@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Copy, ExternalLink, Bike, Shirt, Plane, ClipboardCheck, CheckCircle2, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +15,16 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { addAudit, genRegId, useStore, type Participation } from "@/lib/store";
 import { toast } from "sonner";
 
+const STEP_KEYS = ["A", "B", "C", "D", "E", "F"] as const;
+export type StepKey = (typeof STEP_KEYS)[number];
+
 export const Route = createFileRoute("/register")({
+  validateSearch: (search: Record<string, unknown>): { step?: StepKey } => {
+    const s = search.step;
+    return typeof s === "string" && (STEP_KEYS as readonly string[]).includes(s)
+      ? { step: s as StepKey }
+      : {};
+  },
   head: () => ({ meta: [
     { title: "Register — Team Huntington Hub" },
     { name: "description", content: "Multi-step Team Huntington Pelotonia registration wizard." },
@@ -28,7 +37,9 @@ const SIZES = ["XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL"];
 function RegisterWizard() {
   const { registration, setRegistration, user } = useStore();
   const nav = useNavigate();
+  const { step: stepKeyParam } = Route.useSearch();
   const [step, setStep] = useState(1);
+
   const isRider = registration.participation === "rider" || registration.participation === "both";
   const isVol = registration.participation === "volunteer" || registration.participation === "both";
 
@@ -44,7 +55,15 @@ function RegisterWizard() {
     return base;
   }, [isRider]);
 
+  // Deep link: /register?step=D opens that step directly.
+  useEffect(() => {
+    if (!stepKeyParam) return;
+    const idx = steps.findIndex((s) => s.key === stepKeyParam);
+    if (idx >= 0) setStep(idx + 1);
+  }, [stepKeyParam, steps]);
+
   const total = steps.length;
+
   const progress = Math.round(((step - 1) / (total - 1)) * 100);
   const back = () => setStep((s) => Math.max(1, s - 1));
   const next = () => setStep((s) => Math.min(total, s + 1));

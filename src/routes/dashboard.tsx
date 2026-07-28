@@ -61,6 +61,17 @@ const statusStyles: Record<ReadinessStatus, { label: string; className: string }
   not_applicable: { label: "Not applicable", className: "bg-muted text-muted-foreground border-border" },
 };
 
+/** Readiness card id -> registration wizard step key for deep linking. */
+const REGISTER_STEP_BY_CARD: Record<string, "A" | "B" | "C" | "D" | "E" | "F" | undefined> = {
+  pelotonia: "B",
+  hotel: "C",
+  travel: "C",
+  bike: "D",
+  apparel: "E",
+  mailing: "E",
+  volunteer: "A",
+};
+
 /**
  * Presentation-only overlay: derive readiness card status/detail from the
  * participant's actual registration answers. Seeded demo content remains the
@@ -244,14 +255,18 @@ function RiderView({ readiness }: { readiness: EditableReadinessItem[] }) {
                 </CardContent>
               </Card>
             );
+            const wizardStep = REGISTER_STEP_BY_CARD[r.id];
             const wrap = (inner: React.ReactNode) =>
               r.action === "concierge" ? (
                 <button key={r.id} type="button" onClick={openConcierge} className="text-left rounded-lg">{inner}</button>
               ) : r.action === "fundraising" ? (
                 <Link key={r.id} to="/team" className="rounded-lg">{inner}</Link>
+              ) : wizardStep && (r.href ?? "/register").startsWith("/register") ? (
+                <Link key={r.id} to="/register" search={{ step: wizardStep }} className="rounded-lg">{inner}</Link>
               ) : (
                 <Link key={r.id} to={r.href ?? "/dashboard"} className="rounded-lg">{inner}</Link>
               );
+
             return wrap(CardInner);
           })}
         </div>
