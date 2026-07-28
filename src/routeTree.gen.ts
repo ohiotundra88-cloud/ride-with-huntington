@@ -24,7 +24,16 @@ import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ResourcesIdRouteImport } from './routes/resources.$id'
+import { Route as AdminReadinessRouteImport } from './routes/admin.readiness'
+import { Route as AdminPackingRouteImport } from './routes/admin.packing'
+import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
+import { Route as AdminJourneyRouteImport } from './routes/admin.journey'
+import { Route as AdminGoalsRouteImport } from './routes/admin.goals'
+import { Route as AdminFlagsRouteImport } from './routes/admin.flags'
 import { Route as AdminFaqsRouteImport } from './routes/admin.faqs'
+import { Route as AdminContactsRouteImport } from './routes/admin.contacts'
+import { Route as AdminConciergeRouteImport } from './routes/admin.concierge'
+import { Route as AdminAnnouncementsRouteImport } from './routes/admin.announcements'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
@@ -104,9 +113,54 @@ const ResourcesIdRoute = ResourcesIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => ResourcesRoute,
 } as any)
+const AdminReadinessRoute = AdminReadinessRouteImport.update({
+  id: '/readiness',
+  path: '/readiness',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPackingRoute = AdminPackingRouteImport.update({
+  id: '/packing',
+  path: '/packing',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminNotificationsRoute = AdminNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminJourneyRoute = AdminJourneyRouteImport.update({
+  id: '/journey',
+  path: '/journey',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminGoalsRoute = AdminGoalsRouteImport.update({
+  id: '/goals',
+  path: '/goals',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminFlagsRoute = AdminFlagsRouteImport.update({
+  id: '/flags',
+  path: '/flags',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminFaqsRoute = AdminFaqsRouteImport.update({
   id: '/faqs',
   path: '/faqs',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminContactsRoute = AdminContactsRouteImport.update({
+  id: '/contacts',
+  path: '/contacts',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminConciergeRoute = AdminConciergeRouteImport.update({
+  id: '/concierge',
+  path: '/concierge',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAnnouncementsRoute = AdminAnnouncementsRouteImport.update({
+  id: '/announcements',
+  path: '/announcements',
   getParentRoute: () => AdminRoute,
 } as any)
 const Char91DotwellKnownChar93OauthProtectedResourceRoute =
@@ -145,7 +199,16 @@ export interface FileRoutesByFullPath {
   '/team': typeof TeamRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin/announcements': typeof AdminAnnouncementsRoute
+  '/admin/concierge': typeof AdminConciergeRoute
+  '/admin/contacts': typeof AdminContactsRoute
   '/admin/faqs': typeof AdminFaqsRoute
+  '/admin/flags': typeof AdminFlagsRoute
+  '/admin/goals': typeof AdminGoalsRoute
+  '/admin/journey': typeof AdminJourneyRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
+  '/admin/packing': typeof AdminPackingRoute
+  '/admin/readiness': typeof AdminReadinessRoute
   '/resources/$id': typeof ResourcesIdRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
 }
@@ -166,7 +229,16 @@ export interface FileRoutesByTo {
   '/team': typeof TeamRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin/announcements': typeof AdminAnnouncementsRoute
+  '/admin/concierge': typeof AdminConciergeRoute
+  '/admin/contacts': typeof AdminContactsRoute
   '/admin/faqs': typeof AdminFaqsRoute
+  '/admin/flags': typeof AdminFlagsRoute
+  '/admin/goals': typeof AdminGoalsRoute
+  '/admin/journey': typeof AdminJourneyRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
+  '/admin/packing': typeof AdminPackingRoute
+  '/admin/readiness': typeof AdminReadinessRoute
   '/resources/$id': typeof ResourcesIdRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
 }
@@ -188,7 +260,16 @@ export interface FileRoutesById {
   '/team': typeof TeamRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin/announcements': typeof AdminAnnouncementsRoute
+  '/admin/concierge': typeof AdminConciergeRoute
+  '/admin/contacts': typeof AdminContactsRoute
   '/admin/faqs': typeof AdminFaqsRoute
+  '/admin/flags': typeof AdminFlagsRoute
+  '/admin/goals': typeof AdminGoalsRoute
+  '/admin/journey': typeof AdminJourneyRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
+  '/admin/packing': typeof AdminPackingRoute
+  '/admin/readiness': typeof AdminReadinessRoute
   '/resources/$id': typeof ResourcesIdRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
 }
@@ -211,7 +292,16 @@ export interface FileRouteTypes {
     | '/team'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin/announcements'
+    | '/admin/concierge'
+    | '/admin/contacts'
     | '/admin/faqs'
+    | '/admin/flags'
+    | '/admin/goals'
+    | '/admin/journey'
+    | '/admin/notifications'
+    | '/admin/packing'
+    | '/admin/readiness'
     | '/resources/$id'
     | '/.mcp/invoke-tool/$tool'
   fileRoutesByTo: FileRoutesByTo
@@ -232,7 +322,16 @@ export interface FileRouteTypes {
     | '/team'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin/announcements'
+    | '/admin/concierge'
+    | '/admin/contacts'
     | '/admin/faqs'
+    | '/admin/flags'
+    | '/admin/goals'
+    | '/admin/journey'
+    | '/admin/notifications'
+    | '/admin/packing'
+    | '/admin/readiness'
     | '/resources/$id'
     | '/.mcp/invoke-tool/$tool'
   id:
@@ -253,7 +352,16 @@ export interface FileRouteTypes {
     | '/team'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin/announcements'
+    | '/admin/concierge'
+    | '/admin/contacts'
     | '/admin/faqs'
+    | '/admin/flags'
+    | '/admin/goals'
+    | '/admin/journey'
+    | '/admin/notifications'
+    | '/admin/packing'
+    | '/admin/readiness'
     | '/resources/$id'
     | '/.mcp/invoke-tool/$tool'
   fileRoutesById: FileRoutesById
@@ -385,11 +493,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResourcesIdRouteImport
       parentRoute: typeof ResourcesRoute
     }
+    '/admin/readiness': {
+      id: '/admin/readiness'
+      path: '/readiness'
+      fullPath: '/admin/readiness'
+      preLoaderRoute: typeof AdminReadinessRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/packing': {
+      id: '/admin/packing'
+      path: '/packing'
+      fullPath: '/admin/packing'
+      preLoaderRoute: typeof AdminPackingRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/notifications': {
+      id: '/admin/notifications'
+      path: '/notifications'
+      fullPath: '/admin/notifications'
+      preLoaderRoute: typeof AdminNotificationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/journey': {
+      id: '/admin/journey'
+      path: '/journey'
+      fullPath: '/admin/journey'
+      preLoaderRoute: typeof AdminJourneyRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/goals': {
+      id: '/admin/goals'
+      path: '/goals'
+      fullPath: '/admin/goals'
+      preLoaderRoute: typeof AdminGoalsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/flags': {
+      id: '/admin/flags'
+      path: '/flags'
+      fullPath: '/admin/flags'
+      preLoaderRoute: typeof AdminFlagsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/faqs': {
       id: '/admin/faqs'
       path: '/faqs'
       fullPath: '/admin/faqs'
       preLoaderRoute: typeof AdminFaqsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/contacts': {
+      id: '/admin/contacts'
+      path: '/contacts'
+      fullPath: '/admin/contacts'
+      preLoaderRoute: typeof AdminContactsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/concierge': {
+      id: '/admin/concierge'
+      path: '/concierge'
+      fullPath: '/admin/concierge'
+      preLoaderRoute: typeof AdminConciergeRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/announcements': {
+      id: '/admin/announcements'
+      path: '/announcements'
+      fullPath: '/admin/announcements'
+      preLoaderRoute: typeof AdminAnnouncementsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/.well-known/oauth-protected-resource': {
@@ -417,11 +588,29 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminAnnouncementsRoute: typeof AdminAnnouncementsRoute
+  AdminConciergeRoute: typeof AdminConciergeRoute
+  AdminContactsRoute: typeof AdminContactsRoute
   AdminFaqsRoute: typeof AdminFaqsRoute
+  AdminFlagsRoute: typeof AdminFlagsRoute
+  AdminGoalsRoute: typeof AdminGoalsRoute
+  AdminJourneyRoute: typeof AdminJourneyRoute
+  AdminNotificationsRoute: typeof AdminNotificationsRoute
+  AdminPackingRoute: typeof AdminPackingRoute
+  AdminReadinessRoute: typeof AdminReadinessRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAnnouncementsRoute: AdminAnnouncementsRoute,
+  AdminConciergeRoute: AdminConciergeRoute,
+  AdminContactsRoute: AdminContactsRoute,
   AdminFaqsRoute: AdminFaqsRoute,
+  AdminFlagsRoute: AdminFlagsRoute,
+  AdminGoalsRoute: AdminGoalsRoute,
+  AdminJourneyRoute: AdminJourneyRoute,
+  AdminNotificationsRoute: AdminNotificationsRoute,
+  AdminPackingRoute: AdminPackingRoute,
+  AdminReadinessRoute: AdminReadinessRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)

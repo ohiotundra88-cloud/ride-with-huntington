@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Award, CalendarDays, Users, HandHeart, Megaphone, DollarSign } from "lucide-react";
-import { teamActivities, teamGoal, teamMetrics } from "@/lib/mock-data";
+import { useAdmin, formatCurrencyUSD } from "@/lib/admin-store";
+import { ApiManagedField } from "@/components/ApiManagedField";
 
 export const Route = createFileRoute("/team")({
   head: () => ({
@@ -18,8 +19,9 @@ export const Route = createFileRoute("/team")({
 });
 
 function TeamHub() {
-  const pct = Math.round((teamGoal.current / teamGoal.goal) * 100);
-  const fmt = (n: number) => `$${n.toLocaleString()}`;
+  const { state } = useAdmin();
+  const { team, flags } = state;
+  const pct = team.goalTarget > 0 ? Math.round((team.goalCurrent / team.goalTarget) * 100) : 0;
 
   const quickLinks = [
     { icon: CalendarDays, label: "Team Events", href: "/family" },
@@ -40,41 +42,51 @@ function TeamHub() {
         </p>
       </div>
 
-      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {teamMetrics.map((m) => (
-          <Card key={m.id}>
-            <CardContent className="p-5">
-              <p className="text-xs text-muted-foreground">{m.label}</p>
-              <p className="mt-1 text-2xl sm:text-3xl font-black text-[var(--brand-dark)]">{m.value}</p>
-              {m.note && <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">{m.note}</p>}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {flags.teamMetrics && (
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {team.metrics.map((m) => (
+            <Card key={m.id}>
+              <CardContent className="p-5">
+                <p className="text-xs text-muted-foreground">{m.label}</p>
+                <p className="mt-1 text-2xl sm:text-3xl font-black text-[var(--brand-dark)]">{m.value}</p>
+                {m.note && <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">{m.note}</p>}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <DollarSign className="h-5 w-5 text-[var(--brand)]" /> 2027 fundraising campaign
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p className="text-3xl font-black text-[var(--brand-dark)]">
-                {fmt(teamGoal.current)}
-                <span className="text-base font-semibold text-muted-foreground"> / {fmt(teamGoal.goal)} goal</span>
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">Sample data — updated nightly in production.</p>
-            </div>
-            <div className="text-right">
-              <p className="text-2xl font-black text-[var(--brand-dark)]">{pct}%</p>
-              <p className="text-xs text-muted-foreground">of team goal</p>
-            </div>
-          </div>
-          <Progress value={pct} className="mt-3 h-2.5 [&>div]:bg-[var(--brand)]" aria-label={`Team fundraising ${pct}%`} />
-        </CardContent>
-      </Card>
+      {flags.fundraisingProgress && (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5 text-[var(--brand)]" /> 2027 fundraising campaign
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ApiManagedField
+              fieldKey="team.goal.current"
+              label="Cumulative team raised"
+              value={
+                <div className="flex flex-wrap items-end justify-between gap-3">
+                  <div>
+                    <p className="text-3xl font-black text-[var(--brand-dark)]">
+                      {formatCurrencyUSD(team.goalCurrent)}
+                      <span className="text-base font-semibold text-muted-foreground"> / {formatCurrencyUSD(team.goalTarget)} goal</span>
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">Sample data — synced from Pelotonia CRM in production.</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-black text-[var(--brand-dark)]">{pct}%</p>
+                    <p className="text-xs text-muted-foreground">of team goal</p>
+                  </div>
+                </div>
+              }
+            />
+            <Progress value={pct} className="mt-3 h-2.5 [&>div]:bg-[var(--brand)]" aria-label={`Team fundraising ${pct}%`} />
+          </CardContent>
+        </Card>
+      )}
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
@@ -84,7 +96,7 @@ function TeamHub() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {teamActivities.map((a) => (
+            {team.activity.map((a) => (
               <div key={a.id} className="flex gap-3 rounded-lg border p-3">
                 <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[var(--brand)]" />
                 <div className="flex-1">

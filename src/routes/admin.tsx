@@ -1,236 +1,200 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { AdminShell } from "@/components/AdminShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { StatusBadge } from "@/components/StatusBadge";
-import { useStore, type AdminParticipant } from "@/lib/store";
-import { Download, Search, Mail, Bell, Unlock, StickyNote, FileText, BarChart3 } from "lucide-react";
-import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { useAdmin, announcementIsActive, formatCurrencyUSD } from "@/lib/admin-store";
+import {
+  Plus, Megaphone, Bell, Target, FileText, ListChecks,
+  MessageSquare, CalendarDays, ArrowRight, ClipboardList, History,
+  BarChart3, Users, ShieldCheck, Settings,
+} from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [
-    { title: "Admin — Team Huntington Hub" },
-    { name: "description", content: "Team Huntington admin dashboard: registrations, travel and apparel summaries." },
+    { title: "Super User — Team Huntington Hub" },
+    { name: "description", content: "Super User administration dashboard for Team Huntington Hub demo." },
   ] }),
-  component: Admin,
+  component: SuperUserDashboard,
 });
 
-function Admin() {
-  const { participants, addNote, user } = useStore();
-  const [q, setQ] = useState("");
-  const [role, setRole] = useState<string>("all");
-  const [selected, setSelected] = useState<AdminParticipant | null>(null);
-  const [note, setNote] = useState("");
+function SuperUserDashboard() {
+  const { state } = useAdmin();
 
-  const filtered = useMemo(() => participants.filter((p) => {
-    const match = !q || [p.name, p.email, p.market, p.segment].some((f) => f.toLowerCase().includes(q.toLowerCase()));
-    const r = role === "all" || p.role.toLowerCase() === role;
-    return match && r;
-  }), [participants, q, role]);
+  const activeAnnouncements = state.announcements.filter(announcementIsActive);
+  const drafts = [
+    ...state.announcements.filter((a) => a.publish === "draft").map((a) => ({ type: "Announcement", title: a.headline, at: a.updatedAt })),
+    ...state.notifications.filter((n) => n.publish === "draft").map((n) => ({ type: "Notification", title: n.title, at: n.updatedAt })),
+    ...state.timeline.filter((t) => t.publish === "draft").map((t) => ({ type: "Timeline item", title: t.title, at: t.updatedAt })),
+    ...state.goals.filter((g) => g.publish === "draft").map((g) => ({ type: "Goal", title: g.name, at: g.updatedAt })),
+  ].slice(0, 6);
 
-  const kpis = useMemo(() => {
-    const complete = participants.filter((p) => p.completion === 100).length;
-    return {
-      total: participants.length,
-      riders: participants.filter((p) => p.role !== "Volunteer").length,
-      volunteers: participants.filter((p) => p.role !== "Rider").length,
-      complete,
-      incomplete: participants.length - complete,
-      travel: participants.filter((p) => p.travelStatus !== "not_started").length,
-      hotel: participants.reduce((n, p) => n + p.hotelNights, 0),
-      bike: participants.filter((p) => p.bikeRental).length,
-    };
-  }, [participants]);
+  const recent = [...state.audit].slice(0, 6);
 
-  const apparelSummary = useMemo(() => {
-    const j: Record<string, number> = {}, s: Record<string, number> = {};
-    participants.forEach((p) => {
-      if (p.jerseySize) j[p.jerseySize] = (j[p.jerseySize] || 0) + 1;
-      if (p.shirtSize) s[p.shirtSize] = (s[p.shirtSize] || 0) + 1;
-    });
-    return { j, s };
-  }, [participants]);
+  const readinessTotalWeight = state.readiness.filter((r) => r.active).reduce((n, r) => n + r.weight, 0);
+  const config: { label: string; ok: boolean; hint: string }[] = [
+    { label: "Readiness weights total 100%", ok: readinessTotalWeight === 100, hint: `Currently ${readinessTotalWeight}%` },
+    { label: "At least one published announcement", ok: activeAnnouncements.length > 0, hint: activeAnnouncements.length === 0 ? "None published" : `${activeAnnouncements.length} active` },
+    { label: "Concierge fallback set", ok: !!state.concierge.fallbackBody, hint: state.concierge.fallbackBody ? "Configured" : "Missing" },
+    { label: "Feature flags configured", ok: true, hint: `${Object.values(state.flags).filter(Boolean).length} enabled` },
+  ];
 
-  const exportCSV = () => {
-    const rows = [
-      ["ID", "Name", "Email", "Role", "Market", "Completion"],
-      ...filtered.map((p) => [p.id, p.name, p.email, p.role, p.market, p.completion + "%"]),
-    ];
-    const csv = rows.map((r) => r.map((c) => `"${c}"`).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = "team-huntington.csv"; a.click();
-    toast.success("CSV exported (demo)");
-  };
+  const upcomingDeadlines = state.timeline
+    .filter((t) => t.publish === "published" && t.time && (t.time.includes("Jul") || t.time.includes("Aug") || t.time.includes("Due")))
+    .slice(0, 5);
 
-  if (!user.isAdmin) {
-    return (
-      <div className="mx-auto max-w-lg px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold">Admin access required</h1>
-        <p className="mt-2 text-muted-foreground">Toggle "Admin mode" from the top-right menu to view this demo dashboard.</p>
-      </div>
-    );
-  }
+  const teamPct = state.team.goalTarget > 0 ? Math.round((state.team.goalCurrent / state.team.goalTarget) * 100) : 0;
 
-  const kpiCards = [
-    { label: "Total Registrations", value: kpis.total },
-    { label: "Riders", value: kpis.riders },
-    { label: "Volunteers", value: kpis.volunteers },
-    { label: "Complete", value: kpis.complete },
-    { label: "Incomplete", value: kpis.incomplete },
-    { label: "Travel Needed", value: kpis.travel },
-    { label: "Hotel Nights", value: kpis.hotel },
-    { label: "Bike Rentals", value: kpis.bike },
+  const quickActions = [
+    { icon: Plus, label: "Add FAQ", to: "/admin/faqs" },
+    { icon: FileText, label: "Manage Resources", to: "/admin/faqs" },
+    { icon: Target, label: "Update Fundraising Goal", to: "/admin/goals" },
+    { icon: Megaphone, label: "Add Announcement", to: "/admin/announcements" },
+    { icon: CalendarDays, label: "Edit Ride Schedule", to: "/admin/journey" },
+    { icon: ListChecks, label: "Update Packing List", to: "/admin/packing" },
+    { icon: MessageSquare, label: "Edit Concierge Answers", to: "/admin/concierge" },
+    { icon: Bell, label: "Manage Notifications", to: "/admin/notifications" },
+    { icon: BarChart3, label: "Executive Analytics", to: "/analytics" },
+    { icon: Users, label: "Preview Participant Experience", to: "/dashboard" },
+    { icon: ShieldCheck, label: "Roles & permissions", to: "/admin/flags" },
+    { icon: Settings, label: "Feature flags & audit", to: "/admin/flags" },
   ];
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-black text-[var(--brand-dark)]">Admin dashboard</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Live demo data — 20 seeded colleagues.</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button asChild variant="outline"><Link to="/analytics"><BarChart3 className="mr-1 h-4 w-4" /> Executive Analytics</Link></Button>
-          <Button asChild variant="outline"><Link to="/admin/faqs"><FileText className="mr-1 h-4 w-4" /> Manage FAQs</Link></Button>
-          <Button onClick={exportCSV} variant="outline"><Download className="mr-1 h-4 w-4" /> Export CSV</Button>
-        </div>
-      </div>
-
-      <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {kpiCards.map((k) => (
-          <Card key={k.label}>
-            <CardContent className="p-4">
-              <p className="text-xs text-muted-foreground">{k.label}</p>
-              <p className="mt-1 text-3xl font-black text-[var(--brand-dark)]">{k.value}</p>
-            </CardContent>
-          </Card>
-        ))}
+    <AdminShell
+      title="Super User dashboard"
+      description="Centralized control for Team Huntington Hub content, goals, notifications, and configuration. Demo access — production requires authenticated identity and access management."
+    >
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard label="Active announcements" value={activeAnnouncements.length} />
+        <StatCard label="Published FAQs" value={"see FAQ manager"} sub="managed separately" href="/admin/faqs" />
+        <StatCard label="Draft items" value={drafts.length} />
+        <StatCard label="Team goal" value={`${formatCurrencyUSD(state.team.goalCurrent)} / ${formatCurrencyUSD(state.team.goalTarget)}`} sub={`${teamPct}% of goal`} />
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-3">
-        <Card>
-          <CardHeader><CardTitle>Apparel — Jersey sizes</CardTitle></CardHeader>
-          <CardContent className="text-sm">
-            {Object.entries(apparelSummary.j).map(([k, v]) => (
-              <div key={k} className="flex justify-between border-b py-1"><span>{k}</span><span className="font-semibold">{v}</span></div>
+        <Card className="lg:col-span-2">
+          <CardHeader><CardTitle>Quick actions</CardTitle></CardHeader>
+          <CardContent className="grid gap-2 sm:grid-cols-2">
+            {quickActions.map((q) => (
+              <Button key={q.label} asChild variant="outline" className="justify-start h-auto py-3">
+                <Link to={q.to}>
+                  <q.icon className="mr-2 h-4 w-4 text-[var(--brand-dark)]" />
+                  <span>{q.label}</span>
+                  <ArrowRight className="ml-auto h-3.5 w-3.5 text-muted-foreground" />
+                </Link>
+              </Button>
             ))}
           </CardContent>
         </Card>
+
         <Card>
-          <CardHeader><CardTitle>Apparel — Shirt sizes</CardTitle></CardHeader>
-          <CardContent className="text-sm">
-            {Object.entries(apparelSummary.s).map(([k, v]) => (
-              <div key={k} className="flex justify-between border-b py-1"><span>{k}</span><span className="font-semibold">{v}</span></div>
+          <CardHeader><CardTitle className="flex items-center gap-2"><ClipboardList className="h-4 w-4" /> Configuration health</CardTitle></CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            {config.map((c) => (
+              <div key={c.label} className="flex items-start justify-between gap-2 rounded-md border p-2">
+                <div>
+                  <p className="font-medium">{c.label}</p>
+                  <p className="text-xs text-muted-foreground">{c.hint}</p>
+                </div>
+                <Badge className={c.ok ? "bg-[var(--brand)] text-[var(--brand-foreground)]" : "bg-amber-500 text-black"}>
+                  {c.ok ? "OK" : "Attention"}
+                </Badge>
+              </div>
             ))}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader><CardTitle>Travel summary</CardTitle></CardHeader>
-          <CardContent className="text-sm space-y-1">
-            <div className="flex justify-between border-b py-1"><span>Travel needed</span><span className="font-semibold">{kpis.travel}</span></div>
-            <div className="flex justify-between border-b py-1"><span>Total hotel nights</span><span className="font-semibold">{kpis.hotel}</span></div>
-            <div className="flex justify-between border-b py-1"><span>Bike rentals</span><span className="font-semibold">{kpis.bike}</span></div>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="mt-8">
-        <CardHeader className="flex flex-row items-center gap-3">
-          <CardTitle className="mr-auto">Registrations</CardTitle>
-          <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search name, email…" value={q} onChange={(e) => setQ(e.target.value)} className="pl-8 w-64" />
-          </div>
-          <Select value={role} onValueChange={setRole}>
-            <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All roles</SelectItem>
-              <SelectItem value="rider">Rider</SelectItem>
-              <SelectItem value="volunteer">Volunteer</SelectItem>
-              <SelectItem value="both">Both</SelectItem>
-            </SelectContent>
-          </Select>
-        </CardHeader>
-        <CardContent className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Market</TableHead>
-                <TableHead>Pelotonia</TableHead>
-                <TableHead>Travel</TableHead>
-                <TableHead>Bike</TableHead>
-                <TableHead>Apparel</TableHead>
-                <TableHead>Overall</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.map((p) => (
-                <TableRow key={p.id} onClick={() => setSelected(p)} className="cursor-pointer">
-                  <TableCell>
-                    <p className="font-medium">{p.name}</p>
-                    <p className="text-xs text-muted-foreground">{p.email}</p>
-                  </TableCell>
-                  <TableCell>{p.role}</TableCell>
-                  <TableCell className="text-xs">{p.market}</TableCell>
-                  <TableCell><StatusBadge status={p.pelotoniaStatus} /></TableCell>
-                  <TableCell><StatusBadge status={p.travelStatus} /></TableCell>
-                  <TableCell><StatusBadge status={p.bikeStatus} /></TableCell>
-                  <TableCell><StatusBadge status={p.apparelStatus} /></TableCell>
-                  <TableCell><span className="font-mono font-bold">{p.completion}%</span></TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      <div className="mt-6 grid gap-6 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader><CardTitle>Draft content awaiting review</CardTitle></CardHeader>
+          <CardContent>
+            {drafts.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No drafts pending.</p>
+            ) : (
+              <ul className="divide-y">
+                {drafts.map((d, i) => (
+                  <li key={i} className="py-2 flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium truncate">{d.title}</p>
+                      <p className="text-xs text-muted-foreground">{d.type} · updated {new Date(d.at).toLocaleString()}</p>
+                    </div>
+                    <Badge variant="outline" className="text-[10px]">Draft</Badge>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
 
-      <Sheet open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
-        <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
-          {selected && (
-            <>
-              <SheetHeader><SheetTitle>{selected.name}</SheetTitle></SheetHeader>
-              <div className="mt-4 space-y-3 text-sm">
-                <div className="flex justify-between border-b py-1"><span className="text-muted-foreground">ID</span><span className="font-mono">{selected.id}</span></div>
-                <div className="flex justify-between border-b py-1"><span className="text-muted-foreground">Email</span><span>{selected.email}</span></div>
-                <div className="flex justify-between border-b py-1"><span className="text-muted-foreground">Role</span><span>{selected.role}</span></div>
-                <div className="flex justify-between border-b py-1"><span className="text-muted-foreground">Segment</span><span>{selected.segment}</span></div>
-                <div className="flex justify-between border-b py-1"><span className="text-muted-foreground">Market</span><span>{selected.market}</span></div>
-                <div className="flex justify-between border-b py-1"><span className="text-muted-foreground">Completion</span><span className="font-bold">{selected.completion}%</span></div>
-                <div className="flex justify-between border-b py-1"><span className="text-muted-foreground">Hotel nights</span><span>{selected.hotelNights}</span></div>
-                <div className="flex justify-between border-b py-1"><span className="text-muted-foreground">Bike rental</span><span>{selected.bikeRental ? "Yes" : "No"}</span></div>
-                {selected.jerseySize && <div className="flex justify-between border-b py-1"><span className="text-muted-foreground">Jersey</span><span>{selected.jerseySize}</span></div>}
+        <Card>
+          <CardHeader><CardTitle>Upcoming deadlines</CardTitle></CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            {upcomingDeadlines.length === 0 ? (
+              <p className="text-muted-foreground">None flagged.</p>
+            ) : upcomingDeadlines.map((t) => (
+              <div key={t.id} className="rounded-md border p-2">
+                <p className="font-medium">{t.title}</p>
+                <p className="text-xs text-muted-foreground">{t.time}</p>
               </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
 
-              <div className="mt-6 grid grid-cols-2 gap-2">
-                <Button variant="outline" size="sm" onClick={() => toast.success("Confirmation resent (demo)")}><Mail className="mr-1 h-4 w-4" />Resend</Button>
-                <Button variant="outline" size="sm" onClick={() => toast.success("Reminder sent (demo)")}><Bell className="mr-1 h-4 w-4" />Remind</Button>
-                <Button variant="outline" size="sm" onClick={() => toast.success("Step reopened (demo)")}><Unlock className="mr-1 h-4 w-4" />Reopen step</Button>
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+        <Card>
+          <CardHeader><CardTitle>Current goals</CardTitle></CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            {state.goals.slice(0, 5).map((g) => (
+              <div key={g.id} className="flex items-center justify-between rounded-md border p-2">
+                <div className="min-w-0">
+                  <p className="font-medium truncate">{g.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {g.unit === "dollars" ? `${formatCurrencyUSD(g.current)} / ${formatCurrencyUSD(g.target)}` :
+                     g.unit === "percentage" ? `${g.current}% / ${g.target}%` :
+                     `${g.current.toLocaleString()} / ${g.target.toLocaleString()} ${g.unit}`}
+                  </p>
+                </div>
+                <Badge variant="outline" className="text-[10px] uppercase">{g.status.replace("_", " ")}</Badge>
               </div>
+            ))}
+          </CardContent>
+        </Card>
 
-              <div className="mt-6">
-                <p className="text-sm font-semibold flex items-center gap-1"><StickyNote className="h-4 w-4" /> Internal notes</p>
-                <Textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Add note…" className="mt-2" />
-                <Button
-                  size="sm"
-                  className="mt-2"
-                  onClick={() => { if (note.trim()) { addNote(selected.id, note.trim()); setNote(""); toast.success("Note saved"); } }}
-                >Save note</Button>
-                <ul className="mt-3 space-y-1 text-sm">
-                  {selected.notes.map((n, i) => <li key={i} className="rounded bg-muted p-2">{n}</li>)}
-                </ul>
+        <Card>
+          <CardHeader><CardTitle className="flex items-center gap-2"><History className="h-4 w-4" /> Recent activity</CardTitle></CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            {recent.length === 0 ? (
+              <p className="text-muted-foreground">No changes yet this session.</p>
+            ) : recent.map((r) => (
+              <div key={r.id} className="rounded-md border p-2">
+                <p className="font-medium text-xs uppercase tracking-wide text-[var(--brand-dark)]">
+                  {r.action} · {r.entity}
+                </p>
+                <p className="mt-0.5 text-sm">{r.detail}</p>
+                <p className="mt-1 text-[10px] text-muted-foreground">by {r.user} · {new Date(r.at).toLocaleString()}</p>
               </div>
-            </>
-          )}
-        </SheetContent>
-      </Sheet>
-    </div>
+            ))}
+            <Button asChild variant="link" className="px-0 h-auto"><Link to="/admin/flags">View full audit log →</Link></Button>
+          </CardContent>
+        </Card>
+      </div>
+    </AdminShell>
   );
+}
+
+function StatCard({ label, value, sub, href }: { label: string; value: React.ReactNode; sub?: string; href?: string }) {
+  const inner = (
+    <Card className="h-full">
+      <CardContent className="p-5">
+        <p className="text-xs text-muted-foreground">{label}</p>
+        <p className="mt-1 text-2xl font-black text-[var(--brand-dark)]">{value}</p>
+        {sub && <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">{sub}</p>}
+      </CardContent>
+    </Card>
+  );
+  return href ? <Link to={href}>{inner}</Link> : inner;
 }
