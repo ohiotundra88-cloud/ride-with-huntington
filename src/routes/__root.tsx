@@ -12,7 +12,9 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { StoreProvider } from "@/lib/store";
+import { AdminStoreProvider } from "@/lib/admin-store";
 import { AppNav } from "@/components/AppNav";
+import { SuperUserBar } from "@/components/AdminShell";
 import { Toaster } from "@/components/ui/sonner";
 import { ConciergeLauncher } from "@/components/Concierge";
 
@@ -123,20 +125,23 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <StoreProvider>
-        <div className="min-h-screen flex flex-col">
-          <AppNav />
-          <main className="flex-1 relative">
-            <Outlet />
-          </main>
-          <footer className="border-t bg-[var(--brand-dark)] text-white/70 py-6 text-xs">
-            <div className="mx-auto max-w-7xl px-4 flex flex-wrap gap-4 justify-between">
-              <span>© Team Huntington Hub · Internal prototype</span>
-              <span>Not affiliated with copyrighted Pelotonia branding.</span>
-            </div>
-          </footer>
-        </div>
-        <ConciergeLauncher />
-        <Toaster />
+        <AdminStoreProvider>
+          <div className="min-h-screen flex flex-col">
+            <AppNav />
+            <SuperUserBar />
+            <main className="flex-1 relative">
+              <Outlet />
+            </main>
+            <footer className="border-t bg-[var(--brand-dark)] text-white/70 py-6 text-xs">
+              <div className="mx-auto max-w-7xl px-4 flex flex-wrap gap-4 justify-between">
+                <span>© Team Huntington Hub · Internal prototype</span>
+                <span>Not affiliated with copyrighted Pelotonia branding.</span>
+              </div>
+            </footer>
+          </div>
+          <ConciergeLauncher />
+          <Toaster />
+        </AdminStoreProvider>
       </StoreProvider>
     </QueryClientProvider>
   );

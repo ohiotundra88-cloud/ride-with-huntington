@@ -1,7 +1,8 @@
-import { Link, useRouterState } from "@tanstack/react-router";
-import { Menu, User as UserIcon, ShieldCheck } from "lucide-react";
+import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
+import { Menu, User as UserIcon, ShieldCheck, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { useStore } from "@/lib/store";
+import { useAdmin } from "@/lib/admin-store";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
@@ -10,6 +11,7 @@ import {
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
 import { NotificationCenter } from "@/components/NotificationCenter";
+import { toast } from "sonner";
 
 const links = [
   { to: "/", label: "Home" },
@@ -24,8 +26,17 @@ const links = [
 
 export function AppNav() {
   const { user, setUser } = useStore();
+  const { state, setState } = useAdmin();
   const [open, setOpen] = useState(false);
   const pathname = useRouterState({ select: (r) => r.location.pathname });
+  const nav = useNavigate();
+
+  const enterSuperUser = () => {
+    setUser({ isAdmin: true });
+    setState((s) => ({ ...s, superUser: { ...s.superUser, active: true, previewAs: null } }));
+    toast.success("Super User Mode enabled — demo access only");
+    nav({ to: "/admin" });
+  };
 
   return (
     <header className="sticky top-0 z-40 bg-[var(--brand-dark)] text-[var(--brand-dark-foreground)] border-b border-white/10">
@@ -44,17 +55,11 @@ export function AppNav() {
                   {l.label}
                 </Link>
               ))}
-              {user.isAdmin && (
-                <>
-                  <Link to="/admin" onClick={() => setOpen(false)}
-                    className={`rounded-md px-3 py-2 text-sm ${pathname === "/admin" ? "bg-[var(--brand)] text-[var(--brand-foreground)]" : "hover:bg-white/10"}`}>
-                    Admin
-                  </Link>
-                  <Link to="/analytics" onClick={() => setOpen(false)}
-                    className={`rounded-md px-3 py-2 text-sm ${pathname === "/analytics" ? "bg-[var(--brand)] text-[var(--brand-foreground)]" : "hover:bg-white/10"}`}>
-                    Analytics
-                  </Link>
-                </>
+              {state.superUser.active && (
+                <Link to="/admin" onClick={() => setOpen(false)}
+                  className={`rounded-md px-3 py-2 text-sm ${pathname.startsWith("/admin") ? "bg-[var(--brand)] text-[var(--brand-foreground)]" : "hover:bg-white/10"}`}>
+                  Super User
+                </Link>
               )}
             </div>
           </SheetContent>
@@ -76,39 +81,39 @@ export function AppNav() {
               {l.label}
             </Link>
           ))}
-          {user.isAdmin && (
-            <>
-              <Link to="/admin"
-                className={`rounded-md px-3 py-1.5 text-sm ${pathname === "/admin" ? "bg-white/10 text-white" : "text-white/80 hover:bg-white/10 hover:text-white"}`}>
-                Admin
-              </Link>
-              <Link to="/analytics"
-                className={`rounded-md px-3 py-1.5 text-sm ${pathname === "/analytics" ? "bg-white/10 text-white" : "text-white/80 hover:bg-white/10 hover:text-white"}`}>
-                Analytics
-              </Link>
-            </>
+          {state.superUser.active && (
+            <Link to="/admin"
+              className={`rounded-md px-3 py-1.5 text-sm inline-flex items-center gap-1 ${pathname.startsWith("/admin") ? "bg-white/10 text-white" : "text-white/80 hover:bg-white/10 hover:text-white"}`}>
+              <ShieldCheck className="h-3.5 w-3.5" /> Super User
+            </Link>
           )}
         </nav>
 
         <div className="ml-auto flex items-center gap-1">
-          <NotificationCenter />
+          {state.flags.notificationCenter && <NotificationCenter />}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 gap-2">
-                {user.isAdmin ? <ShieldCheck className="h-4 w-4" /> : <UserIcon className="h-4 w-4" />}
+                {state.superUser.active ? <ShieldCheck className="h-4 w-4 text-[var(--brand)]" /> : <UserIcon className="h-4 w-4" />}
                 <span className="hidden sm:inline text-xs">{user.signedIn ? user.name.split(" ")[0] : "Guest"}</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>Demo Modes</DropdownMenuLabel>
+            <DropdownMenuContent align="end" className="w-64">
+              <DropdownMenuLabel>Demo modes</DropdownMenuLabel>
               <DropdownMenuCheckboxItem
                 checked={user.signedIn}
                 onCheckedChange={(v) => setUser({ signedIn: !!v })}
               >Signed in</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem
-                checked={user.isAdmin}
-                onCheckedChange={(v) => setUser({ isAdmin: !!v })}
-              >Admin mode</DropdownMenuCheckboxItem>
+              <DropdownMenuSeparator />
+              {state.superUser.active ? (
+                <DropdownMenuItem onClick={() => { setState((s) => ({ ...s, superUser: { ...s.superUser, active: false, previewAs: null }})); setUser({ isAdmin: false }); toast.success("Exited Super User Mode"); nav({ to: "/" }); }}>
+                  Exit Super User Mode
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem onClick={enterSuperUser}>
+                  <Sparkles className="mr-2 h-4 w-4 text-[var(--brand)]" /> Super User Mode <span className="ml-auto text-[10px] uppercase text-muted-foreground">Demo</span>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild><Link to="/signin">Sign in / Profile</Link></DropdownMenuItem>
               <DropdownMenuItem asChild><Link to="/profile">Edit profile</Link></DropdownMenuItem>

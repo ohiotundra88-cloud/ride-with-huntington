@@ -3,6 +3,7 @@ import { ArrowRight, MapPin, Plane, Bike, Shirt, CheckCircle2, LifeBuoy, FileTex
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowMotif } from "@/components/AppNav";
+import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -59,6 +60,11 @@ function Landing() {
           </div>
         </div>
       </section>
+
+      {/* Announcements */}
+      <div className="mx-auto max-w-7xl px-4 pt-6">
+        <AnnouncementBanner />
+      </div>
 
       {/* 5 STEPS */}
       <section className="mx-auto max-w-7xl px-4 py-14 sm:py-20">
