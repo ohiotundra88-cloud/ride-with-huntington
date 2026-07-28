@@ -90,8 +90,8 @@ function Landing() {
       {/* RESOURCES */}
       <section className="bg-muted/40 border-y">
         <div className="mx-auto max-w-7xl px-4 py-14 sm:py-20">
-          <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-[var(--brand-dark)]">Resources & support</h2>
-          <p className="mt-2 text-muted-foreground max-w-2xl">Everything you need alongside your registration.</p>
+          <h2 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight text-[var(--brand-dark)]">Resources & support</h2>
+          <p className="mt-3 text-muted-foreground leading-relaxed max-w-2xl">Everything you need alongside your registration.</p>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {resources.map((r) => (
               <Link key={r.title} to={r.to} className="group">
