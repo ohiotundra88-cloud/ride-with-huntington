@@ -298,8 +298,13 @@ function StepBike() {
   const upd = (patch: Partial<typeof b>) => setRegistration((prev) => ({ ...prev, bike: { ...prev.bike, ...patch } }));
 
   const save = () => {
-    const complete = b.needs === "no" || (b.needs === "yes" && !!b.confirmation);
-    upd({ status: b.needs === "no" ? "complete" : complete ? "complete" : "pending" });
+    let status: "complete" | "pending" | "not_started" = "not_started";
+    if (b.needs === "no") status = "complete";
+    else if (b.needs === "yes") {
+      const specsFilled = !!(b.height && b.bikeSize && b.bikeType && b.pedals && b.pickupDate && b.returnDate);
+      status = specsFilled ? "complete" : "pending";
+    } else if (b.needs === "unsure") status = "pending";
+    upd({ status });
     setRegistration((prev) => addAudit(prev, "Bike rental updated"));
     toast.success("Bike info saved");
   };
