@@ -32,17 +32,17 @@ function NotificationsAdmin() {
   const [isNew, setIsNew] = useState(false);
   const [preview, setPreview] = useState<EditableNotification | null>(null);
 
-  const save = () => {
+  const save = (pub?: EditableNotification["publish"]) => {
     if (!editing) return;
     if (!editing.title.trim() || !editing.body.trim()) { toast.error("Title and body required"); return; }
-    const next = { ...editing, updatedAt: new Date().toISOString() };
+    const next = { ...editing, publish: pub ?? editing.publish, updatedAt: new Date().toISOString() };
     setState((s) => {
       const idx = s.notifications.findIndex((a) => a.id === next.id);
       const list = idx >= 0 ? s.notifications.map((a) => a.id === next.id ? next : a) : [...s.notifications, next];
       return { ...s, notifications: list };
     });
     audit({ action: isNew ? "create" : "update", entity: "Notification", entityId: next.id, detail: next.title });
-    toast.success(isNew ? "Notification created" : "Notification saved");
+    toast.success(pub === "published" ? "Published" : isNew ? "Notification created" : "Notification saved");
     setEditing(null);
   };
   const publish = (n: EditableNotification) => {
@@ -128,15 +128,15 @@ function NotificationsAdmin() {
               </div>
               <div className="space-y-1"><Label>CTA link</Label><Input value={editing.href ?? ""} onChange={(e) => setEditing({ ...editing, href: e.target.value })} placeholder="/register" /></div>
               <div className="space-y-1"><Label>CTA label</Label><Input value={editing.ctaLabel ?? ""} onChange={(e) => setEditing({ ...editing, ctaLabel: e.target.value })} /></div>
-              <div className="space-y-1"><Label>Publish at</Label><Input type="datetime-local" value={editing.publishAt.slice(0, 16)} onChange={(e) => setEditing({ ...editing, publishAt: new Date(e.target.value).toISOString() })} /></div>
+              <div className="space-y-1"><Label>Publish at</Label><Input type="datetime-local" value={editing.publishAt ? editing.publishAt.slice(0, 16) : ""} onChange={(e) => setEditing({ ...editing, publishAt: e.target.value ? new Date(e.target.value).toISOString() : "" })} /></div>
               <div className="space-y-1"><Label>Expires at</Label><Input type="datetime-local" value={editing.expireAt?.slice(0, 16) ?? ""} onChange={(e) => setEditing({ ...editing, expireAt: e.target.value ? new Date(e.target.value).toISOString() : "" })} /></div>
             </div>
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditing(null)}>Cancel</Button>
-            <Button variant="outline" onClick={() => { if (editing) { setEditing({ ...editing, publish: "draft" }); save(); } }}>Save draft</Button>
+            <Button variant="outline" onClick={() => save("draft")}>Save draft</Button>
             <Button className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90"
-              onClick={() => { if (editing) { setEditing({ ...editing, publish: "published" }); save(); } }}>Publish</Button>
+              onClick={() => save("published")}>Publish</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

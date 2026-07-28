@@ -180,3 +180,22 @@ export function AdminShell({ title, description, actions, children }: {
     </div>
   );
 }
+
+function MobileNav({ pathname }: { pathname: string }) {
+  const nav = useNavigate();
+  return (
+    <select
+      value={pathname}
+      onChange={(e) => {
+        const l = links.find((x) => x.to === e.target.value);
+        if (l) nav({ to: l.to });
+      }}
+      className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+      aria-label="Admin section"
+    >
+      {links.map((l) => (
+        <option key={l.to} value={l.to}>{l.label}</option>
+      ))}
+    </select>
+  );
+}

@@ -36,19 +36,19 @@ function GoalsAdmin() {
   const [editing, setEditing] = useState<Goal | null>(null);
   const [isNew, setIsNew] = useState(false);
 
-  const save = () => {
+  const save = (pub?: Goal["publish"]) => {
     if (!editing) return;
     if (!editing.name.trim()) { toast.error("Name required"); return; }
-    const next = { ...editing, updatedAt: new Date().toISOString() };
+    if (editing.target < 0 || editing.current < 0) { toast.error("Values must be non-negative"); return; }
+    const next = { ...editing, publish: pub ?? editing.publish, updatedAt: new Date().toISOString() };
     setState((s) => {
       const idx = s.goals.findIndex((g) => g.id === next.id);
       const list = idx >= 0 ? s.goals.map((g) => g.id === next.id ? next : g) : [...s.goals, next];
-      // Keep team fundraising goal in sync
       if (next.id === "g-1") return { ...s, goals: list, team: { ...s.team, goalTarget: next.target } };
       return { ...s, goals: list };
     });
     audit({ action: isNew ? "create" : "update", entity: "Goal", entityId: next.id, detail: next.name });
-    toast.success("Saved");
+    toast.success(pub === "published" ? "Published" : "Saved");
     setEditing(null);
   };
 
@@ -127,11 +127,11 @@ function GoalsAdmin() {
                 {API_MANAGED_GOALS.has(editing.id) ? (
                   <Input value={editing.current} disabled />
                 ) : (
-                  <Input type="number" value={editing.current} onChange={(e) => setEditing({ ...editing, current: Number(e.target.value) })} />
+                  <Input type="number" min={0} value={editing.current} onChange={(e) => setEditing({ ...editing, current: Math.max(0, Number(e.target.value)) })} />
                 )}
                 {API_MANAGED_GOALS.has(editing.id) && <p className="text-[10px] text-muted-foreground">Managed by Pelotonia CRM — sync in production.</p>}
               </div>
-              <div className="space-y-1"><Label>Target</Label><Input type="number" value={editing.target} onChange={(e) => setEditing({ ...editing, target: Number(e.target.value) })} /></div>
+              <div className="space-y-1"><Label>Target</Label><Input type="number" min={0} value={editing.target} onChange={(e) => setEditing({ ...editing, target: Math.max(0, Number(e.target.value)) })} /></div>
               <div className="space-y-1"><Label>Start date</Label><Input type="date" value={editing.startDate} onChange={(e) => setEditing({ ...editing, startDate: e.target.value })} /></div>
               <div className="space-y-1"><Label>End date</Label><Input type="date" value={editing.endDate} onChange={(e) => setEditing({ ...editing, endDate: e.target.value })} /></div>
               <div className="space-y-1 sm:col-span-2"><Label>Display location</Label><Input value={editing.location} onChange={(e) => setEditing({ ...editing, location: e.target.value })} /></div>
@@ -143,8 +143,8 @@ function GoalsAdmin() {
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditing(null)}>Cancel</Button>
-            <Button variant="outline" onClick={() => { if (editing) { setEditing({ ...editing, publish: "draft" }); save(); } }}>Save draft</Button>
-            <Button className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90" onClick={() => { if (editing) { setEditing({ ...editing, publish: "published" }); save(); } }}>Publish</Button>
+            <Button variant="outline" onClick={() => save("draft")}>Save draft</Button>
+            <Button className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90" onClick={() => save("published")}>Publish</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
