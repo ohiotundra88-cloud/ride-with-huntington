@@ -43,6 +43,7 @@ const links = [
   { to: "/admin/contacts", label: "Contacts", icon: ContactIcon },
   { to: "/admin/faqs", label: "FAQs", icon: FileText },
   { to: "/admin/participants", label: "Participants", icon: Users },
+  { to: "/admin/users", label: "Admins & Super Users", icon: ShieldCheck },
   { to: "/admin/flags", label: "Config & Audit", icon: Settings },
 ] as const;
 

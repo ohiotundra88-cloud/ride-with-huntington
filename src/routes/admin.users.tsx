@@ -1,0 +1,148 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { AdminShell } from "@/components/AdminShell";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { ShieldCheck, Trash2, UserPlus } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { listAdmins, grantAdminByEmail, revokeAdmin, type AdminUserRow } from "@/lib/admins.functions";
+
+export const Route = createFileRoute("/admin/users")({
+  component: AdminUsersPage,
+  head: () => ({
+    meta: [
+      { title: "Admins & Super Users — Team Huntington Hub" },
+      { name: "description", content: "Grant or revoke admin access for Team Huntington colleagues." },
+    ],
+  }),
+});
+
+function AdminUsersPage() {
+  const qc = useQueryClient();
+  const [email, setEmail] = useState("");
+
+  const { data: admins = [], isLoading, error } = useQuery<AdminUserRow[]>({
+    queryKey: ["admins"],
+    queryFn: () => listAdmins(),
+  });
+
+  const grant = useMutation({
+    mutationFn: (e: string) => grantAdminByEmail({ data: { email: e } }),
+    onSuccess: (res) => {
+      toast.success(`Granted admin to ${res.email}`);
+      setEmail("");
+      qc.invalidateQueries({ queryKey: ["admins"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const revoke = useMutation({
+    mutationFn: (user_id: string) => revokeAdmin({ data: { user_id } }),
+    onSuccess: () => {
+      toast.success("Admin access revoked");
+      qc.invalidateQueries({ queryKey: ["admins"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const submit = (ev: React.FormEvent) => {
+    ev.preventDefault();
+    const v = email.trim();
+    if (!v) return;
+    grant.mutate(v);
+  };
+
+  return (
+    <AdminShell title="Admins & Super Users" description="Anyone listed here can enter Super User Mode and manage Team Huntington content.">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2"><UserPlus className="h-4 w-4" /> Grant admin access</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={submit} className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+            <div className="space-y-1.5">
+              <Label htmlFor="grant-email">Huntington email</Label>
+              <Input
+                id="grant-email"
+                type="email"
+                placeholder="colleague@huntington.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <Button type="submit" disabled={grant.isPending} className="bg-[var(--brand-dark)] hover:bg-[var(--brand-dark)]/90 text-white">
+              {grant.isPending ? "Granting…" : "Grant admin"}
+            </Button>
+          </form>
+          <p className="mt-2 text-xs text-muted-foreground">
+            The colleague must sign in once so their profile exists. New admins can enter Super User Mode from their profile menu.
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-[var(--brand)]" /> Current admins</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <p className="text-sm text-muted-foreground">Loading…</p>
+          ) : error ? (
+            <p className="text-sm text-destructive">{(error as Error).message}</p>
+          ) : admins.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No admins yet.</p>
+          ) : (
+            <ul className="divide-y">
+              {admins.map((a) => (
+                <li key={a.user_id} className="flex items-center justify-between gap-3 py-3">
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-medium">{a.full_name || a.email}</div>
+                    <div className="truncate text-xs text-muted-foreground">
+                      {a.email}
+                      {a.is_self && <span className="ml-2 rounded bg-[var(--brand)]/20 px-1.5 py-0.5 text-[10px] font-semibold text-[var(--brand-dark)]">YOU</span>}
+                    </div>
+                  </div>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-destructive hover:bg-destructive/10"
+                        disabled={a.is_self || revoke.isPending}
+                        aria-label={`Revoke admin from ${a.email}`}
+                      >
+                        <Trash2 className="mr-1 h-3.5 w-3.5" /> Revoke
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Revoke admin access?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          {a.full_name || a.email} will lose Super User Mode and admin content controls. They will still be able to sign in as a participant.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => revoke.mutate(a.user_id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                          Revoke
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
+    </AdminShell>
+  );
+}
