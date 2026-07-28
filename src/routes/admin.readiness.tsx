@@ -137,7 +137,7 @@ function ReadinessAdmin() {
               <div className="space-y-1"><Label>Status</Label>
                 <Select value={editing.status} onValueChange={(v) => setEditing({ ...editing, status: v as EditableReadinessItem["status"] })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{["not_started", "in_progress", "complete", "reserved", "ordered", "shipped"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                  <SelectContent>{["action_needed", "in_progress", "complete", "reserved", "ordered", "not_applicable"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div className="space-y-1"><Label>Weight</Label><Input type="number" min={0} max={100} value={editing.weight} onChange={(e) => setEditing({ ...editing, weight: Number(e.target.value) })} /></div>
