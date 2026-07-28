@@ -11,7 +11,7 @@ import {
   BarChart3, Users, ShieldCheck, Settings,
 } from "lucide-react";
 
-export const Route = createFileRoute("/admin/")({
+export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [
     { title: "Super User — Team Huntington Hub" },
     { name: "description", content: "Super User administration dashboard for Team Huntington Hub demo." },
