@@ -42,15 +42,15 @@ function Landing() {
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--brand)]" />
             Team Huntington · Pelotonia 2026
           </div>
-          <h1 className="mt-6 text-4xl sm:text-6xl font-black tracking-tight max-w-4xl">
+          <h1 className="mt-8 text-4xl sm:text-6xl font-black tracking-tight leading-[1.08] max-w-4xl">
             Your Team Huntington Pelotonia<br />
             <span className="text-[var(--brand)]">Journey Starts Here.</span>
           </h1>
-          <p className="mt-5 max-w-2xl text-base sm:text-lg text-white/80">
+          <p className="mt-6 max-w-2xl text-base sm:text-lg leading-relaxed text-white/80">
             One place to register, plan travel, rent a bike, pick apparel, and access support —
             guided step by step, saved as you go.
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-10 flex flex-wrap gap-3">
             <Button asChild size="lg" className="bg-[var(--brand)] text-[var(--brand-foreground)] hover:bg-[var(--brand)]/90 h-12 px-6 text-base font-semibold">
               <Link to="/register">Let's Go <ArrowRight className="ml-1 h-4 w-4" /></Link>
             </Button>
@@ -64,8 +64,8 @@ function Landing() {
       {/* 5 STEPS */}
       <section className="mx-auto max-w-7xl px-4 py-14 sm:py-20">
         <div className="max-w-2xl">
-          <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-[var(--brand-dark)]">Five simple steps</h2>
-          <p className="mt-2 text-muted-foreground">Progress autosaves. Come back anytime to pick up where you left off.</p>
+          <h2 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight text-[var(--brand-dark)]">Five simple steps</h2>
+          <p className="mt-3 text-muted-foreground leading-relaxed">Progress autosaves. Come back anytime to pick up where you left off.</p>
         </div>
         <ol className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {steps.map((s, i) => (
@@ -90,8 +90,8 @@ function Landing() {
       {/* RESOURCES */}
       <section className="bg-muted/40 border-y">
         <div className="mx-auto max-w-7xl px-4 py-14 sm:py-20">
-          <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-[var(--brand-dark)]">Resources & support</h2>
-          <p className="mt-2 text-muted-foreground max-w-2xl">Everything you need alongside your registration.</p>
+          <h2 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight text-[var(--brand-dark)]">Resources & support</h2>
+          <p className="mt-3 text-muted-foreground leading-relaxed max-w-2xl">Everything you need alongside your registration.</p>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {resources.map((r) => (
               <Link key={r.title} to={r.to} className="group">
