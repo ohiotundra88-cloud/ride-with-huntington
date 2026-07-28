@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Textarea } from "@/components/ui/textarea";
 import { useStore, type AdminParticipant, type StepStatus } from "@/lib/store";
 import { useAdmin } from "@/lib/admin-store";
-import { Download, Search, StickyNote, Lock } from "lucide-react";
+import { Download, Search, StickyNote, Lock as LockIcon } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/participants")({
@@ -85,7 +85,7 @@ function ParticipantsAdmin() {
       description="Colleague registrations synced from the Pelotonia CRM. Fields shown here are read-only in production."
       actions={
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-[10px]"><Lock className="mr-1 h-3 w-3" /> API-synced</Badge>
+          <Badge variant="outline" className="text-[10px]"><LockIcon className="mr-1 h-3 w-3" /> API-synced</Badge>
           <Button onClick={exportCsv} className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90">
             <Download className="mr-1 h-4 w-4" /> Export CSV
           </Button>
