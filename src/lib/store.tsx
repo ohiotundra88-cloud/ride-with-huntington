@@ -123,7 +123,7 @@ export interface AdminParticipant {
 const emptyReg: Registration = {
   id: null,
   participation: null,
-  pelotonia: { discountCode: "HUNT-TEAM-2027", confirmation: "", completed: false, highRoller: false, survivor: false, status: "not_started" },
+  pelotonia: { discountCode: "HUNT-TEAM-2027", confirmation: "", hbNumber: "", completed: false, highRoller: false, survivor: false, status: "not_started" },
   travel: {
     needs: "", departureCity: "", arrivalDate: "", departureDate: "",
     hotelCheckIn: "", hotelCheckOut: "", notes: "", travelConfirmation: "",
