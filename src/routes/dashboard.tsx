@@ -155,7 +155,7 @@ function RiderView({ readiness }: { readiness: EditableReadinessItem[] }) {
                     </span>
                     {managed && (
                       <span className="inline-flex items-center gap-1 rounded-full border border-[var(--brand-dark)]/20 bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--brand-dark)]/80" title={`Synced from ${managed.source}`}>
-                        <Lock className="h-3 w-3" /> Synced
+                        <LockIcon className="h-3 w-3" /> Synced
                       </span>
                     )}
                   </div>
