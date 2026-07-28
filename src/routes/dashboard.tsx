@@ -61,6 +61,17 @@ const statusStyles: Record<ReadinessStatus, { label: string; className: string }
   not_applicable: { label: "Not applicable", className: "bg-muted text-muted-foreground border-border" },
 };
 
+/** Readiness card id -> registration wizard step key for deep linking. */
+const REGISTER_STEP_BY_CARD: Record<string, "A" | "B" | "C" | "D" | "E" | "F" | undefined> = {
+  pelotonia: "B",
+  hotel: "C",
+  travel: "C",
+  bike: "D",
+  apparel: "E",
+  mailing: "E",
+  volunteer: "A",
+};
+
 /**
  * Presentation-only overlay: derive readiness card status/detail from the
  * participant's actual registration answers. Seeded demo content remains the
