@@ -9,38 +9,214 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SigninRouteImport } from './routes/signin'
+import { Route as ResourcesRouteImport } from './routes/resources'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as ExpensesRouteImport } from './routes/expenses'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as ConfirmationRouteImport } from './routes/confirmation'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ResourcesIdRouteImport } from './routes/resources.$id'
 
+const SigninRoute = SigninRouteImport.update({
+  id: '/signin',
+  path: '/signin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResourcesRoute = ResourcesRouteImport.update({
+  id: '/resources',
+  path: '/resources',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExpensesRoute = ExpensesRouteImport.update({
+  id: '/expenses',
+  path: '/expenses',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfirmationRoute = ConfirmationRouteImport.update({
+  id: '/confirmation',
+  path: '/confirmation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResourcesIdRoute = ResourcesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ResourcesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/confirmation': typeof ConfirmationRoute
+  '/dashboard': typeof DashboardRoute
+  '/expenses': typeof ExpensesRoute
+  '/profile': typeof ProfileRoute
+  '/register': typeof RegisterRoute
+  '/resources': typeof ResourcesRouteWithChildren
+  '/signin': typeof SigninRoute
+  '/resources/$id': typeof ResourcesIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/confirmation': typeof ConfirmationRoute
+  '/dashboard': typeof DashboardRoute
+  '/expenses': typeof ExpensesRoute
+  '/profile': typeof ProfileRoute
+  '/register': typeof RegisterRoute
+  '/resources': typeof ResourcesRouteWithChildren
+  '/signin': typeof SigninRoute
+  '/resources/$id': typeof ResourcesIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/confirmation': typeof ConfirmationRoute
+  '/dashboard': typeof DashboardRoute
+  '/expenses': typeof ExpensesRoute
+  '/profile': typeof ProfileRoute
+  '/register': typeof RegisterRoute
+  '/resources': typeof ResourcesRouteWithChildren
+  '/signin': typeof SigninRoute
+  '/resources/$id': typeof ResourcesIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/confirmation'
+    | '/dashboard'
+    | '/expenses'
+    | '/profile'
+    | '/register'
+    | '/resources'
+    | '/signin'
+    | '/resources/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/admin'
+    | '/confirmation'
+    | '/dashboard'
+    | '/expenses'
+    | '/profile'
+    | '/register'
+    | '/resources'
+    | '/signin'
+    | '/resources/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/confirmation'
+    | '/dashboard'
+    | '/expenses'
+    | '/profile'
+    | '/register'
+    | '/resources'
+    | '/signin'
+    | '/resources/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
+  ConfirmationRoute: typeof ConfirmationRoute
+  DashboardRoute: typeof DashboardRoute
+  ExpensesRoute: typeof ExpensesRoute
+  ProfileRoute: typeof ProfileRoute
+  RegisterRoute: typeof RegisterRoute
+  ResourcesRoute: typeof ResourcesRouteWithChildren
+  SigninRoute: typeof SigninRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/signin': {
+      id: '/signin'
+      path: '/signin'
+      fullPath: '/signin'
+      preLoaderRoute: typeof SigninRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resources': {
+      id: '/resources'
+      path: '/resources'
+      fullPath: '/resources'
+      preLoaderRoute: typeof ResourcesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/expenses': {
+      id: '/expenses'
+      path: '/expenses'
+      fullPath: '/expenses'
+      preLoaderRoute: typeof ExpensesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/confirmation': {
+      id: '/confirmation'
+      path: '/confirmation'
+      fullPath: '/confirmation'
+      preLoaderRoute: typeof ConfirmationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +224,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/resources/$id': {
+      id: '/resources/$id'
+      path: '/$id'
+      fullPath: '/resources/$id'
+      preLoaderRoute: typeof ResourcesIdRouteImport
+      parentRoute: typeof ResourcesRoute
+    }
   }
 }
 
+interface ResourcesRouteChildren {
+  ResourcesIdRoute: typeof ResourcesIdRoute
+}
+
+const ResourcesRouteChildren: ResourcesRouteChildren = {
+  ResourcesIdRoute: ResourcesIdRoute,
+}
+
+const ResourcesRouteWithChildren = ResourcesRoute._addFileChildren(
+  ResourcesRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
+  ConfirmationRoute: ConfirmationRoute,
+  DashboardRoute: DashboardRoute,
+  ExpensesRoute: ExpensesRoute,
+  ProfileRoute: ProfileRoute,
+  RegisterRoute: RegisterRoute,
+  ResourcesRoute: ResourcesRouteWithChildren,
+  SigninRoute: SigninRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
