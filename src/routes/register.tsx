@@ -155,9 +155,10 @@ function StepPelotonia() {
   const upd = (patch: Partial<typeof p>) => setRegistration((prev) => ({ ...prev, pelotonia: { ...prev.pelotonia, ...patch } }));
 
   const markComplete = () => {
-    upd({ completed: true, status: p.confirmation ? "complete" : "pending" });
+    const complete = !!(p.confirmation && p.hbNumber);
+    upd({ completed: true, status: complete ? "complete" : "pending" });
     setRegistration((prev) => addAudit(prev, "Pelotonia registration marked complete"));
-    toast.success("Pelotonia step updated");
+    toast.success(complete ? "Pelotonia step complete" : "Pelotonia step updated — missing required IDs");
   };
 
   return (
@@ -200,8 +201,13 @@ function StepPelotonia() {
         <CardHeader><CardTitle>After you register</CardTitle></CardHeader>
         <CardContent className="space-y-3">
           <div>
-            <Label>Pelotonia confirmation number</Label>
+            <Label>Pelotonia Public/Rider ID</Label>
             <Input value={p.confirmation} onChange={(e) => upd({ confirmation: e.target.value })} placeholder="e.g. PELO-2027-12345" />
+          </div>
+          <div>
+            <Label>Huntington Bank HB number <span className="text-red-500">*</span></Label>
+            <Input value={p.hbNumber} onChange={(e) => upd({ hbNumber: e.target.value })} placeholder="e.g. HB123456" />
+            {!p.hbNumber && <p className="text-xs text-red-500 mt-1">Required for team rostering and expense matching.</p>}
           </div>
           <label className="flex items-center gap-2 text-sm">
             <Checkbox checked={p.completed} onCheckedChange={(v) => upd({ completed: !!v })} />
@@ -584,7 +590,8 @@ function StepReview({ onEdit }: { onEdit: (n: number) => void }) {
         <CardHeader><CardTitle>Pelotonia</CardTitle></CardHeader>
         <CardContent>
           <Row label="Discount code" value={registration.pelotonia.discountCode} editStep={2} />
-          <Row label="Confirmation #" value={registration.pelotonia.confirmation} editStep={2} />
+          <Row label="Public/Rider ID" value={registration.pelotonia.confirmation} editStep={2} />
+          <Row label="HB number" value={registration.pelotonia.hbNumber} editStep={2} />
         </CardContent>
       </Card>
 
