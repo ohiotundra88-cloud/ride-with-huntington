@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { faqCategories, type FAQCategory } from "@/lib/faq-data";
 import { usePublicFaqs } from "@/lib/faq-store";
-import { Search, LifeBuoy } from "lucide-react";
+import { Search, LifeBuoy, ChevronDown, ChevronUp } from "lucide-react";
 
 export const Route = createFileRoute("/resources")({
   head: () => ({ meta: [
