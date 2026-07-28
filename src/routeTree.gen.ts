@@ -24,6 +24,7 @@ import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ResourcesIdRouteImport } from './routes/resources.$id'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminReadinessRouteImport } from './routes/admin.readiness'
 import { Route as AdminParticipantsRouteImport } from './routes/admin.participants'
 import { Route as AdminPackingRouteImport } from './routes/admin.packing'
@@ -114,6 +115,11 @@ const ResourcesIdRoute = ResourcesIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => ResourcesRoute,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminReadinessRoute = AdminReadinessRouteImport.update({
   id: '/admin/readiness',
@@ -222,6 +228,7 @@ export interface FileRoutesByFullPath {
   '/admin/packing': typeof AdminPackingRoute
   '/admin/participants': typeof AdminParticipantsRoute
   '/admin/readiness': typeof AdminReadinessRoute
+  '/admin/users': typeof AdminUsersRoute
   '/resources/$id': typeof ResourcesIdRoute
   '/admin/': typeof AdminIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -254,6 +261,7 @@ export interface FileRoutesByTo {
   '/admin/packing': typeof AdminPackingRoute
   '/admin/participants': typeof AdminParticipantsRoute
   '/admin/readiness': typeof AdminReadinessRoute
+  '/admin/users': typeof AdminUsersRoute
   '/resources/$id': typeof ResourcesIdRoute
   '/admin': typeof AdminIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -287,6 +295,7 @@ export interface FileRoutesById {
   '/admin/packing': typeof AdminPackingRoute
   '/admin/participants': typeof AdminParticipantsRoute
   '/admin/readiness': typeof AdminReadinessRoute
+  '/admin/users': typeof AdminUsersRoute
   '/resources/$id': typeof ResourcesIdRoute
   '/admin/': typeof AdminIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -321,6 +330,7 @@ export interface FileRouteTypes {
     | '/admin/packing'
     | '/admin/participants'
     | '/admin/readiness'
+    | '/admin/users'
     | '/resources/$id'
     | '/admin/'
     | '/.mcp/invoke-tool/$tool'
@@ -353,6 +363,7 @@ export interface FileRouteTypes {
     | '/admin/packing'
     | '/admin/participants'
     | '/admin/readiness'
+    | '/admin/users'
     | '/resources/$id'
     | '/admin'
     | '/.mcp/invoke-tool/$tool'
@@ -385,6 +396,7 @@ export interface FileRouteTypes {
     | '/admin/packing'
     | '/admin/participants'
     | '/admin/readiness'
+    | '/admin/users'
     | '/resources/$id'
     | '/admin/'
     | '/.mcp/invoke-tool/$tool'
@@ -418,6 +430,7 @@ export interface RootRouteChildren {
   AdminPackingRoute: typeof AdminPackingRoute
   AdminParticipantsRoute: typeof AdminParticipantsRoute
   AdminReadinessRoute: typeof AdminReadinessRoute
+  AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
 }
@@ -528,6 +541,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/resources/$id'
       preLoaderRoute: typeof ResourcesIdRouteImport
       parentRoute: typeof ResourcesRoute
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/readiness': {
       id: '/admin/readiness'
@@ -678,6 +698,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminPackingRoute: AdminPackingRoute,
   AdminParticipantsRoute: AdminParticipantsRoute,
   AdminReadinessRoute: AdminReadinessRoute,
+  AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
 }
