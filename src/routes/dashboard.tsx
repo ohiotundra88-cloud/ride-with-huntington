@@ -192,27 +192,30 @@ function RiderView({ readiness }: { readiness: EditableReadinessItem[] }) {
 }
 
 function FamilyView() {
-  const cards = [
-    { icon: Car, title: "Spectator parking", body: "McFerson & Neil Ave. garages. Arrive by 6 AM Saturday.", href: "/family" },
-    { icon: MapPin, title: "Best viewing locations", body: "Miles 12, 34, 68, and the finish at Hilton Columbus.", href: "/family" },
-    { icon: Radio, title: "Rider tracking", body: "Live tracker link posts Ride Day (placeholder).", href: "/family" },
-    { icon: Tent, title: "Team Huntington tent", body: "Finish village + rest stops 2 & 4. Bright lime canopy.", href: "/family" },
-    { icon: Baby, title: "Kids activities", body: "Face painting, obstacle course, story-time tent at the finish.", href: "/family" },
-    { icon: Accessibility, title: "Accessibility", body: "Accessible parking with placard, restrooms, and viewing platforms.", href: "/family" },
-    { icon: AlertTriangle, title: "Emergency guidance", body: "Call 911. Medical tents at every rest stop and the finish.", href: "/family" },
-    { icon: CalendarDays, title: "Ride Weekend schedule", body: "Fri packet & gathering · Sat Ride Day · Sun brunch.", href: "/family" },
-  ] as const;
+  const { state } = useAdmin();
+  const sections = state.family.sections
+    .filter((s) => s.active && s.publish === "published")
+    .sort((a, b) => a.order - b.order);
+  if (sections.length === 0) {
+    return (
+      <Card>
+        <CardContent className="p-8 text-center text-sm text-muted-foreground">
+          No Family Guide sections are published yet. Ask a Super User to publish sections from Admin → Family Guide.
+        </CardContent>
+      </Card>
+    );
+  }
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {cards.map((c) => (
-        <Link key={c.title} to={c.href} className="rounded-lg">
+      {sections.map((s) => (
+        <Link key={s.id} to="/family" hash={s.id} className="rounded-lg">
           <Card className="h-full hover:shadow-md transition-shadow">
             <CardContent className="p-5">
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-[var(--brand-dark)] text-white">
-                <c.icon className="h-5 w-5" />
+                <AdminIcon name={s.icon} className="h-5 w-5" />
               </div>
-              <h3 className="mt-4 font-bold text-[var(--brand-dark)]">{c.title}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">{c.body}</p>
+              <h3 className="mt-4 font-bold text-[var(--brand-dark)]">{s.title}</h3>
+              <p className="mt-1 text-sm text-muted-foreground line-clamp-3">{s.body}</p>
               <span className="mt-3 inline-flex items-center text-sm font-semibold text-[var(--brand-dark)]">
                 Open <ArrowRight className="ml-1 h-3.5 w-3.5" />
               </span>
@@ -223,6 +226,7 @@ function FamilyView() {
     </div>
   );
 }
+
 
 function QuickAction({ icon: Icon, label, to, onClick }: {
   icon: typeof ArrowRight; label: string; to?: string; onClick?: () => void;
