@@ -9,14 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TeamRouteImport } from './routes/team'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as ResourcesRouteImport } from './routes/resources'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PackingRouteImport } from './routes/packing'
 import { Route as McpRouteImport } from './routes/mcp'
+import { Route as FamilyRouteImport } from './routes/family'
 import { Route as ExpensesRouteImport } from './routes/expenses'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ConfirmationRouteImport } from './routes/confirmation'
+import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ResourcesIdRouteImport } from './routes/resources.$id'
@@ -25,6 +29,11 @@ import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } fr
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 
+const TeamRoute = TeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SigninRoute = SigninRouteImport.update({
   id: '/signin',
   path: '/signin',
@@ -45,9 +54,19 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PackingRoute = PackingRouteImport.update({
+  id: '/packing',
+  path: '/packing',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const McpRoute = McpRouteImport.update({
   id: '/mcp',
   path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FamilyRoute = FamilyRouteImport.update({
+  id: '/family',
+  path: '/family',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ExpensesRoute = ExpensesRouteImport.update({
@@ -63,6 +82,11 @@ const DashboardRoute = DashboardRouteImport.update({
 const ConfirmationRoute = ConfirmationRouteImport.update({
   id: '/confirmation',
   path: '/confirmation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnalyticsRoute = AnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -107,14 +131,18 @@ const Char91DotmcpChar93InvokeToolToolRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/analytics': typeof AnalyticsRoute
   '/confirmation': typeof ConfirmationRoute
   '/dashboard': typeof DashboardRoute
   '/expenses': typeof ExpensesRoute
+  '/family': typeof FamilyRoute
   '/mcp': typeof McpRoute
+  '/packing': typeof PackingRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/resources': typeof ResourcesRouteWithChildren
   '/signin': typeof SigninRoute
+  '/team': typeof TeamRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/faqs': typeof AdminFaqsRoute
@@ -124,14 +152,18 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/analytics': typeof AnalyticsRoute
   '/confirmation': typeof ConfirmationRoute
   '/dashboard': typeof DashboardRoute
   '/expenses': typeof ExpensesRoute
+  '/family': typeof FamilyRoute
   '/mcp': typeof McpRoute
+  '/packing': typeof PackingRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/resources': typeof ResourcesRouteWithChildren
   '/signin': typeof SigninRoute
+  '/team': typeof TeamRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/faqs': typeof AdminFaqsRoute
@@ -142,14 +174,18 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/analytics': typeof AnalyticsRoute
   '/confirmation': typeof ConfirmationRoute
   '/dashboard': typeof DashboardRoute
   '/expenses': typeof ExpensesRoute
+  '/family': typeof FamilyRoute
   '/mcp': typeof McpRoute
+  '/packing': typeof PackingRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/resources': typeof ResourcesRouteWithChildren
   '/signin': typeof SigninRoute
+  '/team': typeof TeamRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/faqs': typeof AdminFaqsRoute
@@ -161,14 +197,18 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/analytics'
     | '/confirmation'
     | '/dashboard'
     | '/expenses'
+    | '/family'
     | '/mcp'
+    | '/packing'
     | '/profile'
     | '/register'
     | '/resources'
     | '/signin'
+    | '/team'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin/faqs'
@@ -178,14 +218,18 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/analytics'
     | '/confirmation'
     | '/dashboard'
     | '/expenses'
+    | '/family'
     | '/mcp'
+    | '/packing'
     | '/profile'
     | '/register'
     | '/resources'
     | '/signin'
+    | '/team'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin/faqs'
@@ -195,14 +239,18 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/analytics'
     | '/confirmation'
     | '/dashboard'
     | '/expenses'
+    | '/family'
     | '/mcp'
+    | '/packing'
     | '/profile'
     | '/register'
     | '/resources'
     | '/signin'
+    | '/team'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin/faqs'
@@ -213,14 +261,18 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
+  AnalyticsRoute: typeof AnalyticsRoute
   ConfirmationRoute: typeof ConfirmationRoute
   DashboardRoute: typeof DashboardRoute
   ExpensesRoute: typeof ExpensesRoute
+  FamilyRoute: typeof FamilyRoute
   McpRoute: typeof McpRoute
+  PackingRoute: typeof PackingRoute
   ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
   ResourcesRoute: typeof ResourcesRouteWithChildren
   SigninRoute: typeof SigninRoute
+  TeamRoute: typeof TeamRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -228,6 +280,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/team': {
+      id: '/team'
+      path: '/team'
+      fullPath: '/team'
+      preLoaderRoute: typeof TeamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signin': {
       id: '/signin'
       path: '/signin'
@@ -256,11 +315,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/packing': {
+      id: '/packing'
+      path: '/packing'
+      fullPath: '/packing'
+      preLoaderRoute: typeof PackingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/mcp': {
       id: '/mcp'
       path: '/mcp'
       fullPath: '/mcp'
       preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/family': {
+      id: '/family'
+      path: '/family'
+      fullPath: '/family'
+      preLoaderRoute: typeof FamilyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/expenses': {
@@ -282,6 +355,13 @@ declare module '@tanstack/react-router' {
       path: '/confirmation'
       fullPath: '/confirmation'
       preLoaderRoute: typeof ConfirmationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/analytics': {
+      id: '/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AnalyticsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -361,14 +441,18 @@ const ResourcesRouteWithChildren = ResourcesRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
+  AnalyticsRoute: AnalyticsRoute,
   ConfirmationRoute: ConfirmationRoute,
   DashboardRoute: DashboardRoute,
   ExpensesRoute: ExpensesRoute,
+  FamilyRoute: FamilyRoute,
   McpRoute: McpRoute,
+  PackingRoute: PackingRoute,
   ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,
   ResourcesRoute: ResourcesRouteWithChildren,
   SigninRoute: SigninRoute,
+  TeamRoute: TeamRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
