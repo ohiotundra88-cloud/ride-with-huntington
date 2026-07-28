@@ -11,6 +11,7 @@ import {
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
 import { NotificationCenter } from "@/components/NotificationCenter";
+import { SuperUserLoginDialog } from "@/components/SuperUserLoginDialog";
 import { toast } from "sonner";
 
 const links = [
