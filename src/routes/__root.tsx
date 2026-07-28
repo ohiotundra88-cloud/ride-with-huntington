@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { StoreProvider } from "@/lib/store";
 import { AppNav } from "@/components/AppNav";
 import { Toaster } from "@/components/ui/sonner";
+import { ConciergeLauncher } from "@/components/Concierge";
 
 function NotFoundComponent() {
   return (
@@ -134,6 +135,7 @@ function RootComponent() {
             </div>
           </footer>
         </div>
+        <ConciergeLauncher />
         <Toaster />
       </StoreProvider>
     </QueryClientProvider>

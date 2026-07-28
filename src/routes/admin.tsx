@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useStore, type AdminParticipant } from "@/lib/store";
-import { Download, Search, Mail, Bell, Unlock, StickyNote, FileText } from "lucide-react";
+import { Download, Search, Mail, Bell, Unlock, StickyNote, FileText, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin")({
@@ -95,7 +95,8 @@ function Admin() {
           <h1 className="text-3xl font-black text-[var(--brand-dark)]">Admin dashboard</h1>
           <p className="mt-1 text-sm text-muted-foreground">Live demo data — 20 seeded colleagues.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="outline"><Link to="/analytics"><BarChart3 className="mr-1 h-4 w-4" /> Executive Analytics</Link></Button>
           <Button asChild variant="outline"><Link to="/admin/faqs"><FileText className="mr-1 h-4 w-4" /> Manage FAQs</Link></Button>
           <Button onClick={exportCSV} variant="outline"><Download className="mr-1 h-4 w-4" /> Export CSV</Button>
         </div>
