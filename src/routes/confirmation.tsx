@@ -51,7 +51,7 @@ function Confirmation() {
 
           <div className="mt-4 rounded-lg bg-muted/50 p-4 space-y-1">
             <div className="flex justify-between"><span className="text-muted-foreground">Registration ID</span><span className="font-mono font-bold">{registration.id ?? "—"}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Participation</span><span className="capitalize">{registration.participation ?? "—"}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Participation</span><span className="capitalize">{registration.participation ?? "—"}{[registration.pelotonia.highRoller && "High Roller", registration.pelotonia.survivor && "Survivor"].filter(Boolean).length > 0 && <span className="ml-2 text-xs font-semibold text-[var(--brand-dark)]">· {[registration.pelotonia.highRoller && "High Roller", registration.pelotonia.survivor && "Survivor"].filter(Boolean).join(" · ")}</span>}</span></div>
             <div className="flex justify-between items-center"><span className="text-muted-foreground">Pelotonia</span><StatusBadge status={registration.pelotonia.status} /></div>
             <div className="flex justify-between items-center"><span className="text-muted-foreground">Travel</span><StatusBadge status={registration.travel.status} /></div>
             <div className="flex justify-between items-center"><span className="text-muted-foreground">Bike</span><StatusBadge status={registration.bike.status} /></div>

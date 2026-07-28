@@ -188,6 +188,25 @@ function StepPelotonia() {
             <Checkbox checked={p.completed} onCheckedChange={(v) => upd({ completed: !!v })} />
             I completed registration on Pelotonia.
           </label>
+
+          <div className="rounded-lg border bg-muted/30 p-3 space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Pelotonia designations</p>
+            <label className="flex items-start gap-2 text-sm cursor-pointer">
+              <Checkbox checked={p.highRoller} onCheckedChange={(v) => upd({ highRoller: !!v })} className="mt-0.5" />
+              <span>
+                <b>High Roller</b>
+                <span className="block text-xs text-muted-foreground">I've committed to raise at or above the High Roller fundraising level.</span>
+              </span>
+            </label>
+            <label className="flex items-start gap-2 text-sm cursor-pointer">
+              <Checkbox checked={p.survivor} onCheckedChange={(v) => upd({ survivor: !!v })} className="mt-0.5" />
+              <span>
+                <b>Survivor</b>
+                <span className="block text-xs text-muted-foreground">I'm riding or volunteering as a cancer survivor.</span>
+              </span>
+            </label>
+          </div>
+
           <Button onClick={markComplete} variant="outline" className="w-full">Save status</Button>
         </CardContent>
       </Card>
@@ -373,7 +392,7 @@ function StepApparel() {
   const updA = (patch: Partial<typeof addr>) => setRegistration((prev) => ({ ...prev, address: { ...prev.address, ...patch } }));
 
   const save = () => {
-    const okRider = !isRider || (a.jerseySize && a.shirtSize && a.cut);
+    const okRider = !isRider || (a.jerseySize && a.jerseyStyle && a.shirtSize && a.cut);
     const okVol = !isVol || (a.volunteerShirtSize && a.volunteerCut);
     const okAddr = addr.name && addr.street && addr.city && addr.state && addr.zip && addr.confirmed;
     const complete = !!(okRider && okVol && okAddr);
@@ -408,11 +427,20 @@ function StepApparel() {
               </Dialog>
             </div>
           </CardHeader>
-          <CardContent className="grid gap-4 sm:grid-cols-3">
+          <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div className="space-y-2"><Label>Jersey size</Label>
               <Select value={a.jerseySize} onValueChange={(v) => upd({ jerseySize: v })}>
                 <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
                 <SelectContent>{SIZES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2"><Label>Jersey style</Label>
+              <Select value={a.jerseyStyle} onValueChange={(v) => upd({ jerseyStyle: v as "short-sleeve" | "sleeveless" })}>
+                <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="short-sleeve">Short sleeve</SelectItem>
+                  <SelectItem value="sleeveless">Sleeveless</SelectItem>
+                </SelectContent>
               </Select>
             </div>
             <div className="space-y-2"><Label>Shirt size</Label>
@@ -559,7 +587,7 @@ function StepReview({ onEdit }: { onEdit: (n: number) => void }) {
       <Card>
         <CardHeader><CardTitle>Apparel & mailing</CardTitle></CardHeader>
         <CardContent>
-          {isRider && <Row label="Jersey" value={`${registration.apparel.jerseySize} ${registration.apparel.cut}`} editStep={isRider ? 5 : 4} />}
+          {isRider && <Row label="Jersey" value={[registration.apparel.jerseySize, registration.apparel.jerseyStyle, registration.apparel.cut].filter(Boolean).join(" · ")} editStep={isRider ? 5 : 4} />}
           <Row label="Address" value={[registration.address.street, registration.address.city, registration.address.state, registration.address.zip].filter(Boolean).join(", ")} editStep={isRider ? 5 : 4} />
         </CardContent>
       </Card>

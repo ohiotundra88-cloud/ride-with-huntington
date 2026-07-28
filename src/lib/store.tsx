@@ -48,6 +48,7 @@ export interface BikeRental {
 
 export interface Apparel {
   jerseySize: string;
+  jerseyStyle: "short-sleeve" | "sleeveless" | "";
   shirtSize: string;
   cut: string;
   volunteerShirtSize: string;
@@ -71,6 +72,8 @@ export interface PelotoniaReg {
   discountCode: string;
   confirmation: string;
   completed: boolean;
+  highRoller: boolean;
+  survivor: boolean;
   status: StepStatus;
 }
 
@@ -116,7 +119,7 @@ export interface AdminParticipant {
 const emptyReg: Registration = {
   id: null,
   participation: null,
-  pelotonia: { discountCode: "HUNT-TEAM-2026", confirmation: "", completed: false, status: "not_started" },
+  pelotonia: { discountCode: "HUNT-TEAM-2026", confirmation: "", completed: false, highRoller: false, survivor: false, status: "not_started" },
   travel: {
     needs: "", departureCity: "", arrivalDate: "", departureDate: "",
     hotelCheckIn: "", hotelCheckOut: "", notes: "", travelConfirmation: "",
@@ -128,7 +131,7 @@ const emptyReg: Registration = {
     helmet: false, pickupDate: "", returnDate: "", confirmation: "",
     status: "not_started",
   },
-  apparel: { jerseySize: "", shirtSize: "", cut: "", volunteerShirtSize: "", volunteerCut: "", status: "not_started" },
+  apparel: { jerseySize: "", jerseyStyle: "", shirtSize: "", cut: "", volunteerShirtSize: "", volunteerCut: "", status: "not_started" },
   address: { name: "", street: "", unit: "", city: "", state: "", zip: "", country: "USA", type: "", confirmed: false },
   submittedAt: null,
   audit: [],
