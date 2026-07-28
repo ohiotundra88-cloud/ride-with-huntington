@@ -31,12 +31,12 @@ export const getMyParticipant = createServerFn({ method: "GET" })
 
 const upsertSchema = z.object({
   participation: z.string().nullable().optional(),
-  pelotonia: z.record(z.any()).optional(),
-  travel: z.record(z.any()).optional(),
-  bike: z.record(z.any()).optional(),
-  apparel: z.record(z.any()).optional(),
-  address: z.record(z.any()).optional(),
-  audit: z.array(z.any()).optional(),
+  pelotonia: z.any().optional(),
+  travel: z.any().optional(),
+  bike: z.any().optional(),
+  apparel: z.any().optional(),
+  address: z.any().optional(),
+  audit: z.any().optional(),
   submitted_at: z.string().nullable().optional(),
   reg_id: z.string().nullable().optional(),
 });
