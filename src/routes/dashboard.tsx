@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { useStore } from "@/lib/store";
+import { useStore, type Registration } from "@/lib/store";
 import {
   ArrowRight, CalendarClock, CheckCircle2, ChevronDown, Clock,
   DollarSign, ListChecks, MessageSquare, MapPin, Users, CalendarDays,
