@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, MapPin, Plane, Bike, Shirt, CheckCircle2, LifeBuoy, FileText, ClipboardCheck, HelpCircle } from "lucide-react";
+import { ArrowRight, MapPin, Plane, Bike, Shirt, CheckCircle2, LifeBuoy, FileText, ClipboardCheck, HelpCircle, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowMotif } from "@/components/AppNav";
@@ -109,6 +109,46 @@ function Landing() {
               </Link>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* EVENTS PLACEHOLDER */}
+      <section className="mx-auto max-w-7xl px-4 py-14 sm:py-20">
+        <div className="max-w-2xl">
+          <h2 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight text-[var(--brand-dark)]">Ride Weekend events</h2>
+          <p className="mt-3 text-muted-foreground leading-relaxed">More details around the August 6–8, 2027 weekend will be posted here.</p>
+        </div>
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <Card className="border-2 border-dashed border-[var(--brand-dark)]/20">
+            <CardContent className="p-5">
+              <p className="text-xs font-bold uppercase tracking-wider text-[var(--brand-dark)]/60">Friday, Aug 6</p>
+              <h3 className="mt-3 font-bold text-[var(--brand-dark)]">Packet Pickup & Expo</h3>
+              <p className="mt-1 text-sm text-muted-foreground">Timing and location to be announced.</p>
+              <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[var(--brand)]/10 px-2.5 py-1 text-xs font-semibold text-[var(--brand-dark)]">
+                <Calendar className="h-3.5 w-3.5" /> Details coming soon
+              </span>
+            </CardContent>
+          </Card>
+          <Card className="border-2 border-dashed border-[var(--brand)]/40">
+            <CardContent className="p-5">
+              <p className="text-xs font-bold uppercase tracking-wider text-[var(--brand-dark)]/60">Saturday, Aug 7</p>
+              <h3 className="mt-3 font-bold text-[var(--brand-dark)]">Ride Day</h3>
+              <p className="mt-1 text-sm text-muted-foreground">Route start times and team meetup details coming soon.</p>
+              <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[var(--brand)]/10 px-2.5 py-1 text-xs font-semibold text-[var(--brand-dark)]">
+                <Calendar className="h-3.5 w-3.5" /> Details coming soon
+              </span>
+            </CardContent>
+          </Card>
+          <Card className="border-2 border-dashed border-[var(--brand-dark)]/20">
+            <CardContent className="p-5">
+              <p className="text-xs font-bold uppercase tracking-wider text-[var(--brand-dark)]/60">Sunday, Aug 8</p>
+              <h3 className="mt-3 font-bold text-[var(--brand-dark)]">Team Celebration</h3>
+              <p className="mt-1 text-sm text-muted-foreground">Post-ride gathering info will be shared here.</p>
+              <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[var(--brand)]/10 px-2.5 py-1 text-xs font-semibold text-[var(--brand-dark)]">
+                <Calendar className="h-3.5 w-3.5" /> Details coming soon
+              </span>
+            </CardContent>
+          </Card>
         </div>
       </section>
     </div>
