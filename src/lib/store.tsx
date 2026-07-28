@@ -74,6 +74,7 @@ export interface MailingAddress {
 export interface PelotoniaReg {
   discountCode: string;
   confirmation: string;
+  hbNumber: string;
   completed: boolean;
   highRoller: boolean;
   survivor: boolean;
