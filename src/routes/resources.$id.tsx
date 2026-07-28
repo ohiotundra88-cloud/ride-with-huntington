@@ -2,7 +2,8 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { faqs } from "@/lib/faq-data";
+import { faqs as builtinFaqs } from "@/lib/faq-data";
+import { useFaqAdmin } from "@/lib/faq-store";
 import { ArrowLeft, LifeBuoy } from "lucide-react";
 
 export const Route = createFileRoute("/resources/$id")({

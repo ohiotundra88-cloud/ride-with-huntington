@@ -19,6 +19,7 @@ import { Route as ConfirmationRouteImport } from './routes/confirmation'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ResourcesIdRouteImport } from './routes/resources.$id'
+import { Route as AdminFaqsRouteImport } from './routes/admin.faqs'
 
 const SigninRoute = SigninRouteImport.update({
   id: '/signin',
@@ -70,10 +71,15 @@ const ResourcesIdRoute = ResourcesIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => ResourcesRoute,
 } as any)
+const AdminFaqsRoute = AdminFaqsRouteImport.update({
+  id: '/faqs',
+  path: '/faqs',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/confirmation': typeof ConfirmationRoute
   '/dashboard': typeof DashboardRoute
   '/expenses': typeof ExpensesRoute
@@ -81,11 +87,12 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/resources': typeof ResourcesRouteWithChildren
   '/signin': typeof SigninRoute
+  '/admin/faqs': typeof AdminFaqsRoute
   '/resources/$id': typeof ResourcesIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/confirmation': typeof ConfirmationRoute
   '/dashboard': typeof DashboardRoute
   '/expenses': typeof ExpensesRoute
@@ -93,12 +100,13 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/resources': typeof ResourcesRouteWithChildren
   '/signin': typeof SigninRoute
+  '/admin/faqs': typeof AdminFaqsRoute
   '/resources/$id': typeof ResourcesIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/confirmation': typeof ConfirmationRoute
   '/dashboard': typeof DashboardRoute
   '/expenses': typeof ExpensesRoute
@@ -106,6 +114,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/resources': typeof ResourcesRouteWithChildren
   '/signin': typeof SigninRoute
+  '/admin/faqs': typeof AdminFaqsRoute
   '/resources/$id': typeof ResourcesIdRoute
 }
 export interface FileRouteTypes {
@@ -120,6 +129,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/resources'
     | '/signin'
+    | '/admin/faqs'
     | '/resources/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -132,6 +142,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/resources'
     | '/signin'
+    | '/admin/faqs'
     | '/resources/$id'
   id:
     | '__root__'
@@ -144,12 +155,13 @@ export interface FileRouteTypes {
     | '/register'
     | '/resources'
     | '/signin'
+    | '/admin/faqs'
     | '/resources/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRoute
+  AdminRoute: typeof AdminRouteWithChildren
   ConfirmationRoute: typeof ConfirmationRoute
   DashboardRoute: typeof DashboardRoute
   ExpensesRoute: typeof ExpensesRoute
@@ -231,8 +243,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResourcesIdRouteImport
       parentRoute: typeof ResourcesRoute
     }
+    '/admin/faqs': {
+      id: '/admin/faqs'
+      path: '/faqs'
+      fullPath: '/admin/faqs'
+      preLoaderRoute: typeof AdminFaqsRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
+
+interface AdminRouteChildren {
+  AdminFaqsRoute: typeof AdminFaqsRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminFaqsRoute: AdminFaqsRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface ResourcesRouteChildren {
   ResourcesIdRoute: typeof ResourcesIdRoute
@@ -248,7 +277,7 @@ const ResourcesRouteWithChildren = ResourcesRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRoute,
+  AdminRoute: AdminRouteWithChildren,
   ConfirmationRoute: ConfirmationRoute,
   DashboardRoute: DashboardRoute,
   ExpensesRoute: ExpensesRoute,

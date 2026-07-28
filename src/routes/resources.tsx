@@ -4,7 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { faqs, faqCategories, type FAQCategory } from "@/lib/faq-data";
+import { faqCategories, type FAQCategory } from "@/lib/faq-data";
+import { useFaqAdmin } from "@/lib/faq-store";
 import { Search, LifeBuoy } from "lucide-react";
 
 export const Route = createFileRoute("/resources")({
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/resources")({
 function Resources() {
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<FAQCategory | "All">("All");
+  const { merged: faqs } = useFaqAdmin();
 
   const filtered = useMemo(() => faqs.filter((a) => {
     const catOk = cat === "All" || a.category === cat;
