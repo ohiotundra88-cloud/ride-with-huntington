@@ -1,0 +1,113 @@
+{
+  "version": 1,
+  "sdk_version": "0.24.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "none"
+  },
+  "mcp": {
+    "server": {
+      "name": "team-huntington-hub-mcp",
+      "version": "0.1.0",
+      "title": "Team Huntington Hub"
+    },
+    "tools": [
+      {
+        "name": "list_faqs",
+        "title": "List FAQs",
+        "description": "List Team Huntington Hub FAQ articles. Optionally filter by category. Returns id, title, category, and keywords for each article.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "category": {
+              "type": "string",
+              "description": "Optional category filter, e.g. Registration, Travel, Bike Rental, Apparel, Fundraising, Ride Weekend, Volunteers, Expense Reports."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "search_faqs",
+        "title": "Search FAQs",
+        "description": "Full-text search over Team Huntington Hub FAQ articles. Matches title, body, keywords, and category. Returns matching articles with full body text.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Search query."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 25,
+              "description": "Max results (default 10)."
+            }
+          },
+          "required": [
+            "query"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_faq",
+        "title": "Get FAQ article",
+        "description": "Get the full body of a single Team Huntington Hub FAQ article by id.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "description": "FAQ article id, e.g. 'reg-1'."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "ride_weekend_info",
+        "title": "Ride Weekend info",
+        "description": "Public information about Team Huntington's Pelotonia Ride Weekend 2027, including the ride day and weekend schedule placeholders.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
