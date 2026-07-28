@@ -188,6 +188,25 @@ function StepPelotonia() {
             <Checkbox checked={p.completed} onCheckedChange={(v) => upd({ completed: !!v })} />
             I completed registration on Pelotonia.
           </label>
+
+          <div className="rounded-lg border bg-muted/30 p-3 space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Pelotonia designations</p>
+            <label className="flex items-start gap-2 text-sm cursor-pointer">
+              <Checkbox checked={p.highRoller} onCheckedChange={(v) => upd({ highRoller: !!v })} className="mt-0.5" />
+              <span>
+                <b>High Roller</b>
+                <span className="block text-xs text-muted-foreground">I've committed to raise at or above the High Roller fundraising level.</span>
+              </span>
+            </label>
+            <label className="flex items-start gap-2 text-sm cursor-pointer">
+              <Checkbox checked={p.survivor} onCheckedChange={(v) => upd({ survivor: !!v })} className="mt-0.5" />
+              <span>
+                <b>Survivor</b>
+                <span className="block text-xs text-muted-foreground">I'm riding or volunteering as a cancer survivor.</span>
+              </span>
+            </label>
+          </div>
+
           <Button onClick={markComplete} variant="outline" className="w-full">Save status</Button>
         </CardContent>
       </Card>
