@@ -80,14 +80,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Team Huntington Hub — Your Pelotonia Journey" },
+      { name: "description", content: "One guided digital front door for Huntington colleagues participating in Pelotonia — registration, travel, bike, apparel, and support." },
+      { name: "author", content: "Team Huntington" },
+      { property: "og:title", content: "Team Huntington Hub" },
+      { property: "og:description", content: "Your Team Huntington Pelotonia journey starts here." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
@@ -122,8 +121,21 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <StoreProvider>
+        <div className="min-h-screen flex flex-col">
+          <AppNav />
+          <main className="flex-1 relative">
+            <Outlet />
+          </main>
+          <footer className="border-t bg-[var(--brand-dark)] text-white/70 py-6 text-xs">
+            <div className="mx-auto max-w-7xl px-4 flex flex-wrap gap-4 justify-between">
+              <span>© Team Huntington Hub · Internal prototype</span>
+              <span>Not affiliated with copyrighted Pelotonia branding.</span>
+            </div>
+          </footer>
+        </div>
+        <Toaster />
+      </StoreProvider>
     </QueryClientProvider>
   );
 }
