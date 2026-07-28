@@ -34,6 +34,7 @@ export function AppNav() {
   const nav = useNavigate();
 
   return (
+    <>
     <header className="sticky top-0 z-40 bg-[var(--brand-dark)] text-[var(--brand-dark-foreground)] border-b border-white/10">
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-4">
         <Sheet open={open} onOpenChange={setOpen}>
