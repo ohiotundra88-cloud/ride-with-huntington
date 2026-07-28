@@ -1,5 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Menu, User as UserIcon, ShieldCheck, Sparkles } from "lucide-react";
+import { Menu, User as UserIcon, ShieldCheck, LogOut, LogIn } from "lucide-react";
 import { useState } from "react";
 import { useStore } from "@/lib/store";
 import { useAdmin } from "@/lib/admin-store";
@@ -8,10 +8,8 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
   DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator,
-  DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
 import { NotificationCenter } from "@/components/NotificationCenter";
-import { SuperUserLoginDialog } from "@/components/SuperUserLoginDialog";
 import { toast } from "sonner";
 
 const links = [
@@ -26,15 +24,26 @@ const links = [
 ] as const;
 
 export function AppNav() {
-  const { user, setUser } = useStore();
+  const { user, signOut } = useStore();
   const { state, setState } = useAdmin();
   const [open, setOpen] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
   const pathname = useRouterState({ select: (r) => r.location.pathname });
   const nav = useNavigate();
 
+  const enterSuperUser = () => {
+    setState((s) => ({ ...s, superUser: { ...s.superUser, active: true, previewAs: null, currentEditor: user.name } }));
+    toast.success(`Super User Mode enabled`);
+    nav({ to: "/admin" });
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    setState((s) => ({ ...s, superUser: { ...s.superUser, active: false, previewAs: null } }));
+    toast.success("Signed out");
+    nav({ to: "/" });
+  };
+
   return (
-    <>
     <header className="sticky top-0 z-40 bg-[var(--brand-dark)] text-[var(--brand-dark-foreground)] border-b border-white/10">
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-4">
         <Sheet open={open} onOpenChange={setOpen}>
@@ -87,43 +96,50 @@ export function AppNav() {
 
         <div className="ml-auto flex items-center gap-1">
           {state.flags.notificationCenter && <NotificationCenter />}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 gap-2">
-                {state.superUser.active ? <ShieldCheck className="h-4 w-4 text-[var(--brand)]" /> : <UserIcon className="h-4 w-4" />}
-                <span className="hidden sm:inline text-xs">{user.signedIn ? user.name.split(" ")[0] : "Guest"}</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64">
-              <DropdownMenuLabel>Demo modes</DropdownMenuLabel>
-              <DropdownMenuCheckboxItem
-                checked={user.signedIn}
-                onCheckedChange={(v) => setUser({ signedIn: !!v })}
-              >Signed in</DropdownMenuCheckboxItem>
-              <DropdownMenuSeparator />
-              {state.superUser.active ? (
-                <DropdownMenuItem onClick={() => { setState((s) => ({ ...s, superUser: { ...s.superUser, active: false, previewAs: null }})); setUser({ isAdmin: false }); toast.success("Exited Super User Mode"); nav({ to: "/" }); }}>
-                  Exit Super User Mode
+          {user.signedIn ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 gap-2">
+                  {user.isAdmin ? <ShieldCheck className="h-4 w-4 text-[var(--brand)]" /> : <UserIcon className="h-4 w-4" />}
+                  <span className="hidden sm:inline text-xs">{user.name.split(" ")[0]}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-64">
+                <DropdownMenuLabel>
+                  <div className="font-normal text-xs text-muted-foreground">Signed in as</div>
+                  <div className="truncate text-sm">{user.email}</div>
+                  {user.isAdmin && <div className="mt-1 inline-flex items-center gap-1 rounded bg-[var(--brand)]/20 px-1.5 py-0.5 text-[10px] font-semibold text-[var(--brand-dark)]"><ShieldCheck className="h-3 w-3" /> ADMIN</div>}
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {user.isAdmin && (
+                  state.superUser.active ? (
+                    <DropdownMenuItem onClick={() => { setState((s) => ({ ...s, superUser: { ...s.superUser, active: false, previewAs: null } })); toast.success("Exited Super User Mode"); nav({ to: "/" }); }}>
+                      Exit Super User Mode
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem onClick={enterSuperUser}>
+                      <ShieldCheck className="mr-2 h-4 w-4 text-[var(--brand)]" /> Enter Super User Mode
+                    </DropdownMenuItem>
+                  )
+                )}
+                <DropdownMenuItem asChild><Link to="/profile">Edit profile</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link to="/dashboard">My Journey</Link></DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut}>
+                  <LogOut className="mr-2 h-4 w-4" /> Sign out
                 </DropdownMenuItem>
-              ) : (
-                <DropdownMenuItem onClick={() => setLoginOpen(true)}>
-                  <Sparkles className="mr-2 h-4 w-4 text-[var(--brand)]" /> Super User Mode <span className="ml-auto text-[10px] uppercase text-muted-foreground">Demo</span>
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild><Link to="/signin">Sign in / Profile</Link></DropdownMenuItem>
-              <DropdownMenuItem asChild><Link to="/profile">Edit profile</Link></DropdownMenuItem>
-              <DropdownMenuItem asChild><Link to="/confirmation">Confirmation preview</Link></DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button asChild variant="ghost" size="sm" className="text-white hover:bg-white/10 gap-2">
+              <Link to="/signin"><LogIn className="h-4 w-4" /> <span className="hidden sm:inline text-xs">Sign in</span></Link>
+            </Button>
+          )}
         </div>
       </div>
     </header>
-    <SuperUserLoginDialog open={loginOpen} onOpenChange={setLoginOpen} />
-    </>
   );
 }
-
 
 export function ArrowMotif() {
   return (

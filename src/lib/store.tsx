@@ -1,4 +1,6 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { upsertMyParticipant, getMyParticipant } from "@/lib/participants.functions";
 
 // ============ TYPES ============
 export type Participation = "rider" | "volunteer" | "both" | "unsure" | null;
@@ -14,6 +16,7 @@ export interface User {
   consent: boolean;
   signedIn: boolean;
   isAdmin: boolean;
+  userId: string | null;
 }
 
 export interface TravelInfo {
@@ -137,19 +140,20 @@ const emptyReg: Registration = {
   audit: [],
 };
 
-const demoUser: User = {
-  name: "Chris Harper",
-  email: "chris.harper@huntington.com",
-  mobile: "(614) 555-0142",
-  segment: "Consumer & Business Banking",
-  market: "Columbus, OH",
-  manager: "Priya Shah",
+const guestUser: User = {
+  name: "Guest",
+  email: "",
+  mobile: "",
+  segment: "",
+  market: "",
+  manager: "",
   consent: false,
-  signedIn: true,
+  signedIn: false,
   isAdmin: false,
+  userId: null,
 };
 
-// ============ SEED ADMIN DATA ============
+// ============ SEED ADMIN DATA (mock table for admin dashboard fallback) ============
 const markets = ["Columbus, OH", "Cleveland, OH", "Cincinnati, OH", "Detroit, MI", "Pittsburgh, PA", "Indianapolis, IN", "Chicago, IL"];
 const segments = ["Consumer & Business Banking", "Commercial Banking", "Wealth Management", "Technology", "Risk", "Marketing"];
 const roles: AdminParticipant["role"][] = ["Rider", "Volunteer", "Both"];
@@ -204,36 +208,125 @@ interface StoreCtx {
   reset: () => void;
   completion: number;
   incompleteStep: number;
+  signOut: () => Promise<void>;
 }
 
 const Ctx = createContext<StoreCtx | null>(null);
-const KEY = "hh_state_v1";
+const REG_KEY = "hh_reg_v2";
 
-function loadFromStorage() {
+function loadRegistrationFromStorage(): Registration | null {
   if (typeof window === "undefined") return null;
-  try { const raw = localStorage.getItem(KEY); return raw ? JSON.parse(raw) : null; } catch { return null; }
+  try { const raw = localStorage.getItem(REG_KEY); return raw ? JSON.parse(raw) : null; } catch { return null; }
 }
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [user, setUserState] = useState<User>(demoUser);
+  const [user, setUserState] = useState<User>(guestUser);
   const [registration, setRegState] = useState<Registration>(emptyReg);
   const [participants, setParticipants] = useState<AdminParticipant[]>(seedParticipants);
   const [hydrated, setHydrated] = useState(false);
+  const skipNextPersist = useRef(false);
 
+  // Hydrate registration from localStorage (works offline / guest preview)
   useEffect(() => {
-    const s = loadFromStorage();
-    if (s) {
-      if (s.user) setUserState({ ...demoUser, ...s.user });
-      if (s.registration) setRegState({ ...emptyReg, ...s.registration });
-      if (s.participants) setParticipants(s.participants);
-    }
+    const s = loadRegistrationFromStorage();
+    if (s) setRegState({ ...emptyReg, ...s });
     setHydrated(true);
   }, []);
 
+  // Sync auth session → user state; fetch roles + participant row on sign in
+  useEffect(() => {
+    let cancelled = false;
+
+    async function applySession(sessionUser: { id: string; email?: string | null } | null) {
+      if (!sessionUser) {
+        setUserState(guestUser);
+        return;
+      }
+      const email = sessionUser.email ?? "";
+      const nameGuess = email ? email.split("@")[0].replace(/[._-]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) : "Colleague";
+      // Fetch role + profile in parallel
+      const [rolesRes, profileRes] = await Promise.all([
+        supabase.from("user_roles").select("role").eq("user_id", sessionUser.id),
+        supabase.from("profiles").select("full_name, email").eq("id", sessionUser.id).maybeSingle(),
+      ]);
+      const isAdmin = (rolesRes.data ?? []).some((r) => r.role === "admin");
+      const fullName = profileRes.data?.full_name || nameGuess;
+      if (cancelled) return;
+      setUserState({
+        ...guestUser,
+        userId: sessionUser.id,
+        email,
+        name: fullName,
+        signedIn: true,
+        isAdmin,
+      });
+
+      // Load participant row from cloud (overrides local if present)
+      try {
+        const row = await getMyParticipant();
+        if (cancelled || !row) return;
+        skipNextPersist.current = true;
+        setRegState((prev) => ({
+          ...prev,
+          id: row.reg_id ?? prev.id,
+          participation: (row.participation as Participation) ?? prev.participation,
+          pelotonia: { ...prev.pelotonia, ...(row.pelotonia as any) },
+          travel: { ...prev.travel, ...(row.travel as any) },
+          bike: { ...prev.bike, ...(row.bike as any) },
+          apparel: { ...prev.apparel, ...(row.apparel as any) },
+          address: { ...prev.address, ...(row.address as any) },
+          audit: Array.isArray(row.audit) ? (row.audit as unknown as AuditEvent[]) : prev.audit,
+          submittedAt: row.submitted_at ?? prev.submittedAt,
+        }));
+      } catch {
+        // ignore — server fn may be unavailable during SSR
+      }
+    }
+
+    supabase.auth.getSession().then(({ data }) => {
+      applySession(data.session?.user ? { id: data.session.user.id, email: data.session.user.email } : null);
+    });
+
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED") {
+        applySession(session?.user ? { id: session.user.id, email: session.user.email } : null);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
+
+  // Persist registration to localStorage (cache)
   useEffect(() => {
     if (!hydrated) return;
-    localStorage.setItem(KEY, JSON.stringify({ user, registration, participants }));
-  }, [user, registration, participants, hydrated]);
+    localStorage.setItem(REG_KEY, JSON.stringify(registration));
+  }, [registration, hydrated]);
+
+  // Debounced write-through to Lovable Cloud when signed in
+  useEffect(() => {
+    if (!hydrated) return;
+    if (!user.signedIn || !user.userId) return;
+    if (skipNextPersist.current) { skipNextPersist.current = false; return; }
+    const t = setTimeout(() => {
+      upsertMyParticipant({
+        data: {
+          participation: registration.participation ?? null,
+          pelotonia: registration.pelotonia as any,
+          travel: registration.travel as any,
+          bike: registration.bike as any,
+          apparel: registration.apparel as any,
+          address: registration.address as any,
+          audit: registration.audit as any,
+          submitted_at: registration.submittedAt,
+          reg_id: registration.id,
+        },
+      }).catch(() => { /* offline / transient */ });
+    }, 900);
+    return () => clearTimeout(t);
+  }, [registration, user.signedIn, user.userId, hydrated]);
 
   const setUser = (u: Partial<User>) => setUserState((prev) => ({ ...prev, ...u }));
   const setRegistration = (r: Partial<Registration> | ((prev: Registration) => Registration)) =>
@@ -243,7 +336,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setParticipants((prev) => prev.map((p) => p.id === id ? { ...p, notes: [...p.notes, note] } : p));
   };
 
-  const reset = () => { setRegState(emptyReg); setUserState(demoUser); };
+  const reset = () => { setRegState(emptyReg); };
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    setUserState(guestUser);
+    setRegState(emptyReg);
+    localStorage.removeItem(REG_KEY);
+  };
 
   const completion = useMemo(() => {
     const s = [registration.pelotonia.status, registration.travel.status, registration.bike.status, registration.apparel.status];
@@ -261,7 +361,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [registration]);
 
   return (
-    <Ctx.Provider value={{ user, setUser, registration, setRegistration, participants, addNote, reset, completion, incompleteStep }}>
+    <Ctx.Provider value={{ user, setUser, registration, setRegistration, participants, addNote, reset, completion, incompleteStep, signOut }}>
       {children}
     </Ctx.Provider>
   );

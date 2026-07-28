@@ -5,13 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { faqCategories, type FAQCategory } from "@/lib/faq-data";
-import { useFaqAdmin } from "@/lib/faq-store";
+import { usePublicFaqs } from "@/lib/faq-store";
 import { Search, LifeBuoy } from "lucide-react";
 
 export const Route = createFileRoute("/resources")({
   head: () => ({ meta: [
     { title: "Resources — Team Huntington Hub" },
-    { name: "description", content: "Search 25+ answers for Team Huntington Pelotonia participants." },
+    { name: "description", content: "Search Team Huntington answers for Pelotonia participants." },
   ] }),
   component: Resources,
 });
@@ -19,14 +19,14 @@ export const Route = createFileRoute("/resources")({
 function Resources() {
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<FAQCategory | "All">("All");
-  const { merged: faqs } = useFaqAdmin();
+  const { data: faqs = [], isLoading } = usePublicFaqs();
 
   const filtered = useMemo(() => faqs.filter((a) => {
     const catOk = cat === "All" || a.category === cat;
     if (!q) return catOk;
     const s = q.toLowerCase();
     return catOk && (a.title.toLowerCase().includes(s) || a.body.toLowerCase().includes(s) || a.keywords.some((k) => k.includes(s)));
-  }), [q, cat]);
+  }), [q, cat, faqs]);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
@@ -53,7 +53,10 @@ function Resources() {
       </div>
 
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
-        {filtered.map((a) => (
+        {isLoading && (
+          <div className="sm:col-span-2 py-12 text-center text-muted-foreground">Loading…</div>
+        )}
+        {!isLoading && filtered.map((a) => (
           <Link key={a.id} to="/resources/$id" params={{ id: a.id }}>
             <Card className="h-full hover:shadow-md transition-shadow">
               <CardContent className="p-5">
@@ -64,7 +67,7 @@ function Resources() {
             </Card>
           </Link>
         ))}
-        {filtered.length === 0 && (
+        {!isLoading && filtered.length === 0 && (
           <div className="sm:col-span-2 py-12 text-center text-muted-foreground">
             <LifeBuoy className="mx-auto h-10 w-10 opacity-40" />
             <p className="mt-3">No articles match. Try another search.</p>
