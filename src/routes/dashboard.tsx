@@ -9,8 +9,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { useStore } from "@/lib/store";
 import {
   ArrowRight, CalendarClock, CheckCircle2, ChevronDown, Clock,
-  DollarSign, ListChecks, MessageSquare, MapPin, Users, Tent, Baby,
-  Accessibility, AlertTriangle, Car, CalendarDays, Radio,
+  DollarSign, ListChecks, MessageSquare, MapPin, Users, CalendarDays,
   Lock as LockIcon,
 } from "lucide-react";
 import { openConcierge } from "@/components/Concierge";
