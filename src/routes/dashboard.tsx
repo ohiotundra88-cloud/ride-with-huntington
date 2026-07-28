@@ -244,14 +244,18 @@ function RiderView({ readiness }: { readiness: EditableReadinessItem[] }) {
                 </CardContent>
               </Card>
             );
+            const wizardStep = REGISTER_STEP_BY_CARD[r.id];
             const wrap = (inner: React.ReactNode) =>
               r.action === "concierge" ? (
                 <button key={r.id} type="button" onClick={openConcierge} className="text-left rounded-lg">{inner}</button>
               ) : r.action === "fundraising" ? (
                 <Link key={r.id} to="/team" className="rounded-lg">{inner}</Link>
+              ) : wizardStep && (r.href ?? "/register").startsWith("/register") ? (
+                <Link key={r.id} to="/register" search={{ step: wizardStep }} className="rounded-lg">{inner}</Link>
               ) : (
                 <Link key={r.id} to={r.href ?? "/dashboard"} className="rounded-lg">{inner}</Link>
               );
+
             return wrap(CardInner);
           })}
         </div>
