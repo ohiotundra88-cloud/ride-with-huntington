@@ -105,7 +105,7 @@ export function AppNav() {
                   Exit Super User Mode
                 </DropdownMenuItem>
               ) : (
-                <DropdownMenuItem onClick={enterSuperUser}>
+                <DropdownMenuItem onClick={() => setLoginOpen(true)}>
                   <Sparkles className="mr-2 h-4 w-4 text-[var(--brand)]" /> Super User Mode <span className="ml-auto text-[10px] uppercase text-muted-foreground">Demo</span>
                 </DropdownMenuItem>
               )}
