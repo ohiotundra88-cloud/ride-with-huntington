@@ -2,15 +2,16 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
+type Json = string | number | boolean | null | { [k: string]: Json } | Json[];
 export interface ParticipantRow {
   user_id: string;
   participation: string | null;
-  pelotonia: Record<string, unknown>;
-  travel: Record<string, unknown>;
-  bike: Record<string, unknown>;
-  apparel: Record<string, unknown>;
-  address: Record<string, unknown>;
-  audit: unknown[];
+  pelotonia: Json;
+  travel: Json;
+  bike: Json;
+  apparel: Json;
+  address: Json;
+  audit: Json;
   submitted_at: string | null;
   reg_id: string | null;
   updated_at: string;
