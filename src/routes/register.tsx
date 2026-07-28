@@ -15,7 +15,16 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { addAudit, genRegId, useStore, type Participation } from "@/lib/store";
 import { toast } from "sonner";
 
+const STEP_KEYS = ["A", "B", "C", "D", "E", "F"] as const;
+export type StepKey = (typeof STEP_KEYS)[number];
+
 export const Route = createFileRoute("/register")({
+  validateSearch: (search: Record<string, unknown>): { step?: StepKey } => {
+    const s = search.step;
+    return typeof s === "string" && (STEP_KEYS as readonly string[]).includes(s)
+      ? { step: s as StepKey }
+      : {};
+  },
   head: () => ({ meta: [
     { title: "Register — Team Huntington Hub" },
     { name: "description", content: "Multi-step Team Huntington Pelotonia registration wizard." },
@@ -28,7 +37,9 @@ const SIZES = ["XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL"];
 function RegisterWizard() {
   const { registration, setRegistration, user } = useStore();
   const nav = useNavigate();
+  const { step: stepKeyParam } = Route.useSearch();
   const [step, setStep] = useState(1);
+
   const isRider = registration.participation === "rider" || registration.participation === "both";
   const isVol = registration.participation === "volunteer" || registration.participation === "both";
 
