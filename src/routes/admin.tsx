@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useStore, type AdminParticipant } from "@/lib/store";
-import { Download, Search, Mail, Bell, Unlock, StickyNote } from "lucide-react";
+import { Download, Search, Mail, Bell, Unlock, StickyNote, FileText } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin")({
@@ -95,7 +95,10 @@ function Admin() {
           <h1 className="text-3xl font-black text-[var(--brand-dark)]">Admin dashboard</h1>
           <p className="mt-1 text-sm text-muted-foreground">Live demo data — 20 seeded colleagues.</p>
         </div>
-        <Button onClick={exportCSV} variant="outline"><Download className="mr-1 h-4 w-4" /> Export CSV</Button>
+        <div className="flex gap-2">
+          <Button asChild variant="outline"><Link to="/admin/faqs"><FileText className="mr-1 h-4 w-4" /> Manage FAQs</Link></Button>
+          <Button onClick={exportCSV} variant="outline"><Download className="mr-1 h-4 w-4" /> Export CSV</Button>
+        </div>
       </div>
 
       <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">

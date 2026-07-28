@@ -2,12 +2,13 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { faqs } from "@/lib/faq-data";
+import { faqs as builtinFaqs } from "@/lib/faq-data";
+import { useFaqAdmin } from "@/lib/faq-store";
 import { ArrowLeft, LifeBuoy } from "lucide-react";
 
 export const Route = createFileRoute("/resources/$id")({
   head: ({ params }) => {
-    const a = faqs.find((f) => f.id === params.id);
+    const a = builtinFaqs.find((f) => f.id === params.id);
     return { meta: [
       { title: `${a?.title ?? "Article"} — Team Huntington Hub` },
       { name: "description", content: a?.body.slice(0, 150) ?? "Team Huntington resource." },
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/resources/$id")({
 
 function Article() {
   const { id } = Route.useParams();
+  const { merged: faqs } = useFaqAdmin();
   const a = faqs.find((f) => f.id === id);
   if (!a) throw notFound();
   const related = faqs.filter((f) => f.category === a.category && f.id !== a.id).slice(0, 4);
