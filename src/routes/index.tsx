@@ -64,8 +64,8 @@ function Landing() {
       {/* 5 STEPS */}
       <section className="mx-auto max-w-7xl px-4 py-14 sm:py-20">
         <div className="max-w-2xl">
-          <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-[var(--brand-dark)]">Five simple steps</h2>
-          <p className="mt-2 text-muted-foreground">Progress autosaves. Come back anytime to pick up where you left off.</p>
+          <h2 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight text-[var(--brand-dark)]">Five simple steps</h2>
+          <p className="mt-3 text-muted-foreground leading-relaxed">Progress autosaves. Come back anytime to pick up where you left off.</p>
         </div>
         <ol className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {steps.map((s, i) => (
