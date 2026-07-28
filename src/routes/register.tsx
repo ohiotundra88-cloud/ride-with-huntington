@@ -590,7 +590,8 @@ function StepReview({ onEdit }: { onEdit: (n: number) => void }) {
         <CardHeader><CardTitle>Pelotonia</CardTitle></CardHeader>
         <CardContent>
           <Row label="Discount code" value={registration.pelotonia.discountCode} editStep={2} />
-          <Row label="Confirmation #" value={registration.pelotonia.confirmation} editStep={2} />
+          <Row label="Public/Rider ID" value={registration.pelotonia.confirmation} editStep={2} />
+          <Row label="HB number" value={registration.pelotonia.hbNumber} editStep={2} />
         </CardContent>
       </Card>
 
