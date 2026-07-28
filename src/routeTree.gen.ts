@@ -24,7 +24,10 @@ import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ResourcesIdRouteImport } from './routes/resources.$id'
+import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
+import { Route as AdminGoalsRouteImport } from './routes/admin.goals'
 import { Route as AdminFaqsRouteImport } from './routes/admin.faqs'
+import { Route as AdminAnnouncementsRouteImport } from './routes/admin.announcements'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
@@ -104,9 +107,24 @@ const ResourcesIdRoute = ResourcesIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => ResourcesRoute,
 } as any)
+const AdminNotificationsRoute = AdminNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminGoalsRoute = AdminGoalsRouteImport.update({
+  id: '/goals',
+  path: '/goals',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminFaqsRoute = AdminFaqsRouteImport.update({
   id: '/faqs',
   path: '/faqs',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAnnouncementsRoute = AdminAnnouncementsRouteImport.update({
+  id: '/announcements',
+  path: '/announcements',
   getParentRoute: () => AdminRoute,
 } as any)
 const Char91DotwellKnownChar93OauthProtectedResourceRoute =
@@ -145,7 +163,10 @@ export interface FileRoutesByFullPath {
   '/team': typeof TeamRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/faqs': typeof AdminFaqsRoute
+  '/admin/goals': typeof AdminGoalsRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
   '/resources/$id': typeof ResourcesIdRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
 }
@@ -166,7 +187,10 @@ export interface FileRoutesByTo {
   '/team': typeof TeamRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/faqs': typeof AdminFaqsRoute
+  '/admin/goals': typeof AdminGoalsRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
   '/resources/$id': typeof ResourcesIdRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
 }
@@ -188,7 +212,10 @@ export interface FileRoutesById {
   '/team': typeof TeamRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/faqs': typeof AdminFaqsRoute
+  '/admin/goals': typeof AdminGoalsRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
   '/resources/$id': typeof ResourcesIdRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
 }
@@ -211,7 +238,10 @@ export interface FileRouteTypes {
     | '/team'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin/announcements'
     | '/admin/faqs'
+    | '/admin/goals'
+    | '/admin/notifications'
     | '/resources/$id'
     | '/.mcp/invoke-tool/$tool'
   fileRoutesByTo: FileRoutesByTo
@@ -232,7 +262,10 @@ export interface FileRouteTypes {
     | '/team'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin/announcements'
     | '/admin/faqs'
+    | '/admin/goals'
+    | '/admin/notifications'
     | '/resources/$id'
     | '/.mcp/invoke-tool/$tool'
   id:
@@ -253,7 +286,10 @@ export interface FileRouteTypes {
     | '/team'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin/announcements'
     | '/admin/faqs'
+    | '/admin/goals'
+    | '/admin/notifications'
     | '/resources/$id'
     | '/.mcp/invoke-tool/$tool'
   fileRoutesById: FileRoutesById
@@ -385,11 +421,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResourcesIdRouteImport
       parentRoute: typeof ResourcesRoute
     }
+    '/admin/notifications': {
+      id: '/admin/notifications'
+      path: '/notifications'
+      fullPath: '/admin/notifications'
+      preLoaderRoute: typeof AdminNotificationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/goals': {
+      id: '/admin/goals'
+      path: '/goals'
+      fullPath: '/admin/goals'
+      preLoaderRoute: typeof AdminGoalsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/faqs': {
       id: '/admin/faqs'
       path: '/faqs'
       fullPath: '/admin/faqs'
       preLoaderRoute: typeof AdminFaqsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/announcements': {
+      id: '/admin/announcements'
+      path: '/announcements'
+      fullPath: '/admin/announcements'
+      preLoaderRoute: typeof AdminAnnouncementsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/.well-known/oauth-protected-resource': {
@@ -417,11 +474,17 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminAnnouncementsRoute: typeof AdminAnnouncementsRoute
   AdminFaqsRoute: typeof AdminFaqsRoute
+  AdminGoalsRoute: typeof AdminGoalsRoute
+  AdminNotificationsRoute: typeof AdminNotificationsRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAnnouncementsRoute: AdminAnnouncementsRoute,
   AdminFaqsRoute: AdminFaqsRoute,
+  AdminGoalsRoute: AdminGoalsRoute,
+  AdminNotificationsRoute: AdminNotificationsRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
