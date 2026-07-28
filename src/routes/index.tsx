@@ -42,15 +42,15 @@ function Landing() {
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--brand)]" />
             Team Huntington · Pelotonia 2026
           </div>
-          <h1 className="mt-6 text-4xl sm:text-6xl font-black tracking-tight max-w-4xl">
-            Your Team Huntington Pelotonia<br />
-            <span className="text-[var(--brand)]">Journey Starts Here.</span>
+          <h1 className="mt-8 text-4xl sm:text-6xl font-black tracking-tight leading-[1.05] max-w-4xl">
+            Your Team Huntington<br className="hidden sm:block" /> Pelotonia
+            <span className="text-[var(--brand)]"> Journey Starts Here.</span>
           </h1>
-          <p className="mt-5 max-w-2xl text-base sm:text-lg text-white/80">
+          <p className="mt-6 max-w-2xl text-base sm:text-lg leading-relaxed text-white/80">
             One place to register, plan travel, rent a bike, pick apparel, and access support —
             guided step by step, saved as you go.
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-10 flex flex-wrap gap-3">
             <Button asChild size="lg" className="bg-[var(--brand)] text-[var(--brand-foreground)] hover:bg-[var(--brand)]/90 h-12 px-6 text-base font-semibold">
               <Link to="/register">Let's Go <ArrowRight className="ml-1 h-4 w-4" /></Link>
             </Button>
