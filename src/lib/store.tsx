@@ -138,14 +138,14 @@ const emptyReg: Registration = {
 };
 
 const demoUser: User = {
-  name: "Alex Morgan",
-  email: "alex.morgan@huntington.com",
+  name: "Chris Harper",
+  email: "chris.harper@huntington.com",
   mobile: "(614) 555-0142",
   segment: "Consumer & Business Banking",
   market: "Columbus, OH",
   manager: "Priya Shah",
   consent: false,
-  signedIn: false,
+  signedIn: true,
   isAdmin: false,
 };
 
