@@ -2,25 +2,24 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { faqs as builtinFaqs } from "@/lib/faq-data";
-import { useFaqAdmin } from "@/lib/faq-store";
+import { usePublicFaqs } from "@/lib/faq-store";
 import { ArrowLeft, LifeBuoy } from "lucide-react";
 
 export const Route = createFileRoute("/resources/$id")({
-  head: ({ params }) => {
-    const a = builtinFaqs.find((f) => f.id === params.id);
-    return { meta: [
-      { title: `${a?.title ?? "Article"} — Team Huntington Hub` },
-      { name: "description", content: a?.body.slice(0, 150) ?? "Team Huntington resource." },
-    ] };
-  },
+  head: () => ({ meta: [
+    { title: "Article — Team Huntington Hub" },
+    { name: "description", content: "Team Huntington resource article." },
+  ] }),
   component: Article,
 });
 
 function Article() {
   const { id } = Route.useParams();
-  const { merged: faqs } = useFaqAdmin();
-  const a = faqs.find((f) => f.id === id);
+  const { data: faqs = [], isLoading } = usePublicFaqs();
+  if (isLoading) {
+    return <div className="mx-auto max-w-3xl px-4 py-12 text-center text-muted-foreground">Loading…</div>;
+  }
+  const a = faqs.find((f) => f.id === id || (f as any).source_id === id);
   if (!a) throw notFound();
   const related = faqs.filter((f) => f.category === a.category && f.id !== a.id).slice(0, 4);
 

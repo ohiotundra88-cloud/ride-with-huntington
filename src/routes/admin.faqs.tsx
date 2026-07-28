@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useFaqAdmin, faqCategories, type FAQArticle, type FAQCategory } from "@/lib/faq-store";
+import { useAdminFaqs, faqCategories, type FAQArticle, type FAQCategory } from "@/lib/faq-store";
 import { useStore } from "@/lib/store";
-import { Plus, Pencil, Trash2, RotateCcw, ArrowLeft } from "lucide-react";
+import { Plus, Pencil, Trash2, EyeOff, Eye, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/faqs")({
@@ -30,7 +30,7 @@ const blank = (): FAQArticle => ({
 
 function AdminFaqs() {
   const { user } = useStore();
-  const { merged, upsert, remove, resetBuiltin, isCustom, isEdited } = useFaqAdmin();
+  const { data: articles = [], isLoading, upsert, toggleHidden, remove } = useAdminFaqs();
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<FAQCategory | "All">("All");
   const [editing, setEditing] = useState<FAQArticle | null>(null);
@@ -41,12 +41,12 @@ function AdminFaqs() {
     return (
       <div className="mx-auto max-w-lg px-4 py-16 text-center">
         <h1 className="text-2xl font-bold">Admin access required</h1>
-        <p className="mt-2 text-muted-foreground">Toggle "Admin mode" from the top-right menu.</p>
+        <p className="mt-2 text-muted-foreground">Sign in with an admin account to manage FAQs.</p>
       </div>
     );
   }
 
-  const filtered = merged.filter((a) => {
+  const filtered = articles.filter((a) => {
     const catOk = cat === "All" || a.category === cat;
     if (!q) return catOk;
     const s = q.toLowerCase();
@@ -54,9 +54,7 @@ function AdminFaqs() {
   });
 
   const openNew = () => {
-    const a = blank();
-    a.id = `custom-${Date.now().toString(36)}`;
-    setEditing(a);
+    setEditing(blank());
     setKeywordsInput("");
     setIsNew(true);
   };
@@ -73,15 +71,20 @@ function AdminFaqs() {
       toast.error("Title and body are required");
       return;
     }
-    const article: FAQArticle = {
-      ...editing,
+    const payload = {
+      id: editing.id || undefined,
       title: editing.title.trim(),
       body: editing.body.trim(),
+      category: editing.category,
       keywords: keywordsInput.split(",").map((k) => k.trim().toLowerCase()).filter(Boolean),
     };
-    upsert(article);
-    toast.success(isNew ? "FAQ created" : "FAQ updated");
-    setEditing(null);
+    upsert.mutate(payload, {
+      onSuccess: () => {
+        toast.success(isNew ? "FAQ created" : "FAQ updated");
+        setEditing(null);
+      },
+      onError: (e: any) => toast.error("Save failed", { description: e.message }),
+    });
   };
 
   return (
@@ -92,7 +95,7 @@ function AdminFaqs() {
       <div className="mt-3 flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black text-[var(--brand-dark)]">FAQ management</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Create, edit, or hide articles shown in the Resource Center.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Create, edit, or hide articles shown in the Resource Center. Backed by Lovable Cloud.</p>
         </div>
         <Button onClick={openNew} className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90">
           <Plus className="mr-1 h-4 w-4" /> New FAQ
@@ -111,40 +114,61 @@ function AdminFaqs() {
         <span className="text-sm text-muted-foreground">{filtered.length} article{filtered.length === 1 ? "" : "s"}</span>
       </div>
 
-      <div className="mt-6 grid gap-3 sm:grid-cols-2">
-        {filtered.map((a) => (
-          <Card key={a.id}>
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant="outline" className="text-xs">{a.category}</Badge>
-                    {isCustom(a.id) && <Badge className="bg-[var(--brand)] text-[var(--brand-foreground)] text-xs">Custom</Badge>}
-                    {!isCustom(a.id) && isEdited(a.id) && <Badge variant="secondary" className="text-xs">Edited</Badge>}
+      {isLoading ? (
+        <div className="mt-8 text-center text-muted-foreground">Loading…</div>
+      ) : (
+        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          {filtered.map((a) => (
+            <Card key={a.id} className={a.hidden ? "opacity-60" : ""}>
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant="outline" className="text-xs">{a.category}</Badge>
+                      {a.is_builtin && <Badge variant="secondary" className="text-xs">Built-in</Badge>}
+                      {!a.is_builtin && <Badge className="bg-[var(--brand)] text-[var(--brand-foreground)] text-xs">Custom</Badge>}
+                      {a.hidden && <Badge variant="outline" className="text-xs">Hidden</Badge>}
+                    </div>
+                    <h3 className="mt-2 font-bold text-[var(--brand-dark)] truncate">{a.title}</h3>
+                    <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{a.body}</p>
                   </div>
-                  <h3 className="mt-2 font-bold text-[var(--brand-dark)] truncate">{a.title}</h3>
-                  <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{a.body}</p>
                 </div>
-              </div>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <Button size="sm" variant="outline" onClick={() => openEdit(a)}><Pencil className="mr-1 h-3.5 w-3.5" /> Edit</Button>
-                {!isCustom(a.id) && isEdited(a.id) && (
-                  <Button size="sm" variant="outline" onClick={() => { resetBuiltin(a.id); toast.success("Reset to default"); }}>
-                    <RotateCcw className="mr-1 h-3.5 w-3.5" /> Reset
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Button size="sm" variant="outline" onClick={() => openEdit(a)}>
+                    <Pencil className="mr-1 h-3.5 w-3.5" /> Edit
                   </Button>
-                )}
-                <Button size="sm" variant="ghost" className="text-red-600 hover:text-red-700"
-                  onClick={() => { remove(a.id); toast.success(isCustom(a.id) ? "Deleted" : "Hidden"); }}>
-                  <Trash2 className="mr-1 h-3.5 w-3.5" /> {isCustom(a.id) ? "Delete" : "Hide"}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-        {filtered.length === 0 && (
-          <div className="sm:col-span-2 py-12 text-center text-muted-foreground">No FAQs match.</div>
-        )}
-      </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => toggleHidden.mutate({ id: a.id, hidden: !a.hidden })}
+                  >
+                    {a.hidden ? <><Eye className="mr-1 h-3.5 w-3.5" /> Show</> : <><EyeOff className="mr-1 h-3.5 w-3.5" /> Hide</>}
+                  </Button>
+                  {!a.is_builtin && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-red-600 hover:text-red-700"
+                      onClick={() => {
+                        if (!confirm("Delete this FAQ permanently?")) return;
+                        remove.mutate(a.id, {
+                          onSuccess: () => toast.success("Deleted"),
+                          onError: (e: any) => toast.error("Delete failed", { description: e.message }),
+                        });
+                      }}
+                    >
+                      <Trash2 className="mr-1 h-3.5 w-3.5" /> Delete
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+          {filtered.length === 0 && (
+            <div className="sm:col-span-2 py-12 text-center text-muted-foreground">No FAQs match.</div>
+          )}
+        </div>
+      )}
 
       <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
         <DialogContent className="max-w-2xl">
@@ -191,8 +215,12 @@ function AdminFaqs() {
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditing(null)}>Cancel</Button>
-            <Button onClick={save} className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90">
-              {isNew ? "Create" : "Save changes"}
+            <Button
+              onClick={save}
+              disabled={upsert.isPending}
+              className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90"
+            >
+              {upsert.isPending ? "Saving…" : isNew ? "Create" : "Save changes"}
             </Button>
           </DialogFooter>
         </DialogContent>
