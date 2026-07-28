@@ -48,6 +48,7 @@ export interface BikeRental {
 
 export interface Apparel {
   jerseySize: string;
+  jerseyStyle: "short-sleeve" | "sleeveless" | "";
   shirtSize: string;
   cut: string;
   volunteerShirtSize: string;
@@ -71,6 +72,8 @@ export interface PelotoniaReg {
   discountCode: string;
   confirmation: string;
   completed: boolean;
+  highRoller: boolean;
+  survivor: boolean;
   status: StepStatus;
 }
 
