@@ -275,7 +275,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           bike: { ...prev.bike, ...(row.bike as any) },
           apparel: { ...prev.apparel, ...(row.apparel as any) },
           address: { ...prev.address, ...(row.address as any) },
-          audit: Array.isArray(row.audit) ? (row.audit as AuditEvent[]) : prev.audit,
+          audit: Array.isArray(row.audit) ? (row.audit as unknown as AuditEvent[]) : prev.audit,
           submittedAt: row.submitted_at ?? prev.submittedAt,
         }));
       } catch {
