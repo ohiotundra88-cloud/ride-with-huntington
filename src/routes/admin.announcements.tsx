@@ -47,20 +47,20 @@ function AnnouncementsAdmin() {
   const [isNew, setIsNew] = useState(false);
   const [preview, setPreview] = useState<Announcement | null>(null);
 
-  const save = () => {
+  const save = (pub?: Announcement["publish"]) => {
     if (!editing) return;
     if (!editing.headline.trim() || !editing.body.trim()) {
       toast.error("Headline and body are required");
       return;
     }
-    const next = { ...editing, updatedAt: new Date().toISOString() };
+    const next = { ...editing, publish: pub ?? editing.publish, updatedAt: new Date().toISOString() };
     setState((s) => {
       const idx = s.announcements.findIndex((a) => a.id === next.id);
       const list = idx >= 0 ? s.announcements.map((a) => (a.id === next.id ? next : a)) : [...s.announcements, next];
       return { ...s, announcements: list };
     });
     audit({ action: isNew ? "create" : "update", entity: "Announcement", entityId: next.id, detail: next.headline });
-    toast.success(isNew ? "Announcement created" : "Announcement saved");
+    toast.success(pub === "published" ? "Published" : isNew ? "Announcement created" : "Announcement saved");
     setEditing(null);
   };
 
@@ -193,7 +193,7 @@ function AnnouncementsAdmin() {
               </div>
               <div className="space-y-1">
                 <Label>Publish at</Label>
-                <Input type="datetime-local" value={editing.publishAt.slice(0, 16)} onChange={(e) => setEditing({ ...editing, publishAt: new Date(e.target.value).toISOString() })} />
+                <Input type="datetime-local" value={editing.publishAt ? editing.publishAt.slice(0, 16) : ""} onChange={(e) => setEditing({ ...editing, publishAt: e.target.value ? new Date(e.target.value).toISOString() : "" })} />
               </div>
               <div className="space-y-1">
                 <Label>Expires at</Label>
@@ -211,8 +211,8 @@ function AnnouncementsAdmin() {
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditing(null)}>Cancel</Button>
-            <Button variant="outline" onClick={() => { if (editing) { setEditing({ ...editing, publish: "draft" }); save(); } }}>Save draft</Button>
-            <Button onClick={() => { if (editing) { setEditing({ ...editing, publish: "published" }); save(); } }} className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90">
+            <Button variant="outline" onClick={() => save("draft")}>Save draft</Button>
+            <Button onClick={() => save("published")} className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90">
               Publish
             </Button>
           </DialogFooter>

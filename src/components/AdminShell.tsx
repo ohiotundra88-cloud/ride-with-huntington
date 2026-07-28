@@ -173,19 +173,29 @@ export function AdminShell({ title, description, actions, children }: {
           <div className="flex flex-wrap items-center gap-2">{actions}</div>
         </div>
         <div className="mt-6 lg:hidden">
-          <select
-            value={pathname}
-            onChange={(e) => { window.location.href = e.target.value; }}
-            className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-            aria-label="Admin section"
-          >
-            {links.map((l) => (
-              <option key={l.to} value={l.to}>{l.label}</option>
-            ))}
-          </select>
+          <MobileNav pathname={pathname} />
         </div>
         <div className="mt-6">{children}</div>
       </div>
     </div>
+  );
+}
+
+function MobileNav({ pathname }: { pathname: string }) {
+  const nav = useNavigate();
+  return (
+    <select
+      value={pathname}
+      onChange={(e) => {
+        const l = links.find((x) => x.to === e.target.value);
+        if (l) nav({ to: l.to });
+      }}
+      className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+      aria-label="Admin section"
+    >
+      {links.map((l) => (
+        <option key={l.to} value={l.to}>{l.label}</option>
+      ))}
+    </select>
   );
 }

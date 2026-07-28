@@ -42,17 +42,18 @@ function ReadinessAdmin() {
   const score = useMemo(() => readinessScore(state.readiness), [state.readiness]);
   const totalWeight = state.readiness.filter((r) => r.active && r.publish === "published").reduce((n, r) => n + r.weight, 0);
 
-  const save = () => {
+  const save = (pub?: EditableReadinessItem["publish"]) => {
     if (!editing) return;
     if (!editing.title.trim()) { toast.error("Title required"); return; }
-    const next = { ...editing, updatedAt: new Date().toISOString() };
+    const weight = Math.max(0, Math.min(100, editing.weight));
+    const next = { ...editing, weight, publish: pub ?? editing.publish, updatedAt: new Date().toISOString() };
     setState((s) => {
       const idx = s.readiness.findIndex((r) => r.id === next.id);
       const list = idx >= 0 ? s.readiness.map((r) => r.id === next.id ? next : r) : [...s.readiness, next];
       return { ...s, readiness: list };
     });
     audit({ action: isNew ? "create" : "update", entity: "Readiness", entityId: next.id, detail: next.title });
-    toast.success("Saved");
+    toast.success(pub === "published" ? "Published" : "Saved");
     setEditing(null);
   };
   const remove = (r: EditableReadinessItem) => {
@@ -156,8 +157,8 @@ function ReadinessAdmin() {
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditing(null)}>Cancel</Button>
-            <Button variant="outline" onClick={() => { if (editing) { setEditing({ ...editing, publish: "draft" }); save(); } }}>Save draft</Button>
-            <Button className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90" onClick={() => { if (editing) { setEditing({ ...editing, publish: "published" }); save(); } }}>Publish</Button>
+            <Button variant="outline" onClick={() => save("draft")}>Save draft</Button>
+            <Button className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90" onClick={() => save("published")}>Publish</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

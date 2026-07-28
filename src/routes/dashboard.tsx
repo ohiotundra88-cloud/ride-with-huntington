@@ -11,6 +11,7 @@ import {
   ArrowRight, CalendarClock, CheckCircle2, ChevronDown, Clock,
   DollarSign, ListChecks, MessageSquare, MapPin, Users, Tent, Baby,
   Accessibility, AlertTriangle, Car, CalendarDays, Radio,
+  Lock as LockIcon,
 } from "lucide-react";
 import { openConcierge } from "@/components/Concierge";
 import { RIDE_WEEKEND_DATE, timelineSections, type ReadinessStatus } from "@/lib/mock-data";
@@ -122,14 +123,14 @@ function DashboardPage() {
 }
 
 function RiderView({ readiness }: { readiness: EditableReadinessItem[] }) {
-  const { state } = useAdmin();
+  const { state, isApiManaged } = useAdmin();
   return (
     <>
       {state.flags.dashboardReadiness && (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {readiness.map((r) => {
             const s = statusStyles[r.status];
-            const managedKey = `readiness.${r.id}.status`;
+            const managed = isApiManaged(`readiness.${r.id}.status`) || isApiManaged(`readiness.${r.id}.current`);
             const CardInner = (
               <Card className="h-full hover:shadow-md transition-shadow">
                 <CardContent className="p-5">
@@ -148,10 +149,15 @@ function RiderView({ readiness }: { readiness: EditableReadinessItem[] }) {
                       <Progress value={Math.round((r.progressCurrent / r.progressGoal) * 100)} className="h-2 [&>div]:bg-[var(--brand)]" />
                     </div>
                   )}
-                  <div className="mt-4">
+                  <div className="mt-4 flex items-center justify-between gap-2">
                     <span className="inline-flex items-center text-sm font-semibold text-[var(--brand-dark)]">
                       {r.ctaLabel} <ArrowRight className="ml-1 h-3.5 w-3.5" />
                     </span>
+                    {managed && (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-[var(--brand-dark)]/20 bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--brand-dark)]/80" title={`Synced from ${managed.source}`}>
+                        <LockIcon className="h-3 w-3" /> Synced
+                      </span>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -164,7 +170,6 @@ function RiderView({ readiness }: { readiness: EditableReadinessItem[] }) {
               ) : (
                 <Link key={r.id} to={r.href ?? "/dashboard"} className="rounded-lg">{inner}</Link>
               );
-            void managedKey; // key marker — API-owned status handled by ApiManagedField in editors
             return wrap(CardInner);
           })}
         </div>

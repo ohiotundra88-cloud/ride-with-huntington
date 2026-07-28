@@ -39,17 +39,17 @@ function JourneyAdmin() {
   const sorted = [...state.timeline].sort((a, b) => a.order - b.order);
   const grouped = phases.map((p) => ({ phase: p, items: sorted.filter((t) => t.phase === p) }));
 
-  const save = () => {
+  const save = (pub?: EditableTimelineItem["publish"]) => {
     if (!editing) return;
     if (!editing.title.trim()) { toast.error("Title required"); return; }
-    const next = { ...editing, updatedAt: new Date().toISOString() };
+    const next = { ...editing, publish: pub ?? editing.publish, updatedAt: new Date().toISOString() };
     setState((s) => {
       const idx = s.timeline.findIndex((t) => t.id === next.id);
       const list = idx >= 0 ? s.timeline.map((t) => t.id === next.id ? next : t) : [...s.timeline, next];
       return { ...s, timeline: list };
     });
     audit({ action: isNew ? "create" : "update", entity: "Timeline", entityId: next.id, detail: next.title });
-    toast.success("Saved");
+    toast.success(pub === "published" ? "Published" : "Saved");
     setEditing(null);
   };
   const remove = (t: EditableTimelineItem) => {
@@ -111,11 +111,11 @@ function JourneyAdmin() {
                         {t.instructions && <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{t.instructions}</p>}
                       </div>
                       <div className="flex gap-1">
-                        <Button size="sm" variant="ghost" onClick={() => move(t, -1)}><ArrowUp className="h-3.5 w-3.5" /></Button>
-                        <Button size="sm" variant="ghost" onClick={() => move(t, 1)}><ArrowDown className="h-3.5 w-3.5" /></Button>
+                        <Button size="sm" variant="ghost" aria-label="Move up" onClick={() => move(t, -1)}><ArrowUp className="h-3.5 w-3.5" /></Button>
+                        <Button size="sm" variant="ghost" aria-label="Move down" onClick={() => move(t, 1)}><ArrowDown className="h-3.5 w-3.5" /></Button>
                         <Button size="sm" variant="outline" onClick={() => { setEditing({ ...t }); setIsNew(false); }}><Pencil className="mr-1 h-3.5 w-3.5" /> Edit</Button>
                         <AlertDialog>
-                          <AlertDialogTrigger asChild><Button size="sm" variant="ghost" className="text-red-600"><Trash2 className="h-3.5 w-3.5" /></Button></AlertDialogTrigger>
+                          <AlertDialogTrigger asChild><Button size="sm" variant="ghost" className="text-red-600" aria-label={`Delete ${t.title}`}><Trash2 className="h-3.5 w-3.5" /></Button></AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader><AlertDialogTitle>Delete timeline item?</AlertDialogTitle></AlertDialogHeader>
                             <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => remove(t)} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction></AlertDialogFooter>
@@ -144,7 +144,7 @@ function JourneyAdmin() {
                   </div>
                   <div className="flex gap-1">
                     <Button size="sm" variant="outline" onClick={() => setDayEdit({ ...d })}><Pencil className="mr-1 h-3.5 w-3.5" /> Edit</Button>
-                    <Button size="sm" variant="ghost" className="text-red-600" onClick={() => { setState((s) => ({ ...s, family: { ...s.family, schedule: s.family.schedule.filter((x) => x.id !== d.id) } })); audit({ action: "delete", entity: "Schedule", entityId: d.id, detail: d.day }); toast.success("Removed"); }}><Trash2 className="h-3.5 w-3.5" /></Button>
+                    <Button size="sm" variant="ghost" className="text-red-600" aria-label={`Delete ${d.day}`} onClick={() => { setState((s) => ({ ...s, family: { ...s.family, schedule: s.family.schedule.filter((x) => x.id !== d.id) } })); audit({ action: "delete", entity: "Schedule", entityId: d.id, detail: d.day }); toast.success("Removed"); }}><Trash2 className="h-3.5 w-3.5" /></Button>
                   </div>
                 </div>
               </CardContent>
@@ -189,8 +189,8 @@ function JourneyAdmin() {
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditing(null)}>Cancel</Button>
-            <Button variant="outline" onClick={() => { if (editing) { setEditing({ ...editing, publish: "draft" }); save(); } }}>Save draft</Button>
-            <Button className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90" onClick={() => { if (editing) { setEditing({ ...editing, publish: "published" }); save(); } }}>Publish</Button>
+            <Button variant="outline" onClick={() => save("draft")}>Save draft</Button>
+            <Button className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90" onClick={() => save("published")}>Publish</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
