@@ -9,14 +9,18 @@ import {
   DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator,
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
+import { NotificationCenter } from "@/components/NotificationCenter";
 
 const links = [
   { to: "/", label: "Home" },
   { to: "/dashboard", label: "My Journey" },
   { to: "/register", label: "Register" },
+  { to: "/packing", label: "Packing" },
+  { to: "/family", label: "Family" },
+  { to: "/team", label: "Team" },
   { to: "/resources", label: "Resources" },
   { to: "/expenses", label: "Expenses" },
-];
+] as const;
 
 export function AppNav() {
   const { user, setUser } = useStore();
@@ -28,7 +32,7 @@ export function AppNav() {
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-4">
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="md:hidden text-white hover:bg-white/10">
+            <Button variant="ghost" size="icon" aria-label="Open menu" className="md:hidden text-white hover:bg-white/10">
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
@@ -41,10 +45,16 @@ export function AppNav() {
                 </Link>
               ))}
               {user.isAdmin && (
-                <Link to="/admin" onClick={() => setOpen(false)}
-                  className={`rounded-md px-3 py-2 text-sm ${pathname === "/admin" ? "bg-[var(--brand)] text-[var(--brand-foreground)]" : "hover:bg-white/10"}`}>
-                  Admin
-                </Link>
+                <>
+                  <Link to="/admin" onClick={() => setOpen(false)}
+                    className={`rounded-md px-3 py-2 text-sm ${pathname === "/admin" ? "bg-[var(--brand)] text-[var(--brand-foreground)]" : "hover:bg-white/10"}`}>
+                    Admin
+                  </Link>
+                  <Link to="/analytics" onClick={() => setOpen(false)}
+                    className={`rounded-md px-3 py-2 text-sm ${pathname === "/analytics" ? "bg-[var(--brand)] text-[var(--brand-foreground)]" : "hover:bg-white/10"}`}>
+                    Analytics
+                  </Link>
+                </>
               )}
             </div>
           </SheetContent>
@@ -59,7 +69,7 @@ export function AppNav() {
           <span className="text-sm sm:text-base">Team Huntington Hub</span>
         </Link>
 
-        <nav className="ml-6 hidden items-center gap-1 md:flex">
+        <nav className="ml-6 hidden items-center gap-1 lg:flex">
           {links.map((l) => (
             <Link key={l.to} to={l.to}
               className={`rounded-md px-3 py-1.5 text-sm transition-colors ${pathname === l.to ? "bg-white/10 text-white" : "text-white/80 hover:bg-white/10 hover:text-white"}`}>
@@ -67,14 +77,21 @@ export function AppNav() {
             </Link>
           ))}
           {user.isAdmin && (
-            <Link to="/admin"
-              className={`rounded-md px-3 py-1.5 text-sm ${pathname === "/admin" ? "bg-white/10 text-white" : "text-white/80 hover:bg-white/10 hover:text-white"}`}>
-              Admin
-            </Link>
+            <>
+              <Link to="/admin"
+                className={`rounded-md px-3 py-1.5 text-sm ${pathname === "/admin" ? "bg-white/10 text-white" : "text-white/80 hover:bg-white/10 hover:text-white"}`}>
+                Admin
+              </Link>
+              <Link to="/analytics"
+                className={`rounded-md px-3 py-1.5 text-sm ${pathname === "/analytics" ? "bg-white/10 text-white" : "text-white/80 hover:bg-white/10 hover:text-white"}`}>
+                Analytics
+              </Link>
+            </>
           )}
         </nav>
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-1">
+          <NotificationCenter />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 gap-2">
