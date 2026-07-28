@@ -55,7 +55,15 @@ function RegisterWizard() {
     return base;
   }, [isRider]);
 
+  // Deep link: /register?step=D opens that step directly.
+  useEffect(() => {
+    if (!stepKeyParam) return;
+    const idx = steps.findIndex((s) => s.key === stepKeyParam);
+    if (idx >= 0) setStep(idx + 1);
+  }, [stepKeyParam, steps]);
+
   const total = steps.length;
+
   const progress = Math.round(((step - 1) / (total - 1)) * 100);
   const back = () => setStep((s) => Math.max(1, s - 1));
   const next = () => setStep((s) => Math.min(total, s + 1));
