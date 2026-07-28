@@ -62,17 +62,22 @@ const statusStyles: Record<ReadinessStatus, { label: string; className: string }
 };
 
 function DashboardPage() {
-  const { user } = useStore();
+  const { user, registration } = useStore();
   const { state } = useAdmin();
   const [view, setView] = useState<"rider" | "family">("rider");
   const cd = useCountdown(RIDE_WEEKEND_DATE);
   const firstName = user.name.split(" ")[0];
 
-  const readiness = useMemo(
-    () => state.readiness.filter((r) => r.active && r.publish === "published"),
-    [state.readiness]
+  const merged = useMemo(
+    () => mergeReadinessWithRegistration(state.readiness, registration),
+    [state.readiness, registration]
   );
-  const score = useMemo(() => readinessScore(state.readiness), [state.readiness]);
+  const readiness = useMemo(
+    () => merged.filter((r) => r.active && r.publish === "published"),
+    [merged]
+  );
+  const score = useMemo(() => readinessScore(merged), [merged]);
+
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 space-y-6">
