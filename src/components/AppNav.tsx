@@ -118,6 +118,15 @@ export function AppNav() {
         </div>
       </div>
     </header>
+    <SuperUserLoginDialog open={loginOpen} onOpenChange={setLoginOpen} />
+    </>
+  );
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _noop = null;
+
+function _wrapperFragmentOpen() { return null; }
   );
 }
 
