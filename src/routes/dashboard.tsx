@@ -97,9 +97,9 @@ function mergeReadinessWithRegistration(
       case "pelotonia": {
         const p = reg.pelotonia;
         if (p.status === "complete") {
-          return over("complete", p.confirmation ? `Registered · Confirmation ${p.confirmation}` : "Pelotonia registration confirmed.", "View registration");
+          return over("complete", p.confirmation ? `Registered · Rider ID ${p.confirmation}` : "Pelotonia registration confirmed.", "View registration");
         }
-        if (p.status === "pending") return over("in_progress", "Pelotonia registration started — finish your confirmation.", "Finish registration");
+        if (p.status === "pending") return over("in_progress", "Pelotonia registration started — add your Rider ID and HB number.", "Finish registration");
         return item;
       }
       case "hotel": {
