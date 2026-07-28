@@ -21,7 +21,7 @@ export const Route = createFileRoute("/admin/journey")({
   component: JourneyAdmin,
 });
 
-const phases: EditableTimelineItem["phase"][] = ["today", "friday", "saturday", "sunday", "post"];
+const phases: EditableTimelineItem["phase"][] = ["today", "next_week", "two_weeks", "ride_week", "friday", "saturday", "sunday"];
 
 const blankItem = (): EditableTimelineItem => ({
   id: `t-${crypto.randomUUID().slice(0, 8)}`,

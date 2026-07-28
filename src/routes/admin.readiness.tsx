@@ -23,7 +23,7 @@ export const Route = createFileRoute("/admin/readiness")({
 
 const blank = (): EditableReadinessItem => ({
   id: `r-${crypto.randomUUID().slice(0, 8)}`,
-  title: "", status: "not_started", detail: "", icon: "check",
+  title: "", status: "action_needed", detail: "", icon: "check",
   ctaLabel: "Open", href: "", weight: 10, required: false, audience: "all",
   active: true, publish: "draft", updatedAt: new Date().toISOString(), updatedBy: "Demo Admin",
 });
