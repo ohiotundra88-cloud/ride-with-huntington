@@ -42,9 +42,8 @@ function Landing() {
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--brand)]" />
             Team Huntington · Pelotonia 2026
           </div>
-          <h1 className="mt-8 text-4xl sm:text-6xl font-black tracking-tight leading-[1.08] max-w-4xl">
-            Your Team Huntington Pelotonia<br />
-            <span className="text-[var(--brand)]">Journey Starts Here.</span>
+          <h1 className="mt-8 text-4xl sm:text-6xl font-black tracking-tight leading-[1.08] max-w-5xl">
+            Your Team Huntington Pelotonia <span className="text-[var(--brand)]">Journey Starts Here.</span>
           </h1>
           <p className="mt-6 max-w-2xl text-base sm:text-lg leading-relaxed text-white/80">
             One place to register, plan travel, rent a bike, pick apparel, and access support —
