@@ -182,7 +182,7 @@ function StepPelotonia() {
         <CardContent className="space-y-3">
           <div>
             <Label>Pelotonia confirmation number</Label>
-            <Input value={p.confirmation} onChange={(e) => upd({ confirmation: e.target.value })} placeholder="e.g. PELO-2026-12345" />
+            <Input value={p.confirmation} onChange={(e) => upd({ confirmation: e.target.value })} placeholder="e.g. PELO-2027-12345" />
           </div>
           <label className="flex items-center gap-2 text-sm">
             <Checkbox checked={p.completed} onCheckedChange={(v) => upd({ completed: !!v })} />

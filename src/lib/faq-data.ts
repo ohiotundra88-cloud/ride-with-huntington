@@ -59,7 +59,7 @@ export const faqs: FAQArticle[] = [
   { id: "rw-2", title: "Where is packet pickup?", category: "Ride Weekend",
     keywords: ["packet", "pickup", "expo"], body: "Packet pickup is at the Pelotonia Expo. Times are shared closer to the event." },
   { id: "rw-3", title: "Is there a Team Huntington gathering?", category: "Ride Weekend",
-    keywords: ["gathering", "meet", "team"], body: "Yes — a team breakfast is hosted Saturday morning. Location shared via confirmation email." },
+    keywords: ["gathering", "meet", "team"], body: "Yes — a team breakfast is hosted Saturday morning, August 7, 2027. Location shared via confirmation email." },
 
   { id: "vol-1", title: "What do volunteers do at Ride Weekend?", category: "Volunteers",
     keywords: ["volunteer", "role", "shift"], body: "Volunteers staff rest stops, cheer stations, packet pickup, and finish line hospitality." },

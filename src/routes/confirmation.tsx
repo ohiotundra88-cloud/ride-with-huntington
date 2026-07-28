@@ -47,7 +47,7 @@ function Confirmation() {
             <p><span className="text-muted-foreground">Subject:</span> Your Team Huntington Pelotonia registration</p>
           </div>
           <p>Hi {user.name.split(" ")[0]},</p>
-          <p className="mt-3">Thanks for joining Team Huntington for Pelotonia 2026! Here's your snapshot.</p>
+          <p className="mt-3">Thanks for joining Team Huntington for Pelotonia 2027! Here's your snapshot.</p>
 
           <div className="mt-4 rounded-lg bg-muted/50 p-4 space-y-1">
             <div className="flex justify-between"><span className="text-muted-foreground">Registration ID</span><span className="font-mono font-bold">{registration.id ?? "—"}</span></div>

@@ -40,7 +40,7 @@ function Landing() {
         <div className="mx-auto max-w-7xl px-4 py-16 sm:py-24 relative">
           <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium ring-1 ring-white/15">
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--brand)]" />
-            Team Huntington · Pelotonia 2026
+            Team Huntington · Pelotonia 2027
           </div>
           <h1 className="mt-8 text-4xl sm:text-6xl font-black tracking-tight leading-[1.08] max-w-5xl">
             Your Team Huntington Pelotonia <span className="text-[var(--brand)]">Journey Starts Here.</span>

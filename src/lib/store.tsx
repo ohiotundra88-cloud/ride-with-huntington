@@ -119,7 +119,7 @@ export interface AdminParticipant {
 const emptyReg: Registration = {
   id: null,
   participation: null,
-  pelotonia: { discountCode: "HUNT-TEAM-2026", confirmation: "", completed: false, highRoller: false, survivor: false, status: "not_started" },
+  pelotonia: { discountCode: "HUNT-TEAM-2027", confirmation: "", completed: false, highRoller: false, survivor: false, status: "not_started" },
   travel: {
     needs: "", departureCity: "", arrivalDate: "", departureDate: "",
     hotelCheckIn: "", hotelCheckOut: "", notes: "", travelConfirmation: "",
@@ -185,7 +185,7 @@ export const seedParticipants: AdminParticipant[] = names.map((name, i) => {
     apparelStatus: ap,
     completion,
     hotelNights: trv === "complete" ? 2 : trv === "pending" ? 1 : 0,
-    arrivalDate: trv !== "not_started" ? "2026-08-01" : "",
+    arrivalDate: trv !== "not_started" ? "2027-08-07" : "",
     bikeRental: bk === "complete",
     jerseySize: role !== "Volunteer" ? pick(["S", "M", "L", "XL", "XXL"], i) : undefined,
     shirtSize: pick(["S", "M", "L", "XL", "XXL"], i + 1),

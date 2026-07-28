@@ -15,9 +15,9 @@ export const Route = createFileRoute("/expenses")({
 const sections = [
   { title: "Before You Start", body: "Gather receipts (PDF/photo). Confirm your cost center: Team Huntington Pelotonia. Note your Pelotonia registration ID." },
   { title: "Open Concur Expense", body: "Log into Concur → New Expense Report. Select the 'Pelotonia — Team Huntington' policy template." },
-  { title: "Create Report", body: "Name the report 'Pelotonia 2026 — [Your Last Name]'. Set the date range to your travel window." },
+  { title: "Create Report", body: "Name the report 'Pelotonia 2027 — [Your Last Name]'. Set the date range to your travel window." },
   { title: "Select Expense Type", body: "Use Airfare / Rail, Hotel, Meals, Transportation, or Other Business as applicable. Do NOT categorize personal fundraising." },
-  { title: "Enter Cost Center", body: "Use cost center 'HH-PELO-2026'. Enter your business segment as the sub-allocation." },
+  { title: "Enter Cost Center", body: "Use cost center 'HH-PELO-2027'. Enter your business segment as the sub-allocation." },
   { title: "Attach Receipts", body: "All expenses over $25 require an itemized receipt. Combine multi-page receipts into a single PDF where possible." },
   { title: "Add Business Purpose", body: "'Team Huntington Pelotonia participation — brand and community engagement.'" },
   { title: "Submit for Approval", body: "Route to your direct manager. Copy pelotonia@huntington.com for coordination visibility." },
