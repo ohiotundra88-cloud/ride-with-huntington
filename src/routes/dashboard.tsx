@@ -38,7 +38,7 @@ function Dashboard() {
             <div className="min-w-0">
               <p className="text-xs uppercase tracking-wider text-white/60">Welcome back</p>
               <h1 className="mt-1 text-3xl sm:text-4xl font-black">{user.name.split(" ")[0]} — you're {completion}% there.</h1>
-              <p className="mt-2 text-white/80 max-w-xl">Team Huntington Pelotonia 2026 · {registration.participation ? registration.participation.toUpperCase() : "Not registered"}</p>
+              <p className="mt-2 text-white/80 max-w-xl">Team Huntington Pelotonia 2027 · {registration.participation ? registration.participation.toUpperCase() : "Not registered"}</p>
               <Progress value={completion} className="mt-4 h-2 bg-white/10 [&>div]:bg-[var(--brand)]" />
             </div>
             <div className="shrink-0 flex flex-col gap-2">
