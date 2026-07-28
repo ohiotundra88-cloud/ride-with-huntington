@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,7 +38,7 @@ function PackingPage() {
 
   const [items, setItems] = useState<Item[]>(defaults);
   // Sync when defaults change (preset switch or admin edits)
-  useMemoSync(defaults, setItems);
+  useEffect(() => { setItems(defaults); }, [defaults]);
 
   const [showIncompleteOnly, setShowIncompleteOnly] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
@@ -190,15 +190,4 @@ function PackingPage() {
       </Card>
     </div>
   );
-}
-
-// Keeps local item state in sync with computed defaults when they change.
-function useMemoSync<T>(value: T, setter: (v: T) => void) {
-  const ref = useRefValue(value);
-  if (ref.prev !== value) { ref.prev = value; setter(value); }
-}
-function useRefValue<T>(initial: T) {
-  const { useRef } = require("react") as typeof import("react");
-  const r = useRef<{ prev: T }>({ prev: initial });
-  return r.current;
 }
