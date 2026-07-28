@@ -199,15 +199,6 @@ function AnnouncementsAdmin() {
                 <Label>Expires at</Label>
                 <Input type="datetime-local" value={editing.expireAt?.slice(0, 16) ?? ""} onChange={(e) => setEditing({ ...editing, expireAt: e.target.value ? new Date(e.target.value).toISOString() : "" })} />
               </div>
-              <div className="space-y-1">
-                <Label>CTA label</Label>
-                <Input value={editing.ctaLabel ?? ""} onChange={(e) => setEditing({ ...editing, ctaLabel: e.target.value })} placeholder="Reserve hotel" />
-              </div>
-              <div className="space-y-1">
-                <Label>CTA link</Label>
-                <Input value={editing.ctaHref ?? ""} onChange={(e) => setEditing({ ...editing, ctaHref: e.target.value })} placeholder="/register" />
-                <p className="text-[10px] text-muted-foreground">Both fields required for the button to render.</p>
-              </div>
               <div className="flex items-center gap-3">
                 <Switch checked={editing.pinned} onCheckedChange={(v) => setEditing({ ...editing, pinned: v })} id="pinned" />
                 <Label htmlFor="pinned">Pin to top</Label>
