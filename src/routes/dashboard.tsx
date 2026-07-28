@@ -10,7 +10,7 @@ import { useStore } from "@/lib/store";
 import {
   ArrowRight, CalendarClock, CheckCircle2, ChevronDown, Clock,
   DollarSign, ListChecks, MessageSquare, MapPin, Users, Tent, Baby,
-  Accessibility, AlertTriangle, Car, CalendarDays, Radio,
+  Accessibility, AlertTriangle, Car, CalendarDays, Radio, Lock,
 } from "lucide-react";
 import { openConcierge } from "@/components/Concierge";
 import { RIDE_WEEKEND_DATE, timelineSections, type ReadinessStatus } from "@/lib/mock-data";
