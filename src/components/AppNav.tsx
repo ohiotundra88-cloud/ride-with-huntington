@@ -29,15 +29,9 @@ export function AppNav() {
   const { user, setUser } = useStore();
   const { state, setState } = useAdmin();
   const [open, setOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
   const pathname = useRouterState({ select: (r) => r.location.pathname });
   const nav = useNavigate();
-
-  const enterSuperUser = () => {
-    setUser({ isAdmin: true });
-    setState((s) => ({ ...s, superUser: { ...s.superUser, active: true, previewAs: null } }));
-    toast.success("Super User Mode enabled — demo access only");
-    nav({ to: "/admin" });
-  };
 
   return (
     <header className="sticky top-0 z-40 bg-[var(--brand-dark)] text-[var(--brand-dark-foreground)] border-b border-white/10">
