@@ -84,7 +84,7 @@ function SignIn() {
             </div>
             <CardTitle className="mt-2 text-2xl">Sign in to the Hub</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Use your Huntington work email. Verification codes are temporarily disabled — you'll be signed in instantly.
+              Demo mode — enter your @huntington.com email to sign in instantly. No password or verification code required right now.
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -109,8 +109,11 @@ function SignIn() {
               className="w-full h-11 bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90 font-semibold"
             >
               <LogIn className="mr-2 h-4 w-4" />
-              {busy ? "Signing in…" : "Sign in"}
+              {busy ? "Signing in…" : "Continue with work email"}
             </Button>
+            <p className="text-center text-[11px] text-muted-foreground">
+              Password and email verification are temporarily disabled for this preview.
+            </p>
 
             <div className="text-center text-xs pt-2">
               <Link to="/" className="text-[var(--brand-dark)] hover:underline">Back to home</Link>
