@@ -31,6 +31,7 @@ function SignIn() {
   const nav = useNavigate();
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
+  const ensureAccount = useServerFn(ensureDemoAccount);
 
   const validDomain = (e: string) => {
     const parts = e.trim().toLowerCase().split("@");
@@ -46,34 +47,31 @@ function SignIn() {
     const cleanEmail = email.trim().toLowerCase();
     const password = demoPassword(cleanEmail);
 
-    // Try sign-in first; if the account doesn't exist, sign up (auto-confirmed).
-    let { error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
-    if (error) {
-      const signUpRes = await supabase.auth.signUp({
+    try {
+      // Ensure the account exists with the deterministic demo password.
+      // Handles both first-time users and legacy OTP-only accounts.
+      await ensureAccount({ data: { email: cleanEmail, password } });
+
+      // Clear any stale guest registration cached locally so it doesn't
+      // leak into the newly signed-in session.
+      try { localStorage.removeItem("hh_reg_v2"); } catch { /* noop */ }
+
+      const { error } = await supabase.auth.signInWithPassword({
         email: cleanEmail,
         password,
-        options: { emailRedirectTo: window.location.origin },
       });
-      if (signUpRes.error) {
-        setBusy(false);
-        toast.error("Couldn't sign in", { description: signUpRes.error.message });
-        return;
-      }
-      if (!signUpRes.data.session) {
-        const retry = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
-        error = retry.error;
-      } else {
-        error = null;
-      }
+      if (error) throw error;
+
+      toast.success("Signed in");
+      nav({ to: "/dashboard" });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Please try again.";
+      toast.error("Couldn't sign in", { description: message });
+    } finally {
+      setBusy(false);
     }
-    setBusy(false);
-    if (error) {
-      toast.error("Couldn't sign in", { description: error.message });
-      return;
-    }
-    toast.success("Signed in");
-    nav({ to: "/dashboard" });
   };
+
 
   return (
     <div className="relative">
