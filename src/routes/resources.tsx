@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { faqCategories, type FAQCategory } from "@/lib/faq-data";
 import { usePublicFaqs } from "@/lib/faq-store";
-import { Search, LifeBuoy } from "lucide-react";
+import { Search, LifeBuoy, ChevronDown, ChevronUp } from "lucide-react";
 
 export const Route = createFileRoute("/resources")({
   head: () => ({ meta: [
@@ -57,15 +57,7 @@ function Resources() {
           <div className="sm:col-span-2 py-12 text-center text-muted-foreground">Loading…</div>
         )}
         {!isLoading && filtered.map((a) => (
-          <Link key={a.id} to="/resources/$id" params={{ id: a.id }}>
-            <Card className="h-full hover:shadow-md transition-shadow">
-              <CardContent className="p-5">
-                <Badge variant="outline" className="text-xs">{a.category}</Badge>
-                <h3 className="mt-2 font-bold text-[var(--brand-dark)]">{a.title}</h3>
-                <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{a.body}</p>
-              </CardContent>
-            </Card>
-          </Link>
+          <ExpandableTile key={a.id} article={a} />
         ))}
         {!isLoading && filtered.length === 0 && (
           <div className="sm:col-span-2 py-12 text-center text-muted-foreground">
@@ -75,5 +67,38 @@ function Resources() {
         )}
       </div>
     </div>
+  );
+}
+
+function ExpandableTile({ article: a }: { article: { id: string; category: FAQCategory; title: string; body: string } }) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <Card
+      role="button"
+      tabIndex={0}
+      onClick={() => setExpanded((v) => !v)}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setExpanded((v) => !v); }}
+      className="h-full cursor-pointer hover:shadow-md transition-shadow"
+    >
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <Badge variant="outline" className="text-xs">{a.category}</Badge>
+            <h3 className="mt-2 font-bold text-[var(--brand-dark)]">{a.title}</h3>
+          </div>
+          {expanded ? <ChevronUp className="h-5 w-5 shrink-0 text-muted-foreground" /> : <ChevronDown className="h-5 w-5 shrink-0 text-muted-foreground" />}
+        </div>
+        <p className={`mt-2 text-sm text-muted-foreground transition-all ${expanded ? "" : "line-clamp-2"}`}>
+          {a.body}
+        </p>
+        {expanded && (
+          <div className="mt-4">
+            <Link to="/resources/$id" params={{ id: a.id }} onClick={(e) => e.stopPropagation()}>
+              <Button size="sm" variant="outline" className="w-full sm:w-auto">View full article</Button>
+            </Link>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
