@@ -13,6 +13,7 @@ import {
   topSupportTopics,
 } from "@/lib/mock-data";
 import { useStore } from "@/lib/store";
+import { useAdmin } from "@/lib/admin-store";
 import { AlertCircle, ArrowLeft } from "lucide-react";
 
 export const Route = createFileRoute("/analytics")({
@@ -29,14 +30,15 @@ export const Route = createFileRoute("/analytics")({
 
 function AnalyticsPage() {
   const { user } = useStore();
+  const { state } = useAdmin();
   const [filter, setFilter] = useState<"all" | "riders" | "volunteers">("all");
   const metrics = useMemo(() => analyticsMetrics(filter), [filter]);
 
-  if (!user.isAdmin) {
+  if (!user.isAdmin || !state.flags.executiveAnalytics) {
     return (
       <div className="mx-auto max-w-lg px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold">Admin access required</h1>
-        <p className="mt-2 text-muted-foreground">Toggle "Admin mode" from the top-right menu to view executive analytics.</p>
+        <h1 className="text-2xl font-bold">Executive Analytics unavailable</h1>
+        <p className="mt-2 text-muted-foreground">Requires admin access and the feature to be enabled.</p>
       </div>
     );
   }
