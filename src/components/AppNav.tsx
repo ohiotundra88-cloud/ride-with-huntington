@@ -124,12 +124,6 @@ export function AppNav() {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _noop = null;
-
-function _wrapperFragmentOpen() { return null; }
-  );
-}
 
 export function ArrowMotif() {
   return (
