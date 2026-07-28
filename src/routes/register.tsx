@@ -392,7 +392,7 @@ function StepApparel() {
   const updA = (patch: Partial<typeof addr>) => setRegistration((prev) => ({ ...prev, address: { ...prev.address, ...patch } }));
 
   const save = () => {
-    const okRider = !isRider || (a.jerseySize && a.shirtSize && a.cut);
+    const okRider = !isRider || (a.jerseySize && a.jerseyStyle && a.shirtSize && a.cut);
     const okVol = !isVol || (a.volunteerShirtSize && a.volunteerCut);
     const okAddr = addr.name && addr.street && addr.city && addr.state && addr.zip && addr.confirmed;
     const complete = !!(okRider && okVol && okAddr);
@@ -587,7 +587,7 @@ function StepReview({ onEdit }: { onEdit: (n: number) => void }) {
       <Card>
         <CardHeader><CardTitle>Apparel & mailing</CardTitle></CardHeader>
         <CardContent>
-          {isRider && <Row label="Jersey" value={`${registration.apparel.jerseySize} ${registration.apparel.cut}`} editStep={isRider ? 5 : 4} />}
+          {isRider && <Row label="Jersey" value={[registration.apparel.jerseySize, registration.apparel.jerseyStyle, registration.apparel.cut].filter(Boolean).join(" · ")} editStep={isRider ? 5 : 4} />}
           <Row label="Address" value={[registration.address.street, registration.address.city, registration.address.state, registration.address.zip].filter(Boolean).join(", ")} editStep={isRider ? 5 : 4} />
         </CardContent>
       </Card>
