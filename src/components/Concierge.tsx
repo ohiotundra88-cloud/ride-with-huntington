@@ -41,9 +41,10 @@ export function Concierge({ open, onOpenChange }: { open: boolean; onOpenChange:
     if (!q) return;
     const match = matchIntent(q, state.concierge.intents);
     const userMsg: ChatMsg = { id: crypto.randomUUID(), role: "user", text: q };
+    const resourceLink = { label: "Search Resource Center", href: `/resources?q=${encodeURIComponent(q)}` };
     const botMsg: ChatMsg = match
-      ? { id: crypto.randomUUID(), role: "assistant", text: `${match.title}\n\n${match.body}`, links: match.links }
-      : { id: crypto.randomUUID(), role: "assistant", text: `${state.concierge.fallbackTitle}\n\n${state.concierge.fallbackBody}` };
+      ? { id: crypto.randomUUID(), role: "assistant", text: `${match.title}\n\n${match.body}`, links: [...(match.links || []), resourceLink] }
+      : { id: crypto.randomUUID(), role: "assistant", text: `${state.concierge.fallbackTitle}\n\n${state.concierge.fallbackBody}`, links: [resourceLink] };
     setMessages((m) => [...m, userMsg, botMsg]);
     setInput("");
   };

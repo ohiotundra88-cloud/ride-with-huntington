@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { z } from "zod";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +9,12 @@ import { faqCategories, type FAQCategory } from "@/lib/faq-data";
 import { usePublicFaqs } from "@/lib/faq-store";
 import { Search, LifeBuoy, ChevronDown, ChevronUp } from "lucide-react";
 
+const searchSchema = z.object({
+  q: z.string().optional().catch(""),
+});
+
 export const Route = createFileRoute("/resources")({
+  validateSearch: searchSchema,
   head: () => ({ meta: [
     { title: "Resources — Team Huntington Hub" },
     { name: "description", content: "Search Team Huntington answers for Pelotonia participants." },
@@ -17,7 +23,8 @@ export const Route = createFileRoute("/resources")({
 });
 
 function Resources() {
-  const [q, setQ] = useState("");
+  const { q: queryFromUrl } = Route.useSearch();
+  const [q, setQ] = useState(queryFromUrl ?? "");
   const [cat, setCat] = useState<FAQCategory | "All">("All");
   const { data: faqs = [], isLoading } = usePublicFaqs();
 
