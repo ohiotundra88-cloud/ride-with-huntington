@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { useStore } from "@/lib/store";
+import { useStore, type Registration } from "@/lib/store";
 import {
   ArrowRight, CalendarClock, CheckCircle2, ChevronDown, Clock,
   DollarSign, ListChecks, MessageSquare, MapPin, Users, CalendarDays,
@@ -61,18 +61,101 @@ const statusStyles: Record<ReadinessStatus, { label: string; className: string }
   not_applicable: { label: "Not applicable", className: "bg-muted text-muted-foreground border-border" },
 };
 
+/**
+ * Presentation-only overlay: derive readiness card status/detail from the
+ * participant's actual registration answers. Seeded demo content remains the
+ * fallback for any step the participant hasn't answered yet.
+ */
+function mergeReadinessWithRegistration(
+  items: EditableReadinessItem[],
+  reg: Registration
+): EditableReadinessItem[] {
+  const participation = reg.participation;
+  const isRider = participation === "rider" || participation === "both";
+  const isVolunteer = participation === "volunteer" || participation === "both";
+
+  return items.map((item) => {
+    const over = (status: ReadinessStatus, detail?: string, ctaLabel?: string): EditableReadinessItem => ({
+      ...item,
+      status,
+      detail: detail ?? item.detail,
+      ctaLabel: ctaLabel ?? item.ctaLabel,
+    });
+
+    switch (item.id) {
+      case "pelotonia": {
+        const p = reg.pelotonia;
+        if (p.status === "complete") {
+          return over("complete", p.confirmation ? `Registered · Confirmation ${p.confirmation}` : "Pelotonia registration confirmed.", "View registration");
+        }
+        if (p.status === "pending") return over("in_progress", "Pelotonia registration started — finish your confirmation.", "Finish registration");
+        return item;
+      }
+      case "hotel": {
+        const t = reg.travel;
+        if (t.needs === "none") return over("not_applicable", "No travel or hotel needed.", "Update travel");
+        if (t.status === "complete") {
+          const detail = t.hotelName
+            ? `${t.hotelName}${t.hotelCheckIn ? ` · ${t.hotelCheckIn} – ${t.hotelCheckOut}` : ""}`
+            : "Travel and hotel details confirmed.";
+          return over("reserved", detail, "View travel");
+        }
+        if (t.status === "pending") return over("in_progress", "Travel details started — confirm your dates.", "Finish travel");
+        if (participation) return over("action_needed", "Add your travel and hotel plans before Jul 22.", "Add travel");
+        return item;
+      }
+      case "bike": {
+        const b = reg.bike;
+        if (participation && !isRider) return over("not_applicable", "You're registered as a Volunteer — no bike needed.", "View bike step");
+        if (b.needs === "no") return over("complete", "Bringing your own bike — no rental needed.", "Update bike plan");
+        if (b.needs === "yes") {
+          if (b.status === "complete") {
+            const specs = [b.bikeType, b.bikeSize && `Size ${b.bikeSize}`, b.pedals].filter(Boolean).join(" · ");
+            return over("reserved", specs ? `Rental requested · ${specs}` : "Rental requested.", "View bike details");
+          }
+          return over("action_needed", "Finish your rental details — size, type, pedals and dates.", "Finish bike rental");
+        }
+        if (b.needs === "unsure") return over("in_progress", "Still deciding — confirm your bike plan before Jul 22.", "Decide bike plan");
+        return item;
+      }
+      case "volunteer": {
+        if (!participation) return item;
+        if (!isVolunteer) return over("not_applicable", "You're registered as a Rider — no shift needed.", item.ctaLabel);
+        return over("in_progress", "Volunteer shift assignments open closer to Ride Weekend.", "Volunteer info");
+      }
+      case "apparel": {
+        const a = reg.apparel;
+        if (a.status === "complete") {
+          const bits = [a.jerseyStyle && a.jerseyStyle.replace("-", " "), a.jerseySize && `jersey (${a.jerseySize})`].filter(Boolean).join(" ");
+          return over("ordered", bits ? `${bits.charAt(0).toUpperCase() + bits.slice(1)} · confirmed` : "Apparel selections confirmed.", "View apparel");
+        }
+        if (a.status === "pending") return over("in_progress", "Apparel started — confirm sizes and mailing address.", "Finish apparel");
+        return item;
+      }
+      default:
+        return item;
+    }
+  });
+}
+
+
 function DashboardPage() {
-  const { user } = useStore();
+  const { user, registration } = useStore();
   const { state } = useAdmin();
   const [view, setView] = useState<"rider" | "family">("rider");
   const cd = useCountdown(RIDE_WEEKEND_DATE);
   const firstName = user.name.split(" ")[0];
 
-  const readiness = useMemo(
-    () => state.readiness.filter((r) => r.active && r.publish === "published"),
-    [state.readiness]
+  const merged = useMemo(
+    () => mergeReadinessWithRegistration(state.readiness, registration),
+    [state.readiness, registration]
   );
-  const score = useMemo(() => readinessScore(state.readiness), [state.readiness]);
+  const readiness = useMemo(
+    () => merged.filter((r) => r.active && r.publish === "published"),
+    [merged]
+  );
+  const score = useMemo(() => readinessScore(merged), [merged]);
+
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 space-y-6">
