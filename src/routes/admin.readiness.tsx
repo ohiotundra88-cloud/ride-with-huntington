@@ -82,9 +82,16 @@ function ReadinessAdmin() {
     >
       <Card className="mb-4"><CardContent className="p-4 flex flex-wrap items-center gap-6">
         <div><p className="text-xs uppercase text-muted-foreground">Sample score</p><p className="text-3xl font-black text-[var(--brand-dark)]">{score}%</p></div>
-        <div><p className="text-xs uppercase text-muted-foreground">Total weight (active)</p><p className="text-2xl font-bold">{totalWeight}</p></div>
+        <div>
+          <p className="text-xs uppercase text-muted-foreground">Total weight (active)</p>
+          <p className="text-2xl font-bold">{totalWeight}</p>
+          {totalWeight !== 100 && (
+            <p className="mt-0.5 text-xs text-amber-600">Weights sum to {totalWeight}. Balance to 100 (or Reset) for a full-scale ring.</p>
+          )}
+        </div>
         <div><p className="text-xs uppercase text-muted-foreground">Items</p><p className="text-2xl font-bold">{state.readiness.length}</p></div>
       </CardContent></Card>
+
 
       <div className="grid gap-3">
         {state.readiness.map((r) => {
