@@ -285,12 +285,13 @@ const readinessIconMap: Record<string, string> = {
 
 const readinessWeights: Record<string, number> = {
   pelotonia: 25,
-  hotel: 15,
+  hotel: 20,
   bike: 15,
   volunteer: 0,
-  fundraising: 20,
-  apparel: 10,
+  fundraising: 25,
+  apparel: 15,
 };
+
 
 function seedReadinessItems(): EditableReadinessItem[] {
   const items = seedReadiness as MDReadinessItem[];
