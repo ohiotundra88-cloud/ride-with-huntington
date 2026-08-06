@@ -129,7 +129,9 @@ function RootComponent() {
         <AdminStoreProvider>
           <div className="min-h-screen flex flex-col">
             <AppNav />
+            <NetworkNotice />
             <SuperUserBar />
+
             <main className="flex-1 relative">
               <Outlet />
             </main>
