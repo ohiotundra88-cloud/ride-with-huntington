@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowMotif } from "@/components/AppNav";
 import { toast } from "sonner";
 import { Building2, LogIn } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabaseBrowser as supabase } from "@/integrations/supabase/proxy-client";
 import { useServerFn } from "@tanstack/react-start";
 import { ensureDemoAccount } from "@/lib/auth-demo.functions";
 

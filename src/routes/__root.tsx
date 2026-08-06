@@ -17,6 +17,7 @@ import { AppNav } from "@/components/AppNav";
 import { SuperUserBar } from "@/components/AdminShell";
 import { Toaster } from "@/components/ui/sonner";
 import { ConciergeLauncher } from "@/components/Concierge";
+import { NetworkNotice } from "@/components/NetworkNotice";
 
 function NotFoundComponent() {
   return (
@@ -128,7 +129,9 @@ function RootComponent() {
         <AdminStoreProvider>
           <div className="min-h-screen flex flex-col">
             <AppNav />
+            <NetworkNotice />
             <SuperUserBar />
+
             <main className="flex-1 relative">
               <Outlet />
             </main>
