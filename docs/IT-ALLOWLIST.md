@@ -9,7 +9,8 @@
 | Suggested category | Business / Productivity (internal Huntington Pelotonia team site) |
 | API paths | `/api/public/sb/*` on the same domain (sign-in and data) |
 | Other external hosts required | None |
-| SSL inspection | No exception required; standard public TLS certificate |
+| SSL inspection | Bypass/decrypt exception required in iBoss for both domains |
+| Transport | Allow HTTPS over TCP 443 and HTTP/2 |
 
 ## Why the request is limited to one domain
 
@@ -26,3 +27,18 @@ services are reachable, and includes the details above for a ticket.
 
 Symptom seen when the filter intercepts the site: a blank white page (sometimes showing only the
 word "reset") instead of the Hub.
+
+## iBoss / WireGuard-specific action
+
+The site and its same-origin API return valid HTTPS responses outside the tunnel. If iBoss returns
+only `reset`, add both FQDNs to the tenant's SSL decryption bypass and web allowlist policies:
+
+- `ridewithhuntington.com`
+- `www.ridewithhuntington.com`
+- URL scope: `https://ridewithhuntington.com/*` and `https://www.ridewithhuntington.com/*`
+- Permit HTTPS over TCP 443 and HTTP/2 in the applicable user/location policy
+- Do not use fixed destination IPs; the public CDN addresses can change
+
+After policy propagation, disconnect and reconnect the WireGuard tunnel, clear the browser's DNS
+cache, and open `https://ridewithhuntington.com/health` in a private window. The "Page delivered",
+"Styles loaded", "App scripts running", and "Sign-in & data" checks should all pass.
