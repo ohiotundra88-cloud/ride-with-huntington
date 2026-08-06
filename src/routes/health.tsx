@@ -27,8 +27,6 @@ interface Check {
 }
 
 const KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
-const DIRECT = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-
 async function timed(url: string, init?: RequestInit) {
   const ctl = new AbortController();
   const t = setTimeout(() => ctl.abort(), 6000);
@@ -69,7 +67,6 @@ function HealthPage() {
     { key: "css", label: "Styles loaded", detail: "Checking…", state: "checking" },
     { key: "js", label: "App scripts running", detail: "Checking…", state: "checking" },
     { key: "same", label: "Sign-in & data (this site)", detail: "Checking…", state: "checking" },
-    { key: "direct", label: "Direct backend host (informational)", detail: "Checking…", state: "checking" },
   ]);
   const [origin, setOrigin] = useState("");
   const [nonce, setNonce] = useState(0);
@@ -103,18 +100,6 @@ function HealthPage() {
         r.ok
           ? "Sign-in and data services are reachable through this site's own domain."
           : `Blocked on this network (status ${r.status || "no response"}). Sign-in and saving will not work here — share this page with IT.`,
-      );
-    })();
-
-    (async () => {
-      if (!DIRECT) return set("direct", "fail", "Not configured.");
-      const r = await timed(`${DIRECT}/auth/v1/health`, { headers: KEY ? { apikey: KEY } : undefined });
-      set(
-        "direct",
-        r.ok ? "ok" : "fail",
-        r.ok
-          ? "Also reachable directly (not required — the app no longer depends on this)."
-          : "Blocked on this network. That is expected and no longer affects the app, which routes everything through this site's domain.",
       );
     })();
 
@@ -179,7 +164,11 @@ function HealthPage() {
               Includes the API path <code className="font-mono">/api/public/sb/*</code> on the same domain
               (sign-in and data). No other external hosts are required.
             </li>
-            <li>No SSL-inspection exception needed; standard TLS on a public certificate</li>
+            <li>
+              For iBoss / WireGuard, bypass SSL/TLS inspection for both domains. The tunnel is
+              currently resetting the otherwise valid HTTPS response.
+            </li>
+            <li>Allow HTTPS over TCP 443 and HTTP/2; do not allowlist fixed IP addresses</li>
             <li>
               Current origin under test: <code className="font-mono">{origin || "—"}</code>
             </li>
