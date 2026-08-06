@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabaseBrowser as supabase } from "@/integrations/supabase/proxy-client";
 import { upsertMyParticipant, getMyParticipant } from "@/lib/participants.functions";
 
 // ============ TYPES ============
