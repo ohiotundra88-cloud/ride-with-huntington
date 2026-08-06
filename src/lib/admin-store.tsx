@@ -643,7 +643,11 @@ export function useAdmin() {
 // ============ HELPERS ============
 
 export function readinessScore(items: EditableReadinessItem[]): number {
-  const active = items.filter((i) => i.active && i.publish === "published");
+  // Items that don't apply to the participant (or carry no weight) are excluded
+  // from both sides of the ratio so the ring can still reach 100%.
+  const active = items.filter(
+    (i) => i.active && i.publish === "published" && i.status !== "not_applicable" && i.weight > 0,
+  );
   const totalWeight = active.reduce((n, i) => n + i.weight, 0);
   if (totalWeight === 0) return 0;
   const earned = active.reduce((n, i) => {
@@ -652,6 +656,7 @@ export function readinessScore(items: EditableReadinessItem[]): number {
   }, 0);
   return Math.round((earned / totalWeight) * 100);
 }
+
 
 export function announcementIsActive(a: Announcement): boolean {
   if (a.publish !== "published") return false;
