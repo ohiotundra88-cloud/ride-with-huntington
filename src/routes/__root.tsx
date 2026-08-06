@@ -17,6 +17,7 @@ import { AppNav } from "@/components/AppNav";
 import { SuperUserBar } from "@/components/AdminShell";
 import { Toaster } from "@/components/ui/sonner";
 import { ConciergeLauncher } from "@/components/Concierge";
+import { NetworkNotice } from "@/components/NetworkNotice";
 
 function NotFoundComponent() {
   return (
