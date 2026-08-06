@@ -16,6 +16,7 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PackingRouteImport } from './routes/packing'
 import { Route as McpRouteImport } from './routes/mcp'
+import { Route as HealthRouteImport } from './routes/health'
 import { Route as FamilyRouteImport } from './routes/family'
 import { Route as ExpensesRouteImport } from './routes/expenses'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -75,6 +76,11 @@ const PackingRoute = PackingRouteImport.update({
 const McpRoute = McpRouteImport.update({
   id: '/mcp',
   path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HealthRoute = HealthRouteImport.update({
+  id: '/health',
+  path: '/health',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FamilyRoute = FamilyRouteImport.update({
@@ -213,6 +219,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/expenses': typeof ExpensesRoute
   '/family': typeof FamilyRoute
+  '/health': typeof HealthRoute
   '/mcp': typeof McpRoute
   '/packing': typeof PackingRoute
   '/profile': typeof ProfileRoute
@@ -247,6 +254,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/expenses': typeof ExpensesRoute
   '/family': typeof FamilyRoute
+  '/health': typeof HealthRoute
   '/mcp': typeof McpRoute
   '/packing': typeof PackingRoute
   '/profile': typeof ProfileRoute
@@ -282,6 +290,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/expenses': typeof ExpensesRoute
   '/family': typeof FamilyRoute
+  '/health': typeof HealthRoute
   '/mcp': typeof McpRoute
   '/packing': typeof PackingRoute
   '/profile': typeof ProfileRoute
@@ -318,6 +327,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/expenses'
     | '/family'
+    | '/health'
     | '/mcp'
     | '/packing'
     | '/profile'
@@ -352,6 +362,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/expenses'
     | '/family'
+    | '/health'
     | '/mcp'
     | '/packing'
     | '/profile'
@@ -386,6 +397,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/expenses'
     | '/family'
+    | '/health'
     | '/mcp'
     | '/packing'
     | '/profile'
@@ -421,6 +433,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   ExpensesRoute: typeof ExpensesRoute
   FamilyRoute: typeof FamilyRoute
+  HealthRoute: typeof HealthRoute
   McpRoute: typeof McpRoute
   PackingRoute: typeof PackingRoute
   ProfileRoute: typeof ProfileRoute
@@ -497,6 +510,13 @@ declare module '@tanstack/react-router' {
       path: '/mcp'
       fullPath: '/mcp'
       preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/health': {
+      id: '/health'
+      path: '/health'
+      fullPath: '/health'
+      preLoaderRoute: typeof HealthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/family': {
@@ -696,6 +716,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   ExpensesRoute: ExpensesRoute,
   FamilyRoute: FamilyRoute,
+  HealthRoute: HealthRoute,
   McpRoute: McpRoute,
   PackingRoute: PackingRoute,
   ProfileRoute: ProfileRoute,
