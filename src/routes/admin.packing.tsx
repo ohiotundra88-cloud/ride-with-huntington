@@ -123,6 +123,27 @@ function PackingAdmin() {
           <TabsTrigger value="volunteer">Volunteer preset</TabsTrigger>
         </TabsList>
         <TabsContent value={tab} className="mt-4 space-y-6">
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-sm font-semibold text-[var(--brand-dark)]">Categories</p>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {categories.map((c) => (
+                  <span key={c} className="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs">
+                    {c}
+                    <button type="button" aria-label={`Remove ${c}`} onClick={() => removeCategory(c)} className="text-muted-foreground hover:text-red-600">
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+                {categories.length === 0 && <p className="text-xs italic text-muted-foreground">No categories yet</p>}
+              </div>
+              <form onSubmit={(e) => { e.preventDefault(); addCategory(); }} className="mt-3 flex flex-wrap gap-2">
+                <Input value={newCategory} onChange={(e) => setNewCategory(e.target.value)} placeholder="New category name" className="max-w-xs" />
+                <Button type="submit" variant="outline"><Plus className="mr-1 h-4 w-4" /> Add category</Button>
+              </form>
+            </CardContent>
+          </Card>
+
           {categories.map((cat) => {
             const catItems = items.filter((i) => i.category === cat);
             return (
@@ -141,7 +162,9 @@ function PackingAdmin() {
                           {p.description && <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">{p.description}</p>}
                         </div>
                         <div className="flex gap-1 shrink-0">
-                          <Button size="sm" variant="ghost" onClick={() => { setEditing({ ...p }); setIsNew(false); }}><Pencil className="h-3.5 w-3.5" /></Button>
+                          <Button size="sm" variant="ghost" aria-label={`Move ${p.label} up`} onClick={() => move(p, -1)}><ArrowUp className="h-3.5 w-3.5" /></Button>
+                          <Button size="sm" variant="ghost" aria-label={`Move ${p.label} down`} onClick={() => move(p, 1)}><ArrowDown className="h-3.5 w-3.5" /></Button>
+                          <Button size="sm" variant="ghost" onClick={() => { setEditing({ ...p }); setIsNew(false); setCustomCat(""); }}><Pencil className="h-3.5 w-3.5" /></Button>
                           <AlertDialog>
                             <AlertDialogTrigger asChild><Button size="sm" variant="ghost" className="text-red-600"><Trash2 className="h-3.5 w-3.5" /></Button></AlertDialogTrigger>
                             <AlertDialogContent>
@@ -159,6 +182,7 @@ function PackingAdmin() {
             );
           })}
         </TabsContent>
+
       </Tabs>
 
       <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
