@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      events: {
+        Row: {
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          created_by: string
+          description: string
+          end_time: string | null
+          event_date: string
+          flier_name: string | null
+          flier_path: string | null
+          flier_url: string | null
+          id: string
+          location: string | null
+          published: boolean
+          start_time: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by: string
+          description?: string
+          end_time?: string | null
+          event_date: string
+          flier_name?: string | null
+          flier_path?: string | null
+          flier_url?: string | null
+          id?: string
+          location?: string | null
+          published?: boolean
+          start_time?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string
+          end_time?: string | null
+          event_date?: string
+          flier_name?: string | null
+          flier_path?: string | null
+          flier_url?: string | null
+          id?: string
+          location?: string | null
+          published?: boolean
+          start_time?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       faqs: {
         Row: {
           body: string
@@ -148,6 +208,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_manage_events: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -155,9 +216,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin_text: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      app_role: "admin" | "editor" | "user"
+      app_role: "admin" | "editor" | "user" | "captain"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -285,7 +347,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "editor", "user"],
+      app_role: ["admin", "editor", "user", "captain"],
     },
   },
 } as const

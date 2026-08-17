@@ -16,6 +16,7 @@ export interface User {
   consent: boolean;
   signedIn: boolean;
   isAdmin: boolean;
+  isCaptain: boolean;
   userId: string | null;
 }
 
@@ -151,6 +152,7 @@ const guestUser: User = {
   consent: false,
   signedIn: false,
   isAdmin: false,
+  isCaptain: false,
   userId: null,
 };
 
@@ -250,7 +252,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         supabase.from("user_roles").select("role").eq("user_id", sessionUser.id),
         supabase.from("profiles").select("full_name, email").eq("id", sessionUser.id).maybeSingle(),
       ]);
-      const isAdmin = (rolesRes.data ?? []).some((r) => r.role === "admin");
+      const myRoles = (rolesRes.data ?? []).map((r) => String(r.role));
+      const isAdmin = myRoles.includes("admin");
+      const isCaptain = isAdmin || myRoles.includes("captain");
       const fullName = profileRes.data?.full_name || nameGuess;
       if (cancelled) return;
       setUserState({
@@ -260,6 +264,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         name: fullName,
         signedIn: true,
         isAdmin,
+        isCaptain,
       });
 
       // Load participant row from cloud (overrides local if present)
