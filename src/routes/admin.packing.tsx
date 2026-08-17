@@ -199,12 +199,14 @@ function PackingAdmin() {
                   </Select>
                 </div>
                 <div className="space-y-1"><Label>Category</Label>
-                  <Select value={editing.category} onValueChange={(v) => setEditing({ ...editing, category: v })}>
+                  <Select value={editing.category} onValueChange={(v) => { setEditing({ ...editing, category: v }); setCustomCat(""); }}>
                     <SelectTrigger><SelectValue placeholder="Pick or type below" /></SelectTrigger>
                     <SelectContent>{state.packing.categories[editing.preset].map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                   </Select>
+                  <Input value={customCat} onChange={(e) => setCustomCat(e.target.value)} placeholder="or new category…" className="mt-1" />
                 </div>
               </div>
+
               <div className="space-y-1"><Label>Description</Label><Textarea rows={2} value={editing.description ?? ""} onChange={(e) => setEditing({ ...editing, description: e.target.value })} /></div>
               <div className="flex flex-wrap gap-4">
                 <div className="flex items-center gap-2"><Switch checked={editing.required} onCheckedChange={(v) => setEditing({ ...editing, required: v })} id="req" /><Label htmlFor="req">Required</Label></div>
