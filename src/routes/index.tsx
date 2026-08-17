@@ -29,7 +29,7 @@ const resources = [
   { icon: HelpCircle, title: "FAQ Center", desc: "Search 25+ answers by topic.", to: "/resources" },
   { icon: FileText, title: "Expense Guide", desc: "How to submit Pelotonia expenses.", to: "/expenses" },
   { icon: ClipboardCheck, title: "Ride Weekend Checklist", desc: "What to bring and when.", to: "/resources/rw-1" },
-  { icon: LifeBuoy, title: "Contact Support", desc: "Reach the Team Huntington coordinators.", to: "/resources" },
+  { icon: LifeBuoy, title: "Contact Support", desc: "Reach the Team Huntington coordinators.", to: "/resources", hash: "contacts" },
 ];
 
 function Landing() {
