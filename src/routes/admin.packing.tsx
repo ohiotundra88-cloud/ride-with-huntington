@@ -32,27 +32,43 @@ function PackingAdmin() {
   const [tab, setTab] = useState<"rider" | "volunteer">("rider");
   const [editing, setEditing] = useState<PackingDefault | null>(null);
   const [isNew, setIsNew] = useState(false);
+  const [newCategory, setNewCategory] = useState("");
+  const [customCat, setCustomCat] = useState("");
 
   const items = useMemo(() => state.packing.items.filter((i) => i.preset === tab).sort((a, b) => a.order - b.order), [state.packing.items, tab]);
   const categories = state.packing.categories[tab];
 
   const save = () => {
     if (!editing) return;
-    if (!editing.label.trim() || !editing.category.trim()) { toast.error("Label and category required"); return; }
-    const next = { ...editing, updatedAt: new Date().toISOString() };
+    const category = (customCat.trim() || editing.category).trim();
+    if (!editing.label.trim() || !category) { toast.error("Label and category required"); return; }
+    const next = { ...editing, category, updatedAt: new Date().toISOString() };
     setState((s) => {
       const idx = s.packing.items.findIndex((p) => p.id === next.id);
       const list = idx >= 0 ? s.packing.items.map((p) => p.id === next.id ? next : p) : [...s.packing.items, next];
-      return { ...s, packing: { ...s.packing, items: list } };
+      const cats = s.packing.categories[next.preset];
+      return {
+        ...s,
+        packing: {
+          ...s.packing,
+          items: list,
+          categories: cats.includes(category)
+            ? s.packing.categories
+            : { ...s.packing.categories, [next.preset]: [...cats, category] },
+        },
+      };
     });
     audit({ action: isNew ? "create" : "update", entity: "PackingItem", entityId: next.id, detail: next.label });
     toast.success("Saved");
     setEditing(null);
+    setCustomCat("");
   };
   const remove = (p: PackingDefault) => {
     setState((s) => ({ ...s, packing: { ...s.packing, items: s.packing.items.filter((x) => x.id !== p.id) } }));
     audit({ action: "delete", entity: "PackingItem", entityId: p.id, detail: p.label });
     toast.success("Deleted");
+  };
+
 
   const move = (p: PackingDefault, dir: -1 | 1) => {
     const group = items;
