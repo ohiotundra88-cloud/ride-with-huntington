@@ -416,8 +416,11 @@ function StepApparel() {
   const { registration, setRegistration } = useStore();
   const a = registration.apparel;
   const addr = registration.address;
-  const isRider = registration.participation === "rider" || registration.participation === "both";
-  const isVol = registration.participation === "volunteer" || registration.participation === "both";
+  // When participation isn't a definite rider/volunteer choice (null or "unsure"),
+  // show both apparel sections so options are always editable.
+  const undecided = registration.participation !== "rider" && registration.participation !== "volunteer" && registration.participation !== "both";
+  const isRider = undecided || registration.participation === "rider" || registration.participation === "both";
+  const isVol = undecided || registration.participation === "volunteer" || registration.participation === "both";
   const upd = (patch: Partial<typeof a>) => setRegistration((prev) => ({ ...prev, apparel: { ...prev.apparel, ...patch } }));
   const updA = (patch: Partial<typeof addr>) => setRegistration((prev) => ({ ...prev, address: { ...prev.address, ...patch } }));
 
