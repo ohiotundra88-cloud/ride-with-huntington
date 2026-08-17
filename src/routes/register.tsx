@@ -428,7 +428,9 @@ function StepApparel() {
     const okRider = !isRider || (a.jerseySize && a.jerseyStyle && a.shirtSize && a.cut);
     const okVol = !isVol || (a.volunteerShirtSize && a.volunteerCut);
     const okAddr = addr.name && addr.street && addr.city && addr.state && addr.zip && addr.confirmed;
-    const complete = !!(okRider && okVol && okAddr);
+    // Undecided participants only need one apparel set filled in.
+    const okApparel = undecided ? !!(okRider || okVol) : !!(okRider && okVol);
+    const complete = !!(okApparel && okAddr);
     upd({ status: complete ? "complete" : "pending" });
     setRegistration((prev) => addAudit(prev, "Apparel & mailing updated"));
     toast.success("Apparel saved");
