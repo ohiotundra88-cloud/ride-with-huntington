@@ -73,9 +73,54 @@ function Resources() {
           </div>
         )}
       </div>
+
+      <ContactDirectory />
     </div>
   );
 }
+
+function ContactDirectory() {
+  const { state } = useAdmin();
+  const contacts = state.contacts.filter((c) => c.active);
+  if (contacts.length === 0) return null;
+
+  return (
+    <section id="contacts" className="mt-14 scroll-mt-24">
+      <h2 className="text-2xl font-black text-[var(--brand-dark)]">Contact directory</h2>
+      <p className="mt-2 text-muted-foreground">Reach the Team Huntington coordinators directly.</p>
+      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+        {contacts.map((c) => (
+          <Card key={c.id} className={c.emergency ? "border-[var(--brand)]" : ""}>
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h3 className="font-bold text-[var(--brand-dark)]">{c.name}</h3>
+                  <p className="text-sm text-muted-foreground">{c.role}</p>
+                </div>
+                <Badge variant={c.emergency ? "default" : "outline"} className="text-xs">{c.category}</Badge>
+              </div>
+              {c.department && <p className="mt-2 text-xs text-muted-foreground">{c.department}{c.region && c.region !== "All" ? ` · ${c.region}` : ""}</p>}
+              {c.hours && <p className="mt-1 text-xs text-muted-foreground">{c.hours}</p>}
+              <div className="mt-4 flex flex-wrap gap-2">
+                {c.email && (
+                  <a href={`mailto:${c.email}`}>
+                    <Button size="sm" variant="outline"><Mail className="mr-1 h-4 w-4" /> Email</Button>
+                  </a>
+                )}
+                {c.phone && (
+                  <a href={`tel:${c.phone.replace(/[^0-9+]/g, "")}`}>
+                    <Button size="sm" variant="outline"><Phone className="mr-1 h-4 w-4" /> {c.phone}</Button>
+                  </a>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 
 function ExpandableTile({ article: a }: { article: { id: string; category: FAQCategory; title: string; body: string } }) {
   const [expanded, setExpanded] = useState(false);
