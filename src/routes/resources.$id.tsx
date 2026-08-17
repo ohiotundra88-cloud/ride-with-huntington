@@ -38,7 +38,10 @@ function Article() {
             <p className="font-semibold">Still need help?</p>
             <p className="text-sm text-white/70">Reach the Team Huntington coordinators.</p>
           </div>
-          <Button className="bg-[var(--brand)] text-[var(--brand-foreground)] hover:bg-[var(--brand)]/90"><LifeBuoy className="mr-1 h-4 w-4" /> Contact Support</Button>
+          <Link to="/resources" hash="contacts">
+            <Button className="bg-[var(--brand)] text-[var(--brand-foreground)] hover:bg-[var(--brand)]/90"><LifeBuoy className="mr-1 h-4 w-4" /> Contact Support</Button>
+          </Link>
+
         </CardContent>
       </Card>
 
