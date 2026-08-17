@@ -416,8 +416,11 @@ function StepApparel() {
   const { registration, setRegistration } = useStore();
   const a = registration.apparel;
   const addr = registration.address;
-  const isRider = registration.participation === "rider" || registration.participation === "both";
-  const isVol = registration.participation === "volunteer" || registration.participation === "both";
+  // When participation isn't a definite rider/volunteer choice (null or "unsure"),
+  // show both apparel sections so options are always editable.
+  const undecided = registration.participation !== "rider" && registration.participation !== "volunteer" && registration.participation !== "both";
+  const isRider = undecided || registration.participation === "rider" || registration.participation === "both";
+  const isVol = undecided || registration.participation === "volunteer" || registration.participation === "both";
   const upd = (patch: Partial<typeof a>) => setRegistration((prev) => ({ ...prev, apparel: { ...prev.apparel, ...patch } }));
   const updA = (patch: Partial<typeof addr>) => setRegistration((prev) => ({ ...prev, address: { ...prev.address, ...patch } }));
 
@@ -425,7 +428,9 @@ function StepApparel() {
     const okRider = !isRider || (a.jerseySize && a.jerseyStyle && a.shirtSize && a.cut);
     const okVol = !isVol || (a.volunteerShirtSize && a.volunteerCut);
     const okAddr = addr.name && addr.street && addr.city && addr.state && addr.zip && addr.confirmed;
-    const complete = !!(okRider && okVol && okAddr);
+    // Undecided participants only need one apparel set filled in.
+    const okApparel = undecided ? !!(okRider || okVol) : !!(okRider && okVol);
+    const complete = !!(okApparel && okAddr);
     upd({ status: complete ? "complete" : "pending" });
     setRegistration((prev) => addAudit(prev, "Apparel & mailing updated"));
     toast.success("Apparel saved");
