@@ -19,6 +19,7 @@ import { Route as McpRouteImport } from './routes/mcp'
 import { Route as HealthRouteImport } from './routes/health'
 import { Route as FamilyRouteImport } from './routes/family'
 import { Route as ExpensesRouteImport } from './routes/expenses'
+import { Route as EventsRouteImport } from './routes/events'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ConfirmationRouteImport } from './routes/confirmation'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
@@ -42,6 +43,7 @@ import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } fr
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as ApiPublicSbSplatRouteImport } from './routes/api/public/sb/$'
+import { Route as ApiPublicEventFlierIdRouteImport } from './routes/api/public/event-flier/$id'
 
 const TeamRoute = TeamRouteImport.update({
   id: '/team',
@@ -91,6 +93,11 @@ const FamilyRoute = FamilyRouteImport.update({
 const ExpensesRoute = ExpensesRouteImport.update({
   id: '/expenses',
   path: '/expenses',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsRoute = EventsRouteImport.update({
+  id: '/events',
+  path: '/events',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -211,12 +218,18 @@ const ApiPublicSbSplatRoute = ApiPublicSbSplatRouteImport.update({
   path: '/api/public/sb/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicEventFlierIdRoute = ApiPublicEventFlierIdRouteImport.update({
+  id: '/api/public/event-flier/$id',
+  path: '/api/public/event-flier/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
   '/confirmation': typeof ConfirmationRoute
   '/dashboard': typeof DashboardRoute
+  '/events': typeof EventsRoute
   '/expenses': typeof ExpensesRoute
   '/family': typeof FamilyRoute
   '/health': typeof HealthRoute
@@ -245,6 +258,7 @@ export interface FileRoutesByFullPath {
   '/resources/$id': typeof ResourcesIdRoute
   '/admin/': typeof AdminIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/public/event-flier/$id': typeof ApiPublicEventFlierIdRoute
   '/api/public/sb/$': typeof ApiPublicSbSplatRoute
 }
 export interface FileRoutesByTo {
@@ -252,6 +266,7 @@ export interface FileRoutesByTo {
   '/analytics': typeof AnalyticsRoute
   '/confirmation': typeof ConfirmationRoute
   '/dashboard': typeof DashboardRoute
+  '/events': typeof EventsRoute
   '/expenses': typeof ExpensesRoute
   '/family': typeof FamilyRoute
   '/health': typeof HealthRoute
@@ -280,6 +295,7 @@ export interface FileRoutesByTo {
   '/resources/$id': typeof ResourcesIdRoute
   '/admin': typeof AdminIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/public/event-flier/$id': typeof ApiPublicEventFlierIdRoute
   '/api/public/sb/$': typeof ApiPublicSbSplatRoute
 }
 export interface FileRoutesById {
@@ -288,6 +304,7 @@ export interface FileRoutesById {
   '/analytics': typeof AnalyticsRoute
   '/confirmation': typeof ConfirmationRoute
   '/dashboard': typeof DashboardRoute
+  '/events': typeof EventsRoute
   '/expenses': typeof ExpensesRoute
   '/family': typeof FamilyRoute
   '/health': typeof HealthRoute
@@ -316,6 +333,7 @@ export interface FileRoutesById {
   '/resources/$id': typeof ResourcesIdRoute
   '/admin/': typeof AdminIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/public/event-flier/$id': typeof ApiPublicEventFlierIdRoute
   '/api/public/sb/$': typeof ApiPublicSbSplatRoute
 }
 export interface FileRouteTypes {
@@ -325,6 +343,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/confirmation'
     | '/dashboard'
+    | '/events'
     | '/expenses'
     | '/family'
     | '/health'
@@ -353,6 +372,7 @@ export interface FileRouteTypes {
     | '/resources/$id'
     | '/admin/'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/public/event-flier/$id'
     | '/api/public/sb/$'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -360,6 +380,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/confirmation'
     | '/dashboard'
+    | '/events'
     | '/expenses'
     | '/family'
     | '/health'
@@ -388,6 +409,7 @@ export interface FileRouteTypes {
     | '/resources/$id'
     | '/admin'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/public/event-flier/$id'
     | '/api/public/sb/$'
   id:
     | '__root__'
@@ -395,6 +417,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/confirmation'
     | '/dashboard'
+    | '/events'
     | '/expenses'
     | '/family'
     | '/health'
@@ -423,6 +446,7 @@ export interface FileRouteTypes {
     | '/resources/$id'
     | '/admin/'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/public/event-flier/$id'
     | '/api/public/sb/$'
   fileRoutesById: FileRoutesById
 }
@@ -431,6 +455,7 @@ export interface RootRouteChildren {
   AnalyticsRoute: typeof AnalyticsRoute
   ConfirmationRoute: typeof ConfirmationRoute
   DashboardRoute: typeof DashboardRoute
+  EventsRoute: typeof EventsRoute
   ExpensesRoute: typeof ExpensesRoute
   FamilyRoute: typeof FamilyRoute
   HealthRoute: typeof HealthRoute
@@ -458,6 +483,7 @@ export interface RootRouteChildren {
   AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  ApiPublicEventFlierIdRoute: typeof ApiPublicEventFlierIdRoute
   ApiPublicSbSplatRoute: typeof ApiPublicSbSplatRoute
 }
 
@@ -531,6 +557,13 @@ declare module '@tanstack/react-router' {
       path: '/expenses'
       fullPath: '/expenses'
       preLoaderRoute: typeof ExpensesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events': {
+      id: '/events'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof EventsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -694,6 +727,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSbSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/event-flier/$id': {
+      id: '/api/public/event-flier/$id'
+      path: '/api/public/event-flier/$id'
+      fullPath: '/api/public/event-flier/$id'
+      preLoaderRoute: typeof ApiPublicEventFlierIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -714,6 +754,7 @@ const rootRouteChildren: RootRouteChildren = {
   AnalyticsRoute: AnalyticsRoute,
   ConfirmationRoute: ConfirmationRoute,
   DashboardRoute: DashboardRoute,
+  EventsRoute: EventsRoute,
   ExpensesRoute: ExpensesRoute,
   FamilyRoute: FamilyRoute,
   HealthRoute: HealthRoute,
@@ -742,6 +783,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  ApiPublicEventFlierIdRoute: ApiPublicEventFlierIdRoute,
   ApiPublicSbSplatRoute: ApiPublicSbSplatRoute,
 }
 export const routeTree = rootRouteImport

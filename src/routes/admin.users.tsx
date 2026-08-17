@@ -13,13 +13,15 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { listAdmins, grantAdminByEmail, revokeAdmin, type AdminUserRow } from "@/lib/admins.functions";
+import { listCaptains, grantCaptainByEmail, revokeCaptain, type CaptainRow } from "@/lib/captains.functions";
+import { Flag } from "lucide-react";
 
 export const Route = createFileRoute("/admin/users")({
   component: AdminUsersPage,
   head: () => ({
     meta: [
-      { title: "Admins & Super Users — Team Huntington Hub" },
-      { name: "description", content: "Grant or revoke admin access for Team Huntington colleagues." },
+      { title: "Admins, Super Users & Captains — Team Huntington Hub" },
+      { name: "description", content: "Grant or revoke admin access and Captain designations for Team Huntington colleagues." },
     ],
   }),
 });
@@ -143,6 +145,123 @@ function AdminUsersPage() {
           )}
         </CardContent>
       </Card>
+
+      <CaptainsCard />
     </AdminShell>
+  );
+}
+
+function CaptainsCard() {
+  const qc = useQueryClient();
+  const [email, setEmail] = useState("");
+
+  const { data: captains = [], isLoading, error } = useQuery<CaptainRow[]>({
+    queryKey: ["captains"],
+    queryFn: () => listCaptains(),
+  });
+
+  const grant = useMutation({
+    mutationFn: (e: string) => grantCaptainByEmail({ data: { email: e } }),
+    onSuccess: (res) => {
+      toast.success(`${res.email} can now post fundraising events`);
+      setEmail("");
+      qc.invalidateQueries({ queryKey: ["captains"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const revoke = useMutation({
+    mutationFn: (user_id: string) => revokeCaptain({ data: { user_id } }),
+    onSuccess: () => {
+      toast.success("Captain designation removed");
+      qc.invalidateQueries({ queryKey: ["captains"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const submit = (ev: React.FormEvent) => {
+    ev.preventDefault();
+    const v = email.trim();
+    if (!v) return;
+    grant.mutate(v);
+  };
+
+  return (
+    <Card className="mt-6">
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2">
+          <Flag className="h-4 w-4 text-[var(--brand)]" /> Team Captains
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground">
+          Captains can post and manage fundraising events on the Events calendar. They can only edit the events they create.
+        </p>
+        <form onSubmit={submit} className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+          <div className="space-y-1.5">
+            <Label htmlFor="captain-email">Huntington email</Label>
+            <Input
+              id="captain-email"
+              type="email"
+              placeholder="captain@huntington.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <Button type="submit" disabled={grant.isPending} className="bg-[var(--brand-dark)] hover:bg-[var(--brand-dark)]/90 text-white">
+            {grant.isPending ? "Adding…" : "Make captain"}
+          </Button>
+        </form>
+
+        <div className="mt-5">
+          {isLoading ? (
+            <p className="text-sm text-muted-foreground">Loading…</p>
+          ) : error ? (
+            <p className="text-sm text-destructive">{(error as Error).message}</p>
+          ) : captains.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No captains designated yet.</p>
+          ) : (
+            <ul className="divide-y">
+              {captains.map((c) => (
+                <li key={c.user_id} className="flex items-center justify-between gap-3 py-3">
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-medium">{c.full_name || c.email}</div>
+                    <div className="truncate text-xs text-muted-foreground">{c.email}</div>
+                  </div>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-destructive hover:bg-destructive/10"
+                        disabled={revoke.isPending}
+                        aria-label={`Remove captain designation from ${c.email}`}
+                      >
+                        <Trash2 className="mr-1 h-3.5 w-3.5" /> Remove
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Remove captain designation?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          {c.full_name || c.email} will no longer be able to post fundraising events. Existing events stay on the calendar.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => revoke.mutate(c.user_id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                          Remove
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
