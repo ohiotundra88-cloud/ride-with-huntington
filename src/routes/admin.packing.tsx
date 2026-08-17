@@ -53,7 +53,44 @@ function PackingAdmin() {
     setState((s) => ({ ...s, packing: { ...s.packing, items: s.packing.items.filter((x) => x.id !== p.id) } }));
     audit({ action: "delete", entity: "PackingItem", entityId: p.id, detail: p.label });
     toast.success("Deleted");
+
+  const move = (p: PackingDefault, dir: -1 | 1) => {
+    const group = items;
+    const idx = group.findIndex((x) => x.id === p.id);
+    const swap = group[idx + dir];
+    if (!swap) return;
+    setState((s) => ({
+      ...s,
+      packing: {
+        ...s.packing,
+        items: s.packing.items.map((x) =>
+          x.id === p.id ? { ...x, order: swap.order } : x.id === swap.id ? { ...x, order: p.order } : x,
+        ),
+      },
+    }));
+    audit({ action: "update", entity: "PackingItem", entityId: p.id, detail: `reorder ${p.label}` });
   };
+
+  const addCategory = () => {
+    const name = newCategory.trim();
+    if (!name) return;
+    if (categories.some((c) => c.toLowerCase() === name.toLowerCase())) { toast.error("Category already exists"); return; }
+    setState((s) => ({ ...s, packing: { ...s.packing, categories: { ...s.packing.categories, [tab]: [...s.packing.categories[tab], name] } } }));
+    audit({ action: "create", entity: "PackingCategory", detail: `${tab}: ${name}` });
+    setNewCategory("");
+    toast.success("Category added");
+  };
+
+  const removeCategory = (cat: string) => {
+    if (state.packing.items.some((i) => i.preset === tab && i.category === cat)) {
+      toast.error("Move or delete its items first");
+      return;
+    }
+    setState((s) => ({ ...s, packing: { ...s.packing, categories: { ...s.packing.categories, [tab]: s.packing.categories[tab].filter((c) => c !== cat) } } }));
+    audit({ action: "delete", entity: "PackingCategory", detail: `${tab}: ${cat}` });
+    toast.success("Category removed");
+  };
+
 
   return (
     <AdminShell title="Default packing lists" description="Rider and volunteer starter items. Participants can add their own on top."
