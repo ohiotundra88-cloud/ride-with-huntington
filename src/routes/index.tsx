@@ -99,7 +99,7 @@ function Landing() {
           <p className="mt-3 text-muted-foreground leading-relaxed max-w-2xl">Everything you need alongside your registration.</p>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {resources.map((r) => (
-              <Link key={r.title} to={r.to} className="group">
+              <Link key={r.title} to={r.to} hash={r.hash} className="group">
                 <Card className="h-full transition-shadow hover:shadow-lg">
                   <CardContent className="p-5">
                     <div className="grid h-10 w-10 place-items-center rounded-lg bg-[var(--brand-dark)] text-white">
