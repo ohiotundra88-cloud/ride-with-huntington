@@ -289,11 +289,13 @@ function AttachmentPreview({
   onDownload: () => void;
   downloading: boolean;
 }) {
-  const type = post.content_type ?? "";
-  const isImage = type.startsWith("image/");
-  const isPdf = type === "application/pdf";
-  const isText = type === "text/plain" || type === "text/csv";
+  const ext = (post.file_name ?? "").split(".").pop()?.toLowerCase() ?? "";
+  const type = (post.content_type ?? "").toLowerCase();
+  const isImage = type.startsWith("image/") || ["png", "jpg", "jpeg", "gif", "webp", "svg", "avif", "bmp"].includes(ext);
+  const isPdf = type.includes("pdf") || ext === "pdf";
+  const isText = type.startsWith("text/") || ["txt", "csv", "md", "json"].includes(ext);
   const previewable = isImage || isPdf || isText;
+
   const [open, setOpen] = useState(false);
 
   const file = useQuery({
@@ -305,9 +307,19 @@ function AttachmentPreview({
 
   const objectUrl = useMemo(() => {
     if (!file.data || isText) return null;
-    const bytes = Uint8Array.from(atob(file.data.base64), (c) => c.charCodeAt(0));
-    return URL.createObjectURL(new Blob([bytes], { type: file.data.contentType }));
-  }, [file.data, isText]);
+    try {
+      const bytes = Uint8Array.from(atob(file.data.base64), (c) => c.charCodeAt(0));
+      const mime = isPdf
+        ? "application/pdf"
+        : isImage && !file.data.contentType.startsWith("image/")
+          ? `image/${ext === "jpg" ? "jpeg" : ext || "png"}`
+          : file.data.contentType;
+      return URL.createObjectURL(new Blob([bytes], { type: mime }));
+    } catch {
+      return null;
+    }
+  }, [file.data, isText, isPdf, isImage, ext]);
+
 
   useEffect(() => {
     return () => {
@@ -356,8 +368,21 @@ function AttachmentPreview({
             />
           )}
           {file.data && isPdf && objectUrl && (
-            <iframe src={objectUrl} title={post.file_name ?? "Document preview"} className="h-[520px] w-full rounded-md border" />
+            <div className="space-y-2">
+              <object data={objectUrl} type="application/pdf" className="h-[520px] w-full rounded-md border">
+                <iframe src={objectUrl} title={post.file_name ?? "Document preview"} className="h-[520px] w-full rounded-md border" />
+              </object>
+              <a
+                href={objectUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-block text-xs font-medium text-[var(--brand-dark)] underline"
+              >
+                Open in a new tab
+              </a>
+            </div>
           )}
+
           {file.data && isText && (
             <pre className="max-h-[360px] overflow-auto whitespace-pre-wrap rounded-md bg-muted/50 p-3 text-xs leading-relaxed">
               {textBody ?? "Preview unavailable."}
