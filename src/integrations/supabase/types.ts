@@ -426,6 +426,48 @@ export type Database = {
         }
         Relationships: []
       }
+      site_branding: {
+        Row: {
+          hero_content_type: string | null
+          hero_name: string | null
+          hero_overlay: number
+          hero_path: string | null
+          hero_position: string
+          id: number
+          logo_content_type: string | null
+          logo_name: string | null
+          logo_path: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          hero_content_type?: string | null
+          hero_name?: string | null
+          hero_overlay?: number
+          hero_path?: string | null
+          hero_position?: string
+          id?: number
+          logo_content_type?: string | null
+          logo_name?: string | null
+          logo_path?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          hero_content_type?: string | null
+          hero_name?: string | null
+          hero_overlay?: number
+          hero_path?: string | null
+          hero_position?: string
+          id?: number
+          logo_content_type?: string | null
+          logo_name?: string | null
+          logo_path?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       site_visits: {
         Row: {
           count: number
