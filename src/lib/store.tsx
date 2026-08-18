@@ -127,7 +127,7 @@ export interface AdminParticipant {
 const emptyReg: Registration = {
   id: null,
   participation: null,
-  pelotonia: { discountCode: "Huntington", confirmation: "", hbNumber: "", completed: false, highRoller: false, survivor: false, status: "not_started" },
+  pelotonia: { discountCode: "Huntington", confirmation: "", hbNumber: "", completed: false, highRoller: false, survivor: false, employmentType: "", payGrade74Below: "", status: "not_started" },
   travel: {
     needs: "", departureCity: "", arrivalDate: "", departureDate: "",
     hotelCheckIn: "", hotelCheckOut: "", notes: "", travelConfirmation: "",
