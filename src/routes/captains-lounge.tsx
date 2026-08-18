@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import {
-  Lock, ShieldCheck, Pin, Paperclip, Plus, Pencil, Trash2, EyeOff, Upload, X, Download, Search,
+  Lock, ShieldCheck, Pin, Paperclip, Plus, Pencil, Trash2, EyeOff, Upload, X, Download, Search, UserCircle2,
 } from "lucide-react";
 import {
   listLoungePosts, saveLoungePost, deleteLoungePost, uploadLoungeFile, removeLoungeFile, getLoungeFile,
