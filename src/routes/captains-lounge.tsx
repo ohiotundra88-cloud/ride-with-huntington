@@ -265,6 +265,101 @@ function PostCard({ post, canManage }: { post: CaptainPost; canManage: boolean }
   );
 }
 
+function AttachmentPreview({
+  post,
+  onDownload,
+  downloading,
+}: {
+  post: CaptainPost;
+  onDownload: () => void;
+  downloading: boolean;
+}) {
+  const type = post.content_type ?? "";
+  const isImage = type.startsWith("image/");
+  const isPdf = type === "application/pdf";
+  const isText = type === "text/plain" || type === "text/csv";
+  const previewable = isImage || isPdf || isText;
+  const [open, setOpen] = useState(false);
+
+  const file = useQuery({
+    queryKey: ["lounge-file", post.id, post.file_path],
+    queryFn: () => getLoungeFile({ data: { id: post.id } }),
+    enabled: previewable && open,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const objectUrl = useMemo(() => {
+    if (!file.data || isText) return null;
+    const bytes = Uint8Array.from(atob(file.data.base64), (c) => c.charCodeAt(0));
+    return URL.createObjectURL(new Blob([bytes], { type: file.data.contentType }));
+  }, [file.data, isText]);
+
+  useEffect(() => {
+    return () => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [objectUrl]);
+
+  const textBody = useMemo(() => {
+    if (!file.data || !isText) return null;
+    try {
+      const bytes = Uint8Array.from(atob(file.data.base64), (c) => c.charCodeAt(0));
+      return new TextDecoder().decode(bytes).slice(0, 4000);
+    } catch {
+      return null;
+    }
+  }, [file.data, isText]);
+
+  return (
+    <div className="overflow-hidden rounded-lg border bg-muted/40">
+      <div className="flex flex-wrap items-center gap-3 p-3">
+        <Paperclip className="h-4 w-4 text-muted-foreground" />
+        <span className="min-w-0 flex-1 truncate text-sm">{post.file_name}</span>
+        {previewable && (
+          <Button size="sm" variant="ghost" onClick={() => setOpen((v) => !v)}>
+            {open ? <ChevronUp className="mr-1.5 h-3.5 w-3.5" /> : <Eye className="mr-1.5 h-3.5 w-3.5" />}
+            {open ? "Hide preview" : "Preview"}
+          </Button>
+        )}
+        <Button size="sm" variant="outline" onClick={onDownload} disabled={downloading}>
+          <Download className="mr-1.5 h-3.5 w-3.5" /> {downloading ? "Preparing…" : "Download"}
+        </Button>
+      </div>
+
+      {previewable && open && (
+        <div className="border-t bg-background p-3">
+          {file.isPending && <p className="text-sm text-muted-foreground">Loading preview…</p>}
+          {file.isError && (
+            <p className="text-sm text-destructive">{(file.error as Error).message || "Preview unavailable."}</p>
+          )}
+          {file.data && isImage && objectUrl && (
+            <img
+              src={objectUrl}
+              alt={post.file_name ?? "Attachment preview"}
+              loading="lazy"
+              className="max-h-[420px] w-full rounded-md object-contain"
+            />
+          )}
+          {file.data && isPdf && objectUrl && (
+            <iframe src={objectUrl} title={post.file_name ?? "Document preview"} className="h-[520px] w-full rounded-md border" />
+          )}
+          {file.data && isText && (
+            <pre className="max-h-[360px] overflow-auto whitespace-pre-wrap rounded-md bg-muted/50 p-3 text-xs leading-relaxed">
+              {textBody ?? "Preview unavailable."}
+            </pre>
+          )}
+        </div>
+      )}
+      {!previewable && (
+        <p className="border-t px-3 py-2 text-xs text-muted-foreground">
+          Office documents open after download.
+        </p>
+      )}
+    </div>
+  );
+}
+
+
 function FileControls({ post, onChanged }: { post: CaptainPost; onChanged: () => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
