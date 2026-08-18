@@ -10,6 +10,27 @@ import { ArrowMotif } from "@/components/AppNav";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { useStore } from "@/lib/store";
 import { recordSiteVisit } from "@/lib/analytics.functions";
+import { useBranding } from "@/lib/useBranding";
+
+/** Optional super-user uploaded background image behind the green hero bar. */
+function HeroBackdrop() {
+  const { branding, heroUrl } = useBranding();
+  if (!heroUrl) return null;
+  return (
+    <div className="absolute inset-0" aria-hidden="true">
+      <img
+        src={heroUrl}
+        alt=""
+        className="h-full w-full object-cover"
+        style={{ objectPosition: branding.hero_position }}
+      />
+      <div
+        className="absolute inset-0 bg-[var(--brand-dark)]"
+        style={{ opacity: Math.min(95, Math.max(0, branding.hero_overlay)) / 100 }}
+      />
+    </div>
+  );
+}
 
 
 export const Route = createFileRoute("/")({
