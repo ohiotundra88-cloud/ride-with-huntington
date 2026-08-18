@@ -48,6 +48,7 @@ const links = [
   { to: "/admin/participants", label: "Participants", icon: Users },
   { to: "/admin/roster", label: "Permanent Roster", icon: Lock },
   { to: "/admin/users", label: "Admins & Super Users", icon: ShieldCheck },
+  { to: "/admin/branding", label: "Site Branding", icon: ImageIcon },
   { to: "/admin/flags", label: "Config & Audit", icon: Settings },
 ] as const;
 
