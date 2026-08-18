@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Plane, Bike, Shirt, CheckCircle2, LifeBuoy, FileText, ClipboardCheck, HelpCircle, Calendar, User, Target } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { ArrowRight, Plane, Bike, Shirt, CheckCircle2, LifeBuoy, FileText, ClipboardCheck, HelpCircle, Calendar, User, Target, BarChart3 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,6 +9,8 @@ import { Progress } from "@/components/ui/progress";
 import { ArrowMotif } from "@/components/AppNav";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { useStore } from "@/lib/store";
+import { recordSiteVisit } from "@/lib/analytics.functions";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
