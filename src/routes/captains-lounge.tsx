@@ -256,14 +256,9 @@ function PostCard({ post, canManage }: { post: CaptainPost; canManage: boolean }
       <CardContent className="space-y-3">
         {post.body && <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{post.body}</p>}
         {post.file_path && (
-          <div className="flex flex-wrap items-center gap-3 rounded-lg border bg-muted/40 p-3">
-            <Paperclip className="h-4 w-4 text-muted-foreground" />
-            <span className="min-w-0 flex-1 truncate text-sm">{post.file_name}</span>
-            <Button size="sm" variant="outline" onClick={() => download.mutate()} disabled={download.isPending}>
-              <Download className="mr-1.5 h-3.5 w-3.5" /> {download.isPending ? "Preparing…" : "Download"}
-            </Button>
-          </div>
+          <AttachmentPreview post={post} onDownload={() => download.mutate()} downloading={download.isPending} />
         )}
+
         {canManage && <FileControls post={post} onChanged={invalidate} />}
       </CardContent>
     </Card>
