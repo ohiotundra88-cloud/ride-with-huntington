@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      captain_posts: {
+        Row: {
+          body: string
+          category: string
+          content_type: string | null
+          created_at: string
+          created_by: string
+          file_name: string | null
+          file_path: string | null
+          id: string
+          pinned: boolean
+          published: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body?: string
+          category?: string
+          content_type?: string | null
+          created_at?: string
+          created_by: string
+          file_name?: string | null
+          file_path?: string | null
+          id?: string
+          pinned?: boolean
+          published?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          category?: string
+          content_type?: string | null
+          created_at?: string
+          created_by?: string
+          file_name?: string | null
+          file_path?: string | null
+          id?: string
+          pinned?: boolean
+          published?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           contact_email: string | null
@@ -436,6 +481,7 @@ export type Database = {
       increment_site_visits: { Args: never; Returns: number }
       is_admin_text: { Args: { _user_id: string }; Returns: boolean }
       is_fundraiser_reviewer: { Args: { _user_id: string }; Returns: boolean }
+      is_leadership: { Args: { _user_id: string }; Returns: boolean }
       is_superuser: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
