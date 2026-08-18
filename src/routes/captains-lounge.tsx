@@ -289,11 +289,13 @@ function AttachmentPreview({
   onDownload: () => void;
   downloading: boolean;
 }) {
-  const type = post.content_type ?? "";
-  const isImage = type.startsWith("image/");
-  const isPdf = type === "application/pdf";
-  const isText = type === "text/plain" || type === "text/csv";
+  const ext = (post.file_name ?? "").split(".").pop()?.toLowerCase() ?? "";
+  const type = (post.content_type ?? "").toLowerCase();
+  const isImage = type.startsWith("image/") || ["png", "jpg", "jpeg", "gif", "webp", "svg", "avif", "bmp"].includes(ext);
+  const isPdf = type.includes("pdf") || ext === "pdf";
+  const isText = type.startsWith("text/") || ["txt", "csv", "md", "json"].includes(ext);
   const previewable = isImage || isPdf || isText;
+
   const [open, setOpen] = useState(false);
 
   const file = useQuery({
