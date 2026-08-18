@@ -372,14 +372,20 @@ function EditDialog({ record, onClose, onSaved }: { record: ColleagueRecord; onC
                   );
                 }
                 if (f.type === "select") {
+                  const current = String(raw ?? "");
                   return (
                     <div key={f.key} className="space-y-1.5">
                       <Label htmlFor={id}>{f.label}</Label>
-                      <Select value={String(raw ?? "")} onValueChange={(v) => setField(section, f.key, v)}>
+                      <Select
+                        value={current === "" ? NONE : current}
+                        onValueChange={(v) => setField(section, f.key, v === NONE ? "" : v)}
+                      >
                         <SelectTrigger id={id}><SelectValue placeholder="Not set" /></SelectTrigger>
                         <SelectContent>
                           {(f.options ?? []).map((o) => (
-                            <SelectItem key={o || "none"} value={o}>{o === "" ? "Not set" : o.replace(/_/g, " ")}</SelectItem>
+                            <SelectItem key={o || NONE} value={o === "" ? NONE : o}>
+                              {o === "" ? "Not set" : o.replace(/_/g, " ")}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
