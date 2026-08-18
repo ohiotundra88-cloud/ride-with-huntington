@@ -31,22 +31,43 @@ const markets = [
 ];
 
 function ProfilePage() {
-  const { user, setUser } = useStore();
+  const { user, saveProfile } = useStore();
   const nav = useNavigate();
   const [form, setForm] = useState(user);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
+  const [dirty, setDirty] = useState(false);
 
-  const save = () => {
+  // Profile loads asynchronously after sign-in — refresh the form until edited
+  useEffect(() => {
+    if (!dirty) setForm(user);
+  }, [user, dirty]);
+
+  const update = (patch: Partial<typeof form>) => {
+    setDirty(true);
+    setForm((prev) => ({ ...prev, ...patch }));
+  };
+
+  const save = async () => {
     const e: Record<string, string> = {};
     if (!form.name) e.name = "Required";
     if (!/.+@.+\..+/.test(form.email)) e.email = "Valid email required";
     if (!form.consent) e.consent = "Please confirm the privacy notice";
     setErrors(e);
     if (Object.keys(e).length) return;
-    setUser({ ...form, signedIn: true });
-    toast.success("Profile saved");
-    nav({ to: "/register" });
+    setSaving(true);
+    try {
+      await saveProfile({ ...form, signedIn: true });
+      setDirty(false);
+      toast.success("Profile saved");
+      nav({ to: "/register" });
+    } catch (err) {
+      toast.error((err as Error).message || "Could not save your profile");
+    } finally {
+      setSaving(false);
+    }
   };
+
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10">
