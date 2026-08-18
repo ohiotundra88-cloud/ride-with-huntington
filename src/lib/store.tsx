@@ -221,6 +221,8 @@ interface StoreCtx {
   completion: number;
   incompleteStep: number;
   signOut: () => Promise<void>;
+  saveProfile: (u: Partial<User>) => Promise<void>;
+
 }
 
 const Ctx = createContext<StoreCtx | null>(null);
