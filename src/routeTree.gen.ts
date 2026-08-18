@@ -40,6 +40,7 @@ import { Route as AdminFaqsRouteImport } from './routes/admin.faqs'
 import { Route as AdminFamilyRouteImport } from './routes/admin.family'
 import { Route as AdminContactsRouteImport } from './routes/admin.contacts'
 import { Route as AdminConciergeRouteImport } from './routes/admin.concierge'
+import { Route as AdminApprovalsRouteImport } from './routes/admin.approvals'
 import { Route as AdminAnnouncementsRouteImport } from './routes/admin.announcements'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
@@ -203,6 +204,11 @@ const AdminConciergeRoute = AdminConciergeRouteImport.update({
   path: '/admin/concierge',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminApprovalsRoute = AdminApprovalsRouteImport.update({
+  id: '/admin/approvals',
+  path: '/admin/approvals',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminAnnouncementsRoute = AdminAnnouncementsRouteImport.update({
   id: '/admin/announcements',
   path: '/admin/announcements',
@@ -263,6 +269,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
+  '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/concierge': typeof AdminConciergeRoute
   '/admin/contacts': typeof AdminContactsRoute
   '/admin/family': typeof AdminFamilyRoute
@@ -303,6 +310,7 @@ export interface FileRoutesByTo {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
+  '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/concierge': typeof AdminConciergeRoute
   '/admin/contacts': typeof AdminContactsRoute
   '/admin/family': typeof AdminFamilyRoute
@@ -344,6 +352,7 @@ export interface FileRoutesById {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
+  '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/concierge': typeof AdminConciergeRoute
   '/admin/contacts': typeof AdminContactsRoute
   '/admin/family': typeof AdminFamilyRoute
@@ -386,6 +395,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin/announcements'
+    | '/admin/approvals'
     | '/admin/concierge'
     | '/admin/contacts'
     | '/admin/family'
@@ -426,6 +436,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin/announcements'
+    | '/admin/approvals'
     | '/admin/concierge'
     | '/admin/contacts'
     | '/admin/family'
@@ -466,6 +477,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin/announcements'
+    | '/admin/approvals'
     | '/admin/concierge'
     | '/admin/contacts'
     | '/admin/family'
@@ -507,6 +519,7 @@ export interface RootRouteChildren {
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   AdminAnnouncementsRoute: typeof AdminAnnouncementsRoute
+  AdminApprovalsRoute: typeof AdminApprovalsRoute
   AdminConciergeRoute: typeof AdminConciergeRoute
   AdminContactsRoute: typeof AdminContactsRoute
   AdminFamilyRoute: typeof AdminFamilyRoute
@@ -746,6 +759,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminConciergeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/approvals': {
+      id: '/admin/approvals'
+      path: '/admin/approvals'
+      fullPath: '/admin/approvals'
+      preLoaderRoute: typeof AdminApprovalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/announcements': {
       id: '/admin/announcements'
       path: '/admin/announcements'
@@ -831,6 +851,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   AdminAnnouncementsRoute: AdminAnnouncementsRoute,
+  AdminApprovalsRoute: AdminApprovalsRoute,
   AdminConciergeRoute: AdminConciergeRoute,
   AdminContactsRoute: AdminContactsRoute,
   AdminFamilyRoute: AdminFamilyRoute,
