@@ -28,6 +28,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ResourcesIdRouteImport } from './routes/resources.$id'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminRosterRouteImport } from './routes/admin.roster'
 import { Route as AdminReadinessRouteImport } from './routes/admin.readiness'
 import { Route as AdminParticipantsRouteImport } from './routes/admin.participants'
 import { Route as AdminPackingRouteImport } from './routes/admin.packing'
@@ -142,6 +143,11 @@ const ResourcesIdRoute = ResourcesIdRouteImport.update({
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/admin/users',
   path: '/admin/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRosterRoute = AdminRosterRouteImport.update({
+  id: '/admin/roster',
+  path: '/admin/roster',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminReadinessRoute = AdminReadinessRouteImport.update({
@@ -282,6 +288,7 @@ export interface FileRoutesByFullPath {
   '/admin/packing': typeof AdminPackingRoute
   '/admin/participants': typeof AdminParticipantsRoute
   '/admin/readiness': typeof AdminReadinessRoute
+  '/admin/roster': typeof AdminRosterRoute
   '/admin/users': typeof AdminUsersRoute
   '/resources/$id': typeof ResourcesIdRoute
   '/admin/': typeof AdminIndexRoute
@@ -323,6 +330,7 @@ export interface FileRoutesByTo {
   '/admin/packing': typeof AdminPackingRoute
   '/admin/participants': typeof AdminParticipantsRoute
   '/admin/readiness': typeof AdminReadinessRoute
+  '/admin/roster': typeof AdminRosterRoute
   '/admin/users': typeof AdminUsersRoute
   '/resources/$id': typeof ResourcesIdRoute
   '/admin': typeof AdminIndexRoute
@@ -365,6 +373,7 @@ export interface FileRoutesById {
   '/admin/packing': typeof AdminPackingRoute
   '/admin/participants': typeof AdminParticipantsRoute
   '/admin/readiness': typeof AdminReadinessRoute
+  '/admin/roster': typeof AdminRosterRoute
   '/admin/users': typeof AdminUsersRoute
   '/resources/$id': typeof ResourcesIdRoute
   '/admin/': typeof AdminIndexRoute
@@ -408,6 +417,7 @@ export interface FileRouteTypes {
     | '/admin/packing'
     | '/admin/participants'
     | '/admin/readiness'
+    | '/admin/roster'
     | '/admin/users'
     | '/resources/$id'
     | '/admin/'
@@ -449,6 +459,7 @@ export interface FileRouteTypes {
     | '/admin/packing'
     | '/admin/participants'
     | '/admin/readiness'
+    | '/admin/roster'
     | '/admin/users'
     | '/resources/$id'
     | '/admin'
@@ -490,6 +501,7 @@ export interface FileRouteTypes {
     | '/admin/packing'
     | '/admin/participants'
     | '/admin/readiness'
+    | '/admin/roster'
     | '/admin/users'
     | '/resources/$id'
     | '/admin/'
@@ -532,6 +544,7 @@ export interface RootRouteChildren {
   AdminPackingRoute: typeof AdminPackingRoute
   AdminParticipantsRoute: typeof AdminParticipantsRoute
   AdminReadinessRoute: typeof AdminReadinessRoute
+  AdminRosterRoute: typeof AdminRosterRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -673,6 +686,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/users'
       fullPath: '/admin/users'
       preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/roster': {
+      id: '/admin/roster'
+      path: '/admin/roster'
+      fullPath: '/admin/roster'
+      preLoaderRoute: typeof AdminRosterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/readiness': {
@@ -864,6 +884,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminPackingRoute: AdminPackingRoute,
   AdminParticipantsRoute: AdminParticipantsRoute,
   AdminReadinessRoute: AdminReadinessRoute,
+  AdminRosterRoute: AdminRosterRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
