@@ -13,11 +13,12 @@ import {
   listReviewRequests, decideOnRequest, getMyReviewRoles, listRequestApprovals, getRequestFlier,
 } from "@/lib/fundraiser-requests.functions";
 import {
-  STAGES, actionableStages, canActOnStage, stageStatus, statusLabel,
+  STAGES, actionableStages, canActOnStage, statusLabel,
   type ApprovalEntry, type FundraiserRequest, type StageKey,
 } from "@/lib/fundraiser-requests.shared";
+import { ApprovalTracker } from "@/components/ApprovalTracker";
 import { formatEventDate } from "@/lib/events.shared";
-import { StageIcon, StatusBadge } from "@/routes/fundraiser-request";
+import { StatusBadge } from "@/routes/fundraiser-request";
 
 export const Route = createFileRoute("/admin/approvals")({
   component: ApprovalsPage,
@@ -127,14 +128,7 @@ function ReviewCard({ request, roles }: { request: FundraiserRequest; roles: str
           )}
         </dl>
 
-        <div className="grid gap-2 rounded-lg border p-3 sm:grid-cols-3">
-          {STAGES.map((s) => (
-            <div key={s.key} className="flex items-center gap-2 text-sm">
-              <StageIcon status={stageStatus(request, s.key)} />
-              <span className="text-muted-foreground">{s.label}</span>
-            </div>
-          ))}
-        </div>
+        <ApprovalTracker request={request} />
 
         <div className="flex flex-wrap gap-2">
           {request.flier_name && (

@@ -128,3 +128,102 @@ export const requestFlierSchema = z.object({
   contentType: z.enum(ALLOWED_FLIER_TYPES),
   base64: z.string().min(1),
 });
+
+export type TrackerState = "todo" | "current" | "done" | "changes" | "declined";
+
+export interface TrackerPhase {
+  key: "submitted" | "captain" | "departments" | "cochair" | "calendar";
+  label: string;
+  detail?: string;
+  state: TrackerState;
+  chips?: { label: string; state: TrackerState }[];
+}
+
+function relativeTime(iso: string): string {
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return "";
+  const mins = Math.round((Date.now() - then) / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins} minute${mins === 1 ? "" : "s"} ago`;
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+  const days = Math.round(hours / 24);
+  if (days < 30) return `${days} day${days === 1 ? "" : "s"} ago`;
+  return new Date(iso).toLocaleDateString();
+}
+
+/** Pizza-tracker phases derived from the request's stage columns. */
+export function trackerPhases(r: FundraiserRequest): {
+  phases: TrackerPhase[];
+  message: string;
+  updatedLabel: string;
+} {
+  const tier2 = STAGES.filter((s) => s.tier === 2);
+  const cleared = tier2.filter((s) => stageStatus(r, s.key) === "approved");
+  const blocked = tier2.filter((s) => stageStatus(r, s.key) === "changes_requested");
+  const refused = tier2.filter((s) => stageStatus(r, s.key) === "declined");
+  const captain = stageStatus(r, "captain");
+  const cochair = stageStatus(r, "cochair");
+  const declined = r.status === "declined";
+  const approved = isFullyApproved(r);
+
+  const toState = (s: StageStatus, isCurrent: boolean): TrackerState =>
+    s === "approved" ? "done"
+      : s === "declined" ? "declined"
+        : s === "changes_requested" ? "changes"
+          : isCurrent ? "current" : "todo";
+
+  const captainState = toState(captain, true);
+  const departmentsActive = captain === "approved" && cleared.length < tier2.length;
+  const departmentsState: TrackerState =
+    refused.length > 0 ? "declined"
+      : blocked.length > 0 ? "changes"
+        : cleared.length === tier2.length ? "done"
+          : departmentsActive ? "current" : "todo";
+  const cochairState: TrackerState =
+    cleared.length === tier2.length ? toState(cochair, true) : toState(cochair, false);
+
+  const phases: TrackerPhase[] = [
+    { key: "submitted", label: "Submitted", detail: new Date(r.created_at).toLocaleDateString(), state: "done" },
+    { key: "captain", label: "Peloton Captain", state: captainState },
+    {
+      key: "departments",
+      label: "Department review",
+      detail: `${cleared.length} of ${tier2.length} cleared`,
+      state: departmentsState,
+      chips: tier2.map((s) => ({
+        label: s.label,
+        state: toState(stageStatus(r, s.key), false),
+      })),
+    },
+    { key: "cochair", label: "Co-Chair sign-off", state: cochairState },
+    {
+      key: "calendar",
+      label: r.event_type === "virtual" ? "Live" : "On the calendar",
+      state: r.event_id ? "done" : declined ? "declined" : "todo",
+    },
+  ];
+
+  let message: string;
+  if (declined) {
+    const who = refused[0]?.label ?? (captain === "declined" ? "Your peloton captain" : cochair === "declined" ? "A co-chair" : "A reviewer");
+    message = `${who} declined this request. Check the approval trail for their note.`;
+  } else if (approved) {
+    message = r.event_id
+      ? "Fully approved — your fundraiser is live on the Team Huntington calendar."
+      : "Fully approved. It publishes to the fundraising calendar momentarily.";
+  } else if (captain === "changes_requested") {
+    message = "Your peloton captain sent this back for changes — edit and resubmit below.";
+  } else if (blocked.length > 0) {
+    message = `Sent back for changes by ${blocked.map((s) => s.label).join(", ")} — edit and resubmit.`;
+  } else if (captain !== "approved") {
+    message = "Waiting on your peloton captain to review the details.";
+  } else if (cleared.length < tier2.length) {
+    const waiting = tier2.filter((s) => stageStatus(r, s.key) !== "approved").map((s) => s.label);
+    message = `Captain approved. Now with ${waiting.join(", ")} — they review in any order.`;
+  } else {
+    message = "All departments cleared. Waiting on final co-chair sign-off.";
+  }
+
+  return { phases, message, updatedLabel: relativeTime(r.updated_at) };
+}

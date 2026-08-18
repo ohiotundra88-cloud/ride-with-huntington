@@ -17,9 +17,10 @@ import {
   listMyRequests, saveMyRequest, uploadRequestFlier, getRequestFlier,
 } from "@/lib/fundraiser-requests.functions";
 import {
-  ALLOWED_FLIER_TYPES, MAX_FLIER_BYTES, STAGES, statusLabel, stageStatus,
+  ALLOWED_FLIER_TYPES, MAX_FLIER_BYTES, statusLabel,
   type FundraiserRequest, type RequestInput,
 } from "@/lib/fundraiser-requests.shared";
+import { ApprovalTracker } from "@/components/ApprovalTracker";
 import { formatEventDate } from "@/lib/events.shared";
 
 export const Route = createFileRoute("/fundraiser-request")({
@@ -259,13 +260,8 @@ function RequestCard({ request, onEdit }: { request: FundraiserRequest; onEdit: 
           <StatusBadge status={request.status} />
         </div>
 
-        <div className="mt-4 grid gap-2 sm:grid-cols-2">
-          {STAGES.map((s) => (
-            <div key={s.key} className="flex items-center gap-2 text-sm">
-              <StageIcon status={stageStatus(request, s.key)} />
-              <span className="text-muted-foreground">{s.label}</span>
-            </div>
-          ))}
+        <div className="mt-4">
+          <ApprovalTracker request={request} />
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
