@@ -36,33 +36,11 @@ const resources = [
 ];
 
 function Landing() {
+  const { user } = useStore();
+
   return (
     <div>
-      {/* HERO */}
-      <section className="relative bg-[var(--brand-dark)] text-white overflow-hidden">
-        <div className="text-[var(--brand)]"><ArrowMotif /></div>
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:py-24 relative">
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium ring-1 ring-white/15">
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--brand)]" />
-            Team Huntington · Pelotonia 2027
-          </div>
-          <h1 className="mt-8 text-4xl sm:text-6xl font-black tracking-tight leading-[1.08] max-w-5xl">
-            Your Team Huntington Pelotonia <span className="text-[var(--brand)]">Journey Starts Here.</span>
-          </h1>
-          <p className="mt-6 max-w-2xl text-base sm:text-lg leading-relaxed text-white/80">
-            One place to register, plan travel, rent a bike, pick apparel, and access support —
-            guided step by step, saved as you go.
-          </p>
-          <div className="mt-10 flex flex-wrap gap-3">
-            <Button asChild size="lg" className="bg-[var(--brand)] text-[var(--brand-foreground)] hover:bg-[var(--brand)]/90 h-12 px-6 text-base font-semibold">
-              <Link to="/register">Let's Go <ArrowRight className="ml-1 h-4 w-4" /></Link>
-            </Button>
-            <Button asChild size="lg" variant="outline" className="h-12 px-6 text-base bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white">
-              <Link to="/dashboard">View My Registration</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+      {user.signedIn ? <SignedInHero /> : <GuestHero />}
 
       {/* Announcements */}
       <div className="mx-auto max-w-7xl px-4 pt-6">
@@ -163,3 +141,113 @@ function Landing() {
     </div>
   );
 }
+
+function SignedInHero() {
+  const { user, completion, incompleteStep } = useStore();
+  const firstName = user.name.split(" ")[0] || "Rider";
+  const nextKeys = ["A", "B", "C", "D", "E", "F"] as const;
+  const nextStepKey = nextKeys[incompleteStep] ?? "F";
+  const nextLabel =
+    incompleteStep === 0
+      ? "Start your registration"
+      : incompleteStep === 5
+        ? "Review and submit"
+        : "Continue where you left off";
+  const nextSub =
+    completion === 100
+      ? "You're all set for Ride Weekend."
+      : completion > 0
+        ? "You have a few steps left to complete."
+        : "Let's get your Pelotonia registration started.";
+
+  return (
+    <section className="relative bg-[var(--brand-dark)] text-white overflow-hidden">
+      <div className="text-[var(--brand)]"><ArrowMotif /></div>
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:py-20 relative">
+        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium ring-1 ring-white/15">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--brand)]" />
+              Welcome back
+            </div>
+            <h1 className="mt-6 text-3xl sm:text-5xl font-black tracking-tight leading-[1.08]">
+              Hi, {firstName}. <span className="text-[var(--brand)]">Let's ride.</span>
+            </h1>
+            <p className="mt-4 text-base sm:text-lg leading-relaxed text-white/80">
+              {nextSub}
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Button asChild size="lg" className="bg-[var(--brand)] text-[var(--brand-foreground)] hover:bg-[var(--brand)]/90 h-12 px-6 text-base font-semibold">
+                <Link to="/register" search={{ step: nextStepKey }}>
+                  {nextLabel} <ArrowRight className="ml-1 h-4 w-4" />
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="h-12 px-6 text-base bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white">
+                <Link to="/team">See our progress</Link>
+              </Button>
+            </div>
+          </div>
+
+          <Card className="w-full lg:w-80 bg-white/10 border-white/10 text-white backdrop-blur">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-3">
+                <div className="grid h-11 w-11 place-items-center rounded-full bg-[var(--brand)] text-[var(--brand-foreground)] shrink-0">
+                  <User className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">{user.name}</p>
+                  <p className="text-xs text-white/70">{user.email}</p>
+                </div>
+              </div>
+              <div className="mt-4">
+                <div className="flex items-center justify-between text-xs mb-1.5">
+                  <span className="text-white/80">Journey progress</span>
+                  <span className="font-bold text-[var(--brand)]">{completion}%</span>
+                </div>
+                <Progress value={completion} className="h-2 bg-white/20" />
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <Button asChild variant="secondary" size="sm" className="bg-white/10 text-white hover:bg-white/20 border border-white/10">
+                  <Link to="/dashboard"><Target className="mr-1.5 h-3.5 w-3.5" /> My dashboard</Link>
+                </Button>
+                <Button asChild variant="secondary" size="sm" className="bg-white/10 text-white hover:bg-white/20 border border-white/10">
+                  <Link to="/resources"><HelpCircle className="mr-1.5 h-3.5 w-3.5" /> Resources</Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function GuestHero() {
+  return (
+    <section className="relative bg-[var(--brand-dark)] text-white overflow-hidden">
+      <div className="text-[var(--brand)]"><ArrowMotif /></div>
+      <div className="mx-auto max-w-7xl px-4 py-16 sm:py-24 relative">
+        <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium ring-1 ring-white/15">
+          <span className="h-1.5 w-1.5 rounded-full bg-[var(--brand)]" />
+          Team Huntington · Pelotonia 2027
+        </div>
+        <h1 className="mt-8 text-4xl sm:text-6xl font-black tracking-tight leading-[1.08] max-w-5xl">
+          Your Team Huntington Pelotonia <span className="text-[var(--brand)]">Journey Starts Here.</span>
+        </h1>
+        <p className="mt-6 max-w-2xl text-base sm:text-lg leading-relaxed text-white/80">
+          One place to register, plan travel, rent a bike, pick apparel, and access support —
+          guided step by step, saved as you go.
+        </p>
+        <div className="mt-10 flex flex-wrap gap-3">
+          <Button asChild size="lg" className="bg-[var(--brand)] text-[var(--brand-foreground)] hover:bg-[var(--brand)]/90 h-12 px-6 text-base font-semibold">
+            <Link to="/register">Let's Go <ArrowRight className="ml-1 h-4 w-4" /></Link>
+          </Button>
+          <Button asChild size="lg" variant="outline" className="h-12 px-6 text-base bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white">
+            <Link to="/dashboard">View My Registration</Link>
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
