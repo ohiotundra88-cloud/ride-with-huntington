@@ -28,6 +28,7 @@ import {
   Contact as ContactIcon,
   Home,
   Lock,
+  Image as ImageIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 
