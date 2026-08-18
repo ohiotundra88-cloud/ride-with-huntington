@@ -28,16 +28,16 @@ export function AnnouncementBanner({ audience }: { audience?: Audience }) {
       set.add(audience);
       return [...set];
     }
-    const participation = appState.registration?.participation ?? null;
+    const participation = registration?.participation ?? null;
     if (participation === "rider" || participation === "both") set.add("riders");
     if (participation === "volunteer" || participation === "both") set.add("volunteers");
-    const user = appState.user;
     if (user?.isAdmin || user?.isSuperUser) set.add("admins");
     // Signed-in colleagues who haven't picked a lane yet still see both tracks
     // so a rider-targeted announcement isn't invisible pre-registration.
     if (!participation && user?.signedIn) { set.add("riders"); set.add("volunteers"); }
     return [...set];
-  }, [audience, appState.registration?.participation, appState.user]);
+  }, [audience, registration?.participation, user]);
+
 
   const active = useMemo(() => {
     if (!state.flags.announcements) return [];
