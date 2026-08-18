@@ -189,7 +189,26 @@ function AnnouncementsAdmin() {
               </div>
               <div className="space-y-1">
                 <Label>CTA link</Label>
-                <Input value={editing.ctaHref ?? ""} onChange={(e) => setEditing({ ...editing, ctaHref: e.target.value })} placeholder="/register" />
+                <Select value={editing.ctaHref ?? ""} onValueChange={(v) => setEditing({ ...editing, ctaHref: v })}>
+                  <SelectTrigger><SelectValue placeholder="No link" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No link</SelectItem>
+                    <SelectItem value="/register">Register</SelectItem>
+                    <SelectItem value="/dashboard">My Dashboard</SelectItem>
+                    <SelectItem value="/profile">My Profile</SelectItem>
+                    <SelectItem value="/team">Team Progress</SelectItem>
+                    <SelectItem value="/events">Events Calendar</SelectItem>
+                    <SelectItem value="/resources">Resource Center</SelectItem>
+                    <SelectItem value="/fundraiser-request">Submit Fundraiser</SelectItem>
+                    <SelectItem value="/captains-lounge">Captains Lounge</SelectItem>
+                    <SelectItem value="/packing">Packing List</SelectItem>
+                    <SelectItem value="/family">Family View</SelectItem>
+                    <SelectItem value="/expenses">Expense Guide</SelectItem>
+                    <SelectItem value="/admin/participants">Participant Management</SelectItem>
+                    <SelectItem value="/admin/events">Event Management</SelectItem>
+                    <SelectItem value="/admin/approvals">Fundraiser Approvals</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-1">
                 <Label>Publish at</Label>
