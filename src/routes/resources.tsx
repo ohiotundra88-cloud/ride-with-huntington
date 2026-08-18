@@ -76,7 +76,10 @@ function Resources() {
         )}
       </div>
 
+      <FundraisingResources />
+
       <ContactDirectory />
+
     </div>
   );
 }
