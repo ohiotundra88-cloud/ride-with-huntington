@@ -82,42 +82,42 @@ function ProfilePage() {
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2 sm:col-span-2">
             <Label>Full name</Label>
-            <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+            <Input value={form.name} onChange={(e) => update({ name: e.target.value })} />
             {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
           </div>
           <div className="space-y-2">
             <Label>Work email</Label>
-            <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            <Input type="email" value={form.email} onChange={(e) => update({ email: e.target.value })} />
             {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
           </div>
           <div className="space-y-2">
             <Label>Mobile number</Label>
-            <Input value={form.mobile} onChange={(e) => setForm({ ...form, mobile: e.target.value })} />
+            <Input value={form.mobile} onChange={(e) => update({ mobile: e.target.value })} />
           </div>
           <div className="space-y-2">
             <Label>Business segment</Label>
-            <Select value={form.segment} onValueChange={(v) => setForm({ ...form, segment: v })}>
+            <Select value={form.segment} onValueChange={(v) => update({ segment: v })}>
               <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
               <SelectContent>{segments.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
             <Label>Market / location</Label>
-            <Select value={form.market} onValueChange={(v) => setForm({ ...form, market: v })}>
+            <Select value={form.market} onValueChange={(v) => update({ market: v })}>
               <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
               <SelectContent>{markets.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
             </Select>
           </div>
           <div className="space-y-2 sm:col-span-2">
             <Label>Manager</Label>
-            <Input value={form.manager} onChange={(e) => setForm({ ...form, manager: e.target.value })} />
+            <Input value={form.manager} onChange={(e) => update({ manager: e.target.value })} />
           </div>
 
           <div className="sm:col-span-2 rounded-lg bg-muted/50 p-4">
             <label className="flex gap-3 items-start cursor-pointer">
               <Checkbox
                 checked={form.consent}
-                onCheckedChange={(v) => setForm({ ...form, consent: !!v })}
+                onCheckedChange={(v) => update({ consent: !!v })}
                 className="mt-0.5"
               />
               <span className="text-sm text-muted-foreground">
@@ -131,8 +131,8 @@ function ProfilePage() {
 
       <div className="mt-6 flex justify-end gap-2">
         <Button variant="outline" onClick={() => nav({ to: "/" })}>Cancel</Button>
-        <Button onClick={save} className="bg-[var(--brand)] text-[var(--brand-foreground)] hover:bg-[var(--brand)]/90 font-semibold">
-          Save & continue
+        <Button onClick={save} disabled={saving} className="bg-[var(--brand)] text-[var(--brand-foreground)] hover:bg-[var(--brand)]/90 font-semibold">
+          {saving ? "Saving…" : "Save & continue"}
         </Button>
       </div>
     </div>
