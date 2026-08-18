@@ -364,6 +364,26 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [registration, user.signedIn, user.userId, hydrated]);
 
   const setUser = (u: Partial<User>) => setUserState((prev) => ({ ...prev, ...u }));
+
+  // Persist colleague details to the cloud profile so they survive reloads
+  const saveProfile = async (u: Partial<User>) => {
+    setUserState((prev) => ({ ...prev, ...u }));
+    const id = user.userId;
+    if (!id) return;
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        full_name: u.name ?? user.name,
+        mobile: u.mobile ?? user.mobile,
+        segment: u.segment ?? user.segment,
+        market: u.market ?? user.market,
+        manager: u.manager ?? user.manager,
+        consent: u.consent ?? user.consent,
+      })
+      .eq("id", id);
+    if (error) throw new Error(error.message);
+  };
+
   const setRegistration = (r: Partial<Registration> | ((prev: Registration) => Registration)) =>
     setRegState((prev) => typeof r === "function" ? r(prev) : { ...prev, ...r });
 
