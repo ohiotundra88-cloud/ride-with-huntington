@@ -45,7 +45,6 @@ const links = [
   { to: "/admin/faqs", label: "FAQs", icon: FileText },
   { to: "/admin/fundraising", label: "Fundraising Resources", icon: Megaphone },
   { to: "/admin/approvals", label: "Fundraiser Approvals", icon: ClipboardList },
-  { to: "/admin/events", label: "Events", icon: CalendarDays },
   { to: "/admin/participants", label: "Participants", icon: Users },
   { to: "/admin/roster", label: "Permanent Roster", icon: Lock },
   { to: "/admin/users", label: "Admins & Super Users", icon: ShieldCheck },
