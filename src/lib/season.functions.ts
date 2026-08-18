@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { assertSuper, demoPassword } from "@/lib/season.server";
 
 export interface ManualParticipantRow {
   user_id: string;
@@ -9,14 +10,6 @@ export interface ManualParticipantRow {
   participation: string | null;
   season: string;
   created_at: string;
-}
-
-/** Same deterministic demo password the sign-in screen derives from the email. */
-const demoPassword = (email: string) => `Hub!${email.trim().toLowerCase()}#2027`;
-
-async function assertSuper(context: { supabase: any; userId: string }) {
-  const { assertSuperUser } = await import("@/lib/roles-admin.server");
-  await assertSuperUser(context);
 }
 
 export const listManualParticipants = createServerFn({ method: "GET" })
