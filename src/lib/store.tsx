@@ -259,20 +259,32 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       // Fetch role + profile in parallel
       const [rolesRes, profileRes] = await Promise.all([
         supabase.from("user_roles").select("role").eq("user_id", sessionUser.id),
-        supabase.from("profiles").select("full_name, email").eq("id", sessionUser.id).maybeSingle(),
+        supabase
+          .from("profiles")
+          .select("full_name, email, mobile, segment, market, manager, consent")
+          .eq("id", sessionUser.id)
+          .maybeSingle(),
       ]);
       const myRoles = (rolesRes.data ?? []).map((r) => String(r.role));
       const isAdmin = myRoles.includes("admin");
       const isSuperUser = myRoles.includes("superuser");
       const isCaptain = isAdmin || isSuperUser || myRoles.includes("captain");
       const isReviewer = isCaptain || ["legal", "risk", "compliance", "marketing", "cochair"].some((r) => myRoles.includes(r));
-      const fullName = profileRes.data?.full_name || nameGuess;
+      const prof = profileRes.data as
+        | { full_name?: string | null; mobile?: string | null; segment?: string | null; market?: string | null; manager?: string | null; consent?: boolean | null }
+        | null;
+      const fullName = prof?.full_name || nameGuess;
       if (cancelled) return;
       setUserState({
         ...guestUser,
         userId: sessionUser.id,
         email,
         name: fullName,
+        mobile: prof?.mobile ?? "",
+        segment: prof?.segment ?? "",
+        market: prof?.market ?? "",
+        manager: prof?.manager ?? "",
+        consent: !!prof?.consent,
         signedIn: true,
         isAdmin,
         isCaptain,
@@ -280,6 +292,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         isReviewer,
         roles: myRoles,
       });
+
 
       // Load participant row from cloud (overrides local if present)
       try {
