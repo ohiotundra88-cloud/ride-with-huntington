@@ -23,6 +23,7 @@ import { Route as ExpensesRouteImport } from './routes/expenses'
 import { Route as EventsRouteImport } from './routes/events'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ConfirmationRouteImport } from './routes/confirmation'
+import { Route as CaptainsLoungeRouteImport } from './routes/captains-lounge'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
@@ -118,6 +119,11 @@ const DashboardRoute = DashboardRouteImport.update({
 const ConfirmationRoute = ConfirmationRouteImport.update({
   id: '/confirmation',
   path: '/confirmation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaptainsLoungeRoute = CaptainsLoungeRouteImport.update({
+  id: '/captains-lounge',
+  path: '/captains-lounge',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AnalyticsRoute = AnalyticsRouteImport.update({
@@ -258,6 +264,7 @@ const ApiPublicEventFlierIdRoute = ApiPublicEventFlierIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
+  '/captains-lounge': typeof CaptainsLoungeRoute
   '/confirmation': typeof ConfirmationRoute
   '/dashboard': typeof DashboardRoute
   '/events': typeof EventsRoute
@@ -300,6 +307,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
+  '/captains-lounge': typeof CaptainsLoungeRoute
   '/confirmation': typeof ConfirmationRoute
   '/dashboard': typeof DashboardRoute
   '/events': typeof EventsRoute
@@ -343,6 +351,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
+  '/captains-lounge': typeof CaptainsLoungeRoute
   '/confirmation': typeof ConfirmationRoute
   '/dashboard': typeof DashboardRoute
   '/events': typeof EventsRoute
@@ -387,6 +396,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/analytics'
+    | '/captains-lounge'
     | '/confirmation'
     | '/dashboard'
     | '/events'
@@ -429,6 +439,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/analytics'
+    | '/captains-lounge'
     | '/confirmation'
     | '/dashboard'
     | '/events'
@@ -471,6 +482,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/analytics'
+    | '/captains-lounge'
     | '/confirmation'
     | '/dashboard'
     | '/events'
@@ -514,6 +526,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnalyticsRoute: typeof AnalyticsRoute
+  CaptainsLoungeRoute: typeof CaptainsLoungeRoute
   ConfirmationRoute: typeof ConfirmationRoute
   DashboardRoute: typeof DashboardRoute
   EventsRoute: typeof EventsRoute
@@ -651,6 +664,13 @@ declare module '@tanstack/react-router' {
       path: '/confirmation'
       fullPath: '/confirmation'
       preLoaderRoute: typeof ConfirmationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/captains-lounge': {
+      id: '/captains-lounge'
+      path: '/captains-lounge'
+      fullPath: '/captains-lounge'
+      preLoaderRoute: typeof CaptainsLoungeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/analytics': {
@@ -853,6 +873,7 @@ const ResourcesRouteWithChildren = ResourcesRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalyticsRoute: AnalyticsRoute,
+  CaptainsLoungeRoute: CaptainsLoungeRoute,
   ConfirmationRoute: ConfirmationRoute,
   DashboardRoute: DashboardRoute,
   EventsRoute: EventsRoute,
