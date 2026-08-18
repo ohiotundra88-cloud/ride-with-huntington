@@ -2,18 +2,9 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { RoleMemberRow } from "@/lib/roles-admin.server";
+import { MANAGEABLE_ROLES } from "@/lib/roles.shared";
 
 export type { RoleMemberRow };
-
-export const MANAGEABLE_ROLES = [
-  "superuser",
-  "captain",
-  "legal",
-  "risk",
-  "compliance",
-  "marketing",
-  "cochair",
-] as const;
 
 const roleSchema = z.enum(MANAGEABLE_ROLES);
 

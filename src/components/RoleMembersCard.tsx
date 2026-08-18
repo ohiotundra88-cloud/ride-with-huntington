@@ -12,10 +12,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   listRoleMembers, grantRoleByEmail, revokeRoleFromUser, type RoleMemberRow,
-  type MANAGEABLE_ROLES,
 } from "@/lib/roles-manage.functions";
-
-type ManageableRole = (typeof MANAGEABLE_ROLES)[number];
+import type { ManageableRole } from "@/lib/roles.shared";
 
 export function RoleMembersCard({
   role,
