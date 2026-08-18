@@ -212,6 +212,7 @@ function SignedInHero() {
 
   return (
     <section className="relative bg-[var(--brand-dark)] text-white overflow-hidden">
+      <HeroBackdrop />
       <div className="text-[var(--brand)]"><ArrowMotif /></div>
       <div className="mx-auto max-w-7xl px-4 py-12 sm:py-20 relative">
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
@@ -275,6 +276,7 @@ function SignedInHero() {
 function GuestHero() {
   return (
     <section className="relative bg-[var(--brand-dark)] text-white overflow-hidden">
+      <HeroBackdrop />
       <div className="text-[var(--brand)]"><ArrowMotif /></div>
       <div className="mx-auto max-w-7xl px-4 py-16 sm:py-24 relative">
         <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium ring-1 ring-white/15">
