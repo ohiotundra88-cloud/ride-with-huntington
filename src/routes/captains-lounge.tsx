@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import {
-  Lock, ShieldCheck, Pin, Paperclip, Plus, Pencil, Trash2, EyeOff, Upload, X, Download, Search, UserCircle2,
+  Lock, ShieldCheck, Pin, Paperclip, Plus, Pencil, Trash2, EyeOff, Upload, X, Download, Search,
   Eye, ChevronUp,
 } from "lucide-react";
 import {
@@ -27,6 +27,8 @@ import {
 import {
   ALLOWED_DOC_TYPES, MAX_DOC_BYTES, formatPostDate, postCategories, type CaptainPost,
 } from "@/lib/captain-lounge.shared";
+import { avatarUrl, initialsFrom } from "@/lib/profile-photo.shared";
+
 
 export const Route = createFileRoute("/captains-lounge")({
   component: CaptainsLoungePage,
@@ -221,7 +223,18 @@ function PostCard({ post, canManage }: { post: CaptainPost; canManage: boolean }
             </div>
             <CardTitle className="text-lg leading-snug">{post.title}</CardTitle>
             <p className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-muted-foreground">
-              <UserCircle2 className="h-3.5 w-3.5 shrink-0" />
+              {post.author_avatar_version ? (
+                <img
+                  src={avatarUrl(post.created_by, post.author_avatar_version)}
+                  alt={post.author_name ? `${post.author_name} profile photo` : "Author profile photo"}
+                  loading="lazy"
+                  className="mr-0.5 h-6 w-6 shrink-0 rounded-full object-cover ring-1 ring-border"
+                />
+              ) : (
+                <span className="mr-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted text-[10px] font-bold text-muted-foreground">
+                  {initialsFrom(post.author_name || post.author_email)}
+                </span>
+              )}
               <span className="font-medium text-foreground">
                 {post.author_name || post.author_email || "Team leadership"}
               </span>
@@ -232,6 +245,7 @@ function PostCard({ post, canManage }: { post: CaptainPost; canManage: boolean }
               <span>Posted {formatPostDate(post.created_at)}</span>
             </p>
           </div>
+
           {canManage && (
             <div className="flex items-center gap-1">
               <PostDialog post={post} onSaved={invalidate} />

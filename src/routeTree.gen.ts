@@ -52,6 +52,7 @@ import { Route as ApiPublicSbSplatRouteImport } from './routes/api/public/sb/$'
 import { Route as ApiPublicFundraisingAssetIdRouteImport } from './routes/api/public/fundraising-asset/$id'
 import { Route as ApiPublicEventFlierIdRouteImport } from './routes/api/public/event-flier/$id'
 import { Route as ApiPublicBrandingKindRouteImport } from './routes/api/public/branding/$kind'
+import { Route as ApiPublicAvatarUserIdRouteImport } from './routes/api/public/avatar/$userId'
 
 const TeamRoute = TeamRouteImport.update({
   id: '/team',
@@ -272,6 +273,11 @@ const ApiPublicBrandingKindRoute = ApiPublicBrandingKindRouteImport.update({
   path: '/api/public/branding/$kind',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicAvatarUserIdRoute = ApiPublicAvatarUserIdRouteImport.update({
+  id: '/api/public/avatar/$userId',
+  path: '/api/public/avatar/$userId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -313,6 +319,7 @@ export interface FileRoutesByFullPath {
   '/resources/$id': typeof ResourcesIdRoute
   '/admin/': typeof AdminIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/public/avatar/$userId': typeof ApiPublicAvatarUserIdRoute
   '/api/public/branding/$kind': typeof ApiPublicBrandingKindRoute
   '/api/public/event-flier/$id': typeof ApiPublicEventFlierIdRoute
   '/api/public/fundraising-asset/$id': typeof ApiPublicFundraisingAssetIdRoute
@@ -358,6 +365,7 @@ export interface FileRoutesByTo {
   '/resources/$id': typeof ResourcesIdRoute
   '/admin': typeof AdminIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/public/avatar/$userId': typeof ApiPublicAvatarUserIdRoute
   '/api/public/branding/$kind': typeof ApiPublicBrandingKindRoute
   '/api/public/event-flier/$id': typeof ApiPublicEventFlierIdRoute
   '/api/public/fundraising-asset/$id': typeof ApiPublicFundraisingAssetIdRoute
@@ -404,6 +412,7 @@ export interface FileRoutesById {
   '/resources/$id': typeof ResourcesIdRoute
   '/admin/': typeof AdminIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/public/avatar/$userId': typeof ApiPublicAvatarUserIdRoute
   '/api/public/branding/$kind': typeof ApiPublicBrandingKindRoute
   '/api/public/event-flier/$id': typeof ApiPublicEventFlierIdRoute
   '/api/public/fundraising-asset/$id': typeof ApiPublicFundraisingAssetIdRoute
@@ -451,6 +460,7 @@ export interface FileRouteTypes {
     | '/resources/$id'
     | '/admin/'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/public/avatar/$userId'
     | '/api/public/branding/$kind'
     | '/api/public/event-flier/$id'
     | '/api/public/fundraising-asset/$id'
@@ -496,6 +506,7 @@ export interface FileRouteTypes {
     | '/resources/$id'
     | '/admin'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/public/avatar/$userId'
     | '/api/public/branding/$kind'
     | '/api/public/event-flier/$id'
     | '/api/public/fundraising-asset/$id'
@@ -541,6 +552,7 @@ export interface FileRouteTypes {
     | '/resources/$id'
     | '/admin/'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/public/avatar/$userId'
     | '/api/public/branding/$kind'
     | '/api/public/event-flier/$id'
     | '/api/public/fundraising-asset/$id'
@@ -586,6 +598,7 @@ export interface RootRouteChildren {
   AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  ApiPublicAvatarUserIdRoute: typeof ApiPublicAvatarUserIdRoute
   ApiPublicBrandingKindRoute: typeof ApiPublicBrandingKindRoute
   ApiPublicEventFlierIdRoute: typeof ApiPublicEventFlierIdRoute
   ApiPublicFundraisingAssetIdRoute: typeof ApiPublicFundraisingAssetIdRoute
@@ -895,6 +908,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicBrandingKindRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/avatar/$userId': {
+      id: '/api/public/avatar/$userId'
+      path: '/api/public/avatar/$userId'
+      fullPath: '/api/public/avatar/$userId'
+      preLoaderRoute: typeof ApiPublicAvatarUserIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -950,6 +970,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  ApiPublicAvatarUserIdRoute: ApiPublicAvatarUserIdRoute,
   ApiPublicBrandingKindRoute: ApiPublicBrandingKindRoute,
   ApiPublicEventFlierIdRoute: ApiPublicEventFlierIdRoute,
   ApiPublicFundraisingAssetIdRoute: ApiPublicFundraisingAssetIdRoute,

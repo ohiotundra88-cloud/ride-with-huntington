@@ -48,16 +48,18 @@ export const listLoungePosts = createServerFn({ method: "GET" })
     const ids = Array.from(new Set(posts.map((p) => p.created_by).filter(Boolean)));
     if (ids.length) {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { data: profiles } = await supabaseAdmin
+      const { data: profiles } = await (supabaseAdmin as any)
         .from("profiles")
-        .select("id, full_name, email")
+        .select("id, full_name, email, avatar_path, avatar_updated_at")
         .in("id", ids);
       const byId = new Map((profiles ?? []).map((p: any) => [p.id, p]));
       for (const post of posts) {
-        const prof = byId.get(post.created_by);
+        const prof = byId.get(post.created_by) as any;
         post.author_name = prof?.full_name ?? null;
         post.author_email = prof?.email ?? null;
+        post.author_avatar_version = prof?.avatar_path ? (prof.avatar_updated_at ?? "1") : null;
       }
+
     }
     return posts;
   });
