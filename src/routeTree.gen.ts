@@ -33,6 +33,7 @@ import { Route as AdminPackingRouteImport } from './routes/admin.packing'
 import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
 import { Route as AdminJourneyRouteImport } from './routes/admin.journey'
 import { Route as AdminGoalsRouteImport } from './routes/admin.goals'
+import { Route as AdminFundraisingRouteImport } from './routes/admin.fundraising'
 import { Route as AdminFlagsRouteImport } from './routes/admin.flags'
 import { Route as AdminFaqsRouteImport } from './routes/admin.faqs'
 import { Route as AdminFamilyRouteImport } from './routes/admin.family'
@@ -166,6 +167,11 @@ const AdminGoalsRoute = AdminGoalsRouteImport.update({
   path: '/admin/goals',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminFundraisingRoute = AdminFundraisingRouteImport.update({
+  id: '/admin/fundraising',
+  path: '/admin/fundraising',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminFlagsRoute = AdminFlagsRouteImport.update({
   id: '/admin/flags',
   path: '/admin/flags',
@@ -255,6 +261,7 @@ export interface FileRoutesByFullPath {
   '/admin/family': typeof AdminFamilyRoute
   '/admin/faqs': typeof AdminFaqsRoute
   '/admin/flags': typeof AdminFlagsRoute
+  '/admin/fundraising': typeof AdminFundraisingRoute
   '/admin/goals': typeof AdminGoalsRoute
   '/admin/journey': typeof AdminJourneyRoute
   '/admin/notifications': typeof AdminNotificationsRoute
@@ -293,6 +300,7 @@ export interface FileRoutesByTo {
   '/admin/family': typeof AdminFamilyRoute
   '/admin/faqs': typeof AdminFaqsRoute
   '/admin/flags': typeof AdminFlagsRoute
+  '/admin/fundraising': typeof AdminFundraisingRoute
   '/admin/goals': typeof AdminGoalsRoute
   '/admin/journey': typeof AdminJourneyRoute
   '/admin/notifications': typeof AdminNotificationsRoute
@@ -332,6 +340,7 @@ export interface FileRoutesById {
   '/admin/family': typeof AdminFamilyRoute
   '/admin/faqs': typeof AdminFaqsRoute
   '/admin/flags': typeof AdminFlagsRoute
+  '/admin/fundraising': typeof AdminFundraisingRoute
   '/admin/goals': typeof AdminGoalsRoute
   '/admin/journey': typeof AdminJourneyRoute
   '/admin/notifications': typeof AdminNotificationsRoute
@@ -372,6 +381,7 @@ export interface FileRouteTypes {
     | '/admin/family'
     | '/admin/faqs'
     | '/admin/flags'
+    | '/admin/fundraising'
     | '/admin/goals'
     | '/admin/journey'
     | '/admin/notifications'
@@ -410,6 +420,7 @@ export interface FileRouteTypes {
     | '/admin/family'
     | '/admin/faqs'
     | '/admin/flags'
+    | '/admin/fundraising'
     | '/admin/goals'
     | '/admin/journey'
     | '/admin/notifications'
@@ -448,6 +459,7 @@ export interface FileRouteTypes {
     | '/admin/family'
     | '/admin/faqs'
     | '/admin/flags'
+    | '/admin/fundraising'
     | '/admin/goals'
     | '/admin/journey'
     | '/admin/notifications'
@@ -487,6 +499,7 @@ export interface RootRouteChildren {
   AdminFamilyRoute: typeof AdminFamilyRoute
   AdminFaqsRoute: typeof AdminFaqsRoute
   AdminFlagsRoute: typeof AdminFlagsRoute
+  AdminFundraisingRoute: typeof AdminFundraisingRoute
   AdminGoalsRoute: typeof AdminGoalsRoute
   AdminJourneyRoute: typeof AdminJourneyRoute
   AdminNotificationsRoute: typeof AdminNotificationsRoute
@@ -671,6 +684,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminGoalsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/fundraising': {
+      id: '/admin/fundraising'
+      path: '/admin/fundraising'
+      fullPath: '/admin/fundraising'
+      preLoaderRoute: typeof AdminFundraisingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/flags': {
       id: '/admin/flags'
       path: '/admin/flags'
@@ -795,6 +815,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminFamilyRoute: AdminFamilyRoute,
   AdminFaqsRoute: AdminFaqsRoute,
   AdminFlagsRoute: AdminFlagsRoute,
+  AdminFundraisingRoute: AdminFundraisingRoute,
   AdminGoalsRoute: AdminGoalsRoute,
   AdminJourneyRoute: AdminJourneyRoute,
   AdminNotificationsRoute: AdminNotificationsRoute,
