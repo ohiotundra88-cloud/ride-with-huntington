@@ -155,10 +155,11 @@ function StepPelotonia() {
   const upd = (patch: Partial<typeof p>) => setRegistration((prev) => ({ ...prev, pelotonia: { ...prev.pelotonia, ...patch } }));
 
   const markComplete = () => {
-    const complete = !!(p.confirmation && p.hbNumber);
+    const complete = !!(p.confirmation && p.hbNumber && p.employmentType && p.payGrade74Below);
     upd({ completed: true, status: complete ? "complete" : "pending" });
     setRegistration((prev) => addAudit(prev, "Pelotonia registration marked complete"));
-    toast.success(complete ? "Pelotonia step complete" : "Pelotonia step updated — missing required IDs");
+    toast.success(complete ? "Pelotonia step complete" : "Pelotonia step updated — some required answers are missing");
+
   };
 
   return (
@@ -231,6 +232,31 @@ function StepPelotonia() {
               </span>
             </label>
           </div>
+
+          <div className="rounded-lg border bg-muted/30 p-3 space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Colleague details</p>
+            <div>
+              <Label>Are you a Salary or Hourly colleague? <span className="text-red-500">*</span></Label>
+              <Select value={p.employmentType} onValueChange={(v) => upd({ employmentType: v as "salary" | "hourly" })}>
+                <SelectTrigger className="mt-1.5"><SelectValue placeholder="Select..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="salary">Salary</SelectItem>
+                  <SelectItem value="hourly">Hourly</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Are you a pay grade 74 and below? <span className="text-red-500">*</span></Label>
+              <Select value={p.payGrade74Below} onValueChange={(v) => upd({ payGrade74Below: v as "yes" | "no" })}>
+                <SelectTrigger className="mt-1.5"><SelectValue placeholder="Select..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="yes">Yes — pay grade 74 or below</SelectItem>
+                  <SelectItem value="no">No — pay grade 75 or above</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
 
           <Button onClick={markComplete} variant="outline" className="w-full">Save status</Button>
         </CardContent>
@@ -597,6 +623,9 @@ function StepReview({ onEdit }: { onEdit: (n: number) => void }) {
           <Row label="Discount code" value={registration.pelotonia.discountCode} editStep={2} />
           <Row label="Public/Rider ID" value={registration.pelotonia.confirmation} editStep={2} />
           <Row label="HB number" value={registration.pelotonia.hbNumber} editStep={2} />
+          <Row label="Salary / Hourly" value={registration.pelotonia.employmentType} editStep={2} />
+          <Row label="Pay grade 74 or below" value={registration.pelotonia.payGrade74Below} editStep={2} />
+
         </CardContent>
       </Card>
 
