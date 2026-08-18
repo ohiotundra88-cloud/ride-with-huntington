@@ -307,9 +307,19 @@ function AttachmentPreview({
 
   const objectUrl = useMemo(() => {
     if (!file.data || isText) return null;
-    const bytes = Uint8Array.from(atob(file.data.base64), (c) => c.charCodeAt(0));
-    return URL.createObjectURL(new Blob([bytes], { type: file.data.contentType }));
-  }, [file.data, isText]);
+    try {
+      const bytes = Uint8Array.from(atob(file.data.base64), (c) => c.charCodeAt(0));
+      const mime = isPdf
+        ? "application/pdf"
+        : isImage && !file.data.contentType.startsWith("image/")
+          ? `image/${ext === "jpg" ? "jpeg" : ext || "png"}`
+          : file.data.contentType;
+      return URL.createObjectURL(new Blob([bytes], { type: mime }));
+    } catch {
+      return null;
+    }
+  }, [file.data, isText, isPdf, isImage, ext]);
+
 
   useEffect(() => {
     return () => {
