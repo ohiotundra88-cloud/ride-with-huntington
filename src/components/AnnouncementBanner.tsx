@@ -28,13 +28,16 @@ export function AnnouncementBanner({ audience }: { audience?: Audience }) {
       set.add(audience);
       return [...set];
     }
-    const participation = registration?.participation ?? null;
-    if (participation === "rider" || participation === "both") set.add("riders");
-    if (participation === "volunteer" || participation === "both") set.add("volunteers");
+    const participation = String(registration?.participation ?? "").toLowerCase();
+    const isRider = participation.includes("rider") || participation === "both";
+    const isVolunteer = participation.includes("volunteer") || participation === "both";
+    if (isRider) set.add("riders");
+    if (isVolunteer) set.add("volunteers");
     if (user?.isAdmin || user?.isSuperUser) set.add("admins");
-    // Signed-in colleagues who haven't picked a lane yet still see both tracks
-    // so a rider-targeted announcement isn't invisible pre-registration.
-    if (!participation && user?.signedIn) { set.add("riders"); set.add("volunteers"); }
+    // If we don't know the viewer's lane yet (not registered, or registration
+    // still hydrating from the backend), show both tracks so a rider-targeted
+    // announcement is never silently hidden.
+    if (!isRider && !isVolunteer) { set.add("riders"); set.add("volunteers"); }
     return [...set];
   }, [audience, registration?.participation, user]);
 
