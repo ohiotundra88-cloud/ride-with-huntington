@@ -79,6 +79,9 @@ export interface PelotoniaReg {
   completed: boolean;
   highRoller: boolean;
   survivor: boolean;
+  employmentType: "salary" | "hourly" | "";
+  payGrade74Below: "yes" | "no" | "";
+
   status: StepStatus;
 }
 
