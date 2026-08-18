@@ -40,9 +40,11 @@ function TeamHub() {
   const liveMetrics = live
     ? [
         { id: "members", label: "Team members", value: live.members.toLocaleString(), note: "live" },
-        { id: "riders", label: "Riders", value: live.riders.toLocaleString(), note: `+ ${live.challengers.toLocaleString()} challengers` },
+        { id: "riders", label: "Riders", value: live.riders.toLocaleString(), note: "live" },
+        { id: "challengers", label: "Challengers", value: live.challengers.toLocaleString(), note: "live" },
         { id: "volunteers", label: "Volunteers", value: live.volunteers.toLocaleString(), note: "live" },
-        { id: "hr", label: "High rollers", value: live.highRollers.toLocaleString(), note: `${live.survivors.toLocaleString()} survivors` },
+        { id: "hr", label: "High rollers", value: live.highRollers.toLocaleString(), note: "live" },
+        { id: "survivors", label: "Survivors", value: live.survivors.toLocaleString(), note: "live" },
       ]
     : null;
 
