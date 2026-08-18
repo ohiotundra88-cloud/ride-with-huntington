@@ -27,6 +27,8 @@ import {
 import {
   ALLOWED_DOC_TYPES, MAX_DOC_BYTES, formatPostDate, postCategories, type CaptainPost,
 } from "@/lib/captain-lounge.shared";
+import { avatarUrl, initialsFrom } from "@/lib/profile-photo.shared";
+
 
 export const Route = createFileRoute("/captains-lounge")({
   component: CaptainsLoungePage,
