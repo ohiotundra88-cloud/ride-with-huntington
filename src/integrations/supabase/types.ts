@@ -285,7 +285,6 @@ export type Database = {
         }
         Returns: boolean
       }
-      increment_site_visits: { Args: never; Returns: number }
       is_admin_text: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
