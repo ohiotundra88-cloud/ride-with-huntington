@@ -56,8 +56,9 @@ function EventsPage() {
   const canManage = user.signedIn && user.isCaptain;
 
   const { data: events = [], isLoading } = useQuery<FundraisingEvent[]>({
-    queryKey: ["events", canManage ? "manage" : "public"],
-    queryFn: () => (canManage ? listManageableEvents() : listPublicEvents()),
+    queryKey: ["events", canManage ? "manage" : user.signedIn ? "colleague" : "public"],
+    queryFn: () =>
+      canManage ? listManageableEvents() : user.signedIn ? listEventsForColleague() : listPublicEvents(),
   });
 
   const [cursor, setCursor] = useState(() => {
