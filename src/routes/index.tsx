@@ -179,11 +179,9 @@ function SignedInHero() {
   const nextKeys = ["A", "B", "C", "D", "E", "F"] as const;
   const nextStepKey = nextKeys[incompleteStep] ?? "F";
   const nextLabel =
-    incompleteStep === 0
-      ? "Start your registration"
-      : incompleteStep === 5
-        ? "Review and submit"
-        : "Continue where you left off";
+    completion === 100
+      ? "Review your confirmation"
+      : "What do I need to do next?";
   const nextSub =
     completion === 100
       ? "You're all set for Ride Weekend."
