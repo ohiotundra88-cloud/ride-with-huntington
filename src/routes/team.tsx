@@ -84,7 +84,7 @@ function TeamHub() {
       </div>
 
       {flags.teamMetrics && (
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           {(liveMetrics ?? team.metrics).map((m) => (
             <Card key={m.id}>
               <CardContent className="p-5">
