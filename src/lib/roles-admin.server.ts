@@ -79,3 +79,26 @@ export async function revokeRole(context: Ctx, userId: string, role: string) {
   if (error) throw new Error(error.message);
   return { ok: true };
 }
+
+export async function assertSuperUser(context: Ctx) {
+  const { data, error } = await context.supabase.rpc("is_superuser", { _user_id: context.userId });
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("Forbidden: super user access required");
+}
+
+/**
+ * Grant/revoke for the reviewer designations. Super user is intentionally
+ * gated behind an existing super user — admins alone cannot mint one.
+ */
+export async function grantRoleGuarded(context: Ctx, email: string, role: string) {
+  if (role === "superuser") await assertSuperUser(context);
+  return grantRole(context, email, role);
+}
+
+export async function revokeRoleGuarded(context: Ctx, userId: string, role: string) {
+  if (role === "superuser") {
+    await assertSuperUser(context);
+    if (userId === context.userId) throw new Error("You can't revoke your own super user access.");
+  }
+  return revokeRole(context, userId, role);
+}
