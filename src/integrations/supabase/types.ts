@@ -407,30 +407,45 @@ export type Database = {
           avatar_content_type: string | null
           avatar_path: string | null
           avatar_updated_at: string | null
+          consent: boolean
           created_at: string
           email: string | null
           full_name: string | null
           id: string
+          manager: string | null
+          market: string | null
+          mobile: string | null
+          segment: string | null
           updated_at: string
         }
         Insert: {
           avatar_content_type?: string | null
           avatar_path?: string | null
           avatar_updated_at?: string | null
+          consent?: boolean
           created_at?: string
           email?: string | null
           full_name?: string | null
           id: string
+          manager?: string | null
+          market?: string | null
+          mobile?: string | null
+          segment?: string | null
           updated_at?: string
         }
         Update: {
           avatar_content_type?: string | null
           avatar_path?: string | null
           avatar_updated_at?: string | null
+          consent?: boolean
           created_at?: string
           email?: string | null
           full_name?: string | null
           id?: string
+          manager?: string | null
+          market?: string | null
+          mobile?: string | null
+          segment?: string | null
           updated_at?: string
         }
         Relationships: []
