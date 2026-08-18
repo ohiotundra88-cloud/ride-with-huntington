@@ -17,6 +17,9 @@ export interface User {
   signedIn: boolean;
   isAdmin: boolean;
   isCaptain: boolean;
+  isSuperUser: boolean;
+  isReviewer: boolean;
+  roles: string[];
   userId: string | null;
 }
 
@@ -156,6 +159,9 @@ const guestUser: User = {
   signedIn: false,
   isAdmin: false,
   isCaptain: false,
+  isSuperUser: false,
+  isReviewer: false,
+  roles: [],
   userId: null,
 };
 
@@ -257,7 +263,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       ]);
       const myRoles = (rolesRes.data ?? []).map((r) => String(r.role));
       const isAdmin = myRoles.includes("admin");
-      const isCaptain = isAdmin || myRoles.includes("captain");
+      const isSuperUser = myRoles.includes("superuser");
+      const isCaptain = isAdmin || isSuperUser || myRoles.includes("captain");
+      const isReviewer = isCaptain || ["legal", "risk", "compliance", "marketing", "cochair"].some((r) => myRoles.includes(r));
       const fullName = profileRes.data?.full_name || nameGuess;
       if (cancelled) return;
       setUserState({
@@ -268,6 +276,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         signedIn: true,
         isAdmin,
         isCaptain,
+        isSuperUser,
+        isReviewer,
+        roles: myRoles,
       });
 
       // Load participant row from cloud (overrides local if present)
