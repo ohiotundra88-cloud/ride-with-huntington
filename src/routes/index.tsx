@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Plane, Bike, Shirt, CheckCircle2, LifeBuoy, FileText, ClipboardCheck, HelpCircle, Calendar, User, Target } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { ArrowRight, Plane, Bike, Shirt, CheckCircle2, LifeBuoy, FileText, ClipboardCheck, HelpCircle, Calendar, User, Target, BarChart3 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,6 +9,8 @@ import { Progress } from "@/components/ui/progress";
 import { ArrowMotif } from "@/components/AppNav";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { useStore } from "@/lib/store";
+import { recordSiteVisit } from "@/lib/analytics.functions";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -139,9 +143,35 @@ function Landing() {
           </Card>
         </div>
       </section>
+
+      <VisitCounter />
     </div>
   );
 }
+
+function VisitCounter() {
+  const record = useServerFn(recordSiteVisit);
+  const { data: visits, isLoading } = useQuery({
+    queryKey: ["site-visits"],
+    queryFn: () => record(),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  return (
+    <section className="border-t bg-muted/30">
+      <div className="mx-auto max-w-7xl px-4 py-6">
+        <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+          <BarChart3 className="h-3.5 w-3.5" />
+          <span>Total site visits:</span>
+          <span className="font-semibold text-[var(--brand-dark)]">
+            {isLoading ? "…" : visits?.toLocaleString() ?? "—"}
+          </span>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 
 function SignedInHero() {
   const { user, completion, incompleteStep } = useStore();
@@ -149,11 +179,9 @@ function SignedInHero() {
   const nextKeys = ["A", "B", "C", "D", "E", "F"] as const;
   const nextStepKey = nextKeys[incompleteStep] ?? "F";
   const nextLabel =
-    incompleteStep === 0
-      ? "Start your registration"
-      : incompleteStep === 5
-        ? "Review and submit"
-        : "Continue where you left off";
+    completion === 100
+      ? "Review your confirmation"
+      : "What do I need to do next?";
   const nextSub =
     completion === 100
       ? "You're all set for Ride Weekend."
