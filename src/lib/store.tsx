@@ -416,7 +416,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [registration]);
 
   return (
-    <Ctx.Provider value={{ user, setUser, registration, setRegistration, participants, addNote, reset, completion, incompleteStep, signOut }}>
+    <Ctx.Provider value={{ user, setUser, saveProfile, registration, setRegistration, participants, addNote, reset, completion, incompleteStep, signOut }}>
       {children}
     </Ctx.Provider>
   );
