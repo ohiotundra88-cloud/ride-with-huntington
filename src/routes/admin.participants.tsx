@@ -34,6 +34,9 @@ type FieldDef = { key: string; label: string; type?: "text" | "date" | "bool" | 
 
 const STATUS_OPTIONS = ["not_started", "pending", "complete"];
 
+/** Sentinel for "no value" — Radix Select items cannot use an empty string value. */
+const NONE = "__none";
+
 const FIELDS: Record<Section, FieldDef[]> = {
   pelotonia: [
     { key: "discountCode", label: "Discount code" },
@@ -372,14 +375,20 @@ function EditDialog({ record, onClose, onSaved }: { record: ColleagueRecord; onC
                   );
                 }
                 if (f.type === "select") {
+                  const current = String(raw ?? "");
                   return (
                     <div key={f.key} className="space-y-1.5">
                       <Label htmlFor={id}>{f.label}</Label>
-                      <Select value={String(raw ?? "")} onValueChange={(v) => setField(section, f.key, v)}>
+                      <Select
+                        value={current === "" ? NONE : current}
+                        onValueChange={(v) => setField(section, f.key, v === NONE ? "" : v)}
+                      >
                         <SelectTrigger id={id}><SelectValue placeholder="Not set" /></SelectTrigger>
                         <SelectContent>
                           {(f.options ?? []).map((o) => (
-                            <SelectItem key={o || "none"} value={o}>{o === "" ? "Not set" : o.replace(/_/g, " ")}</SelectItem>
+                            <SelectItem key={o || NONE} value={o === "" ? NONE : o}>
+                              {o === "" ? "Not set" : o.replace(/_/g, " ")}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
