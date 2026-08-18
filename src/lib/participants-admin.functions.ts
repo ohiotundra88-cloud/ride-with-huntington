@@ -2,17 +2,19 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+export type JsonLike = Record<string, string | number | boolean | null>;
+
 export interface ColleagueRecord {
   user_id: string;
   email: string;
   full_name: string | null;
   participation: string | null;
   reg_id: string | null;
-  pelotonia: Record<string, unknown>;
-  travel: Record<string, unknown>;
-  bike: Record<string, unknown>;
-  apparel: Record<string, unknown>;
-  address: Record<string, unknown>;
+  pelotonia: JsonLike;
+  travel: JsonLike;
+  bike: JsonLike;
+  apparel: JsonLike;
+  address: JsonLike;
   submitted_at: string | null;
   manual_entry: boolean;
   season_locked: boolean;
@@ -21,7 +23,7 @@ export interface ColleagueRecord {
   created_at: string;
 }
 
-const jsonRecord = z.record(z.string(), z.unknown());
+const jsonRecord = z.record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.null()]));
 
 const saveSchema = z.object({
   user_id: z.string().uuid(),
@@ -40,8 +42,8 @@ const saveSchema = z.object({
 export const listColleagues = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<ColleagueRecord[]> => {
-    const { supabaseAdmin } = await import("@/lib/participants-admin.server");
-    await (await import("@/lib/participants-admin.server")).assertManager(context);
+    const { supabaseAdmin, assertManager } = await import("@/lib/participants-admin.server");
+    await assertManager(context);
     const { data, error } = await supabaseAdmin
       .from("participants")
       .select("*")
@@ -51,19 +53,19 @@ export const listColleagues = createServerFn({ method: "GET" })
     const { data: profiles } = await supabaseAdmin
       .from("profiles")
       .select("id, email, full_name")
-      .in("id", rows.map((r) => r.user_id));
-    const map = new Map((profiles ?? []).map((p) => [p.id, p]));
-    return rows.map((r) => ({
+      .in("id", rows.map((r: { user_id: string }) => r.user_id));
+    const map = new Map((profiles ?? []).map((p: { id: string; email: string | null; full_name: string | null }) => [p.id, p] as const));
+    return rows.map((r: Record<string, never>) => ({
       user_id: r.user_id,
       email: map.get(r.user_id)?.email ?? "(unknown)",
       full_name: map.get(r.user_id)?.full_name ?? null,
       participation: r.participation,
       reg_id: r.reg_id,
-      pelotonia: (r.pelotonia ?? {}) as Record<string, unknown>,
-      travel: (r.travel ?? {}) as Record<string, unknown>,
-      bike: (r.bike ?? {}) as Record<string, unknown>,
-      apparel: (r.apparel ?? {}) as Record<string, unknown>,
-      address: (r.address ?? {}) as Record<string, unknown>,
+      pelotonia: (r.pelotonia ?? {}) as JsonLike,
+      travel: (r.travel ?? {}) as JsonLike,
+      bike: (r.bike ?? {}) as JsonLike,
+      apparel: (r.apparel ?? {}) as JsonLike,
+      address: (r.address ?? {}) as JsonLike,
       submitted_at: r.submitted_at,
       manual_entry: r.manual_entry,
       season_locked: r.season_locked,
