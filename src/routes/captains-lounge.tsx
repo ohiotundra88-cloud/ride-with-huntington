@@ -368,8 +368,21 @@ function AttachmentPreview({
             />
           )}
           {file.data && isPdf && objectUrl && (
-            <iframe src={objectUrl} title={post.file_name ?? "Document preview"} className="h-[520px] w-full rounded-md border" />
+            <div className="space-y-2">
+              <object data={objectUrl} type="application/pdf" className="h-[520px] w-full rounded-md border">
+                <iframe src={objectUrl} title={post.file_name ?? "Document preview"} className="h-[520px] w-full rounded-md border" />
+              </object>
+              <a
+                href={objectUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-block text-xs font-medium text-[var(--brand-dark)] underline"
+              >
+                Open in a new tab
+              </a>
+            </div>
           )}
+
           {file.data && isText && (
             <pre className="max-h-[360px] overflow-auto whitespace-pre-wrap rounded-md bg-muted/50 p-3 text-xs leading-relaxed">
               {textBody ?? "Preview unavailable."}
