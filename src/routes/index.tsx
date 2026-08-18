@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, MapPin, Plane, Bike, Shirt, CheckCircle2, LifeBuoy, FileText, ClipboardCheck, HelpCircle, Calendar } from "lucide-react";
+import { ArrowRight, MapPin, Plane, Bike, Shirt, CheckCircle2, LifeBuoy, FileText, ClipboardCheck, HelpCircle, Calendar, User, TrendingUp, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { ArrowMotif } from "@/components/AppNav";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
+import { useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -16,6 +18,7 @@ export const Route = createFileRoute("/")({
   }),
   component: Landing,
 });
+
 
 const steps = [
   { icon: ClipboardCheck, title: "Register", desc: "Choose Rider or Volunteer and apply the team code." },
