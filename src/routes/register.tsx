@@ -232,6 +232,31 @@ function StepPelotonia() {
             </label>
           </div>
 
+          <div className="rounded-lg border bg-muted/30 p-3 space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Colleague details</p>
+            <div>
+              <Label>Are you a Salary or Hourly colleague? <span className="text-red-500">*</span></Label>
+              <Select value={p.employmentType} onValueChange={(v) => upd({ employmentType: v as "salary" | "hourly" })}>
+                <SelectTrigger className="mt-1.5"><SelectValue placeholder="Select..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="salary">Salary</SelectItem>
+                  <SelectItem value="hourly">Hourly</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Are you a pay grade 74 and below? <span className="text-red-500">*</span></Label>
+              <Select value={p.payGrade74Below} onValueChange={(v) => upd({ payGrade74Below: v as "yes" | "no" })}>
+                <SelectTrigger className="mt-1.5"><SelectValue placeholder="Select..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="yes">Yes — pay grade 74 or below</SelectItem>
+                  <SelectItem value="no">No — pay grade 75 or above</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+
           <Button onClick={markComplete} variant="outline" className="w-full">Save status</Button>
         </CardContent>
       </Card>
