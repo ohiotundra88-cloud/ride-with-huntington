@@ -55,7 +55,7 @@ export const listColleagues = createServerFn({ method: "GET" })
       .select("id, email, full_name")
       .in("id", rows.map((r: { user_id: string }) => r.user_id));
     const map = new Map((profiles ?? []).map((p: { id: string; email: string | null; full_name: string | null }) => [p.id, p] as const));
-    return rows.map((r: Record<string, never>) => ({
+    return rows.map((r) => ({
       user_id: r.user_id,
       email: map.get(r.user_id)?.email ?? "(unknown)",
       full_name: map.get(r.user_id)?.full_name ?? null,
