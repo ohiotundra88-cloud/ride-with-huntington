@@ -50,6 +50,7 @@ import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[
 import { Route as ApiPublicSbSplatRouteImport } from './routes/api/public/sb/$'
 import { Route as ApiPublicFundraisingAssetIdRouteImport } from './routes/api/public/fundraising-asset/$id'
 import { Route as ApiPublicEventFlierIdRouteImport } from './routes/api/public/event-flier/$id'
+import { Route as ApiPublicBrandingKindRouteImport } from './routes/api/public/branding/$kind'
 
 const TeamRoute = TeamRouteImport.update({
   id: '/team',
@@ -260,6 +261,11 @@ const ApiPublicEventFlierIdRoute = ApiPublicEventFlierIdRouteImport.update({
   path: '/api/public/event-flier/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicBrandingKindRoute = ApiPublicBrandingKindRouteImport.update({
+  id: '/api/public/branding/$kind',
+  path: '/api/public/branding/$kind',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -300,6 +306,7 @@ export interface FileRoutesByFullPath {
   '/resources/$id': typeof ResourcesIdRoute
   '/admin/': typeof AdminIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/public/branding/$kind': typeof ApiPublicBrandingKindRoute
   '/api/public/event-flier/$id': typeof ApiPublicEventFlierIdRoute
   '/api/public/fundraising-asset/$id': typeof ApiPublicFundraisingAssetIdRoute
   '/api/public/sb/$': typeof ApiPublicSbSplatRoute
@@ -343,6 +350,7 @@ export interface FileRoutesByTo {
   '/resources/$id': typeof ResourcesIdRoute
   '/admin': typeof AdminIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/public/branding/$kind': typeof ApiPublicBrandingKindRoute
   '/api/public/event-flier/$id': typeof ApiPublicEventFlierIdRoute
   '/api/public/fundraising-asset/$id': typeof ApiPublicFundraisingAssetIdRoute
   '/api/public/sb/$': typeof ApiPublicSbSplatRoute
@@ -387,6 +395,7 @@ export interface FileRoutesById {
   '/resources/$id': typeof ResourcesIdRoute
   '/admin/': typeof AdminIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/public/branding/$kind': typeof ApiPublicBrandingKindRoute
   '/api/public/event-flier/$id': typeof ApiPublicEventFlierIdRoute
   '/api/public/fundraising-asset/$id': typeof ApiPublicFundraisingAssetIdRoute
   '/api/public/sb/$': typeof ApiPublicSbSplatRoute
@@ -432,6 +441,7 @@ export interface FileRouteTypes {
     | '/resources/$id'
     | '/admin/'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/public/branding/$kind'
     | '/api/public/event-flier/$id'
     | '/api/public/fundraising-asset/$id'
     | '/api/public/sb/$'
@@ -475,6 +485,7 @@ export interface FileRouteTypes {
     | '/resources/$id'
     | '/admin'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/public/branding/$kind'
     | '/api/public/event-flier/$id'
     | '/api/public/fundraising-asset/$id'
     | '/api/public/sb/$'
@@ -518,6 +529,7 @@ export interface FileRouteTypes {
     | '/resources/$id'
     | '/admin/'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/public/branding/$kind'
     | '/api/public/event-flier/$id'
     | '/api/public/fundraising-asset/$id'
     | '/api/public/sb/$'
@@ -561,6 +573,7 @@ export interface RootRouteChildren {
   AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  ApiPublicBrandingKindRoute: typeof ApiPublicBrandingKindRoute
   ApiPublicEventFlierIdRoute: typeof ApiPublicEventFlierIdRoute
   ApiPublicFundraisingAssetIdRoute: typeof ApiPublicFundraisingAssetIdRoute
   ApiPublicSbSplatRoute: typeof ApiPublicSbSplatRoute
@@ -855,6 +868,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicEventFlierIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/branding/$kind': {
+      id: '/api/public/branding/$kind'
+      path: '/api/public/branding/$kind'
+      fullPath: '/api/public/branding/$kind'
+      preLoaderRoute: typeof ApiPublicBrandingKindRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -909,6 +929,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  ApiPublicBrandingKindRoute: ApiPublicBrandingKindRoute,
   ApiPublicEventFlierIdRoute: ApiPublicEventFlierIdRoute,
   ApiPublicFundraisingAssetIdRoute: ApiPublicFundraisingAssetIdRoute,
   ApiPublicSbSplatRoute: ApiPublicSbSplatRoute,
