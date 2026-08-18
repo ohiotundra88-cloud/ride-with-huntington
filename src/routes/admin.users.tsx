@@ -14,7 +14,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { listAdmins, grantAdminByEmail, revokeAdmin, type AdminUserRow } from "@/lib/admins.functions";
 import { listCaptains, grantCaptainByEmail, revokeCaptain, type CaptainRow } from "@/lib/captains.functions";
-import { Flag } from "lucide-react";
+import { Flag, Scale, ShieldAlert, BadgeCheck, Megaphone, Crown } from "lucide-react";
+import { RoleMembersCard } from "@/components/RoleMembersCard";
 
 export const Route = createFileRoute("/admin/users")({
   component: AdminUsersPage,
@@ -147,6 +148,21 @@ function AdminUsersPage() {
       </Card>
 
       <CaptainsCard />
+
+      <RoleMembersCard
+        role="superuser"
+        title="Super users"
+        description="Super users manage the permanent roster, appoint every review role, and run the end-of-season reset. Manually added colleagues can only be removed by a super user."
+        icon={<ShieldCheck className="h-4 w-4 text-[var(--brand)]" />}
+      />
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <RoleMembersCard role="legal" title="Legal reviewers" description="Approve the legal stage of fundraiser requests." icon={<Scale className="h-4 w-4 text-[var(--brand)]" />} />
+        <RoleMembersCard role="risk" title="Risk reviewers" description="Approve the risk stage of fundraiser requests." icon={<ShieldAlert className="h-4 w-4 text-[var(--brand)]" />} />
+        <RoleMembersCard role="compliance" title="Compliance reviewers" description="Approve the compliance stage of fundraiser requests." icon={<BadgeCheck className="h-4 w-4 text-[var(--brand)]" />} />
+        <RoleMembersCard role="marketing" title="Marketing reviewers" description="Approve the marketing stage of fundraiser requests." icon={<Megaphone className="h-4 w-4 text-[var(--brand)]" />} />
+        <RoleMembersCard role="cochair" title="Co-chairs" description="Final sign-off. Once a co-chair approves, the event publishes to the fundraising calendar." icon={<Crown className="h-4 w-4 text-[var(--brand)]" />} />
+      </div>
     </AdminShell>
   );
 }
