@@ -143,9 +143,35 @@ function Landing() {
           </Card>
         </div>
       </section>
+
+      <VisitCounter />
     </div>
   );
 }
+
+function VisitCounter() {
+  const record = useServerFn(recordSiteVisit);
+  const { data: visits, isLoading } = useQuery({
+    queryKey: ["site-visits"],
+    queryFn: () => record(),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  return (
+    <section className="border-t bg-muted/30">
+      <div className="mx-auto max-w-7xl px-4 py-6">
+        <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+          <BarChart3 className="h-3.5 w-3.5" />
+          <span>Total site visits:</span>
+          <span className="font-semibold text-[var(--brand-dark)]">
+            {isLoading ? "…" : visits?.toLocaleString() ?? "—"}
+          </span>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 
 function SignedInHero() {
   const { user, completion, incompleteStep } = useStore();
