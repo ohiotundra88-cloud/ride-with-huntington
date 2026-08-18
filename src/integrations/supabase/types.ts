@@ -233,6 +233,24 @@ export type Database = {
         }
         Relationships: []
       }
+      site_visits: {
+        Row: {
+          count: number
+          id: number
+          updated_at: string
+        }
+        Insert: {
+          count?: number
+          id: number
+          updated_at?: string
+        }
+        Update: {
+          count?: number
+          id?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -267,6 +285,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_site_visits: { Args: never; Returns: number }
       is_admin_text: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
