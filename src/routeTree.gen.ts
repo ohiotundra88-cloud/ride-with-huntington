@@ -17,6 +17,7 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PackingRouteImport } from './routes/packing'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as HealthRouteImport } from './routes/health'
+import { Route as FundraiserRequestRouteImport } from './routes/fundraiser-request'
 import { Route as FamilyRouteImport } from './routes/family'
 import { Route as ExpensesRouteImport } from './routes/expenses'
 import { Route as EventsRouteImport } from './routes/events'
@@ -85,6 +86,11 @@ const McpRoute = McpRouteImport.update({
 const HealthRoute = HealthRouteImport.update({
   id: '/health',
   path: '/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FundraiserRequestRoute = FundraiserRequestRouteImport.update({
+  id: '/fundraiser-request',
+  path: '/fundraiser-request',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FamilyRoute = FamilyRouteImport.update({
@@ -245,6 +251,7 @@ export interface FileRoutesByFullPath {
   '/events': typeof EventsRoute
   '/expenses': typeof ExpensesRoute
   '/family': typeof FamilyRoute
+  '/fundraiser-request': typeof FundraiserRequestRoute
   '/health': typeof HealthRoute
   '/mcp': typeof McpRoute
   '/packing': typeof PackingRoute
@@ -284,6 +291,7 @@ export interface FileRoutesByTo {
   '/events': typeof EventsRoute
   '/expenses': typeof ExpensesRoute
   '/family': typeof FamilyRoute
+  '/fundraiser-request': typeof FundraiserRequestRoute
   '/health': typeof HealthRoute
   '/mcp': typeof McpRoute
   '/packing': typeof PackingRoute
@@ -324,6 +332,7 @@ export interface FileRoutesById {
   '/events': typeof EventsRoute
   '/expenses': typeof ExpensesRoute
   '/family': typeof FamilyRoute
+  '/fundraiser-request': typeof FundraiserRequestRoute
   '/health': typeof HealthRoute
   '/mcp': typeof McpRoute
   '/packing': typeof PackingRoute
@@ -365,6 +374,7 @@ export interface FileRouteTypes {
     | '/events'
     | '/expenses'
     | '/family'
+    | '/fundraiser-request'
     | '/health'
     | '/mcp'
     | '/packing'
@@ -404,6 +414,7 @@ export interface FileRouteTypes {
     | '/events'
     | '/expenses'
     | '/family'
+    | '/fundraiser-request'
     | '/health'
     | '/mcp'
     | '/packing'
@@ -443,6 +454,7 @@ export interface FileRouteTypes {
     | '/events'
     | '/expenses'
     | '/family'
+    | '/fundraiser-request'
     | '/health'
     | '/mcp'
     | '/packing'
@@ -483,6 +495,7 @@ export interface RootRouteChildren {
   EventsRoute: typeof EventsRoute
   ExpensesRoute: typeof ExpensesRoute
   FamilyRoute: typeof FamilyRoute
+  FundraiserRequestRoute: typeof FundraiserRequestRoute
   HealthRoute: typeof HealthRoute
   McpRoute: typeof McpRoute
   PackingRoute: typeof PackingRoute
@@ -570,6 +583,13 @@ declare module '@tanstack/react-router' {
       path: '/health'
       fullPath: '/health'
       preLoaderRoute: typeof HealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fundraiser-request': {
+      id: '/fundraiser-request'
+      path: '/fundraiser-request'
+      fullPath: '/fundraiser-request'
+      preLoaderRoute: typeof FundraiserRequestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/family': {
@@ -798,6 +818,7 @@ const rootRouteChildren: RootRouteChildren = {
   EventsRoute: EventsRoute,
   ExpensesRoute: ExpensesRoute,
   FamilyRoute: FamilyRoute,
+  FundraiserRequestRoute: FundraiserRequestRoute,
   HealthRoute: HealthRoute,
   McpRoute: McpRoute,
   PackingRoute: PackingRoute,
