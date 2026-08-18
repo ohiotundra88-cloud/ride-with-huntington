@@ -21,6 +21,13 @@ export interface FundraisingEvent {
 export const EVENT_COLUMNS =
   "id, title, description, event_date, start_time, end_time, location, contact_name, contact_email, contact_phone, flier_path, flier_name, published, created_by, created_at";
 
+/**
+ * Columns safe to expose to visitors who are not signed in. Organizer email and
+ * phone are omitted so public/anon traffic can't harvest colleague contacts.
+ */
+export const PUBLIC_EVENT_COLUMNS =
+  "id, title, description, event_date, start_time, end_time, location, contact_name, flier_path, flier_name, published, created_by, created_at";
+
 const nullableText = (max: number) =>
   z
     .string()

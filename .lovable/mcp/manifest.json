@@ -3,7 +3,13 @@
   "sdk_version": "0.24.0",
   "path": "/mcp",
   "auth": {
-    "type": "none"
+    "type": "oauth",
+    "issuer": "https://wiwbpxokwurpanezleuo.supabase.co/auth/v1",
+    "resource_name": "Team Huntington Hub",
+    "accepted_audiences": [
+      "authenticated"
+    ],
+    "jwks_uri": "https://wiwbpxokwurpanezleuo.supabase.co/auth/v1/.well-known/jwks.json"
   },
   "mcp": {
     "server": {

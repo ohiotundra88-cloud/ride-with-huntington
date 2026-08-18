@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
   EVENT_COLUMNS,
+  PUBLIC_EVENT_COLUMNS,
   eventInputSchema,
   flierInputSchema,
   idSchema,
@@ -9,7 +10,7 @@ import {
   type FundraisingEvent,
 } from "@/lib/events.shared";
 
-/** Public calendar feed — published events only. */
+/** Public calendar feed — published events only, organizer email/phone withheld. */
 export const listPublicEvents = createServerFn({ method: "GET" }).handler(
   async (): Promise<FundraisingEvent[]> => {
     const { createClient } = await import("@supabase/supabase-js");
@@ -27,13 +28,30 @@ export const listPublicEvents = createServerFn({ method: "GET" }).handler(
     });
     const { data, error } = await client
       .from("events")
+      .select(PUBLIC_EVENT_COLUMNS)
+      .eq("published", true)
+      .order("event_date", { ascending: true });
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((e: any) => ({
+      ...e,
+      contact_email: null,
+      contact_phone: null,
+    })) as FundraisingEvent[];
+  },
+);
+
+/** Published events with organizer contacts — signed-in colleagues only. */
+export const listEventsForColleague = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<FundraisingEvent[]> => {
+    const { data, error } = await context.supabase
+      .from("events")
       .select(EVENT_COLUMNS)
       .eq("published", true)
       .order("event_date", { ascending: true });
     if (error) throw new Error(error.message);
-    return (data ?? []) as FundraisingEvent[];
-  },
-);
+    return (data ?? []) as unknown as FundraisingEvent[];
+  });
 
 /** Own drafts + published events; admins see everything. */
 export const listManageableEvents = createServerFn({ method: "GET" })

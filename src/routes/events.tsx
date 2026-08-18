@@ -21,7 +21,8 @@ import {
   Paperclip, Plus, Pencil, Trash2, EyeOff, Upload, X,
 } from "lucide-react";
 import {
-  listPublicEvents, listManageableEvents, saveEvent, deleteEvent, uploadEventFlier, removeEventFlier,
+  listPublicEvents, listEventsForColleague, listManageableEvents, saveEvent, deleteEvent,
+  uploadEventFlier, removeEventFlier,
 } from "@/lib/events.functions";
 import {
   ALLOWED_FLIER_TYPES, MAX_FLIER_BYTES, flierUrl, formatEventDate, formatTimeRange,
@@ -56,8 +57,9 @@ function EventsPage() {
   const canManage = user.signedIn && user.isCaptain;
 
   const { data: events = [], isLoading } = useQuery<FundraisingEvent[]>({
-    queryKey: ["events", canManage ? "manage" : "public"],
-    queryFn: () => (canManage ? listManageableEvents() : listPublicEvents()),
+    queryKey: ["events", canManage ? "manage" : user.signedIn ? "colleague" : "public"],
+    queryFn: () =>
+      canManage ? listManageableEvents() : user.signedIn ? listEventsForColleague() : listPublicEvents(),
   });
 
   const [cursor, setCursor] = useState(() => {
