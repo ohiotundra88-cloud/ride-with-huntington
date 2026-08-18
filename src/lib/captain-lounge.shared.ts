@@ -15,6 +15,8 @@ export interface CaptainPost {
   updated_at: string;
   author_name?: string | null;
   author_email?: string | null;
+  author_avatar_version?: string | null;
+
 }
 
 export const POST_COLUMNS =
