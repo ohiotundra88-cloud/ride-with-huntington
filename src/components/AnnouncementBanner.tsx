@@ -15,7 +15,7 @@ function loadDismissed(): string[] {
 
 export function AnnouncementBanner({ audience }: { audience?: Audience }) {
   const { state } = useAdmin();
-  const { state: appState } = useStore();
+  const { user, registration } = useStore();
   const [dismissed, setDismissed] = useState<string[]>([]);
 
   useEffect(() => { setDismissed(loadDismissed()); }, []);
