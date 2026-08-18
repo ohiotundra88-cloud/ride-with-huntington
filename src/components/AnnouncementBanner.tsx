@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { X, Megaphone } from "lucide-react";
 import { useAdmin, announcementIsActive, type Audience } from "@/lib/admin-store";
+import { useStore } from "@/lib/store";
 import { AdminIcon } from "@/components/AdminIcon";
 import { Button } from "@/components/ui/button";
 
@@ -12,20 +13,41 @@ function loadDismissed(): string[] {
   try { return JSON.parse(localStorage.getItem(DISMISS_KEY) || "[]"); } catch { return []; }
 }
 
-export function AnnouncementBanner({ audience = "all" as Audience }: { audience?: Audience }) {
+export function AnnouncementBanner({ audience }: { audience?: Audience }) {
   const { state } = useAdmin();
+  const { user, registration } = useStore();
   const [dismissed, setDismissed] = useState<string[]>([]);
 
   useEffect(() => { setDismissed(loadDismissed()); }, []);
+
+  // Which audiences does this viewer belong to? An explicit prop (e.g. the
+  // family page) narrows it; otherwise derive it from the signed-in colleague.
+  const viewerAudiences = useMemo<Audience[]>(() => {
+    const set = new Set<Audience>(["all"]);
+    if (audience) {
+      set.add(audience);
+      return [...set];
+    }
+    const participation = registration?.participation ?? null;
+    if (participation === "rider" || participation === "both") set.add("riders");
+    if (participation === "volunteer" || participation === "both") set.add("volunteers");
+    if (user?.isAdmin || user?.isSuperUser) set.add("admins");
+    // Signed-in colleagues who haven't picked a lane yet still see both tracks
+    // so a rider-targeted announcement isn't invisible pre-registration.
+    if (!participation && user?.signedIn) { set.add("riders"); set.add("volunteers"); }
+    return [...set];
+  }, [audience, registration?.participation, user]);
+
 
   const active = useMemo(() => {
     if (!state.flags.announcements) return [];
     return state.announcements
       .filter(announcementIsActive)
-      .filter((a) => a.audience === "all" || a.audience === audience)
+      .filter((a) => viewerAudiences.includes(a.audience))
       .filter((a) => !dismissed.includes(a.id))
       .sort((a, b) => Number(b.pinned) - Number(a.pinned));
-  }, [state.announcements, state.flags.announcements, audience, dismissed]);
+  }, [state.announcements, state.flags.announcements, viewerAudiences, dismissed]);
+
 
   if (active.length === 0) return null;
 
