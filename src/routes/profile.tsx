@@ -49,7 +49,10 @@ function ProfilePage() {
       <h1 className="text-3xl font-black text-[var(--brand-dark)]">Your profile</h1>
       <p className="mt-1 text-muted-foreground">Prefilled from your Huntington record. Update anything that has changed.</p>
 
+      <ProfilePhotoCard name={form.name} email={form.email} />
+
       <Card className="mt-6">
+
         <CardHeader><CardTitle>Colleague details</CardTitle></CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2 sm:col-span-2">
