@@ -13,6 +13,8 @@ export interface CaptainPost {
   created_by: string;
   created_at: string;
   updated_at: string;
+  author_name?: string | null;
+  author_email?: string | null;
 }
 
 export const POST_COLUMNS =

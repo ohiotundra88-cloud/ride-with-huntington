@@ -44,7 +44,22 @@ export const listLoungePosts = createServerFn({ method: "GET" })
       .order("pinned", { ascending: false })
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
-    return (data ?? []) as unknown as CaptainPost[];
+    const posts = (data ?? []) as unknown as CaptainPost[];
+    const ids = Array.from(new Set(posts.map((p) => p.created_by).filter(Boolean)));
+    if (ids.length) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: profiles } = await supabaseAdmin
+        .from("profiles")
+        .select("id, full_name, email")
+        .in("id", ids);
+      const byId = new Map((profiles ?? []).map((p: any) => [p.id, p]));
+      for (const post of posts) {
+        const prof = byId.get(post.created_by);
+        post.author_name = prof?.full_name ?? null;
+        post.author_email = prof?.email ?? null;
+      }
+    }
+    return posts;
   });
 
 export const saveLoungePost = createServerFn({ method: "POST" })
