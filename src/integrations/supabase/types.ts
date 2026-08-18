@@ -404,6 +404,9 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_content_type: string | null
+          avatar_path: string | null
+          avatar_updated_at: string | null
           created_at: string
           email: string | null
           full_name: string | null
@@ -411,6 +414,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          avatar_content_type?: string | null
+          avatar_path?: string | null
+          avatar_updated_at?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
@@ -418,6 +424,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          avatar_content_type?: string | null
+          avatar_path?: string | null
+          avatar_updated_at?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
