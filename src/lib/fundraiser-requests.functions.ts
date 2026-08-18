@@ -163,7 +163,7 @@ export const decideOnRequest = createServerFn({ method: "POST" })
       throw new Error("This stage isn't open yet — an earlier approval is still outstanding.");
     }
 
-    const patch: Record<string, unknown> = { [`${data.stage}_status`]: data.decision };
+    const patch: Record<string, string> = { [`${data.stage}_status`]: data.decision };
     const next = { ...request, [`${data.stage}_status`]: data.decision } as FundraiserRequest;
 
     if (data.decision === "declined") patch.status = "declined";
@@ -173,7 +173,7 @@ export const decideOnRequest = createServerFn({ method: "POST" })
 
     const { data: updated, error: uErr } = await supabaseAdmin
       .from("fundraiser_requests")
-      .update(patch)
+      .update(patch as never)
       .eq("id", data.id)
       .select(REQUEST_COLUMNS)
       .single();
