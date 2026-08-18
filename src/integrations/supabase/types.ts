@@ -113,6 +113,57 @@ export type Database = {
         }
         Relationships: []
       }
+      fundraising_assets: {
+        Row: {
+          category: string
+          content_type: string | null
+          created_at: string
+          created_by: string
+          description: string
+          file_name: string | null
+          file_path: string | null
+          id: string
+          link_url: string | null
+          published: boolean
+          sort_order: number
+          suggested_caption: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          content_type?: string | null
+          created_at?: string
+          created_by: string
+          description?: string
+          file_name?: string | null
+          file_path?: string | null
+          id?: string
+          link_url?: string | null
+          published?: boolean
+          sort_order?: number
+          suggested_caption?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          content_type?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string
+          file_name?: string | null
+          file_path?: string | null
+          id?: string
+          link_url?: string | null
+          published?: boolean
+          sort_order?: number
+          suggested_caption?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       participants: {
         Row: {
           address: Json

@@ -42,6 +42,7 @@ const links = [
   { to: "/admin/concierge", label: "Concierge", icon: MessageSquare },
   { to: "/admin/contacts", label: "Contacts", icon: ContactIcon },
   { to: "/admin/faqs", label: "FAQs", icon: FileText },
+  { to: "/admin/fundraising", label: "Fundraising Resources", icon: Megaphone },
   { to: "/admin/participants", label: "Participants", icon: Users },
   { to: "/admin/users", label: "Admins & Super Users", icon: ShieldCheck },
   { to: "/admin/flags", label: "Config & Audit", icon: Settings },
