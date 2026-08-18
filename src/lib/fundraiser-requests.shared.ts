@@ -219,7 +219,7 @@ export function trackerPhases(r: FundraiserRequest): {
   } else if (captain !== "approved") {
     message = "Waiting on your peloton captain to review the details.";
   } else if (cleared.length < tier2.length) {
-    const waiting = tier2.filter((s) => stageStatus(s ? r : r, s.key) !== "approved").map((s) => s.label);
+    const waiting = tier2.filter((s) => stageStatus(r, s.key) !== "approved").map((s) => s.label);
     message = `Captain approved. Now with ${waiting.join(", ")} — they review in any order.`;
   } else {
     message = "All departments cleared. Waiting on final co-chair sign-off.";
