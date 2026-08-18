@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useStore } from "@/lib/store";
@@ -123,16 +123,23 @@ function EventsPage() {
             download the flier, and reach the captain hosting it.
           </p>
         </div>
-        {canManage && (
-          <Button onClick={() => setCreating(true)} className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90">
-            <Plus className="mr-1 h-4 w-4" /> Post an event
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="outline">
+            <Link to="/fundraiser-request">Request approval for a fundraiser</Link>
           </Button>
-        )}
+          {canManage && (
+            <Button onClick={() => setCreating(true)} className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90">
+              <Plus className="mr-1 h-4 w-4" /> Post an event
+            </Button>
+          )}
+        </div>
       </div>
 
-      {user.signedIn && !user.isCaptain && (
+      {user.signedIn && (
         <p className="mt-4 rounded-md border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
-          Want to host a fundraiser? Ask an administrator to give you the <strong>Captain</strong> designation and you'll be able to post events here.
+          Hosting a fundraiser? Submit it through <Link to="/fundraiser-request" className="font-semibold underline">the approval request form</Link> — your
+          peloton captain reviews it first, then Legal, Risk, Compliance and Marketing, with co-chair sign-off last. Approved in-person events publish
+          here automatically.
         </p>
       )}
 

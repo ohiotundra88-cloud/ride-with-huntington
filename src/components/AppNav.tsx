@@ -20,6 +20,7 @@ const links = [
   { to: "/family", label: "Family" },
   { to: "/team", label: "Team" },
   { to: "/events", label: "Events" },
+  { to: "/fundraiser-request", label: "Fundraiser Request" },
   { to: "/resources", label: "Resources" },
   { to: "/expenses", label: "Expenses" },
 ] as const;

@@ -17,6 +17,7 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PackingRouteImport } from './routes/packing'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as HealthRouteImport } from './routes/health'
+import { Route as FundraiserRequestRouteImport } from './routes/fundraiser-request'
 import { Route as FamilyRouteImport } from './routes/family'
 import { Route as ExpensesRouteImport } from './routes/expenses'
 import { Route as EventsRouteImport } from './routes/events'
@@ -27,6 +28,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ResourcesIdRouteImport } from './routes/resources.$id'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminRosterRouteImport } from './routes/admin.roster'
 import { Route as AdminReadinessRouteImport } from './routes/admin.readiness'
 import { Route as AdminParticipantsRouteImport } from './routes/admin.participants'
 import { Route as AdminPackingRouteImport } from './routes/admin.packing'
@@ -39,6 +41,7 @@ import { Route as AdminFaqsRouteImport } from './routes/admin.faqs'
 import { Route as AdminFamilyRouteImport } from './routes/admin.family'
 import { Route as AdminContactsRouteImport } from './routes/admin.contacts'
 import { Route as AdminConciergeRouteImport } from './routes/admin.concierge'
+import { Route as AdminApprovalsRouteImport } from './routes/admin.approvals'
 import { Route as AdminAnnouncementsRouteImport } from './routes/admin.announcements'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
@@ -85,6 +88,11 @@ const McpRoute = McpRouteImport.update({
 const HealthRoute = HealthRouteImport.update({
   id: '/health',
   path: '/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FundraiserRequestRoute = FundraiserRequestRouteImport.update({
+  id: '/fundraiser-request',
+  path: '/fundraiser-request',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FamilyRoute = FamilyRouteImport.update({
@@ -135,6 +143,11 @@ const ResourcesIdRoute = ResourcesIdRouteImport.update({
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/admin/users',
   path: '/admin/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRosterRoute = AdminRosterRouteImport.update({
+  id: '/admin/roster',
+  path: '/admin/roster',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminReadinessRoute = AdminReadinessRouteImport.update({
@@ -197,6 +210,11 @@ const AdminConciergeRoute = AdminConciergeRouteImport.update({
   path: '/admin/concierge',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminApprovalsRoute = AdminApprovalsRouteImport.update({
+  id: '/admin/approvals',
+  path: '/admin/approvals',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminAnnouncementsRoute = AdminAnnouncementsRouteImport.update({
   id: '/admin/announcements',
   path: '/admin/announcements',
@@ -245,6 +263,7 @@ export interface FileRoutesByFullPath {
   '/events': typeof EventsRoute
   '/expenses': typeof ExpensesRoute
   '/family': typeof FamilyRoute
+  '/fundraiser-request': typeof FundraiserRequestRoute
   '/health': typeof HealthRoute
   '/mcp': typeof McpRoute
   '/packing': typeof PackingRoute
@@ -256,6 +275,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
+  '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/concierge': typeof AdminConciergeRoute
   '/admin/contacts': typeof AdminContactsRoute
   '/admin/family': typeof AdminFamilyRoute
@@ -268,6 +288,7 @@ export interface FileRoutesByFullPath {
   '/admin/packing': typeof AdminPackingRoute
   '/admin/participants': typeof AdminParticipantsRoute
   '/admin/readiness': typeof AdminReadinessRoute
+  '/admin/roster': typeof AdminRosterRoute
   '/admin/users': typeof AdminUsersRoute
   '/resources/$id': typeof ResourcesIdRoute
   '/admin/': typeof AdminIndexRoute
@@ -284,6 +305,7 @@ export interface FileRoutesByTo {
   '/events': typeof EventsRoute
   '/expenses': typeof ExpensesRoute
   '/family': typeof FamilyRoute
+  '/fundraiser-request': typeof FundraiserRequestRoute
   '/health': typeof HealthRoute
   '/mcp': typeof McpRoute
   '/packing': typeof PackingRoute
@@ -295,6 +317,7 @@ export interface FileRoutesByTo {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
+  '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/concierge': typeof AdminConciergeRoute
   '/admin/contacts': typeof AdminContactsRoute
   '/admin/family': typeof AdminFamilyRoute
@@ -307,6 +330,7 @@ export interface FileRoutesByTo {
   '/admin/packing': typeof AdminPackingRoute
   '/admin/participants': typeof AdminParticipantsRoute
   '/admin/readiness': typeof AdminReadinessRoute
+  '/admin/roster': typeof AdminRosterRoute
   '/admin/users': typeof AdminUsersRoute
   '/resources/$id': typeof ResourcesIdRoute
   '/admin': typeof AdminIndexRoute
@@ -324,6 +348,7 @@ export interface FileRoutesById {
   '/events': typeof EventsRoute
   '/expenses': typeof ExpensesRoute
   '/family': typeof FamilyRoute
+  '/fundraiser-request': typeof FundraiserRequestRoute
   '/health': typeof HealthRoute
   '/mcp': typeof McpRoute
   '/packing': typeof PackingRoute
@@ -335,6 +360,7 @@ export interface FileRoutesById {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
+  '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/concierge': typeof AdminConciergeRoute
   '/admin/contacts': typeof AdminContactsRoute
   '/admin/family': typeof AdminFamilyRoute
@@ -347,6 +373,7 @@ export interface FileRoutesById {
   '/admin/packing': typeof AdminPackingRoute
   '/admin/participants': typeof AdminParticipantsRoute
   '/admin/readiness': typeof AdminReadinessRoute
+  '/admin/roster': typeof AdminRosterRoute
   '/admin/users': typeof AdminUsersRoute
   '/resources/$id': typeof ResourcesIdRoute
   '/admin/': typeof AdminIndexRoute
@@ -365,6 +392,7 @@ export interface FileRouteTypes {
     | '/events'
     | '/expenses'
     | '/family'
+    | '/fundraiser-request'
     | '/health'
     | '/mcp'
     | '/packing'
@@ -376,6 +404,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin/announcements'
+    | '/admin/approvals'
     | '/admin/concierge'
     | '/admin/contacts'
     | '/admin/family'
@@ -388,6 +417,7 @@ export interface FileRouteTypes {
     | '/admin/packing'
     | '/admin/participants'
     | '/admin/readiness'
+    | '/admin/roster'
     | '/admin/users'
     | '/resources/$id'
     | '/admin/'
@@ -404,6 +434,7 @@ export interface FileRouteTypes {
     | '/events'
     | '/expenses'
     | '/family'
+    | '/fundraiser-request'
     | '/health'
     | '/mcp'
     | '/packing'
@@ -415,6 +446,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin/announcements'
+    | '/admin/approvals'
     | '/admin/concierge'
     | '/admin/contacts'
     | '/admin/family'
@@ -427,6 +459,7 @@ export interface FileRouteTypes {
     | '/admin/packing'
     | '/admin/participants'
     | '/admin/readiness'
+    | '/admin/roster'
     | '/admin/users'
     | '/resources/$id'
     | '/admin'
@@ -443,6 +476,7 @@ export interface FileRouteTypes {
     | '/events'
     | '/expenses'
     | '/family'
+    | '/fundraiser-request'
     | '/health'
     | '/mcp'
     | '/packing'
@@ -454,6 +488,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin/announcements'
+    | '/admin/approvals'
     | '/admin/concierge'
     | '/admin/contacts'
     | '/admin/family'
@@ -466,6 +501,7 @@ export interface FileRouteTypes {
     | '/admin/packing'
     | '/admin/participants'
     | '/admin/readiness'
+    | '/admin/roster'
     | '/admin/users'
     | '/resources/$id'
     | '/admin/'
@@ -483,6 +519,7 @@ export interface RootRouteChildren {
   EventsRoute: typeof EventsRoute
   ExpensesRoute: typeof ExpensesRoute
   FamilyRoute: typeof FamilyRoute
+  FundraiserRequestRoute: typeof FundraiserRequestRoute
   HealthRoute: typeof HealthRoute
   McpRoute: typeof McpRoute
   PackingRoute: typeof PackingRoute
@@ -494,6 +531,7 @@ export interface RootRouteChildren {
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   AdminAnnouncementsRoute: typeof AdminAnnouncementsRoute
+  AdminApprovalsRoute: typeof AdminApprovalsRoute
   AdminConciergeRoute: typeof AdminConciergeRoute
   AdminContactsRoute: typeof AdminContactsRoute
   AdminFamilyRoute: typeof AdminFamilyRoute
@@ -506,6 +544,7 @@ export interface RootRouteChildren {
   AdminPackingRoute: typeof AdminPackingRoute
   AdminParticipantsRoute: typeof AdminParticipantsRoute
   AdminReadinessRoute: typeof AdminReadinessRoute
+  AdminRosterRoute: typeof AdminRosterRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -570,6 +609,13 @@ declare module '@tanstack/react-router' {
       path: '/health'
       fullPath: '/health'
       preLoaderRoute: typeof HealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fundraiser-request': {
+      id: '/fundraiser-request'
+      path: '/fundraiser-request'
+      fullPath: '/fundraiser-request'
+      preLoaderRoute: typeof FundraiserRequestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/family': {
@@ -640,6 +686,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/users'
       fullPath: '/admin/users'
       preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/roster': {
+      id: '/admin/roster'
+      path: '/admin/roster'
+      fullPath: '/admin/roster'
+      preLoaderRoute: typeof AdminRosterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/readiness': {
@@ -726,6 +779,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminConciergeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/approvals': {
+      id: '/admin/approvals'
+      path: '/admin/approvals'
+      fullPath: '/admin/approvals'
+      preLoaderRoute: typeof AdminApprovalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/announcements': {
       id: '/admin/announcements'
       path: '/admin/announcements'
@@ -798,6 +858,7 @@ const rootRouteChildren: RootRouteChildren = {
   EventsRoute: EventsRoute,
   ExpensesRoute: ExpensesRoute,
   FamilyRoute: FamilyRoute,
+  FundraiserRequestRoute: FundraiserRequestRoute,
   HealthRoute: HealthRoute,
   McpRoute: McpRoute,
   PackingRoute: PackingRoute,
@@ -810,6 +871,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   AdminAnnouncementsRoute: AdminAnnouncementsRoute,
+  AdminApprovalsRoute: AdminApprovalsRoute,
   AdminConciergeRoute: AdminConciergeRoute,
   AdminContactsRoute: AdminContactsRoute,
   AdminFamilyRoute: AdminFamilyRoute,
@@ -822,6 +884,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminPackingRoute: AdminPackingRoute,
   AdminParticipantsRoute: AdminParticipantsRoute,
   AdminReadinessRoute: AdminReadinessRoute,
+  AdminRosterRoute: AdminRosterRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,

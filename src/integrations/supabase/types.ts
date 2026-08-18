@@ -113,6 +113,145 @@ export type Database = {
         }
         Relationships: []
       }
+      fundraiser_approvals: {
+        Row: {
+          actor_email: string | null
+          actor_id: string | null
+          created_at: string
+          decision: string
+          id: string
+          note: string | null
+          request_id: string
+          stage: string
+        }
+        Insert: {
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string
+          decision: string
+          id?: string
+          note?: string | null
+          request_id: string
+          stage: string
+        }
+        Update: {
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string
+          decision?: string
+          id?: string
+          note?: string | null
+          request_id?: string
+          stage?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fundraiser_approvals_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "fundraiser_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fundraiser_requests: {
+        Row: {
+          captain_status: string
+          cochair_status: string
+          compliance_status: string
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          description: string
+          end_time: string | null
+          event_date: string
+          event_id: string | null
+          event_type: string
+          expected_attendance: number | null
+          flier_name: string | null
+          flier_path: string | null
+          fundraising_method: string | null
+          id: string
+          legal_status: string
+          location: string | null
+          marketing_status: string
+          risk_status: string
+          season: string
+          start_time: string | null
+          status: string
+          submitted_by: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          captain_status?: string
+          cochair_status?: string
+          compliance_status?: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description?: string
+          end_time?: string | null
+          event_date: string
+          event_id?: string | null
+          event_type?: string
+          expected_attendance?: number | null
+          flier_name?: string | null
+          flier_path?: string | null
+          fundraising_method?: string | null
+          id?: string
+          legal_status?: string
+          location?: string | null
+          marketing_status?: string
+          risk_status?: string
+          season?: string
+          start_time?: string | null
+          status?: string
+          submitted_by: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          captain_status?: string
+          cochair_status?: string
+          compliance_status?: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description?: string
+          end_time?: string | null
+          event_date?: string
+          event_id?: string | null
+          event_type?: string
+          expected_attendance?: number | null
+          flier_name?: string | null
+          flier_path?: string | null
+          fundraising_method?: string | null
+          id?: string
+          legal_status?: string
+          location?: string | null
+          marketing_status?: string
+          risk_status?: string
+          season?: string
+          start_time?: string | null
+          status?: string
+          submitted_by?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fundraiser_requests_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fundraising_assets: {
         Row: {
           category: string
@@ -171,9 +310,12 @@ export type Database = {
           audit: Json
           bike: Json
           created_at: string
+          manual_entry: boolean
           participation: string | null
           pelotonia: Json
           reg_id: string | null
+          season: string
+          season_locked: boolean
           submitted_at: string | null
           travel: Json
           updated_at: string
@@ -185,9 +327,12 @@ export type Database = {
           audit?: Json
           bike?: Json
           created_at?: string
+          manual_entry?: boolean
           participation?: string | null
           pelotonia?: Json
           reg_id?: string | null
+          season?: string
+          season_locked?: boolean
           submitted_at?: string | null
           travel?: Json
           updated_at?: string
@@ -199,9 +344,12 @@ export type Database = {
           audit?: Json
           bike?: Json
           created_at?: string
+          manual_entry?: boolean
           participation?: string | null
           pelotonia?: Json
           reg_id?: string | null
+          season?: string
+          season_locked?: boolean
           submitted_at?: string | null
           travel?: Json
           updated_at?: string
@@ -287,9 +435,21 @@ export type Database = {
       }
       increment_site_visits: { Args: never; Returns: number }
       is_admin_text: { Args: { _user_id: string }; Returns: boolean }
+      is_fundraiser_reviewer: { Args: { _user_id: string }; Returns: boolean }
+      is_superuser: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      app_role: "admin" | "editor" | "user" | "captain"
+      app_role:
+        | "admin"
+        | "editor"
+        | "user"
+        | "captain"
+        | "legal"
+        | "risk"
+        | "compliance"
+        | "marketing"
+        | "cochair"
+        | "superuser"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -417,7 +577,18 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "editor", "user", "captain"],
+      app_role: [
+        "admin",
+        "editor",
+        "user",
+        "captain",
+        "legal",
+        "risk",
+        "compliance",
+        "marketing",
+        "cochair",
+        "superuser",
+      ],
     },
   },
 } as const

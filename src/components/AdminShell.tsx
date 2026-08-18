@@ -27,6 +27,7 @@ import {
   Settings,
   Contact as ContactIcon,
   Home,
+  Lock,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -43,7 +44,9 @@ const links = [
   { to: "/admin/contacts", label: "Contacts", icon: ContactIcon },
   { to: "/admin/faqs", label: "FAQs", icon: FileText },
   { to: "/admin/fundraising", label: "Fundraising Resources", icon: Megaphone },
+  { to: "/admin/approvals", label: "Fundraiser Approvals", icon: ClipboardList },
   { to: "/admin/participants", label: "Participants", icon: Users },
+  { to: "/admin/roster", label: "Permanent Roster", icon: Lock },
   { to: "/admin/users", label: "Admins & Super Users", icon: ShieldCheck },
   { to: "/admin/flags", label: "Config & Audit", icon: Settings },
 ] as const;
