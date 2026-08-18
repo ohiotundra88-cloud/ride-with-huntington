@@ -155,10 +155,11 @@ function StepPelotonia() {
   const upd = (patch: Partial<typeof p>) => setRegistration((prev) => ({ ...prev, pelotonia: { ...prev.pelotonia, ...patch } }));
 
   const markComplete = () => {
-    const complete = !!(p.confirmation && p.hbNumber);
+    const complete = !!(p.confirmation && p.hbNumber && p.employmentType && p.payGrade74Below);
     upd({ completed: true, status: complete ? "complete" : "pending" });
     setRegistration((prev) => addAudit(prev, "Pelotonia registration marked complete"));
-    toast.success(complete ? "Pelotonia step complete" : "Pelotonia step updated — missing required IDs");
+    toast.success(complete ? "Pelotonia step complete" : "Pelotonia step updated — some required answers are missing");
+
   };
 
   return (
