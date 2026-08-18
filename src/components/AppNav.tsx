@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { toast } from "sonner";
+import { useApprovalNotifications } from "@/lib/useApprovalNotifications";
 
 const links = [
   { to: "/", label: "Home" },
@@ -31,6 +32,7 @@ export function AppNav() {
   const [open, setOpen] = useState(false);
   const pathname = useRouterState({ select: (r) => r.location.pathname });
   const nav = useNavigate();
+  useApprovalNotifications();
 
   const enterSuperUser = () => {
     setState((s) => ({ ...s, superUser: { ...s.superUser, active: true, previewAs: null, currentEditor: user.name } }));
