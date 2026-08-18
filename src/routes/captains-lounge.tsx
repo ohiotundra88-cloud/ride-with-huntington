@@ -219,7 +219,17 @@ function PostCard({ post, canManage }: { post: CaptainPost; canManage: boolean }
               {!post.published && <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-600"><EyeOff className="h-3 w-3" /> Draft</span>}
             </div>
             <CardTitle className="text-lg leading-snug">{post.title}</CardTitle>
-            <p className="mt-1 text-xs text-muted-foreground">Posted {formatPostDate(post.created_at)}</p>
+            <p className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-muted-foreground">
+              <UserCircle2 className="h-3.5 w-3.5 shrink-0" />
+              <span className="font-medium text-foreground">
+                {post.author_name || post.author_email || "Team leadership"}
+              </span>
+              {post.author_name && post.author_email && (
+                <span className="hidden sm:inline">({post.author_email})</span>
+              )}
+              <span aria-hidden>·</span>
+              <span>Posted {formatPostDate(post.created_at)}</span>
+            </p>
           </div>
           {canManage && (
             <div className="flex items-center gap-1">
