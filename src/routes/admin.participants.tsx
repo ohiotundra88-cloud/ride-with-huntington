@@ -34,6 +34,9 @@ type FieldDef = { key: string; label: string; type?: "text" | "date" | "bool" | 
 
 const STATUS_OPTIONS = ["not_started", "pending", "complete"];
 
+/** Sentinel for "no value" — Radix Select items cannot use an empty string value. */
+const NONE = "__none";
+
 const FIELDS: Record<Section, FieldDef[]> = {
   pelotonia: [
     { key: "discountCode", label: "Discount code" },
