@@ -42,6 +42,7 @@ import { Route as AdminFaqsRouteImport } from './routes/admin.faqs'
 import { Route as AdminFamilyRouteImport } from './routes/admin.family'
 import { Route as AdminContactsRouteImport } from './routes/admin.contacts'
 import { Route as AdminConciergeRouteImport } from './routes/admin.concierge'
+import { Route as AdminBrandingRouteImport } from './routes/admin.branding'
 import { Route as AdminApprovalsRouteImport } from './routes/admin.approvals'
 import { Route as AdminAnnouncementsRouteImport } from './routes/admin.announcements'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
@@ -217,6 +218,11 @@ const AdminConciergeRoute = AdminConciergeRouteImport.update({
   path: '/admin/concierge',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminBrandingRoute = AdminBrandingRouteImport.update({
+  id: '/admin/branding',
+  path: '/admin/branding',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminApprovalsRoute = AdminApprovalsRouteImport.update({
   id: '/admin/approvals',
   path: '/admin/approvals',
@@ -289,6 +295,7 @@ export interface FileRoutesByFullPath {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/approvals': typeof AdminApprovalsRoute
+  '/admin/branding': typeof AdminBrandingRoute
   '/admin/concierge': typeof AdminConciergeRoute
   '/admin/contacts': typeof AdminContactsRoute
   '/admin/family': typeof AdminFamilyRoute
@@ -333,6 +340,7 @@ export interface FileRoutesByTo {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/approvals': typeof AdminApprovalsRoute
+  '/admin/branding': typeof AdminBrandingRoute
   '/admin/concierge': typeof AdminConciergeRoute
   '/admin/contacts': typeof AdminContactsRoute
   '/admin/family': typeof AdminFamilyRoute
@@ -378,6 +386,7 @@ export interface FileRoutesById {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/approvals': typeof AdminApprovalsRoute
+  '/admin/branding': typeof AdminBrandingRoute
   '/admin/concierge': typeof AdminConciergeRoute
   '/admin/contacts': typeof AdminContactsRoute
   '/admin/family': typeof AdminFamilyRoute
@@ -424,6 +433,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin/announcements'
     | '/admin/approvals'
+    | '/admin/branding'
     | '/admin/concierge'
     | '/admin/contacts'
     | '/admin/family'
@@ -468,6 +478,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin/announcements'
     | '/admin/approvals'
+    | '/admin/branding'
     | '/admin/concierge'
     | '/admin/contacts'
     | '/admin/family'
@@ -512,6 +523,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin/announcements'
     | '/admin/approvals'
+    | '/admin/branding'
     | '/admin/concierge'
     | '/admin/contacts'
     | '/admin/family'
@@ -557,6 +569,7 @@ export interface RootRouteChildren {
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   AdminAnnouncementsRoute: typeof AdminAnnouncementsRoute
   AdminApprovalsRoute: typeof AdminApprovalsRoute
+  AdminBrandingRoute: typeof AdminBrandingRoute
   AdminConciergeRoute: typeof AdminConciergeRoute
   AdminContactsRoute: typeof AdminContactsRoute
   AdminFamilyRoute: typeof AdminFamilyRoute
@@ -812,6 +825,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminConciergeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/branding': {
+      id: '/admin/branding'
+      path: '/admin/branding'
+      fullPath: '/admin/branding'
+      preLoaderRoute: typeof AdminBrandingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/approvals': {
       id: '/admin/approvals'
       path: '/admin/approvals'
@@ -913,6 +933,7 @@ const rootRouteChildren: RootRouteChildren = {
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   AdminAnnouncementsRoute: AdminAnnouncementsRoute,
   AdminApprovalsRoute: AdminApprovalsRoute,
+  AdminBrandingRoute: AdminBrandingRoute,
   AdminConciergeRoute: AdminConciergeRoute,
   AdminContactsRoute: AdminContactsRoute,
   AdminFamilyRoute: AdminFamilyRoute,
