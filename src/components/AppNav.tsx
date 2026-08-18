@@ -1,3 +1,4 @@
+import { useBranding } from "@/lib/useBranding";
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { Menu, User as UserIcon, ShieldCheck, LogOut, LogIn } from "lucide-react";
 import { useState } from "react";
@@ -79,11 +80,7 @@ export function AppNav() {
         </Sheet>
 
         <Link to="/" className="flex items-center gap-2 font-black tracking-tight">
-          <div className="grid h-8 w-8 place-items-center rounded-md bg-[var(--brand)] text-[var(--brand-foreground)]">
-            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="3">
-              <path d="M4 12h12M12 6l6 6-6 6" />
-            </svg>
-          </div>
+          <BrandMark />
           <span className="text-sm sm:text-base">Team Huntington Hub</span>
         </Link>
 
@@ -146,6 +143,27 @@ export function AppNav() {
         </div>
       </div>
     </header>
+  );
+}
+
+/** Header icon — a super-user uploaded logo, or the default arrow mark. */
+export function BrandMark() {
+  const { logoUrl } = useBranding();
+  if (logoUrl) {
+    return (
+      <img
+        src={logoUrl}
+        alt="Team Huntington Hub logo"
+        className="h-8 w-8 rounded-md object-cover bg-white/10"
+      />
+    );
+  }
+  return (
+    <div className="grid h-8 w-8 place-items-center rounded-md bg-[var(--brand)] text-[var(--brand-foreground)]">
+      <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="3">
+        <path d="M4 12h12M12 6l6 6-6 6" />
+      </svg>
+    </div>
   );
 }
 

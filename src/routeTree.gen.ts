@@ -42,6 +42,7 @@ import { Route as AdminFaqsRouteImport } from './routes/admin.faqs'
 import { Route as AdminFamilyRouteImport } from './routes/admin.family'
 import { Route as AdminContactsRouteImport } from './routes/admin.contacts'
 import { Route as AdminConciergeRouteImport } from './routes/admin.concierge'
+import { Route as AdminBrandingRouteImport } from './routes/admin.branding'
 import { Route as AdminApprovalsRouteImport } from './routes/admin.approvals'
 import { Route as AdminAnnouncementsRouteImport } from './routes/admin.announcements'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
@@ -50,6 +51,7 @@ import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[
 import { Route as ApiPublicSbSplatRouteImport } from './routes/api/public/sb/$'
 import { Route as ApiPublicFundraisingAssetIdRouteImport } from './routes/api/public/fundraising-asset/$id'
 import { Route as ApiPublicEventFlierIdRouteImport } from './routes/api/public/event-flier/$id'
+import { Route as ApiPublicBrandingKindRouteImport } from './routes/api/public/branding/$kind'
 
 const TeamRoute = TeamRouteImport.update({
   id: '/team',
@@ -216,6 +218,11 @@ const AdminConciergeRoute = AdminConciergeRouteImport.update({
   path: '/admin/concierge',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminBrandingRoute = AdminBrandingRouteImport.update({
+  id: '/admin/branding',
+  path: '/admin/branding',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminApprovalsRoute = AdminApprovalsRouteImport.update({
   id: '/admin/approvals',
   path: '/admin/approvals',
@@ -260,6 +267,11 @@ const ApiPublicEventFlierIdRoute = ApiPublicEventFlierIdRouteImport.update({
   path: '/api/public/event-flier/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicBrandingKindRoute = ApiPublicBrandingKindRouteImport.update({
+  id: '/api/public/branding/$kind',
+  path: '/api/public/branding/$kind',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -283,6 +295,7 @@ export interface FileRoutesByFullPath {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/approvals': typeof AdminApprovalsRoute
+  '/admin/branding': typeof AdminBrandingRoute
   '/admin/concierge': typeof AdminConciergeRoute
   '/admin/contacts': typeof AdminContactsRoute
   '/admin/family': typeof AdminFamilyRoute
@@ -300,6 +313,7 @@ export interface FileRoutesByFullPath {
   '/resources/$id': typeof ResourcesIdRoute
   '/admin/': typeof AdminIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/public/branding/$kind': typeof ApiPublicBrandingKindRoute
   '/api/public/event-flier/$id': typeof ApiPublicEventFlierIdRoute
   '/api/public/fundraising-asset/$id': typeof ApiPublicFundraisingAssetIdRoute
   '/api/public/sb/$': typeof ApiPublicSbSplatRoute
@@ -326,6 +340,7 @@ export interface FileRoutesByTo {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/approvals': typeof AdminApprovalsRoute
+  '/admin/branding': typeof AdminBrandingRoute
   '/admin/concierge': typeof AdminConciergeRoute
   '/admin/contacts': typeof AdminContactsRoute
   '/admin/family': typeof AdminFamilyRoute
@@ -343,6 +358,7 @@ export interface FileRoutesByTo {
   '/resources/$id': typeof ResourcesIdRoute
   '/admin': typeof AdminIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/public/branding/$kind': typeof ApiPublicBrandingKindRoute
   '/api/public/event-flier/$id': typeof ApiPublicEventFlierIdRoute
   '/api/public/fundraising-asset/$id': typeof ApiPublicFundraisingAssetIdRoute
   '/api/public/sb/$': typeof ApiPublicSbSplatRoute
@@ -370,6 +386,7 @@ export interface FileRoutesById {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/approvals': typeof AdminApprovalsRoute
+  '/admin/branding': typeof AdminBrandingRoute
   '/admin/concierge': typeof AdminConciergeRoute
   '/admin/contacts': typeof AdminContactsRoute
   '/admin/family': typeof AdminFamilyRoute
@@ -387,6 +404,7 @@ export interface FileRoutesById {
   '/resources/$id': typeof ResourcesIdRoute
   '/admin/': typeof AdminIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/public/branding/$kind': typeof ApiPublicBrandingKindRoute
   '/api/public/event-flier/$id': typeof ApiPublicEventFlierIdRoute
   '/api/public/fundraising-asset/$id': typeof ApiPublicFundraisingAssetIdRoute
   '/api/public/sb/$': typeof ApiPublicSbSplatRoute
@@ -415,6 +433,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin/announcements'
     | '/admin/approvals'
+    | '/admin/branding'
     | '/admin/concierge'
     | '/admin/contacts'
     | '/admin/family'
@@ -432,6 +451,7 @@ export interface FileRouteTypes {
     | '/resources/$id'
     | '/admin/'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/public/branding/$kind'
     | '/api/public/event-flier/$id'
     | '/api/public/fundraising-asset/$id'
     | '/api/public/sb/$'
@@ -458,6 +478,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin/announcements'
     | '/admin/approvals'
+    | '/admin/branding'
     | '/admin/concierge'
     | '/admin/contacts'
     | '/admin/family'
@@ -475,6 +496,7 @@ export interface FileRouteTypes {
     | '/resources/$id'
     | '/admin'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/public/branding/$kind'
     | '/api/public/event-flier/$id'
     | '/api/public/fundraising-asset/$id'
     | '/api/public/sb/$'
@@ -501,6 +523,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin/announcements'
     | '/admin/approvals'
+    | '/admin/branding'
     | '/admin/concierge'
     | '/admin/contacts'
     | '/admin/family'
@@ -518,6 +541,7 @@ export interface FileRouteTypes {
     | '/resources/$id'
     | '/admin/'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/public/branding/$kind'
     | '/api/public/event-flier/$id'
     | '/api/public/fundraising-asset/$id'
     | '/api/public/sb/$'
@@ -545,6 +569,7 @@ export interface RootRouteChildren {
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   AdminAnnouncementsRoute: typeof AdminAnnouncementsRoute
   AdminApprovalsRoute: typeof AdminApprovalsRoute
+  AdminBrandingRoute: typeof AdminBrandingRoute
   AdminConciergeRoute: typeof AdminConciergeRoute
   AdminContactsRoute: typeof AdminContactsRoute
   AdminFamilyRoute: typeof AdminFamilyRoute
@@ -561,6 +586,7 @@ export interface RootRouteChildren {
   AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  ApiPublicBrandingKindRoute: typeof ApiPublicBrandingKindRoute
   ApiPublicEventFlierIdRoute: typeof ApiPublicEventFlierIdRoute
   ApiPublicFundraisingAssetIdRoute: typeof ApiPublicFundraisingAssetIdRoute
   ApiPublicSbSplatRoute: typeof ApiPublicSbSplatRoute
@@ -799,6 +825,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminConciergeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/branding': {
+      id: '/admin/branding'
+      path: '/admin/branding'
+      fullPath: '/admin/branding'
+      preLoaderRoute: typeof AdminBrandingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/approvals': {
       id: '/admin/approvals'
       path: '/admin/approvals'
@@ -855,6 +888,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicEventFlierIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/branding/$kind': {
+      id: '/api/public/branding/$kind'
+      path: '/api/public/branding/$kind'
+      fullPath: '/api/public/branding/$kind'
+      preLoaderRoute: typeof ApiPublicBrandingKindRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -893,6 +933,7 @@ const rootRouteChildren: RootRouteChildren = {
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   AdminAnnouncementsRoute: AdminAnnouncementsRoute,
   AdminApprovalsRoute: AdminApprovalsRoute,
+  AdminBrandingRoute: AdminBrandingRoute,
   AdminConciergeRoute: AdminConciergeRoute,
   AdminContactsRoute: AdminContactsRoute,
   AdminFamilyRoute: AdminFamilyRoute,
@@ -909,6 +950,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  ApiPublicBrandingKindRoute: ApiPublicBrandingKindRoute,
   ApiPublicEventFlierIdRoute: ApiPublicEventFlierIdRoute,
   ApiPublicFundraisingAssetIdRoute: ApiPublicFundraisingAssetIdRoute,
   ApiPublicSbSplatRoute: ApiPublicSbSplatRoute,
