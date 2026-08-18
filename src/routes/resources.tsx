@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { faqCategories, type FAQCategory } from "@/lib/faq-data";
 import { usePublicFaqs } from "@/lib/faq-store";
 import { useAdmin } from "@/lib/admin-store";
+import { FundraisingResources } from "@/components/FundraisingResources";
 import { Search, LifeBuoy, ChevronDown, ChevronUp, Mail, Phone } from "lucide-react";
 
 
