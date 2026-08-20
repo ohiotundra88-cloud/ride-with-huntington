@@ -93,13 +93,14 @@ export function AppNav() {
           <span className="text-sm sm:text-base">Team Huntington Hub</span>
         </Link>
 
-        <nav className="ml-6 hidden items-center gap-1 lg:flex">
+        <nav className="ml-6 hidden items-center lg:flex">
           {navLinks.map((l) => (
             <Link key={l.to} to={l.to}
-              className={`rounded-md px-3 py-1.5 text-sm transition-colors ${pathname === l.to ? "bg-white/10 text-white" : "text-white/80 hover:bg-white/10 hover:text-white"}`}>
+              className={`rounded-md px-2 py-1.5 text-xs xl:text-sm transition-colors ${pathname === l.to ? "bg-white/10 text-white" : "text-white/80 hover:bg-white/10 hover:text-white"}`}>
               {l.label}
             </Link>
           ))}
+
           {state.superUser.active && (
             <Link to="/admin"
               className={`rounded-md px-3 py-1.5 text-sm inline-flex items-center gap-1 ${pathname.startsWith("/admin") ? "bg-white/10 text-white" : "text-white/80 hover:bg-white/10 hover:text-white"}`}>
