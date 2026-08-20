@@ -33,7 +33,18 @@ function HeroBackdrop() {
 }
 
 
+const visitsQueryOptions = queryOptions({
+  queryKey: ["site-visits"],
+  queryFn: () => recordSiteVisit(),
+  staleTime: 5 * 60 * 1000,
+  retry: 1,
+});
+
 export const Route = createFileRoute("/")({
+  // Resolve the counter on the server so the number is present in the initial
+  // HTML — if client JS is blocked or slow it still renders a real value.
+  loader: ({ context }) =>
+    context.queryClient.ensureQueryData(visitsQueryOptions).catch(() => null),
   head: () => ({
     meta: [
       { title: "Team Huntington Hub — Your Pelotonia Journey Starts Here" },
@@ -43,7 +54,18 @@ export const Route = createFileRoute("/")({
     ],
   }),
   component: Landing,
+  errorComponent: ({ error }) => (
+    <div className="mx-auto max-w-md px-4 py-20 text-center text-sm text-muted-foreground">
+      {error.message}
+    </div>
+  ),
+  notFoundComponent: () => (
+    <div className="mx-auto max-w-md px-4 py-20 text-center text-sm text-muted-foreground">
+      Page not found.
+    </div>
+  ),
 });
+
 
 
 const steps = [
