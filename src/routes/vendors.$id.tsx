@@ -31,13 +31,11 @@ import {
 
 export const Route = createFileRoute("/vendors/$id")({
   component: () => (
-    <>
-      <AppNav />
-      <VendorGate>
-        <VendorDetailPage />
-      </VendorGate>
-    </>
+    <VendorGate>
+      <VendorDetailPage />
+    </VendorGate>
   ),
+
   head: () => ({
     meta: [
       { title: "Vendor record — Vendor CRM" },
