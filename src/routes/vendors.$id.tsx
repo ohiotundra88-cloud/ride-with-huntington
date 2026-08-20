@@ -5,8 +5,8 @@ import { toast } from "sonner";
 import {
   Archive, ArrowLeft, Download, FileText, History, Pencil, Plus, RotateCcw, Trash2, Upload,
 } from "lucide-react";
-import { AppNav } from "@/components/AppNav";
 import { VendorGate, useVendorAccess } from "@/components/VendorGate";
+
 import { VendorForm } from "@/components/VendorForm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,13 +31,11 @@ import {
 
 export const Route = createFileRoute("/vendors/$id")({
   component: () => (
-    <>
-      <AppNav />
-      <VendorGate>
-        <VendorDetailPage />
-      </VendorGate>
-    </>
+    <VendorGate>
+      <VendorDetailPage />
+    </VendorGate>
   ),
+
   head: () => ({
     meta: [
       { title: "Vendor record — Vendor CRM" },
