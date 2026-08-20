@@ -17,13 +17,11 @@ import {
 
 export const Route = createFileRoute("/vendors/")({
   component: () => (
-    <>
-      <AppNav />
-      <VendorGate>
-        <VendorDashboard />
-      </VendorGate>
-    </>
+    <VendorGate>
+      <VendorDashboard />
+    </VendorGate>
   ),
+
   head: () => ({
     meta: [
       { title: "Vendor CRM — Team Huntington Hub" },
