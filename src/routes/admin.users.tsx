@@ -14,8 +14,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { listAdmins, grantAdminByEmail, revokeAdmin, type AdminUserRow } from "@/lib/admins.functions";
 import { listCaptains, grantCaptainByEmail, revokeCaptain, type CaptainRow } from "@/lib/captains.functions";
-import { Flag, Scale, ShieldAlert, BadgeCheck, Megaphone, Crown } from "lucide-react";
+import { Flag, Scale, ShieldAlert, BadgeCheck, Megaphone, Crown, Briefcase } from "lucide-react";
 import { RoleMembersCard } from "@/components/RoleMembersCard";
+import { VendorAccessCard } from "@/components/VendorAccessCard";
+
 
 export const Route = createFileRoute("/admin/users")({
   component: AdminUsersPage,
@@ -150,11 +152,21 @@ function AdminUsersPage() {
       <CaptainsCard />
 
       <RoleMembersCard
+        role="vendor_captain"
+        title="Vendor Captains"
+        description="Vendor Captains manage the Vendor CRM: they can view and edit every vendor record, but cannot archive or delete. Each one also needs the vendor dashboard switch turned on below."
+        icon={<Briefcase className="h-4 w-4 text-[var(--brand)]" />}
+      />
+
+      <VendorAccessCard />
+
+      <RoleMembersCard
         role="superuser"
         title="Super users"
         description="Super users manage the permanent roster, appoint every review role, and run the end-of-season reset. Manually added colleagues can only be removed by a super user."
         icon={<ShieldCheck className="h-4 w-4 text-[var(--brand)]" />}
       />
+
 
       <div className="grid gap-6 lg:grid-cols-2">
         <RoleMembersCard role="legal" title="Legal reviewers" description="Approve the legal stage of fundraiser requests." icon={<Scale className="h-4 w-4 text-[var(--brand)]" />} />

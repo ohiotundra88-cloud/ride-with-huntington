@@ -13,6 +13,8 @@ import {
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { toast } from "sonner";
 import { useApprovalNotifications } from "@/lib/useApprovalNotifications";
+import { useVendorAccess } from "@/components/VendorGate";
+
 
 const links = [
   { to: "/", label: "Home" },
@@ -35,9 +37,16 @@ export function AppNav() {
   const nav = useNavigate();
   useApprovalNotifications();
 
-  const navLinks = user.signedIn && user.isReviewer
-    ? [...links, { to: "/captains-lounge", label: "Captains Lounge" } as const]
-    : links;
+  const { data: vendorAccess } = useVendorAccess();
+
+  let navLinks: readonly { to: any; label: string }[] = links;
+  if (user.signedIn && user.isReviewer) {
+    navLinks = [...navLinks, { to: "/captains-lounge", label: "Captains Lounge" }];
+  }
+  if (vendorAccess?.allowed) {
+    navLinks = [...navLinks, { to: "/vendors", label: "Vendor CRM" }];
+  }
+
 
   const enterSuperUser = () => {
     setState((s) => ({ ...s, superUser: { ...s.superUser, active: true, previewAs: null, currentEditor: user.name } }));

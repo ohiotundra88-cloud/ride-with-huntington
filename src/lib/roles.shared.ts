@@ -1,6 +1,8 @@
 export const MANAGEABLE_ROLES = [
   "superuser",
   "captain",
+  "vendor_captain",
+
   "legal",
   "risk",
   "compliance",

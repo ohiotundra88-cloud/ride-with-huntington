@@ -26,7 +26,10 @@ import { Route as ConfirmationRouteImport } from './routes/confirmation'
 import { Route as CaptainsLoungeRouteImport } from './routes/captains-lounge'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as VendorsIndexRouteImport } from './routes/vendors.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as VendorsNewRouteImport } from './routes/vendors.new'
+import { Route as VendorsIdRouteImport } from './routes/vendors.$id'
 import { Route as ResourcesIdRouteImport } from './routes/resources.$id'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminRosterRouteImport } from './routes/admin.roster'
@@ -139,9 +142,24 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VendorsIndexRoute = VendorsIndexRouteImport.update({
+  id: '/vendors/',
+  path: '/vendors/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VendorsNewRoute = VendorsNewRouteImport.update({
+  id: '/vendors/new',
+  path: '/vendors/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VendorsIdRoute = VendorsIdRouteImport.update({
+  id: '/vendors/$id',
+  path: '/vendors/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResourcesIdRoute = ResourcesIdRouteImport.update({
@@ -317,7 +335,10 @@ export interface FileRoutesByFullPath {
   '/admin/roster': typeof AdminRosterRoute
   '/admin/users': typeof AdminUsersRoute
   '/resources/$id': typeof ResourcesIdRoute
+  '/vendors/$id': typeof VendorsIdRoute
+  '/vendors/new': typeof VendorsNewRoute
   '/admin/': typeof AdminIndexRoute
+  '/vendors/': typeof VendorsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/avatar/$userId': typeof ApiPublicAvatarUserIdRoute
   '/api/public/branding/$kind': typeof ApiPublicBrandingKindRoute
@@ -363,7 +384,10 @@ export interface FileRoutesByTo {
   '/admin/roster': typeof AdminRosterRoute
   '/admin/users': typeof AdminUsersRoute
   '/resources/$id': typeof ResourcesIdRoute
+  '/vendors/$id': typeof VendorsIdRoute
+  '/vendors/new': typeof VendorsNewRoute
   '/admin': typeof AdminIndexRoute
+  '/vendors': typeof VendorsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/avatar/$userId': typeof ApiPublicAvatarUserIdRoute
   '/api/public/branding/$kind': typeof ApiPublicBrandingKindRoute
@@ -410,7 +434,10 @@ export interface FileRoutesById {
   '/admin/roster': typeof AdminRosterRoute
   '/admin/users': typeof AdminUsersRoute
   '/resources/$id': typeof ResourcesIdRoute
+  '/vendors/$id': typeof VendorsIdRoute
+  '/vendors/new': typeof VendorsNewRoute
   '/admin/': typeof AdminIndexRoute
+  '/vendors/': typeof VendorsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/avatar/$userId': typeof ApiPublicAvatarUserIdRoute
   '/api/public/branding/$kind': typeof ApiPublicBrandingKindRoute
@@ -458,7 +485,10 @@ export interface FileRouteTypes {
     | '/admin/roster'
     | '/admin/users'
     | '/resources/$id'
+    | '/vendors/$id'
+    | '/vendors/new'
     | '/admin/'
+    | '/vendors/'
     | '/.mcp/invoke-tool/$tool'
     | '/api/public/avatar/$userId'
     | '/api/public/branding/$kind'
@@ -504,7 +534,10 @@ export interface FileRouteTypes {
     | '/admin/roster'
     | '/admin/users'
     | '/resources/$id'
+    | '/vendors/$id'
+    | '/vendors/new'
     | '/admin'
+    | '/vendors'
     | '/.mcp/invoke-tool/$tool'
     | '/api/public/avatar/$userId'
     | '/api/public/branding/$kind'
@@ -550,7 +583,10 @@ export interface FileRouteTypes {
     | '/admin/roster'
     | '/admin/users'
     | '/resources/$id'
+    | '/vendors/$id'
+    | '/vendors/new'
     | '/admin/'
+    | '/vendors/'
     | '/.mcp/invoke-tool/$tool'
     | '/api/public/avatar/$userId'
     | '/api/public/branding/$kind'
@@ -596,7 +632,10 @@ export interface RootRouteChildren {
   AdminReadinessRoute: typeof AdminReadinessRoute
   AdminRosterRoute: typeof AdminRosterRoute
   AdminUsersRoute: typeof AdminUsersRoute
+  VendorsIdRoute: typeof VendorsIdRoute
+  VendorsNewRoute: typeof VendorsNewRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  VendorsIndexRoute: typeof VendorsIndexRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicAvatarUserIdRoute: typeof ApiPublicAvatarUserIdRoute
   ApiPublicBrandingKindRoute: typeof ApiPublicBrandingKindRoute
@@ -726,11 +765,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/vendors/': {
+      id: '/vendors/'
+      path: '/vendors'
+      fullPath: '/vendors/'
+      preLoaderRoute: typeof VendorsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/': {
       id: '/admin/'
       path: '/admin'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vendors/new': {
+      id: '/vendors/new'
+      path: '/vendors/new'
+      fullPath: '/vendors/new'
+      preLoaderRoute: typeof VendorsNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vendors/$id': {
+      id: '/vendors/$id'
+      path: '/vendors/$id'
+      fullPath: '/vendors/$id'
+      preLoaderRoute: typeof VendorsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/resources/$id': {
@@ -968,7 +1028,10 @@ const rootRouteChildren: RootRouteChildren = {
   AdminReadinessRoute: AdminReadinessRoute,
   AdminRosterRoute: AdminRosterRoute,
   AdminUsersRoute: AdminUsersRoute,
+  VendorsIdRoute: VendorsIdRoute,
+  VendorsNewRoute: VendorsNewRoute,
   AdminIndexRoute: AdminIndexRoute,
+  VendorsIndexRoute: VendorsIndexRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicAvatarUserIdRoute: ApiPublicAvatarUserIdRoute,
   ApiPublicBrandingKindRoute: ApiPublicBrandingKindRoute,
