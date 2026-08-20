@@ -193,12 +193,12 @@ function Landing() {
 }
 
 function VisitCounter() {
-  const record = useServerFn(recordSiteVisit);
-  const { data: visits, isLoading } = useQuery({
-    queryKey: ["site-visits"],
-    queryFn: () => record(),
-    staleTime: 5 * 60 * 1000,
-  });
+  // Primed by the route loader, so `data` is already a real number on first
+  // paint. If the count genuinely can't be loaded we hide the line entirely
+  // rather than leaving a bare ellipsis.
+  const { data: visits, isPending } = useQuery(visitsQueryOptions);
+  const count = typeof visits === "number" ? visits : null;
+  if (count === null && !isPending) return null;
 
   return (
     <section className="border-t bg-muted/30">
@@ -207,12 +207,13 @@ function VisitCounter() {
           <BarChart3 className="h-3.5 w-3.5" />
           <span>Total site visits:</span>
           <span className="font-semibold text-[var(--brand-dark)]">
-            {isLoading ? "…" : visits?.toLocaleString() ?? "—"}
+            {count === null ? "—" : count.toLocaleString()}
           </span>
         </div>
       </div>
     </section>
   );
+
 }
 
 
