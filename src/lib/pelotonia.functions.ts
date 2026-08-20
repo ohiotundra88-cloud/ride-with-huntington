@@ -19,6 +19,7 @@ export interface PelotoniaTeamData {
   raised: number;
   goal: number;
   allTimeRaised: number;
+  kidsRaised: number;
   members: number;
   riders: number;
   challengers: number;
@@ -74,9 +75,11 @@ export const getPelotoniaTeamData = createServerFn({ method: "GET" }).handler(
 
       return {
         teamName: String(o["team_name"] ?? "Team Huntington Bank"),
-        raised: num(o["raised"]),
+        // Dashboard headline total includes Pelotonia Kids funds
+        raised: num(o["raised"]) + num(o["kids_raised"]),
         goal: num(o["goal"]),
-        allTimeRaised: num(o["all_time_raised"]),
+        allTimeRaised: num(o["all_time_raised"]) + num(o["kids_raised"]),
+        kidsRaised: num(o["kids_raised"]),
         members: num(o["members_count"]),
         riders: num(o["riders"]),
         challengers: num(o["challengers"]),

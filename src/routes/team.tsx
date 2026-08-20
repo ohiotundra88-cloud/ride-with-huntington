@@ -117,7 +117,7 @@ function TeamHub() {
                     </p>
                     <p className="mt-1 text-sm text-muted-foreground">
                       {live
-                        ? `${live.donationsCount.toLocaleString()} donations · ${formatCurrencyUSD(live.totalCommitted)} committed · ${formatCurrencyUSD(live.allTimeRaised)} all-time`
+                        ? `${live.donationsCount.toLocaleString()} donations · incl. ${formatCurrencyUSD(live.kidsRaised)} Pelotonia Kids · ${formatCurrencyUSD(live.totalCommitted)} committed · ${formatCurrencyUSD(live.allTimeRaised)} all-time`
                         : "Sample data — live totals unavailable right now."}
                     </p>
                   </div>
