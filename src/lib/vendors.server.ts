@@ -469,3 +469,37 @@ export async function setVendorAccessFlag(ctx: Ctx, userId: string, value: boole
   if (error) throw new Error(error.message);
   return { ok: true };
 }
+
+// Token-optional access probe: used by nav/gate so signed-out visitors get a
+// plain "not allowed" answer instead of an Unauthorized error.
+export async function getAccessFromToken(token: string | null): Promise<VendorAccess> {
+  const denied: VendorAccess = { allowed: false, roles: [], canArchive: false, canPurge: false };
+  if (!token || token.split(".").length !== 3) return denied;
+
+  const url = process.env["SUPABASE_URL"];
+  const key = process.env["SUPABASE_PUBLISHABLE_KEY"];
+  if (!url || !key) return denied;
+
+  const { createClient } = await import("@supabase/supabase-js");
+  const supabase = createClient(url, key, {
+    global: {
+      fetch: (input: any, init: any) => {
+        const headers = new Headers(init?.headers);
+        if (headers.get("Authorization") === `Bearer ${key}`) headers.delete("Authorization");
+        headers.set("apikey", key);
+        return fetch(input, { ...init, headers });
+      },
+      headers: { Authorization: `Bearer ${token}` },
+    },
+    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+  });
+
+  const { data, error } = await supabase.auth.getClaims(token);
+  if (error || !data?.claims?.sub) return denied;
+
+  try {
+    return await getAccess({ supabase, userId: data.claims.sub, claims: data.claims as any });
+  } catch {
+    return denied;
+  }
+}
