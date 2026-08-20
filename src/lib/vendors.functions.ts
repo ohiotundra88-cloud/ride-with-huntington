@@ -16,10 +16,12 @@ import type { VendorCaptainRow } from "@/lib/vendors.server";
 export type { VendorCaptainRow };
 
 export const getVendorAccess = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<VendorAccess> => {
-    const { getAccess } = await import("@/lib/vendors.server");
-    return getAccess(context as any);
+  .handler(async (): Promise<VendorAccess> => {
+    const { getRequestHeader } = await import("@tanstack/react-start/server");
+    const header = getRequestHeader("authorization") ?? "";
+    const token = header.startsWith("Bearer ") ? header.slice(7) : null;
+    const { getAccessFromToken } = await import("@/lib/vendors.server");
+    return getAccessFromToken(token);
   });
 
 export const listVendorRecords = createServerFn({ method: "POST" })
