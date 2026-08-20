@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import { queryOptions } from "@tanstack/react-query";
 
 import { ArrowRight, Plane, Bike, Shirt, CheckCircle2, LifeBuoy, FileText, ClipboardCheck, HelpCircle, Calendar, User, Target, BarChart3 } from "lucide-react";
 
@@ -193,12 +193,12 @@ function Landing() {
 }
 
 function VisitCounter() {
-  // Primed by the route loader, so `data` is already a real number on first
-  // paint. If the count genuinely can't be loaded we hide the line entirely
-  // rather than leaving a bare ellipsis.
-  const { data: visits, isPending } = useQuery(visitsQueryOptions);
+  // Read straight from the loader so the server HTML and the first client
+  // render always agree (a client-side refetch would change the number and
+  // trip a hydration mismatch). Hidden entirely if the count can't be loaded.
+  const visits = Route.useLoaderData();
   const count = typeof visits === "number" ? visits : null;
-  if (count === null && !isPending) return null;
+  if (count === null) return null;
 
   return (
     <section className="border-t bg-muted/30">
@@ -206,15 +206,13 @@ function VisitCounter() {
         <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
           <BarChart3 className="h-3.5 w-3.5" />
           <span>Total site visits:</span>
-          <span className="font-semibold text-[var(--brand-dark)]">
-            {count === null ? "—" : count.toLocaleString()}
-          </span>
+          <span className="font-semibold text-[var(--brand-dark)]">{count.toLocaleString()}</span>
         </div>
       </div>
     </section>
   );
-
 }
+
 
 
 function SignedInHero() {

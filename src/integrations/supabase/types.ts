@@ -411,6 +411,7 @@ export type Database = {
           created_at: string
           email: string | null
           full_name: string | null
+          has_vendor_dashboard_access: boolean
           id: string
           manager: string | null
           market: string | null
@@ -426,6 +427,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           full_name?: string | null
+          has_vendor_dashboard_access?: boolean
           id: string
           manager?: string | null
           market?: string | null
@@ -441,6 +443,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           full_name?: string | null
+          has_vendor_dashboard_access?: boolean
           id?: string
           manager?: string | null
           market?: string | null
@@ -531,12 +534,333 @@ export type Database = {
         }
         Relationships: []
       }
+      vendor_activity: {
+        Row: {
+          contact_date: string
+          contact_method: string
+          contacted_by: string
+          created_at: string
+          created_by: string | null
+          id: string
+          interaction_notes: string
+          next_step: string
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          contact_date: string
+          contact_method?: string
+          contacted_by?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          interaction_notes?: string
+          next_step?: string
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          contact_date?: string
+          contact_method?: string
+          contacted_by?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          interaction_notes?: string
+          next_step?: string
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_activity_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_attachments: {
+        Row: {
+          archived: boolean
+          content_type: string | null
+          created_at: string
+          file_name: string
+          file_path: string
+          id: string
+          size_bytes: number | null
+          uploaded_by: string
+          vendor_id: string
+        }
+        Insert: {
+          archived?: boolean
+          content_type?: string | null
+          created_at?: string
+          file_name: string
+          file_path: string
+          id?: string
+          size_bytes?: number | null
+          uploaded_by: string
+          vendor_id: string
+        }
+        Update: {
+          archived?: boolean
+          content_type?: string | null
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          id?: string
+          size_bytes?: number | null
+          uploaded_by?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_attachments_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_audit: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_id: string | null
+          created_at: string
+          details: Json
+          id: string
+          vendor_id: string
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          vendor_id: string
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_audit_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_contacts: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          sort_order: number
+          title: string | null
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          sort_order?: number
+          title?: string | null
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          sort_order?: number
+          title?: string | null
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_contacts_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_donations: {
+        Row: {
+          actual_donated_amount: number
+          committed_amount: number
+          created_at: string
+          id: string
+          notes: string
+          recipient: string
+          updated_at: string
+          vendor_id: string
+          year: number
+        }
+        Insert: {
+          actual_donated_amount?: number
+          committed_amount?: number
+          created_at?: string
+          id?: string
+          notes?: string
+          recipient?: string
+          updated_at?: string
+          vendor_id: string
+          year: number
+        }
+        Update: {
+          actual_donated_amount?: number
+          committed_amount?: number
+          created_at?: string
+          id?: string
+          notes?: string
+          recipient?: string
+          updated_at?: string
+          vendor_id?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_donations_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_spend: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          notes: string
+          updated_at: string
+          vendor_id: string
+          year: number
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          notes?: string
+          updated_at?: string
+          vendor_id: string
+          year: number
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          notes?: string
+          updated_at?: string
+          vendor_id?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_spend_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendors: {
+        Row: {
+          archived: boolean
+          archived_at: string | null
+          archived_by: string | null
+          business_name: string
+          business_segment: string | null
+          created_at: string
+          created_by: string
+          general_notes: string
+          id: string
+          internal_business_segment: string | null
+          internal_notes: string
+          primary_contact_name: string | null
+          primary_contact_phone: string | null
+          relationship_owner: string | null
+          secondary_relationship_owner: string | null
+          status: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          archived?: boolean
+          archived_at?: string | null
+          archived_by?: string | null
+          business_name: string
+          business_segment?: string | null
+          created_at?: string
+          created_by: string
+          general_notes?: string
+          id?: string
+          internal_business_segment?: string | null
+          internal_notes?: string
+          primary_contact_name?: string | null
+          primary_contact_phone?: string | null
+          relationship_owner?: string | null
+          secondary_relationship_owner?: string | null
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          archived?: boolean
+          archived_at?: string | null
+          archived_by?: string | null
+          business_name?: string
+          business_segment?: string | null
+          created_at?: string
+          created_by?: string
+          general_notes?: string
+          id?: string
+          internal_business_segment?: string | null
+          internal_notes?: string
+          primary_contact_name?: string | null
+          primary_contact_phone?: string | null
+          relationship_owner?: string | null
+          secondary_relationship_owner?: string | null
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      can_archive_vendors: { Args: { _user_id: string }; Returns: boolean }
       can_manage_events: { Args: { _user_id: string }; Returns: boolean }
+      can_purge_vendors: { Args: { _user_id: string }; Returns: boolean }
+      can_view_vendors: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -562,6 +886,7 @@ export type Database = {
         | "marketing"
         | "cochair"
         | "superuser"
+        | "vendor_captain"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -700,6 +1025,7 @@ export const Constants = {
         "marketing",
         "cochair",
         "superuser",
+        "vendor_captain",
       ],
     },
   },
