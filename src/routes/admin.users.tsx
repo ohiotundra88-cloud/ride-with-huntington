@@ -14,8 +14,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { listAdmins, grantAdminByEmail, revokeAdmin, type AdminUserRow } from "@/lib/admins.functions";
 import { listCaptains, grantCaptainByEmail, revokeCaptain, type CaptainRow } from "@/lib/captains.functions";
-import { Flag, Scale, ShieldAlert, BadgeCheck, Megaphone, Crown } from "lucide-react";
+import { Flag, Scale, ShieldAlert, BadgeCheck, Megaphone, Crown, Briefcase } from "lucide-react";
 import { RoleMembersCard } from "@/components/RoleMembersCard";
+import { VendorAccessCard } from "@/components/VendorAccessCard";
+
 
 export const Route = createFileRoute("/admin/users")({
   component: AdminUsersPage,
