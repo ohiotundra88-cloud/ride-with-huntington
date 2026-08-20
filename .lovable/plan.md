@@ -1,58 +1,59 @@
-# 30-Minute CTO Demo Guide
+# Vendor CRM Module
 
-Produce a run-of-show document for a 30-minute live demo of Team Huntington Hub, organized by the three personas: colleague (participant), captain/reviewer, and super user. Delivered as a document you can open, print, or paste into a deck — plus an optional in-app page so you can pull it up on your phone mid-demo.
+A new, tightly gated area of the hub for tracking Team Huntington vendor relationships, spend, and donations — matching the existing hub branding and mobile-first layout.
 
-## What the document contains
+## Access model
 
-**1. Cover / framing (1 min)**
-- What the Hub replaces today: scattered emails, SharePoint approval forms, manual rosters.
-- One-line value statement and the three personas you'll walk.
+New role: **Vendor Captain**, appointed like the existing reviewer roles.
 
-**2. Timed run-of-show table**
-Minute-by-minute agenda with the exact route to open at each step, so nothing is hunted for live.
+Who gets in:
+- Vendor Captain **and** their profile flag `has_vendor_dashboard_access` is on
+- Co-Chair (always, flag not required)
+- Super User (always, plus destructive powers)
 
-```text
-0-2    Landing page + brand, 5-step guide, live visit counter
-2-4    Sign-in (Huntington email only) + "Welcome back" personalization
-4-12   Colleague journey
-12-19  Captain / reviewer journey
-19-27  Super user journey
-27-30  Architecture + security wrap, Q&A
-```
+Only a Super User can turn `has_vendor_dashboard_access` on or off. Everyone else — riders, volunteers, captains, legal, risk, compliance, marketing, plain admins — sees no navigation entry and is refused by the server if they try a direct URL.
 
-**3. Colleague perspective (~8 min)**
-- Landing: 5-step visual guide, personalized hero CTAs, announcement banner targeting (riders / volunteers / all).
-- Registration wizard (`/register`): Rider / Volunteer / Both, Pelotonia Public-Rider ID + HB number, salary vs hourly and pay grade, travel, bike rental, jersey style (short sleeve / sleeveless), high roller and survivor flags, mailing address; deep links jump straight to the right step.
-- My Journey (`/dashboard`): readiness ring, countdown to Aug 7 2027, action items that deep-link into the flow.
-- Resources & FAQ (`/resources`): searchable articles, expandable tiles, contact directory, fundraising social assets to download.
-- Expense guide (`/expenses`), packing list (`/packing`), family guide (`/family`), team snapshot (`/team`) with live Pelotonia dashboard data.
-- Fundraiser approval request (`/fundraiser-request`): submit event + flier, pizza-tracker style status rail, in-app notifications on stage changes.
-- Profile (`/profile`): photo upload, segment/market/manager details that persist.
+Permissions inside the module:
 
-**4. Captain / reviewer perspective (~7 min)**
-- Events calendar (`/events`): captains post fundraising events with flier attachments and contact info.
-- Approval queue (`/admin/approvals`): only requests waiting on your stage, badge counts, approve / request changes / decline with notes, visible approval trail (Captain -> Legal / Risk / Compliance / Marketing -> Co-chair).
-- Calendar publishing rules: in-person events publish after co-chair sign-off; virtual events show earlier as "pending final approval".
-- Captains Lounge (`/captains-lounge`): leadership-only updates, author name and avatar, document attachments with inline preview, pinned playbooks.
+| Action | Vendor Captain | Co-Chair | Super User |
+| --- | --- | --- | --- |
+| View all vendors (shared pool) | yes | yes | yes |
+| Create / edit vendors, contacts, spend, donations, activity, attachments | yes | yes | yes |
+| Archive vendor / attachment | no | yes | yes |
+| Permanently delete (archived only) | no | no | yes |
+| Toggle dashboard access flag | no | no | yes |
 
-**5. Super user perspective (~8 min)**
-- Admin home (`/admin`): draft queue and audit log.
-- People: roles and appointments (`/admin/users`), permanent roster and season reset (`/admin/roster`), full participant CRUD (`/admin/participants`).
-- Content: announcements with audience targeting and dropdown CTAs, FAQs, timeline/journey, goals, readiness scoring, packing list, family guide, contacts, concierge intents, fundraising resources.
-- Branding (`/admin/branding`): hero background image with focus/darkening and header logo.
-- Feature flags and audit (`/admin/flags`), executive analytics (`/analytics`).
+Security is enforced in the database, not the browser: every vendor table gets row-level policies driven by a single security-definer function that re-checks role + flag on every read and write. Files live in a private bucket streamed through an authorization-checking endpoint, so attachment URLs are not guessable or shareable outside the allowed group.
 
-**6. Technical and security talking points (for the CTO)**
-- React + TypeScript on TanStack Start, server functions for all privileged work, Postgres with row-level security, role table (never role-on-profile) with security-definer role checks.
-- VPN / corporate-filter hardening: all backend and file traffic streams same-origin through the hub's own domain; `/health` self-check page; IT allowlist doc.
-- Custom domain `ridewithhuntington.com`, no AI-platform hostnames in the request path.
-- Recent security hardening: contact info withheld from anonymous traffic, storage RLS, locked-down analytics writes, leaked-password protection, authenticated agent/MCP endpoint.
-- Roadmap asks: verified-domain email notifications for approval stages, SSO instead of demo sign-in.
+## Data model
 
-**7. Demo hygiene checklist**
-Pre-demo: sign in once, confirm live team data loaded, have a request mid-approval, tabs pre-opened, note the demo sign-in shortcut so it isn't a surprise.
+- `vendors` — business name, status (Active/Prospect/Inactive), business segment, internal business segment, relationship owner, secondary owner, internal notes, primary contact name + phone, general notes, archived flag/by/at, created/updated by + timestamps
+- `vendor_contacts` — up to 10 additional contacts per vendor (name, email, title, phone)
+- `vendor_spend` — one row per vendor per year: year (integer, with a "Beyond" bucket), amount, notes
+- `vendor_donations` — one row per vendor per year: year, committed amount, actual donated, recipient, notes. Outstanding commitment is always calculated, never stored.
+- `vendor_activity` — touchpoint log: date, contacted by, method (Phone/Email/In-Person/Video Call/Other), notes, next step
+- `vendor_attachments` — file metadata, uploader, upload date, archived flag
+- `vendor_audit` — append-only history: created, edited (with changed field names), archived, restored, attachment uploaded, attachment deleted. No updates or deletes permitted, even for Super Users.
+- `profiles.has_vendor_dashboard_access` — boolean, default false
+
+Years are rows, so adding 2028 later needs no schema change — the UI renders whatever years exist plus the standard 2024–2027 + Beyond columns.
+
+## Screens
+
+**Executive dashboard** (top of module, year filter defaulting to the current year): total vendor spend, total donations received, total commitments, outstanding commitments, donation-to-spend ratio, active vendor count, donating vendor count, and a "spend but no donation" count that links straight to that filtered list.
+
+**Vendor list**: search by business name; filters for status, business segment, year with activity, and an Archived tab; sorting by name, status, segment, last modified, total spend, total donated, and support rate (highest and lowest); a quick filter for high-spend / zero-donation vendors; and a CSV export of the current filtered set with contacts and year data flattened into columns.
+
+**Vendor detail**: summary header with rollups (total spend, committed, donated, outstanding, fulfillment %, support rate) and prominent "Last Modified By / Date", the most recent activity entry with a "view full history" expander, a year-by-year tab/table view for spend and donations, additional contacts, attachments with name/uploader/date/download, and a link to the full audit log.
+
+**Create / edit vendor**: single mobile-friendly form. Before saving a new vendor, a near-match check on business name warns "A vendor named 'X' already exists — are you sure?" with a confirm-anyway option. Validation: business name required, primary contact required, valid email and phone formats, non-negative amounts.
+
+**Super User access screen**: extends the existing Admins & Super Users page with a Vendor Captains card — appoint/revoke the role by email (same pattern as other roles) and a per-person toggle for vendor dashboard access.
 
 ## Technical notes
 
-- Write `docs/CTO-DEMO-SCRIPT.md` (markdown, print-friendly) as the primary deliverable and a copy under the artifacts folder for easy download.
-- Optionally add a `/demo-script` route rendering the same content from a shared module so it's viewable on a phone during the demo; not linked from public nav.
+- Migration adds `vendor_captain` to the `app_role` enum, the seven vendor tables with GRANTs + RLS, `profiles.has_vendor_dashboard_access`, `updated_at` triggers, and security-definer helpers `can_view_vendors`, `can_archive_vendors`, `can_purge_vendors`, plus a private `vendor-files` storage bucket with owner-group policies.
+- Server functions in `src/lib/vendors.functions.ts` (+ `vendors.server.ts`, `vendors.shared.ts`) all use `requireSupabaseAuth` and re-assert authorization before touching data; rollups are computed in SQL views for list sorting.
+- Attachment downloads go through `src/routes/api/vendor-file/$id.ts` — an authenticated (non-public) route that validates the bearer session and role before streaming, keeping VPN-friendly same-origin delivery.
+- Routes: `src/routes/vendors.tsx` (dashboard + list), `vendors.$id.tsx` (detail), `vendors.new.tsx`, all wrapped in a gate component that also fails closed on the server. Nav entry appears only for permitted roles.
+- Audit rows are written inside the same server functions that mutate data, with field-level diffs for edits.
