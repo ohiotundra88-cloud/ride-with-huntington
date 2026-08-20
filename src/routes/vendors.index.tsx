@@ -2,8 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { BarChart3, Download, Plus, Search, Building2 } from "lucide-react";
-import { AppNav } from "@/components/AppNav";
 import { VendorGate, useVendorAccess } from "@/components/VendorGate";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
