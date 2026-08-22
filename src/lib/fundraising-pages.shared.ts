@@ -220,7 +220,7 @@ export interface FundraiserAuditRow {
   id: string;
   action: string;
   actor_email: string | null;
-  details: Record<string, unknown>;
+  details: Record<string, string | number | boolean | null | string[]>;
   created_at: string;
 }
 
