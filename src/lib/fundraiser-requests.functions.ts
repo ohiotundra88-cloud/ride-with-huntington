@@ -214,12 +214,29 @@ export const decideOnRequest = createServerFn({ method: "POST" })
       await logDecision(data.id, "published", "published", "Added to the fundraising calendar", context.userId);
     }
 
+    // A fundraising page linked to this request goes live as soon as every
+    // stage has signed off — otherwise it stays invisible after approval.
+    if (fresh.status === "approved") {
+      const { data: page } = await supabaseAdmin
+        .from("fundraisers")
+        .select("id, status")
+        .eq("request_id", data.id)
+        .maybeSingle();
+      if (page && page.status === "pending_approval") {
+        await supabaseAdmin
+          .from("fundraisers")
+          .update({ status: "live", published_at: new Date().toISOString() })
+          .eq("id", page.id);
+      }
+    }
+
     if (fresh.status === "declined" && fresh.event_id) {
       await supabaseAdmin.from("events").delete().eq("id", fresh.event_id);
       await supabaseAdmin.from("fundraiser_requests").update({ event_id: null }).eq("id", data.id);
     }
 
     return { ok: true };
+
   });
 
 export const uploadRequestFlier = createServerFn({ method: "POST" })
