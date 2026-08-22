@@ -62,7 +62,7 @@ function MyFundraisers() {
         </p>
         <div className="mt-5 flex justify-center gap-2">
           <Button asChild className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90">
-            <Link to="/auth">Sign in</Link>
+            <Link to="/signin">Sign in</Link>
           </Button>
           <Button asChild variant="outline"><Link to="/fundraisers">Browse fundraisers</Link></Button>
         </div>

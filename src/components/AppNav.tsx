@@ -24,6 +24,7 @@ const links = [
   { to: "/family", label: "Family" },
   { to: "/team", label: "Team" },
   { to: "/events", label: "Events" },
+  { to: "/fundraisers", label: "Fundraisers" },
   { to: "/fundraiser-request", label: "Fundraiser Request" },
   { to: "/resources", label: "Resources" },
   { to: "/expenses", label: "Expenses" },
@@ -42,6 +43,9 @@ export function AppNav() {
   let navLinks: readonly { to: any; label: string }[] = links;
   if (user.signedIn && user.isReviewer) {
     navLinks = [...navLinks, { to: "/captains-lounge", label: "Captains Lounge" }];
+  }
+  if (user.signedIn) {
+    navLinks = [...navLinks, { to: "/my-fundraisers", label: "My Fundraisers" }];
   }
   if (vendorAccess?.allowed) {
     navLinks = [...navLinks, { to: "/vendors", label: "Vendor CRM" }];
