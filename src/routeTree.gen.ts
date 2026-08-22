@@ -33,6 +33,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as VendorsNewRouteImport } from './routes/vendors.new'
 import { Route as VendorsIdRouteImport } from './routes/vendors.$id'
 import { Route as ResourcesIdRouteImport } from './routes/resources.$id'
+import { Route as MyFundraisersIdRouteImport } from './routes/my-fundraisers.$id'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminRosterRouteImport } from './routes/admin.roster'
 import { Route as AdminReadinessRouteImport } from './routes/admin.readiness'
@@ -180,6 +181,11 @@ const ResourcesIdRoute = ResourcesIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => ResourcesRoute,
+} as any)
+const MyFundraisersIdRoute = MyFundraisersIdRouteImport.update({
+  id: '/my-fundraisers/$id',
+  path: '/my-fundraisers/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/admin/users',
@@ -358,6 +364,7 @@ export interface FileRoutesByFullPath {
   '/admin/readiness': typeof AdminReadinessRoute
   '/admin/roster': typeof AdminRosterRoute
   '/admin/users': typeof AdminUsersRoute
+  '/my-fundraisers/$id': typeof MyFundraisersIdRoute
   '/resources/$id': typeof ResourcesIdRoute
   '/vendors/$id': typeof VendorsIdRoute
   '/vendors/new': typeof VendorsNewRoute
@@ -411,6 +418,7 @@ export interface FileRoutesByTo {
   '/admin/readiness': typeof AdminReadinessRoute
   '/admin/roster': typeof AdminRosterRoute
   '/admin/users': typeof AdminUsersRoute
+  '/my-fundraisers/$id': typeof MyFundraisersIdRoute
   '/resources/$id': typeof ResourcesIdRoute
   '/vendors/$id': typeof VendorsIdRoute
   '/vendors/new': typeof VendorsNewRoute
@@ -465,6 +473,7 @@ export interface FileRoutesById {
   '/admin/readiness': typeof AdminReadinessRoute
   '/admin/roster': typeof AdminRosterRoute
   '/admin/users': typeof AdminUsersRoute
+  '/my-fundraisers/$id': typeof MyFundraisersIdRoute
   '/resources/$id': typeof ResourcesIdRoute
   '/vendors/$id': typeof VendorsIdRoute
   '/vendors/new': typeof VendorsNewRoute
@@ -520,6 +529,7 @@ export interface FileRouteTypes {
     | '/admin/readiness'
     | '/admin/roster'
     | '/admin/users'
+    | '/my-fundraisers/$id'
     | '/resources/$id'
     | '/vendors/$id'
     | '/vendors/new'
@@ -573,6 +583,7 @@ export interface FileRouteTypes {
     | '/admin/readiness'
     | '/admin/roster'
     | '/admin/users'
+    | '/my-fundraisers/$id'
     | '/resources/$id'
     | '/vendors/$id'
     | '/vendors/new'
@@ -626,6 +637,7 @@ export interface FileRouteTypes {
     | '/admin/readiness'
     | '/admin/roster'
     | '/admin/users'
+    | '/my-fundraisers/$id'
     | '/resources/$id'
     | '/vendors/$id'
     | '/vendors/new'
@@ -680,6 +692,7 @@ export interface RootRouteChildren {
   AdminReadinessRoute: typeof AdminReadinessRoute
   AdminRosterRoute: typeof AdminRosterRoute
   AdminUsersRoute: typeof AdminUsersRoute
+  MyFundraisersIdRoute: typeof MyFundraisersIdRoute
   VendorsIdRoute: typeof VendorsIdRoute
   VendorsNewRoute: typeof VendorsNewRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -865,6 +878,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/resources/$id'
       preLoaderRoute: typeof ResourcesIdRouteImport
       parentRoute: typeof ResourcesRoute
+    }
+    '/my-fundraisers/$id': {
+      id: '/my-fundraisers/$id'
+      path: '/my-fundraisers/$id'
+      fullPath: '/my-fundraisers/$id'
+      preLoaderRoute: typeof MyFundraisersIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/users': {
       id: '/admin/users'
@@ -1108,6 +1128,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminReadinessRoute: AdminReadinessRoute,
   AdminRosterRoute: AdminRosterRoute,
   AdminUsersRoute: AdminUsersRoute,
+  MyFundraisersIdRoute: MyFundraisersIdRoute,
   VendorsIdRoute: VendorsIdRoute,
   VendorsNewRoute: VendorsNewRoute,
   AdminIndexRoute: AdminIndexRoute,
