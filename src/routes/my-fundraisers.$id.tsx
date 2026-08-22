@@ -363,34 +363,34 @@ function ManageFundraiser() {
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div className="space-y-1.5">
                       <Label>Label</Label>
-                      <Input value={item.label} onChange={(e) => setItem(i, { label: e.target.value })} />
+                      <Input aria-label="Item label" value={item.label} onChange={(e) => setItem(i, { label: e.target.value })} />
                     </div>
                     <div className="space-y-1.5">
                       <Label>Price ($)</Label>
-                      <Input type="number" min={0} value={item.unit_price}
+                      <Input aria-label="Item price" type="number" min={0} value={item.unit_price}
                         onChange={(e) => setItem(i, { unit_price: Number(e.target.value || 0) })} />
                     </div>
                     <div className="space-y-1.5">
                       <Label>Quantity available (blank = unlimited)</Label>
-                      <Input type="number" min={0} value={item.quantity_available ?? ""}
+                      <Input aria-label="Item quantity available" type="number" min={0} value={item.quantity_available ?? ""}
                         onChange={(e) => setItem(i, { quantity_available: e.target.value === "" ? null : Number(e.target.value) })} />
                     </div>
                     <div className="space-y-1.5">
                       <Label>Max per order</Label>
-                      <Input type="number" min={1} value={item.max_per_order}
+                      <Input aria-label="Item max per order" type="number" min={1} value={item.max_per_order}
                         onChange={(e) => setItem(i, { max_per_order: Number(e.target.value || 1) })} />
                     </div>
                     {f.kind === "raffle" && (
                       <div className="space-y-1.5">
                         <Label>Entries per unit</Label>
-                        <Input type="number" min={1} value={item.entries_per_unit}
+                        <Input aria-label="Item entries per unit" type="number" min={1} value={item.entries_per_unit}
                           onChange={(e) => setItem(i, { entries_per_unit: Number(e.target.value || 1) })} />
                       </div>
                     )}
                   </div>
                   <div className="space-y-1.5">
                     <Label>Description</Label>
-                    <Textarea rows={2} value={item.description} onChange={(e) => setItem(i, { description: e.target.value })} />
+                    <Textarea aria-label="Item description" rows={2} value={item.description} onChange={(e) => setItem(i, { description: e.target.value })} />
                   </div>
                   <div className="flex items-center justify-between">
                     <label className="flex items-center gap-2 text-sm">
