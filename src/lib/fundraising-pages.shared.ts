@@ -109,6 +109,9 @@ export interface FundraiserRecord {
   story: string;
   cover_path: string | null;
   cover_name: string | null;
+  flier_path: string | null;
+  flier_name: string | null;
+  flier_content_type: string | null;
   goal_amount: number;
   currency: string;
   opens_at: string | null;
