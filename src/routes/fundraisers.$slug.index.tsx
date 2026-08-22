@@ -122,6 +122,14 @@ function FundraiserPublicPage() {
             <div className="mt-5 whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{f.story}</div>
           )}
 
+          {f.flier_path && (
+            <a href={fundraiserFlierUrl(f.id)} target="_blank" rel="noreferrer"
+              className="mt-5 inline-flex items-center gap-1.5 rounded-md border px-3 py-2 text-sm font-semibold text-[var(--brand-dark)] hover:bg-muted">
+              <Paperclip className="h-4 w-4" /> {f.flier_name || "View the flier"}
+            </a>
+          )}
+
+
           {data.supporters.length > 0 && (
             <Card className="mt-6">
               <CardHeader className="pb-3">
