@@ -160,6 +160,8 @@ export interface PublicFundraiser {
     | "summary"
     | "story"
     | "cover_path"
+    | "flier_path"
+    | "flier_name"
     | "goal_amount"
     | "closes_at"
     | "draw_at"
