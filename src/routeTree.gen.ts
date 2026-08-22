@@ -27,6 +27,7 @@ import { Route as CaptainsLoungeRouteImport } from './routes/captains-lounge'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VendorsIndexRouteImport } from './routes/vendors.index'
+import { Route as MyFundraisersIndexRouteImport } from './routes/my-fundraisers.index'
 import { Route as FundraisersIndexRouteImport } from './routes/fundraisers.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as VendorsNewRouteImport } from './routes/vendors.new'
@@ -148,6 +149,11 @@ const IndexRoute = IndexRouteImport.update({
 const VendorsIndexRoute = VendorsIndexRouteImport.update({
   id: '/vendors/',
   path: '/vendors/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyFundraisersIndexRoute = MyFundraisersIndexRouteImport.update({
+  id: '/my-fundraisers/',
+  path: '/my-fundraisers/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FundraisersIndexRoute = FundraisersIndexRouteImport.update({
@@ -357,6 +363,7 @@ export interface FileRoutesByFullPath {
   '/vendors/new': typeof VendorsNewRoute
   '/admin/': typeof AdminIndexRoute
   '/fundraisers/': typeof FundraisersIndexRoute
+  '/my-fundraisers/': typeof MyFundraisersIndexRoute
   '/vendors/': typeof VendorsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/fundraisers/$slug/thanks': typeof FundraisersSlugThanksRoute
@@ -409,6 +416,7 @@ export interface FileRoutesByTo {
   '/vendors/new': typeof VendorsNewRoute
   '/admin': typeof AdminIndexRoute
   '/fundraisers': typeof FundraisersIndexRoute
+  '/my-fundraisers': typeof MyFundraisersIndexRoute
   '/vendors': typeof VendorsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/fundraisers/$slug/thanks': typeof FundraisersSlugThanksRoute
@@ -462,6 +470,7 @@ export interface FileRoutesById {
   '/vendors/new': typeof VendorsNewRoute
   '/admin/': typeof AdminIndexRoute
   '/fundraisers/': typeof FundraisersIndexRoute
+  '/my-fundraisers/': typeof MyFundraisersIndexRoute
   '/vendors/': typeof VendorsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/fundraisers/$slug/thanks': typeof FundraisersSlugThanksRoute
@@ -516,6 +525,7 @@ export interface FileRouteTypes {
     | '/vendors/new'
     | '/admin/'
     | '/fundraisers/'
+    | '/my-fundraisers/'
     | '/vendors/'
     | '/.mcp/invoke-tool/$tool'
     | '/fundraisers/$slug/thanks'
@@ -568,6 +578,7 @@ export interface FileRouteTypes {
     | '/vendors/new'
     | '/admin'
     | '/fundraisers'
+    | '/my-fundraisers'
     | '/vendors'
     | '/.mcp/invoke-tool/$tool'
     | '/fundraisers/$slug/thanks'
@@ -620,6 +631,7 @@ export interface FileRouteTypes {
     | '/vendors/new'
     | '/admin/'
     | '/fundraisers/'
+    | '/my-fundraisers/'
     | '/vendors/'
     | '/.mcp/invoke-tool/$tool'
     | '/fundraisers/$slug/thanks'
@@ -672,6 +684,7 @@ export interface RootRouteChildren {
   VendorsNewRoute: typeof VendorsNewRoute
   AdminIndexRoute: typeof AdminIndexRoute
   FundraisersIndexRoute: typeof FundraisersIndexRoute
+  MyFundraisersIndexRoute: typeof MyFundraisersIndexRoute
   VendorsIndexRoute: typeof VendorsIndexRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   FundraisersSlugThanksRoute: typeof FundraisersSlugThanksRoute
@@ -809,6 +822,13 @@ declare module '@tanstack/react-router' {
       path: '/vendors'
       fullPath: '/vendors/'
       preLoaderRoute: typeof VendorsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-fundraisers/': {
+      id: '/my-fundraisers/'
+      path: '/my-fundraisers'
+      fullPath: '/my-fundraisers/'
+      preLoaderRoute: typeof MyFundraisersIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/fundraisers/': {
@@ -1092,6 +1112,7 @@ const rootRouteChildren: RootRouteChildren = {
   VendorsNewRoute: VendorsNewRoute,
   AdminIndexRoute: AdminIndexRoute,
   FundraisersIndexRoute: FundraisersIndexRoute,
+  MyFundraisersIndexRoute: MyFundraisersIndexRoute,
   VendorsIndexRoute: VendorsIndexRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   FundraisersSlugThanksRoute: FundraisersSlugThanksRoute,
