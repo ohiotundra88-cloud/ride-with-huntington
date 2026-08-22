@@ -601,6 +601,9 @@ export type Database = {
           created_at: string
           currency: string
           draw_at: string | null
+          flier_content_type: string | null
+          flier_name: string | null
+          flier_path: string | null
           goal_amount: number
           id: string
           is_demo: boolean
@@ -630,6 +633,9 @@ export type Database = {
           created_at?: string
           currency?: string
           draw_at?: string | null
+          flier_content_type?: string | null
+          flier_name?: string | null
+          flier_path?: string | null
           goal_amount?: number
           id?: string
           is_demo?: boolean
@@ -659,6 +665,9 @@ export type Database = {
           created_at?: string
           currency?: string
           draw_at?: string | null
+          flier_content_type?: string | null
+          flier_name?: string | null
+          flier_path?: string | null
           goal_amount?: number
           id?: string
           is_demo?: boolean

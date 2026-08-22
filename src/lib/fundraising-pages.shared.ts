@@ -109,6 +109,9 @@ export interface FundraiserRecord {
   story: string;
   cover_path: string | null;
   cover_name: string | null;
+  flier_path: string | null;
+  flier_name: string | null;
+  flier_content_type: string | null;
   goal_amount: number;
   currency: string;
   opens_at: string | null;
@@ -157,6 +160,8 @@ export interface PublicFundraiser {
     | "summary"
     | "story"
     | "cover_path"
+    | "flier_path"
+    | "flier_name"
     | "goal_amount"
     | "closes_at"
     | "draw_at"
@@ -360,6 +365,27 @@ export const payoutSchema = z.object({
   notes: z.string().trim().max(1000).default(""),
 });
 export type PayoutInput = z.infer<typeof payoutSchema>;
+
+export const ALLOWED_FUNDRAISER_FLIER_TYPES = [
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "application/pdf",
+] as const;
+export const MAX_FUNDRAISER_FLIER_BYTES = 8 * 1024 * 1024;
+
+export const fundraiserFlierSchema = z.object({
+  id: z.string().uuid(),
+  fileName: z.string().trim().min(1).max(160),
+  contentType: z.enum(ALLOWED_FUNDRAISER_FLIER_TYPES),
+  base64: z.string().min(1),
+});
+export type FundraiserFlierInput = z.infer<typeof fundraiserFlierSchema>;
+
+/** Same-origin URL that streams a fundraiser's attached document. */
+export function fundraiserFlierUrl(fundraiserId: string) {
+  return `/api/public/fundraiser-flier/${fundraiserId}`;
+}
 
 export function validationIssues(input: FundraiserInput): string[] {
   const issues: string[] = [];

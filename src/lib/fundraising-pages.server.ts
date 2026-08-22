@@ -201,6 +201,8 @@ export async function getPublic(slug: string): Promise<PublicFundraiser> {
       summary: f.summary,
       story: f.story,
       cover_path: f.cover_path,
+      flier_path: f.flier_path ?? null,
+      flier_name: f.flier_name ?? null,
       goal_amount: Number(f.goal_amount),
       closes_at: f.closes_at,
       draw_at: f.draw_at,
@@ -746,4 +748,51 @@ export async function seedDemoSupporters(ctx: Ctx, id: string, count: number) {
   }
   await audit(id, "demo_supporters_seeded", ctx, { count: created });
   return { created };
+}
+
+// ------------------------------------------------------------------ flier attachment
+
+const FLIER_BUCKET = "event-fliers";
+
+export async function setFlier(
+  ctx: Ctx,
+  input: { id: string; fileName: string; contentType: string; base64: string },
+) {
+  const { record } = await assertManageable(ctx, input.id);
+  const bytes = Buffer.from(input.base64, "base64");
+  if (bytes.byteLength > 8 * 1024 * 1024) throw new Error("The document must be 8 MB or smaller.");
+
+  const ext = input.fileName.includes(".") ? input.fileName.split(".").pop()!.toLowerCase() : "bin";
+  const path = `fundraisers/${input.id}/flier-${Date.now()}.${ext}`;
+
+  const db = await admin();
+  const { error: upErr } = await db.storage
+    .from(FLIER_BUCKET)
+    .upload(path, bytes, { contentType: input.contentType, upsert: true });
+  if (upErr) throw new Error(upErr.message);
+
+  const { error } = await db
+    .from("fundraisers")
+    .update({ flier_path: path, flier_name: input.fileName, flier_content_type: input.contentType })
+    .eq("id", input.id);
+  if (error) throw new Error(error.message);
+
+  const previous = (record as any).flier_path as string | null;
+  if (previous && previous !== path) await db.storage.from(FLIER_BUCKET).remove([previous]);
+  await audit(input.id, "flier_uploaded", ctx, { file_name: input.fileName });
+  return { ok: true, flier_path: path, flier_name: input.fileName };
+}
+
+export async function clearFlier(ctx: Ctx, id: string) {
+  const { record } = await assertManageable(ctx, id);
+  const db = await admin();
+  const { error } = await db
+    .from("fundraisers")
+    .update({ flier_path: null, flier_name: null, flier_content_type: null })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+  const previous = (record as any).flier_path as string | null;
+  if (previous) await db.storage.from(FLIER_BUCKET).remove([previous]);
+  await audit(id, "flier_removed", ctx, { file_name: (record as any).flier_name ?? null });
+  return { ok: true };
 }

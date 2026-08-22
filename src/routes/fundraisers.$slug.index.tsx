@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { ArrowLeft, CalendarClock, HandCoins, Loader2, Ticket, Users } from "lucide-react";
+import { ArrowLeft, CalendarClock, HandCoins, Loader2, Paperclip, Ticket, Users } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { DemoPaymentBanner } from "@/components/DemoPaymentBanner";
 import { getPublicFundraiser, startCheckout } from "@/lib/fundraising-pages.functions";
 import {
-  KIND_ITEM_NOUN, KIND_LABELS, money, remainingQuantity,
+  fundraiserFlierUrl, KIND_ITEM_NOUN, KIND_LABELS, money, remainingQuantity,
   type FundraiserItem, type PublicFundraiser,
 } from "@/lib/fundraising-pages.shared";
 
@@ -121,6 +121,14 @@ function FundraiserPublicPage() {
           {f.story && (
             <div className="mt-5 whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{f.story}</div>
           )}
+
+          {f.flier_path && (
+            <a href={fundraiserFlierUrl(f.id)} target="_blank" rel="noreferrer"
+              className="mt-5 inline-flex items-center gap-1.5 rounded-md border px-3 py-2 text-sm font-semibold text-[var(--brand-dark)] hover:bg-muted">
+              <Paperclip className="h-4 w-4" /> {f.flier_name || "View the flier"}
+            </a>
+          )}
+
 
           {data.supporters.length > 0 && (
             <Card className="mt-6">
