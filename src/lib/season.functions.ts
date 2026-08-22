@@ -20,7 +20,7 @@ export const listManualParticipants = createServerFn({ method: "GET" })
     const { data, error } = await supabaseAdmin
       .from("participants")
       .select("user_id, participation, season, created_at")
-      .eq("manual_entry", true)
+      .eq("season_locked", true)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
     const rows = data ?? [];
@@ -127,7 +127,6 @@ export const resetSeason = createServerFn({ method: "POST" })
     const { data: cleared, error } = await supabaseAdmin
       .from("participants")
       .delete()
-      .eq("manual_entry", false)
       .eq("season_locked", false)
       .select("user_id");
     if (error) throw new Error(error.message);
