@@ -51,9 +51,14 @@ function FundraiserPublicPage() {
   const [message, setMessage] = useState("");
   const [anonymous, setAnonymous] = useState(false);
 
-  const selected: FundraiserItem | null = activeItems.find((i) => i.id === itemId) ?? null;
+  const firstAvailable = activeItems.find(
+    (i) => i.quantity_available === null || i.quantity_available - i.quantity_sold > 0,
+  );
+  const effectiveItemId = itemId ?? (amount ? null : firstAvailable?.id ?? null);
+  const selected: FundraiserItem | null = activeItems.find((i) => i.id === effectiveItemId) ?? null;
   const f = data?.fundraiser;
   const open = f?.status === "live";
+
 
   const checkout = useMutation({
     mutationFn: () =>
