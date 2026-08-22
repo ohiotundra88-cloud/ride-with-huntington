@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { ArrowLeft, CalendarClock, HandCoins, Loader2, Ticket, Users } from "lucide-react";
+import { ArrowLeft, CalendarClock, HandCoins, Loader2, Paperclip, Ticket, Users } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
