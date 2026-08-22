@@ -156,3 +156,21 @@ export const seedFundraiserDemoSupporters = createServerFn({ method: "POST" })
     const { seedDemoSupporters } = await import("@/lib/fundraising-pages.server");
     return seedDemoSupporters(context as any, data.id, data.count);
   });
+
+// ------------------------------------------------------------------ flier attachment
+
+export const uploadFundraiserFlier = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => fundraiserFlierSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const { setFlier } = await import("@/lib/fundraising-pages.server");
+    return setFlier(context as any, data);
+  });
+
+export const removeFundraiserFlier = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => idSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const { clearFlier } = await import("@/lib/fundraising-pages.server");
+    return clearFlier(context as any, data.id);
+  });
