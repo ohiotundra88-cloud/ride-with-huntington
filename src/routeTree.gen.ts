@@ -51,6 +51,7 @@ import { Route as AdminApprovalsRouteImport } from './routes/admin.approvals'
 import { Route as AdminAnnouncementsRouteImport } from './routes/admin.announcements'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
+import { Route as FundraisersSlugIndexRouteImport } from './routes/fundraisers.$slug.index'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as ApiPublicSbSplatRouteImport } from './routes/api/public/sb/$'
 import { Route as ApiPublicFundraisingAssetIdRouteImport } from './routes/api/public/fundraising-asset/$id'
@@ -270,6 +271,11 @@ const Char91DotmcpChar93ListToolsRoute =
     path: '/.mcp/list-tools',
     getParentRoute: () => rootRouteImport,
   } as any)
+const FundraisersSlugIndexRoute = FundraisersSlugIndexRouteImport.update({
+  id: '/fundraisers/$slug/',
+  path: '/fundraisers/$slug/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const Char91DotmcpChar93InvokeToolToolRoute =
   Char91DotmcpChar93InvokeToolToolRouteImport.update({
     id: '/.mcp/invoke-tool/$tool',
@@ -347,6 +353,7 @@ export interface FileRoutesByFullPath {
   '/fundraisers/': typeof FundraisersIndexRoute
   '/vendors/': typeof VendorsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/fundraisers/$slug/': typeof FundraisersSlugIndexRoute
   '/api/public/avatar/$userId': typeof ApiPublicAvatarUserIdRoute
   '/api/public/branding/$kind': typeof ApiPublicBrandingKindRoute
   '/api/public/event-flier/$id': typeof ApiPublicEventFlierIdRoute
@@ -397,6 +404,7 @@ export interface FileRoutesByTo {
   '/fundraisers': typeof FundraisersIndexRoute
   '/vendors': typeof VendorsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/fundraisers/$slug': typeof FundraisersSlugIndexRoute
   '/api/public/avatar/$userId': typeof ApiPublicAvatarUserIdRoute
   '/api/public/branding/$kind': typeof ApiPublicBrandingKindRoute
   '/api/public/event-flier/$id': typeof ApiPublicEventFlierIdRoute
@@ -448,6 +456,7 @@ export interface FileRoutesById {
   '/fundraisers/': typeof FundraisersIndexRoute
   '/vendors/': typeof VendorsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/fundraisers/$slug/': typeof FundraisersSlugIndexRoute
   '/api/public/avatar/$userId': typeof ApiPublicAvatarUserIdRoute
   '/api/public/branding/$kind': typeof ApiPublicBrandingKindRoute
   '/api/public/event-flier/$id': typeof ApiPublicEventFlierIdRoute
@@ -500,6 +509,7 @@ export interface FileRouteTypes {
     | '/fundraisers/'
     | '/vendors/'
     | '/.mcp/invoke-tool/$tool'
+    | '/fundraisers/$slug/'
     | '/api/public/avatar/$userId'
     | '/api/public/branding/$kind'
     | '/api/public/event-flier/$id'
@@ -550,6 +560,7 @@ export interface FileRouteTypes {
     | '/fundraisers'
     | '/vendors'
     | '/.mcp/invoke-tool/$tool'
+    | '/fundraisers/$slug'
     | '/api/public/avatar/$userId'
     | '/api/public/branding/$kind'
     | '/api/public/event-flier/$id'
@@ -600,6 +611,7 @@ export interface FileRouteTypes {
     | '/fundraisers/'
     | '/vendors/'
     | '/.mcp/invoke-tool/$tool'
+    | '/fundraisers/$slug/'
     | '/api/public/avatar/$userId'
     | '/api/public/branding/$kind'
     | '/api/public/event-flier/$id'
@@ -650,6 +662,7 @@ export interface RootRouteChildren {
   FundraisersIndexRoute: typeof FundraisersIndexRoute
   VendorsIndexRoute: typeof VendorsIndexRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  FundraisersSlugIndexRoute: typeof FundraisersSlugIndexRoute
   ApiPublicAvatarUserIdRoute: typeof ApiPublicAvatarUserIdRoute
   ApiPublicBrandingKindRoute: typeof ApiPublicBrandingKindRoute
   ApiPublicEventFlierIdRoute: typeof ApiPublicEventFlierIdRoute
@@ -953,6 +966,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/fundraisers/$slug/': {
+      id: '/fundraisers/$slug/'
+      path: '/fundraisers/$slug'
+      fullPath: '/fundraisers/$slug/'
+      preLoaderRoute: typeof FundraisersSlugIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/.mcp/invoke-tool/$tool': {
       id: '/.mcp/invoke-tool/$tool'
       path: '/.mcp/invoke-tool/$tool'
@@ -1054,6 +1074,7 @@ const rootRouteChildren: RootRouteChildren = {
   FundraisersIndexRoute: FundraisersIndexRoute,
   VendorsIndexRoute: VendorsIndexRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  FundraisersSlugIndexRoute: FundraisersSlugIndexRoute,
   ApiPublicAvatarUserIdRoute: ApiPublicAvatarUserIdRoute,
   ApiPublicBrandingKindRoute: ApiPublicBrandingKindRoute,
   ApiPublicEventFlierIdRoute: ApiPublicEventFlierIdRoute,
