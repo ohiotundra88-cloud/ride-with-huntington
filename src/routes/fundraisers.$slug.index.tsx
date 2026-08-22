@@ -51,9 +51,14 @@ function FundraiserPublicPage() {
   const [message, setMessage] = useState("");
   const [anonymous, setAnonymous] = useState(false);
 
-  const selected: FundraiserItem | null = activeItems.find((i) => i.id === itemId) ?? null;
+  const firstAvailable = activeItems.find(
+    (i) => i.quantity_available === null || i.quantity_available - i.quantity_sold > 0,
+  );
+  const effectiveItemId = itemId ?? (amount ? null : firstAvailable?.id ?? null);
+  const selected: FundraiserItem | null = activeItems.find((i) => i.id === effectiveItemId) ?? null;
   const f = data?.fundraiser;
   const open = f?.status === "live";
+
 
   const checkout = useMutation({
     mutationFn: () =>
@@ -198,7 +203,7 @@ function FundraiserPublicPage() {
                               setQuantity(1);
                             }}
                             className={`w-full rounded-lg border p-3 text-left transition disabled:opacity-50 ${
-                              itemId === item.id ? "border-[var(--brand)] bg-[var(--brand)]/5" : "hover:bg-muted/50"
+                              effectiveItemId === item.id ? "border-[var(--brand)] bg-[var(--brand)]/5" : "hover:bg-muted/50"
                             }`}
                           >
                             <div className="flex items-baseline justify-between gap-2">
