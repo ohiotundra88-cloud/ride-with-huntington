@@ -1,9 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft, BadgeCheck, Banknote, Dice5, ExternalLink, History, Loader2,
-  Plus, Save, Send, Sparkles, Trash2, Users,
+  Paperclip, Plus, Save, Send, Sparkles, Trash2, Upload, Users,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -19,11 +19,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { DemoPaymentBanner } from "@/components/DemoPaymentBanner";
 import {
   drawFundraiserWinner, getFundraiserAccess, getFundraiserApproval, getFundraiserDetail,
-  recordFundraiserPayout, refundFundraiserOrder, saveFundraiserPage, seedFundraiserDemoSupporters,
-  setFundraiserStatus, submitFundraiserForApproval,
+  recordFundraiserPayout, refundFundraiserOrder, removeFundraiserFlier, saveFundraiserPage,
+  seedFundraiserDemoSupporters, setFundraiserStatus, submitFundraiserForApproval, uploadFundraiserFlier,
 } from "@/lib/fundraising-pages.functions";
 import {
-  KIND_ITEM_NOUN, KIND_LABELS, money, moneyExact, STATUS_LABELS, validationIssues,
+  ALLOWED_FUNDRAISER_FLIER_TYPES, fundraiserFlierUrl, KIND_ITEM_NOUN, KIND_LABELS,
+  MAX_FUNDRAISER_FLIER_BYTES, money, moneyExact, STATUS_LABELS, validationIssues,
   type FundraiserDetail, type FundraiserInput, type ItemInput,
 } from "@/lib/fundraising-pages.shared";
 
