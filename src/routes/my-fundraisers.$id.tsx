@@ -336,6 +336,10 @@ function ManageFundraiser() {
             </CardContent>
           </Card>
 
+          <FlierCard fundraiser={f} />
+
+
+
           <Card>
             <CardHeader className="flex-row items-center justify-between pb-3">
               <CardTitle className="text-base">{KIND_ITEM_NOUN[f.kind]}</CardTitle>
