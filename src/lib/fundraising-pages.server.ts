@@ -201,6 +201,8 @@ export async function getPublic(slug: string): Promise<PublicFundraiser> {
       summary: f.summary,
       story: f.story,
       cover_path: f.cover_path,
+      flier_path: f.flier_path ?? null,
+      flier_name: f.flier_name ?? null,
       goal_amount: Number(f.goal_amount),
       closes_at: f.closes_at,
       draw_at: f.draw_at,
