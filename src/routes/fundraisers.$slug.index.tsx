@@ -203,7 +203,7 @@ function FundraiserPublicPage() {
                               setQuantity(1);
                             }}
                             className={`w-full rounded-lg border p-3 text-left transition disabled:opacity-50 ${
-                              itemId === item.id ? "border-[var(--brand)] bg-[var(--brand)]/5" : "hover:bg-muted/50"
+                              effectiveItemId === item.id ? "border-[var(--brand)] bg-[var(--brand)]/5" : "hover:bg-muted/50"
                             }`}
                           >
                             <div className="flex items-baseline justify-between gap-2">
