@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { DemoPaymentBanner } from "@/components/DemoPaymentBanner";
 import { getPublicFundraiser, startCheckout } from "@/lib/fundraising-pages.functions";
 import {
-  KIND_ITEM_NOUN, KIND_LABELS, money, remainingQuantity,
+  fundraiserFlierUrl, KIND_ITEM_NOUN, KIND_LABELS, money, remainingQuantity,
   type FundraiserItem, type PublicFundraiser,
 } from "@/lib/fundraising-pages.shared";
 
