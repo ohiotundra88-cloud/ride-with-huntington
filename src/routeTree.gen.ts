@@ -58,6 +58,7 @@ import { Route as FundraisersSlugThanksRouteImport } from './routes/fundraisers.
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as ApiPublicSbSplatRouteImport } from './routes/api/public/sb/$'
 import { Route as ApiPublicFundraisingAssetIdRouteImport } from './routes/api/public/fundraising-asset/$id'
+import { Route as ApiPublicFundraiserFlierIdRouteImport } from './routes/api/public/fundraiser-flier/$id'
 import { Route as ApiPublicEventFlierIdRouteImport } from './routes/api/public/event-flier/$id'
 import { Route as ApiPublicBrandingKindRouteImport } from './routes/api/public/branding/$kind'
 import { Route as ApiPublicAvatarUserIdRouteImport } from './routes/api/public/avatar/$userId'
@@ -311,6 +312,12 @@ const ApiPublicFundraisingAssetIdRoute =
     path: '/api/public/fundraising-asset/$id',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicFundraiserFlierIdRoute =
+  ApiPublicFundraiserFlierIdRouteImport.update({
+    id: '/api/public/fundraiser-flier/$id',
+    path: '/api/public/fundraiser-flier/$id',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicEventFlierIdRoute = ApiPublicEventFlierIdRouteImport.update({
   id: '/api/public/event-flier/$id',
   path: '/api/public/event-flier/$id',
@@ -378,6 +385,7 @@ export interface FileRoutesByFullPath {
   '/api/public/avatar/$userId': typeof ApiPublicAvatarUserIdRoute
   '/api/public/branding/$kind': typeof ApiPublicBrandingKindRoute
   '/api/public/event-flier/$id': typeof ApiPublicEventFlierIdRoute
+  '/api/public/fundraiser-flier/$id': typeof ApiPublicFundraiserFlierIdRoute
   '/api/public/fundraising-asset/$id': typeof ApiPublicFundraisingAssetIdRoute
   '/api/public/sb/$': typeof ApiPublicSbSplatRoute
 }
@@ -432,6 +440,7 @@ export interface FileRoutesByTo {
   '/api/public/avatar/$userId': typeof ApiPublicAvatarUserIdRoute
   '/api/public/branding/$kind': typeof ApiPublicBrandingKindRoute
   '/api/public/event-flier/$id': typeof ApiPublicEventFlierIdRoute
+  '/api/public/fundraiser-flier/$id': typeof ApiPublicFundraiserFlierIdRoute
   '/api/public/fundraising-asset/$id': typeof ApiPublicFundraisingAssetIdRoute
   '/api/public/sb/$': typeof ApiPublicSbSplatRoute
 }
@@ -487,6 +496,7 @@ export interface FileRoutesById {
   '/api/public/avatar/$userId': typeof ApiPublicAvatarUserIdRoute
   '/api/public/branding/$kind': typeof ApiPublicBrandingKindRoute
   '/api/public/event-flier/$id': typeof ApiPublicEventFlierIdRoute
+  '/api/public/fundraiser-flier/$id': typeof ApiPublicFundraiserFlierIdRoute
   '/api/public/fundraising-asset/$id': typeof ApiPublicFundraisingAssetIdRoute
   '/api/public/sb/$': typeof ApiPublicSbSplatRoute
 }
@@ -543,6 +553,7 @@ export interface FileRouteTypes {
     | '/api/public/avatar/$userId'
     | '/api/public/branding/$kind'
     | '/api/public/event-flier/$id'
+    | '/api/public/fundraiser-flier/$id'
     | '/api/public/fundraising-asset/$id'
     | '/api/public/sb/$'
   fileRoutesByTo: FileRoutesByTo
@@ -597,6 +608,7 @@ export interface FileRouteTypes {
     | '/api/public/avatar/$userId'
     | '/api/public/branding/$kind'
     | '/api/public/event-flier/$id'
+    | '/api/public/fundraiser-flier/$id'
     | '/api/public/fundraising-asset/$id'
     | '/api/public/sb/$'
   id:
@@ -651,6 +663,7 @@ export interface FileRouteTypes {
     | '/api/public/avatar/$userId'
     | '/api/public/branding/$kind'
     | '/api/public/event-flier/$id'
+    | '/api/public/fundraiser-flier/$id'
     | '/api/public/fundraising-asset/$id'
     | '/api/public/sb/$'
   fileRoutesById: FileRoutesById
@@ -705,6 +718,7 @@ export interface RootRouteChildren {
   ApiPublicAvatarUserIdRoute: typeof ApiPublicAvatarUserIdRoute
   ApiPublicBrandingKindRoute: typeof ApiPublicBrandingKindRoute
   ApiPublicEventFlierIdRoute: typeof ApiPublicEventFlierIdRoute
+  ApiPublicFundraiserFlierIdRoute: typeof ApiPublicFundraiserFlierIdRoute
   ApiPublicFundraisingAssetIdRoute: typeof ApiPublicFundraisingAssetIdRoute
   ApiPublicSbSplatRoute: typeof ApiPublicSbSplatRoute
 }
@@ -1054,6 +1068,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicFundraisingAssetIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/fundraiser-flier/$id': {
+      id: '/api/public/fundraiser-flier/$id'
+      path: '/api/public/fundraiser-flier/$id'
+      fullPath: '/api/public/fundraiser-flier/$id'
+      preLoaderRoute: typeof ApiPublicFundraiserFlierIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/event-flier/$id': {
       id: '/api/public/event-flier/$id'
       path: '/api/public/event-flier/$id'
@@ -1141,6 +1162,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAvatarUserIdRoute: ApiPublicAvatarUserIdRoute,
   ApiPublicBrandingKindRoute: ApiPublicBrandingKindRoute,
   ApiPublicEventFlierIdRoute: ApiPublicEventFlierIdRoute,
+  ApiPublicFundraiserFlierIdRoute: ApiPublicFundraiserFlierIdRoute,
   ApiPublicFundraisingAssetIdRoute: ApiPublicFundraisingAssetIdRoute,
   ApiPublicSbSplatRoute: ApiPublicSbSplatRoute,
 }
