@@ -567,7 +567,8 @@ export async function submitForApproval(ctx: Ctx, id: string) {
       .insert({
         title: record.title,
         description: record.summary || record.story || record.title,
-        event_type: record.kind,
+        event_type: "virtual", // online fundraising page; the kind is carried in fundraising_method
+
         event_date: (record.closes_at ?? new Date().toISOString()).slice(0, 10),
         fundraising_method: `Online fundraising page (${record.kind})`,
         contact_name: record.organizer_name,
