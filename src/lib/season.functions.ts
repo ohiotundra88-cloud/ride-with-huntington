@@ -127,7 +127,6 @@ export const resetSeason = createServerFn({ method: "POST" })
     const { data: cleared, error } = await supabaseAdmin
       .from("participants")
       .delete()
-      .eq("manual_entry", false)
       .eq("season_locked", false)
       .select("user_id");
     if (error) throw new Error(error.message);
