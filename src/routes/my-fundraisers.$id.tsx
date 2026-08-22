@@ -672,3 +672,91 @@ function PayoutPanel({ data, canPayout, onDone }: { data: FundraiserDetail; canP
     </div>
   );
 }
+
+function FlierCard({ fundraiser }: { fundraiser: FundraiserDetail["fundraiser"] }) {
+  const qc = useQueryClient();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const publiclyVisible = ["live", "closed", "paid_out"].includes(fundraiser.status);
+
+  const refresh = () => qc.invalidateQueries({ queryKey: ["fundraiser-detail", fundraiser.id] });
+
+  const drop = useMutation({
+    mutationFn: () => removeFundraiserFlier({ data: { id: fundraiser.id } }),
+    onSuccess: () => { toast.success("Attachment removed"); refresh(); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const pick = async (file: File | null) => {
+    if (!file) return;
+    if (!(ALLOWED_FUNDRAISER_FLIER_TYPES as readonly string[]).includes(file.type)) {
+      toast.error("Attach a PNG, JPG, WEBP or PDF"); return;
+    }
+    if (file.size > MAX_FUNDRAISER_FLIER_BYTES) { toast.error("File must be 8 MB or smaller"); return; }
+    setBusy(true);
+    try {
+      const buf = new Uint8Array(await file.arrayBuffer());
+      let binary = "";
+      for (let i = 0; i < buf.length; i += 8192) binary += String.fromCharCode(...buf.subarray(i, i + 8192));
+      await uploadFundraiserFlier({
+        data: {
+          id: fundraiser.id,
+          fileName: file.name,
+          contentType: file.type as (typeof ALLOWED_FUNDRAISER_FLIER_TYPES)[number],
+          base64: btoa(binary),
+        },
+      });
+      toast.success("Attachment saved");
+      refresh();
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setBusy(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Paperclip className="h-4 w-4 text-[var(--brand)]" /> Flier or document
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <p className="text-xs text-muted-foreground">
+          Attach one flier, menu, rules sheet or sponsorship packet (PNG, JPG, WEBP or PDF, up to 8 MB). Supporters can
+          download it right from your public page.
+        </p>
+
+        {fundraiser.flier_path ? (
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border bg-muted/40 px-3 py-2 text-sm">
+            {publiclyVisible ? (
+              <a href={fundraiserFlierUrl(fundraiser.id)} target="_blank" rel="noreferrer"
+                className="inline-flex items-center gap-1.5 font-medium text-[var(--brand-dark)] underline">
+                <Paperclip className="h-3.5 w-3.5" /> {fundraiser.flier_name || "Current attachment"}
+              </a>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+                <Paperclip className="h-3.5 w-3.5" /> {fundraiser.flier_name || "Current attachment"} — downloadable once the page is live
+              </span>
+            )}
+            <Button type="button" size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10"
+              onClick={() => drop.mutate()} disabled={drop.isPending || busy}>
+              Remove
+            </Button>
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">No document attached yet.</p>
+        )}
+
+        <input ref={fileRef} type="file" accept=".png,.jpg,.jpeg,.webp,.pdf" className="hidden"
+          onChange={(e) => pick(e.target.files?.[0] ?? null)} />
+        <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()} disabled={busy}>
+          {busy ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <Upload className="mr-1 h-3.5 w-3.5" />}
+          {fundraiser.flier_path ? "Replace document" : "Attach document"}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
