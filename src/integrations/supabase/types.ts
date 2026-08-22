@@ -199,6 +199,298 @@ export type Database = {
           },
         ]
       }
+      fundraiser_audit: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_id: string | null
+          created_at: string
+          details: Json
+          fundraiser_id: string
+          id: string
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          fundraiser_id: string
+          id?: string
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          fundraiser_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fundraiser_audit_fundraiser_id_fkey"
+            columns: ["fundraiser_id"]
+            isOneToOne: false
+            referencedRelation: "fundraisers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fundraiser_entries: {
+        Row: {
+          bid_amount: number | null
+          created_at: string
+          entry_number: number | null
+          fundraiser_id: string
+          id: string
+          is_winner: boolean
+          item_id: string | null
+          kind: string
+          order_id: string | null
+          supporter_email: string
+          supporter_name: string
+        }
+        Insert: {
+          bid_amount?: number | null
+          created_at?: string
+          entry_number?: number | null
+          fundraiser_id: string
+          id?: string
+          is_winner?: boolean
+          item_id?: string | null
+          kind?: string
+          order_id?: string | null
+          supporter_email?: string
+          supporter_name?: string
+        }
+        Update: {
+          bid_amount?: number | null
+          created_at?: string
+          entry_number?: number | null
+          fundraiser_id?: string
+          id?: string
+          is_winner?: boolean
+          item_id?: string | null
+          kind?: string
+          order_id?: string | null
+          supporter_email?: string
+          supporter_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fundraiser_entries_fundraiser_id_fkey"
+            columns: ["fundraiser_id"]
+            isOneToOne: false
+            referencedRelation: "fundraisers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fundraiser_entries_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "fundraiser_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fundraiser_entries_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "fundraiser_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fundraiser_items: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string
+          entries_per_unit: number
+          fundraiser_id: string
+          id: string
+          label: string
+          max_per_order: number
+          quantity_available: number | null
+          quantity_sold: number
+          sort_order: number
+          unit_price: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string
+          entries_per_unit?: number
+          fundraiser_id: string
+          id?: string
+          label: string
+          max_per_order?: number
+          quantity_available?: number | null
+          quantity_sold?: number
+          sort_order?: number
+          unit_price?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string
+          entries_per_unit?: number
+          fundraiser_id?: string
+          id?: string
+          label?: string
+          max_per_order?: number
+          quantity_available?: number | null
+          quantity_sold?: number
+          sort_order?: number
+          unit_price?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fundraiser_items_fundraiser_id_fkey"
+            columns: ["fundraiser_id"]
+            isOneToOne: false
+            referencedRelation: "fundraisers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fundraiser_orders: {
+        Row: {
+          amount: number
+          anonymous: boolean
+          created_at: string
+          fee_amount: number
+          fundraiser_id: string
+          id: string
+          item_id: string | null
+          message: string
+          net_amount: number
+          paid_at: string | null
+          provider: string
+          provider_payment_id: string | null
+          provider_session_id: string | null
+          quantity: number
+          refunded_at: string | null
+          status: string
+          supporter_email: string
+          supporter_name: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          anonymous?: boolean
+          created_at?: string
+          fee_amount?: number
+          fundraiser_id: string
+          id?: string
+          item_id?: string | null
+          message?: string
+          net_amount?: number
+          paid_at?: string | null
+          provider?: string
+          provider_payment_id?: string | null
+          provider_session_id?: string | null
+          quantity?: number
+          refunded_at?: string | null
+          status?: string
+          supporter_email?: string
+          supporter_name?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          anonymous?: boolean
+          created_at?: string
+          fee_amount?: number
+          fundraiser_id?: string
+          id?: string
+          item_id?: string | null
+          message?: string
+          net_amount?: number
+          paid_at?: string | null
+          provider?: string
+          provider_payment_id?: string | null
+          provider_session_id?: string | null
+          quantity?: number
+          refunded_at?: string | null
+          status?: string
+          supporter_email?: string
+          supporter_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fundraiser_orders_fundraiser_id_fkey"
+            columns: ["fundraiser_id"]
+            isOneToOne: false
+            referencedRelation: "fundraisers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fundraiser_orders_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "fundraiser_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fundraiser_payouts: {
+        Row: {
+          created_at: string
+          fee_amount: number
+          fundraiser_id: string
+          gross_amount: number
+          id: string
+          net_amount: number
+          notes: string
+          recipient: string
+          recorded_by: string | null
+          recorded_by_email: string | null
+          reference: string
+          transfer_date: string
+        }
+        Insert: {
+          created_at?: string
+          fee_amount?: number
+          fundraiser_id: string
+          gross_amount?: number
+          id?: string
+          net_amount?: number
+          notes?: string
+          recipient: string
+          recorded_by?: string | null
+          recorded_by_email?: string | null
+          reference?: string
+          transfer_date: string
+        }
+        Update: {
+          created_at?: string
+          fee_amount?: number
+          fundraiser_id?: string
+          gross_amount?: number
+          id?: string
+          net_amount?: number
+          notes?: string
+          recipient?: string
+          recorded_by?: string | null
+          recorded_by_email?: string | null
+          reference?: string
+          transfer_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fundraiser_payouts_fundraiser_id_fkey"
+            columns: ["fundraiser_id"]
+            isOneToOne: false
+            referencedRelation: "fundraisers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fundraiser_requests: {
         Row: {
           captain_status: string
@@ -293,6 +585,104 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fundraisers: {
+        Row: {
+          allow_custom_amount: boolean
+          beneficiary: string
+          closed_at: string | null
+          closes_at: string | null
+          contact_email: string | null
+          cover_name: string | null
+          cover_path: string | null
+          created_at: string
+          currency: string
+          draw_at: string | null
+          goal_amount: number
+          id: string
+          is_demo: boolean
+          kind: string
+          min_custom_amount: number
+          opens_at: string | null
+          organizer_id: string
+          organizer_name: string
+          published_at: string | null
+          request_id: string | null
+          season: string
+          slug: string
+          status: string
+          story: string
+          summary: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          allow_custom_amount?: boolean
+          beneficiary?: string
+          closed_at?: string | null
+          closes_at?: string | null
+          contact_email?: string | null
+          cover_name?: string | null
+          cover_path?: string | null
+          created_at?: string
+          currency?: string
+          draw_at?: string | null
+          goal_amount?: number
+          id?: string
+          is_demo?: boolean
+          kind?: string
+          min_custom_amount?: number
+          opens_at?: string | null
+          organizer_id: string
+          organizer_name?: string
+          published_at?: string | null
+          request_id?: string | null
+          season?: string
+          slug: string
+          status?: string
+          story?: string
+          summary?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          allow_custom_amount?: boolean
+          beneficiary?: string
+          closed_at?: string | null
+          closes_at?: string | null
+          contact_email?: string | null
+          cover_name?: string | null
+          cover_path?: string | null
+          created_at?: string
+          currency?: string
+          draw_at?: string | null
+          goal_amount?: number
+          id?: string
+          is_demo?: boolean
+          kind?: string
+          min_custom_amount?: number
+          opens_at?: string | null
+          organizer_id?: string
+          organizer_name?: string
+          published_at?: string | null
+          request_id?: string | null
+          season?: string
+          slug?: string
+          status?: string
+          story?: string
+          summary?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fundraisers_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "fundraiser_requests"
             referencedColumns: ["id"]
           },
         ]

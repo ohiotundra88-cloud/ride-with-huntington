@@ -27,10 +27,13 @@ import { Route as CaptainsLoungeRouteImport } from './routes/captains-lounge'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VendorsIndexRouteImport } from './routes/vendors.index'
+import { Route as MyFundraisersIndexRouteImport } from './routes/my-fundraisers.index'
+import { Route as FundraisersIndexRouteImport } from './routes/fundraisers.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as VendorsNewRouteImport } from './routes/vendors.new'
 import { Route as VendorsIdRouteImport } from './routes/vendors.$id'
 import { Route as ResourcesIdRouteImport } from './routes/resources.$id'
+import { Route as MyFundraisersIdRouteImport } from './routes/my-fundraisers.$id'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminRosterRouteImport } from './routes/admin.roster'
 import { Route as AdminReadinessRouteImport } from './routes/admin.readiness'
@@ -50,6 +53,8 @@ import { Route as AdminApprovalsRouteImport } from './routes/admin.approvals'
 import { Route as AdminAnnouncementsRouteImport } from './routes/admin.announcements'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
+import { Route as FundraisersSlugIndexRouteImport } from './routes/fundraisers.$slug.index'
+import { Route as FundraisersSlugThanksRouteImport } from './routes/fundraisers.$slug.thanks'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as ApiPublicSbSplatRouteImport } from './routes/api/public/sb/$'
 import { Route as ApiPublicFundraisingAssetIdRouteImport } from './routes/api/public/fundraising-asset/$id'
@@ -147,6 +152,16 @@ const VendorsIndexRoute = VendorsIndexRouteImport.update({
   path: '/vendors/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MyFundraisersIndexRoute = MyFundraisersIndexRouteImport.update({
+  id: '/my-fundraisers/',
+  path: '/my-fundraisers/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FundraisersIndexRoute = FundraisersIndexRouteImport.update({
+  id: '/fundraisers/',
+  path: '/fundraisers/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
@@ -166,6 +181,11 @@ const ResourcesIdRoute = ResourcesIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => ResourcesRoute,
+} as any)
+const MyFundraisersIdRoute = MyFundraisersIdRouteImport.update({
+  id: '/my-fundraisers/$id',
+  path: '/my-fundraisers/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/admin/users',
@@ -264,6 +284,16 @@ const Char91DotmcpChar93ListToolsRoute =
     path: '/.mcp/list-tools',
     getParentRoute: () => rootRouteImport,
   } as any)
+const FundraisersSlugIndexRoute = FundraisersSlugIndexRouteImport.update({
+  id: '/fundraisers/$slug/',
+  path: '/fundraisers/$slug/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FundraisersSlugThanksRoute = FundraisersSlugThanksRouteImport.update({
+  id: '/fundraisers/$slug/thanks',
+  path: '/fundraisers/$slug/thanks',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const Char91DotmcpChar93InvokeToolToolRoute =
   Char91DotmcpChar93InvokeToolToolRouteImport.update({
     id: '/.mcp/invoke-tool/$tool',
@@ -334,12 +364,17 @@ export interface FileRoutesByFullPath {
   '/admin/readiness': typeof AdminReadinessRoute
   '/admin/roster': typeof AdminRosterRoute
   '/admin/users': typeof AdminUsersRoute
+  '/my-fundraisers/$id': typeof MyFundraisersIdRoute
   '/resources/$id': typeof ResourcesIdRoute
   '/vendors/$id': typeof VendorsIdRoute
   '/vendors/new': typeof VendorsNewRoute
   '/admin/': typeof AdminIndexRoute
+  '/fundraisers/': typeof FundraisersIndexRoute
+  '/my-fundraisers/': typeof MyFundraisersIndexRoute
   '/vendors/': typeof VendorsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/fundraisers/$slug/thanks': typeof FundraisersSlugThanksRoute
+  '/fundraisers/$slug/': typeof FundraisersSlugIndexRoute
   '/api/public/avatar/$userId': typeof ApiPublicAvatarUserIdRoute
   '/api/public/branding/$kind': typeof ApiPublicBrandingKindRoute
   '/api/public/event-flier/$id': typeof ApiPublicEventFlierIdRoute
@@ -383,12 +418,17 @@ export interface FileRoutesByTo {
   '/admin/readiness': typeof AdminReadinessRoute
   '/admin/roster': typeof AdminRosterRoute
   '/admin/users': typeof AdminUsersRoute
+  '/my-fundraisers/$id': typeof MyFundraisersIdRoute
   '/resources/$id': typeof ResourcesIdRoute
   '/vendors/$id': typeof VendorsIdRoute
   '/vendors/new': typeof VendorsNewRoute
   '/admin': typeof AdminIndexRoute
+  '/fundraisers': typeof FundraisersIndexRoute
+  '/my-fundraisers': typeof MyFundraisersIndexRoute
   '/vendors': typeof VendorsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/fundraisers/$slug/thanks': typeof FundraisersSlugThanksRoute
+  '/fundraisers/$slug': typeof FundraisersSlugIndexRoute
   '/api/public/avatar/$userId': typeof ApiPublicAvatarUserIdRoute
   '/api/public/branding/$kind': typeof ApiPublicBrandingKindRoute
   '/api/public/event-flier/$id': typeof ApiPublicEventFlierIdRoute
@@ -433,12 +473,17 @@ export interface FileRoutesById {
   '/admin/readiness': typeof AdminReadinessRoute
   '/admin/roster': typeof AdminRosterRoute
   '/admin/users': typeof AdminUsersRoute
+  '/my-fundraisers/$id': typeof MyFundraisersIdRoute
   '/resources/$id': typeof ResourcesIdRoute
   '/vendors/$id': typeof VendorsIdRoute
   '/vendors/new': typeof VendorsNewRoute
   '/admin/': typeof AdminIndexRoute
+  '/fundraisers/': typeof FundraisersIndexRoute
+  '/my-fundraisers/': typeof MyFundraisersIndexRoute
   '/vendors/': typeof VendorsIndexRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/fundraisers/$slug/thanks': typeof FundraisersSlugThanksRoute
+  '/fundraisers/$slug/': typeof FundraisersSlugIndexRoute
   '/api/public/avatar/$userId': typeof ApiPublicAvatarUserIdRoute
   '/api/public/branding/$kind': typeof ApiPublicBrandingKindRoute
   '/api/public/event-flier/$id': typeof ApiPublicEventFlierIdRoute
@@ -484,12 +529,17 @@ export interface FileRouteTypes {
     | '/admin/readiness'
     | '/admin/roster'
     | '/admin/users'
+    | '/my-fundraisers/$id'
     | '/resources/$id'
     | '/vendors/$id'
     | '/vendors/new'
     | '/admin/'
+    | '/fundraisers/'
+    | '/my-fundraisers/'
     | '/vendors/'
     | '/.mcp/invoke-tool/$tool'
+    | '/fundraisers/$slug/thanks'
+    | '/fundraisers/$slug/'
     | '/api/public/avatar/$userId'
     | '/api/public/branding/$kind'
     | '/api/public/event-flier/$id'
@@ -533,12 +583,17 @@ export interface FileRouteTypes {
     | '/admin/readiness'
     | '/admin/roster'
     | '/admin/users'
+    | '/my-fundraisers/$id'
     | '/resources/$id'
     | '/vendors/$id'
     | '/vendors/new'
     | '/admin'
+    | '/fundraisers'
+    | '/my-fundraisers'
     | '/vendors'
     | '/.mcp/invoke-tool/$tool'
+    | '/fundraisers/$slug/thanks'
+    | '/fundraisers/$slug'
     | '/api/public/avatar/$userId'
     | '/api/public/branding/$kind'
     | '/api/public/event-flier/$id'
@@ -582,12 +637,17 @@ export interface FileRouteTypes {
     | '/admin/readiness'
     | '/admin/roster'
     | '/admin/users'
+    | '/my-fundraisers/$id'
     | '/resources/$id'
     | '/vendors/$id'
     | '/vendors/new'
     | '/admin/'
+    | '/fundraisers/'
+    | '/my-fundraisers/'
     | '/vendors/'
     | '/.mcp/invoke-tool/$tool'
+    | '/fundraisers/$slug/thanks'
+    | '/fundraisers/$slug/'
     | '/api/public/avatar/$userId'
     | '/api/public/branding/$kind'
     | '/api/public/event-flier/$id'
@@ -632,11 +692,16 @@ export interface RootRouteChildren {
   AdminReadinessRoute: typeof AdminReadinessRoute
   AdminRosterRoute: typeof AdminRosterRoute
   AdminUsersRoute: typeof AdminUsersRoute
+  MyFundraisersIdRoute: typeof MyFundraisersIdRoute
   VendorsIdRoute: typeof VendorsIdRoute
   VendorsNewRoute: typeof VendorsNewRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  FundraisersIndexRoute: typeof FundraisersIndexRoute
+  MyFundraisersIndexRoute: typeof MyFundraisersIndexRoute
   VendorsIndexRoute: typeof VendorsIndexRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  FundraisersSlugThanksRoute: typeof FundraisersSlugThanksRoute
+  FundraisersSlugIndexRoute: typeof FundraisersSlugIndexRoute
   ApiPublicAvatarUserIdRoute: typeof ApiPublicAvatarUserIdRoute
   ApiPublicBrandingKindRoute: typeof ApiPublicBrandingKindRoute
   ApiPublicEventFlierIdRoute: typeof ApiPublicEventFlierIdRoute
@@ -772,6 +837,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VendorsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/my-fundraisers/': {
+      id: '/my-fundraisers/'
+      path: '/my-fundraisers'
+      fullPath: '/my-fundraisers/'
+      preLoaderRoute: typeof MyFundraisersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fundraisers/': {
+      id: '/fundraisers/'
+      path: '/fundraisers'
+      fullPath: '/fundraisers/'
+      preLoaderRoute: typeof FundraisersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/': {
       id: '/admin/'
       path: '/admin'
@@ -799,6 +878,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/resources/$id'
       preLoaderRoute: typeof ResourcesIdRouteImport
       parentRoute: typeof ResourcesRoute
+    }
+    '/my-fundraisers/$id': {
+      id: '/my-fundraisers/$id'
+      path: '/my-fundraisers/$id'
+      fullPath: '/my-fundraisers/$id'
+      preLoaderRoute: typeof MyFundraisersIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/users': {
       id: '/admin/users'
@@ -933,6 +1019,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/fundraisers/$slug/': {
+      id: '/fundraisers/$slug/'
+      path: '/fundraisers/$slug'
+      fullPath: '/fundraisers/$slug/'
+      preLoaderRoute: typeof FundraisersSlugIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fundraisers/$slug/thanks': {
+      id: '/fundraisers/$slug/thanks'
+      path: '/fundraisers/$slug/thanks'
+      fullPath: '/fundraisers/$slug/thanks'
+      preLoaderRoute: typeof FundraisersSlugThanksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/.mcp/invoke-tool/$tool': {
       id: '/.mcp/invoke-tool/$tool'
       path: '/.mcp/invoke-tool/$tool'
@@ -1028,11 +1128,16 @@ const rootRouteChildren: RootRouteChildren = {
   AdminReadinessRoute: AdminReadinessRoute,
   AdminRosterRoute: AdminRosterRoute,
   AdminUsersRoute: AdminUsersRoute,
+  MyFundraisersIdRoute: MyFundraisersIdRoute,
   VendorsIdRoute: VendorsIdRoute,
   VendorsNewRoute: VendorsNewRoute,
   AdminIndexRoute: AdminIndexRoute,
+  FundraisersIndexRoute: FundraisersIndexRoute,
+  MyFundraisersIndexRoute: MyFundraisersIndexRoute,
   VendorsIndexRoute: VendorsIndexRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  FundraisersSlugThanksRoute: FundraisersSlugThanksRoute,
+  FundraisersSlugIndexRoute: FundraisersSlugIndexRoute,
   ApiPublicAvatarUserIdRoute: ApiPublicAvatarUserIdRoute,
   ApiPublicBrandingKindRoute: ApiPublicBrandingKindRoute,
   ApiPublicEventFlierIdRoute: ApiPublicEventFlierIdRoute,
