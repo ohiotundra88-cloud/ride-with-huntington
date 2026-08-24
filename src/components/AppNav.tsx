@@ -66,16 +66,15 @@ export function AppNav() {
 
   const { data: vendorAccess } = useVendorAccess();
 
-  let navLinks: readonly { to: any; label: string }[] = links;
-  if (user.signedIn && user.isReviewer) {
-    navLinks = [...navLinks, { to: "/captains-lounge", label: "Captains Lounge" }];
-  }
-  if (user.signedIn) {
-    navLinks = [...navLinks, { to: "/my-fundraisers", label: "My Fundraisers" }];
-  }
-  if (vendorAccess?.allowed) {
-    navLinks = [...navLinks, { to: "/vendors", label: "Vendor CRM" }];
-  }
+  const ctx: NavCtx = {
+    signedIn: user.signedIn,
+    isReviewer: !!user.isReviewer,
+    vendorAccess: !!vendorAccess?.allowed,
+  };
+  const visibleGroups = groups
+    .map((g) => ({ ...g, items: g.items.filter((i) => !i.show || i.show(ctx)) }))
+    .filter((g) => g.items.length > 0);
+
 
 
   const enterSuperUser = () => {
