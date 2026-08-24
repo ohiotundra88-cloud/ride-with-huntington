@@ -171,8 +171,6 @@ export function AppNav() {
           )}
         </nav>
 
-        </nav>
-
         <div className="ml-auto flex items-center gap-1">
           {state.flags.notificationCenter && <NotificationCenter />}
           {user.signedIn ? (
