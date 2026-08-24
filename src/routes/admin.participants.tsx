@@ -206,6 +206,8 @@ function ParticipantsAdmin() {
                 <TableHead>Colleague</TableHead>
                 <TableHead>Participation</TableHead>
                 <TableHead>Rider ID / HB</TableHead>
+                <TableHead>Last logged in</TableHead>
+                <TableHead>Last updated</TableHead>
                 <TableHead className="text-right">Completion</TableHead>
                 <TableHead className="text-right">Manage</TableHead>
               </TableRow>
