@@ -59,6 +59,63 @@ export type Database = {
         }
         Relationships: []
       }
+      contacts: {
+        Row: {
+          active: boolean
+          category: string
+          created_at: string
+          department: string
+          email: string
+          emergency: boolean
+          hours: string
+          id: string
+          name: string
+          phone: string
+          region: string
+          role: string
+          sort_order: number
+          updated_at: string
+          updated_by: string | null
+          updated_by_email: string | null
+        }
+        Insert: {
+          active?: boolean
+          category?: string
+          created_at?: string
+          department?: string
+          email?: string
+          emergency?: boolean
+          hours?: string
+          id?: string
+          name: string
+          phone?: string
+          region?: string
+          role?: string
+          sort_order?: number
+          updated_at?: string
+          updated_by?: string | null
+          updated_by_email?: string | null
+        }
+        Update: {
+          active?: boolean
+          category?: string
+          created_at?: string
+          department?: string
+          email?: string
+          emergency?: boolean
+          hours?: string
+          id?: string
+          name?: string
+          phone?: string
+          region?: string
+          role?: string
+          sort_order?: number
+          updated_at?: string
+          updated_by?: string | null
+          updated_by_email?: string | null
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           contact_email: string | null
