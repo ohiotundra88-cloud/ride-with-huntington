@@ -101,6 +101,14 @@ const FIELDS: Record<Section, FieldDef[]> = {
 
 const PARTICIPATION = ["rider", "volunteer", "both", "unsure"] as const;
 
+/** Local date + time, or an em dash when the timestamp is missing. */
+function fmtWhen(iso: string | null) {
+  if (!iso) return "Never";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleString(undefined, { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
+}
+
 function completionOf(r: ColleagueRecord) {
   const statuses = [r.pelotonia.status, r.travel.status, r.bike.status, r.apparel.status];
   return Math.round((statuses.filter((s) => s === "complete").length / 4) * 100);
@@ -145,7 +153,7 @@ function ParticipantsAdmin() {
     const headers = [
       "email", "name", "participation", "completion", "riderId", "hbNumber", "employmentType",
       "payGrade74Below", "highRoller", "survivor", "arrivalDate", "hotelName", "bikeType",
-      "jerseySize", "jerseyStyle", "shirtSize", "city", "state", "zip", "seasonLocked",
+      "jerseySize", "jerseyStyle", "shirtSize", "city", "state", "zip", "seasonLocked", "lastLoggedIn", "lastUpdated",
     ];
     const body = filtered.map((r) => [
       r.email, r.full_name ?? "", r.participation ?? "", `${completionOf(r)}%`,
@@ -154,6 +162,7 @@ function ParticipantsAdmin() {
       r.travel.arrivalDate ?? "", r.travel.hotelName ?? "", r.bike.bikeType ?? "",
       r.apparel.jerseySize ?? "", r.apparel.jerseyStyle ?? "", r.apparel.shirtSize ?? "",
       r.address.city ?? "", r.address.state ?? "", r.address.zip ?? "", r.season_locked,
+      r.last_sign_in_at ?? "", r.updated_at ?? "",
     ]);
     const csv = [headers, ...body].map((line) => line.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
@@ -214,12 +223,12 @@ function ParticipantsAdmin() {
             </TableHeader>
             <TableBody>
               {isLoading && (
-                <TableRow><TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
+                <TableRow><TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
                   <Loader2 className="mx-auto h-4 w-4 animate-spin" />
                 </TableCell></TableRow>
               )}
               {!isLoading && filtered.length === 0 && (
-                <TableRow><TableCell colSpan={5} className="py-8 text-center text-muted-foreground">No colleagues match those filters.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={7} className="py-8 text-center text-muted-foreground">No colleagues match those filters.</TableCell></TableRow>
               )}
               {filtered.map((r) => (
                 <TableRow key={r.user_id}>
@@ -237,6 +246,8 @@ function ParticipantsAdmin() {
                     <span className="block">{String(r.pelotonia.confirmation ?? "—")}</span>
                     <span className="block text-muted-foreground">{String(r.pelotonia.hbNumber ?? "—")}</span>
                   </TableCell>
+                  <TableCell className="text-xs whitespace-nowrap">{fmtWhen(r.last_sign_in_at)}</TableCell>
+                  <TableCell className="text-xs whitespace-nowrap">{fmtWhen(r.updated_at)}</TableCell>
                   <TableCell className="text-right font-bold">{completionOf(r)}%</TableCell>
                   <TableCell className="text-right">
                     <Button size="sm" variant="ghost" aria-label={`Edit ${r.email}`} onClick={() => setEditing(r)}>
