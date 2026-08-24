@@ -16,19 +16,45 @@ import { useApprovalNotifications } from "@/lib/useApprovalNotifications";
 import { useVendorAccess } from "@/components/VendorGate";
 
 
-const links = [
+type NavItem = { to: any; label: string; show?: (c: NavCtx) => boolean };
+type NavGroup = { label: string; items: NavItem[] };
+type NavCtx = { signedIn: boolean; isReviewer: boolean; vendorAccess: boolean };
+
+const topLinks: NavItem[] = [
   { to: "/", label: "Home" },
   { to: "/dashboard", label: "My Journey" },
-  { to: "/register", label: "Register" },
-  { to: "/packing", label: "Packing" },
-  { to: "/family", label: "Family" },
-  { to: "/team", label: "Team" },
-  { to: "/events", label: "Events" },
-  { to: "/fundraisers", label: "Fundraisers" },
-  { to: "/fundraiser-request", label: "Fundraiser Request" },
-  { to: "/resources", label: "Resources" },
-  { to: "/expenses", label: "Expenses" },
-] as const;
+];
+
+const groups: NavGroup[] = [
+  {
+    label: "Team",
+    items: [
+      { to: "/team", label: "Team" },
+      { to: "/family", label: "Family" },
+      { to: "/events", label: "Events" },
+      { to: "/packing", label: "Packing" },
+    ],
+  },
+  {
+    label: "Fundraising",
+    items: [
+      { to: "/fundraisers", label: "Fundraisers" },
+      { to: "/fundraiser-request", label: "Fundraiser Request" },
+      { to: "/my-fundraisers", label: "My Fundraisers", show: (c) => c.signedIn },
+      { to: "/captains-lounge", label: "Captains Lounge", show: (c) => c.signedIn && c.isReviewer },
+      { to: "/vendors", label: "Vendor CRM", show: (c) => c.vendorAccess },
+    ],
+  },
+  {
+    label: "Resources",
+    items: [
+      { to: "/register", label: "Register" },
+      { to: "/resources", label: "Resources" },
+      { to: "/expenses", label: "Expenses" },
+    ],
+  },
+];
+
 
 export function AppNav() {
   const { user, signOut } = useStore();
