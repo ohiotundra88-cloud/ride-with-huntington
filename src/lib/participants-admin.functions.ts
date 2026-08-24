@@ -16,6 +16,7 @@ export interface ColleagueRecord {
   apparel: JsonLike;
   address: JsonLike;
   submitted_at: string | null;
+  last_sign_in_at: string | null;
   manual_entry: boolean;
   season_locked: boolean;
   season: string;
