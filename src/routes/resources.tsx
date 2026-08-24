@@ -1,5 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { listContacts } from "@/lib/contacts.functions";
+import { contactsQueryKey, type DirectoryContact } from "@/lib/contacts.shared";
 import { z } from "zod";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,7 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { faqCategories, type FAQCategory } from "@/lib/faq-data";
 import { usePublicFaqs } from "@/lib/faq-store";
-import { useAdmin } from "@/lib/admin-store";
 import { FundraisingResources } from "@/components/FundraisingResources";
 import { Search, LifeBuoy, ChevronDown, ChevronUp, Mail, Phone } from "lucide-react";
 
@@ -86,9 +88,14 @@ function Resources() {
 }
 
 function ContactDirectory() {
-  const { state } = useAdmin();
-  const contacts = state.contacts.filter((c) => c.active);
+  const { data = [] } = useQuery<DirectoryContact[]>({
+    queryKey: contactsQueryKey,
+    queryFn: () => listContacts(),
+    staleTime: 60_000,
+  });
+  const contacts = data.filter((c) => c.active);
   if (contacts.length === 0) return null;
+
 
   return (
     <section id="contacts" className="mt-14 scroll-mt-24">

@@ -258,7 +258,6 @@ export interface AdminState {
     schedule: FamilyScheduleDay[];
     parkingActive: boolean;
   };
-  contacts: Contact[];
   team: {
     metrics: TeamMetric[];
     activity: TeamActivity[];
@@ -441,13 +440,6 @@ const familyScheduleSeed: FamilyScheduleDay[] = [
   { id: "sun", day: "Sunday · Aug 8", items: ["11:00 AM — Team brunch, Hilton", "1:00 PM — Recognition & photos"], active: true },
 ];
 
-const contactsSeed: Contact[] = [
-  { id: "c-1", name: "Priya Shah", role: "Team Captain", email: "priya.shah@hub.demo", phone: "(614) 555-0111", department: "Corporate Responsibility", region: "Columbus, OH", category: "General", hours: "Mon–Fri 9–5 ET", emergency: false, active: true, updatedAt: NOW(), updatedBy: EDITOR },
-  { id: "c-2", name: "Marcus Reed", role: "Travel Coordinator", email: "marcus.reed@hub.demo", phone: "(614) 555-0122", department: "Corporate Travel", region: "All", category: "Travel", hours: "Mon–Fri 8–6 ET", emergency: false, active: true, updatedAt: NOW(), updatedBy: EDITOR },
-  { id: "c-3", name: "Ride Weekend Hotline", role: "24/7 Rider Support", email: "hotline@hub.demo", phone: "(614) 555-0999", department: "Ride Weekend Ops", region: "All", category: "Emergency", hours: "Aug 6–8 · 24 hours", emergency: true, active: true, updatedAt: NOW(), updatedBy: EDITOR },
-  { id: "c-4", name: "Alex Bennett", role: "Volunteer Lead", email: "alex.bennett@hub.demo", phone: "(614) 555-0144", department: "Volunteer Ops", region: "All", category: "Volunteers", hours: "Mon–Fri 9–5 ET", emergency: false, active: true, updatedAt: NOW(), updatedBy: EDITOR },
-];
-
 const apiManagedSeed: APIManagedField[] = [
   { key: "readiness.pelotonia.status", label: "Official Pelotonia registration status", source: "Pelotonia.org API", lastSync: "2027-07-14T09:12:00Z" },
   { key: "readiness.hotel.status", label: "Hotel reservation status", source: "Concur / ATG", lastSync: "2027-07-14T09:12:00Z" },
@@ -543,7 +535,6 @@ function initialState(): AdminState {
       schedule: familyScheduleSeed,
       parkingActive: true,
     },
-    contacts: contactsSeed,
     team: {
       metrics: [...seedTeamMetrics],
       activity: [...seedTeamActivities],
