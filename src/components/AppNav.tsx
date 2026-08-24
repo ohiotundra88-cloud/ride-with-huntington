@@ -1,6 +1,6 @@
 import { useBranding } from "@/lib/useBranding";
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Menu, User as UserIcon, ShieldCheck, LogOut, LogIn } from "lucide-react";
+import { Menu, User as UserIcon, ShieldCheck, LogOut, LogIn, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { useStore } from "@/lib/store";
 import { useAdmin } from "@/lib/admin-store";
@@ -16,19 +16,45 @@ import { useApprovalNotifications } from "@/lib/useApprovalNotifications";
 import { useVendorAccess } from "@/components/VendorGate";
 
 
-const links = [
+type NavItem = { to: any; label: string; show?: (c: NavCtx) => boolean };
+type NavGroup = { label: string; items: NavItem[] };
+type NavCtx = { signedIn: boolean; isReviewer: boolean; vendorAccess: boolean };
+
+const topLinks: NavItem[] = [
   { to: "/", label: "Home" },
   { to: "/dashboard", label: "My Journey" },
-  { to: "/register", label: "Register" },
-  { to: "/packing", label: "Packing" },
-  { to: "/family", label: "Family" },
-  { to: "/team", label: "Team" },
-  { to: "/events", label: "Events" },
-  { to: "/fundraisers", label: "Fundraisers" },
-  { to: "/fundraiser-request", label: "Fundraiser Request" },
-  { to: "/resources", label: "Resources" },
-  { to: "/expenses", label: "Expenses" },
-] as const;
+];
+
+const groups: NavGroup[] = [
+  {
+    label: "Team",
+    items: [
+      { to: "/team", label: "Team" },
+      { to: "/family", label: "Family" },
+      { to: "/events", label: "Events" },
+      { to: "/packing", label: "Packing" },
+    ],
+  },
+  {
+    label: "Fundraising",
+    items: [
+      { to: "/fundraisers", label: "Fundraisers" },
+      { to: "/fundraiser-request", label: "Fundraiser Request" },
+      { to: "/my-fundraisers", label: "My Fundraisers", show: (c) => c.signedIn },
+      { to: "/captains-lounge", label: "Captains Lounge", show: (c) => c.signedIn && c.isReviewer },
+      { to: "/vendors", label: "Vendor CRM", show: (c) => c.vendorAccess },
+    ],
+  },
+  {
+    label: "Resources",
+    items: [
+      { to: "/register", label: "Register" },
+      { to: "/resources", label: "Resources" },
+      { to: "/expenses", label: "Expenses" },
+    ],
+  },
+];
+
 
 export function AppNav() {
   const { user, signOut } = useStore();
@@ -40,16 +66,15 @@ export function AppNav() {
 
   const { data: vendorAccess } = useVendorAccess();
 
-  let navLinks: readonly { to: any; label: string }[] = links;
-  if (user.signedIn && user.isReviewer) {
-    navLinks = [...navLinks, { to: "/captains-lounge", label: "Captains Lounge" }];
-  }
-  if (user.signedIn) {
-    navLinks = [...navLinks, { to: "/my-fundraisers", label: "My Fundraisers" }];
-  }
-  if (vendorAccess?.allowed) {
-    navLinks = [...navLinks, { to: "/vendors", label: "Vendor CRM" }];
-  }
+  const ctx: NavCtx = {
+    signedIn: user.signedIn,
+    isReviewer: !!user.isReviewer,
+    vendorAccess: !!vendorAccess?.allowed,
+  };
+  const visibleGroups = groups
+    .map((g) => ({ ...g, items: g.items.filter((i) => !i.show || i.show(ctx)) }))
+    .filter((g) => g.items.length > 0);
+
 
 
   const enterSuperUser = () => {
@@ -74,17 +99,28 @@ export function AppNav() {
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-72 bg-[var(--brand-dark)] text-white border-r border-white/10">
+          <SheetContent side="left" className="w-72 overflow-y-auto bg-[var(--brand-dark)] text-white border-r border-white/10">
             <div className="mt-8 flex flex-col gap-1">
-              {navLinks.map((l) => (
+              {topLinks.map((l) => (
                 <Link key={l.to} to={l.to} onClick={() => setOpen(false)}
                   className={`rounded-md px-3 py-2 text-sm ${pathname === l.to ? "bg-[var(--brand)] text-[var(--brand-foreground)]" : "hover:bg-white/10"}`}>
                   {l.label}
                 </Link>
               ))}
+              {visibleGroups.map((g) => (
+                <div key={g.label} className="mt-3">
+                  <div className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wide text-white/50">{g.label}</div>
+                  {g.items.map((l) => (
+                    <Link key={l.to} to={l.to} onClick={() => setOpen(false)}
+                      className={`block rounded-md px-3 py-2 text-sm ${pathname === l.to ? "bg-[var(--brand)] text-[var(--brand-foreground)]" : "hover:bg-white/10"}`}>
+                      {l.label}
+                    </Link>
+                  ))}
+                </div>
+              ))}
               {state.superUser.active && (
                 <Link to="/admin" onClick={() => setOpen(false)}
-                  className={`rounded-md px-3 py-2 text-sm ${pathname.startsWith("/admin") ? "bg-[var(--brand)] text-[var(--brand-foreground)]" : "hover:bg-white/10"}`}>
+                  className={`mt-3 rounded-md px-3 py-2 text-sm ${pathname.startsWith("/admin") ? "bg-[var(--brand)] text-[var(--brand-foreground)]" : "hover:bg-white/10"}`}>
                   Super User
                 </Link>
               )}
@@ -92,22 +128,44 @@ export function AppNav() {
           </SheetContent>
         </Sheet>
 
-        <Link to="/" className="flex items-center gap-2 font-black tracking-tight">
+        <Link to="/" className="flex shrink-0 items-center gap-2 font-black tracking-tight">
           <BrandMark />
-          <span className="text-sm sm:text-base">Team Huntington Hub</span>
+          <span className="whitespace-nowrap text-sm sm:text-base">
+            Team Huntington<span className="hidden xl:inline"> Hub</span>
+          </span>
         </Link>
 
-        <nav className="ml-6 hidden items-center lg:flex">
-          {navLinks.map((l) => (
+        <nav className="ml-4 hidden items-center gap-0.5 md:flex">
+          {topLinks.map((l) => (
             <Link key={l.to} to={l.to}
-              className={`rounded-md px-2 py-1.5 text-xs xl:text-sm transition-colors ${pathname === l.to ? "bg-white/10 text-white" : "text-white/80 hover:bg-white/10 hover:text-white"}`}>
+              className={`whitespace-nowrap rounded-md px-2.5 py-1.5 text-xs xl:text-sm transition-colors ${pathname === l.to ? "bg-white/10 text-white" : "text-white/80 hover:bg-white/10 hover:text-white"}`}>
               {l.label}
             </Link>
           ))}
 
+          {visibleGroups.map((g) => {
+            const active = g.items.some((i) => pathname === i.to || pathname.startsWith(`${i.to}/`));
+            return (
+              <DropdownMenu key={g.label}>
+                <DropdownMenuTrigger
+                  className={`inline-flex items-center gap-1 whitespace-nowrap rounded-md px-2.5 py-1.5 text-xs outline-none transition-colors xl:text-sm ${active ? "bg-white/10 text-white" : "text-white/80 hover:bg-white/10 hover:text-white"}`}>
+                  {g.label}
+                  <ChevronDown className="h-3.5 w-3.5" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56">
+                  {g.items.map((l) => (
+                    <DropdownMenuItem key={l.to} asChild>
+                      <Link to={l.to} className={pathname === l.to ? "font-semibold" : ""}>{l.label}</Link>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            );
+          })}
+
           {state.superUser.active && (
             <Link to="/admin"
-              className={`rounded-md px-3 py-1.5 text-sm inline-flex items-center gap-1 ${pathname.startsWith("/admin") ? "bg-white/10 text-white" : "text-white/80 hover:bg-white/10 hover:text-white"}`}>
+              className={`ml-1 inline-flex items-center gap-1 whitespace-nowrap rounded-md px-2.5 py-1.5 text-xs xl:text-sm ${pathname.startsWith("/admin") ? "bg-[var(--brand)] text-[var(--brand-foreground)]" : "text-white/80 hover:bg-white/10 hover:text-white"}`}>
               <ShieldCheck className="h-3.5 w-3.5" /> Super User
             </Link>
           )}
