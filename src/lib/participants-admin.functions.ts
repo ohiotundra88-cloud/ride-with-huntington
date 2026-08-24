@@ -78,6 +78,7 @@ export const listColleagues = createServerFn({ method: "GET" })
       apparel: (r.apparel ?? {}) as JsonLike,
       address: (r.address ?? {}) as JsonLike,
       submitted_at: r.submitted_at,
+      last_sign_in_at: signIns.get(r.user_id) ?? null,
       manual_entry: r.manual_entry,
       season_locked: r.season_locked,
       season: r.season,
