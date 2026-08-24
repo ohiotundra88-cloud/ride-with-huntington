@@ -99,17 +99,28 @@ export function AppNav() {
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-72 bg-[var(--brand-dark)] text-white border-r border-white/10">
+          <SheetContent side="left" className="w-72 overflow-y-auto bg-[var(--brand-dark)] text-white border-r border-white/10">
             <div className="mt-8 flex flex-col gap-1">
-              {navLinks.map((l) => (
+              {topLinks.map((l) => (
                 <Link key={l.to} to={l.to} onClick={() => setOpen(false)}
                   className={`rounded-md px-3 py-2 text-sm ${pathname === l.to ? "bg-[var(--brand)] text-[var(--brand-foreground)]" : "hover:bg-white/10"}`}>
                   {l.label}
                 </Link>
               ))}
+              {visibleGroups.map((g) => (
+                <div key={g.label} className="mt-3">
+                  <div className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wide text-white/50">{g.label}</div>
+                  {g.items.map((l) => (
+                    <Link key={l.to} to={l.to} onClick={() => setOpen(false)}
+                      className={`block rounded-md px-3 py-2 text-sm ${pathname === l.to ? "bg-[var(--brand)] text-[var(--brand-foreground)]" : "hover:bg-white/10"}`}>
+                      {l.label}
+                    </Link>
+                  ))}
+                </div>
+              ))}
               {state.superUser.active && (
                 <Link to="/admin" onClick={() => setOpen(false)}
-                  className={`rounded-md px-3 py-2 text-sm ${pathname.startsWith("/admin") ? "bg-[var(--brand)] text-[var(--brand-foreground)]" : "hover:bg-white/10"}`}>
+                  className={`mt-3 rounded-md px-3 py-2 text-sm ${pathname.startsWith("/admin") ? "bg-[var(--brand)] text-[var(--brand-foreground)]" : "hover:bg-white/10"}`}>
                   Super User
                 </Link>
               )}
@@ -117,25 +128,49 @@ export function AppNav() {
           </SheetContent>
         </Sheet>
 
-        <Link to="/" className="flex items-center gap-2 font-black tracking-tight">
+        <Link to="/" className="flex shrink-0 items-center gap-2 font-black tracking-tight">
           <BrandMark />
-          <span className="text-sm sm:text-base">Team Huntington Hub</span>
+          <span className="whitespace-nowrap text-sm sm:text-base">
+            Team Huntington<span className="hidden xl:inline"> Hub</span>
+          </span>
         </Link>
 
-        <nav className="ml-6 hidden items-center lg:flex">
-          {navLinks.map((l) => (
+        <nav className="ml-4 hidden items-center gap-0.5 md:flex">
+          {topLinks.map((l) => (
             <Link key={l.to} to={l.to}
-              className={`rounded-md px-2 py-1.5 text-xs xl:text-sm transition-colors ${pathname === l.to ? "bg-white/10 text-white" : "text-white/80 hover:bg-white/10 hover:text-white"}`}>
+              className={`whitespace-nowrap rounded-md px-2.5 py-1.5 text-xs xl:text-sm transition-colors ${pathname === l.to ? "bg-white/10 text-white" : "text-white/80 hover:bg-white/10 hover:text-white"}`}>
               {l.label}
             </Link>
           ))}
 
+          {visibleGroups.map((g) => {
+            const active = g.items.some((i) => pathname === i.to || pathname.startsWith(`${i.to}/`));
+            return (
+              <DropdownMenu key={g.label}>
+                <DropdownMenuTrigger
+                  className={`inline-flex items-center gap-1 whitespace-nowrap rounded-md px-2.5 py-1.5 text-xs outline-none transition-colors xl:text-sm ${active ? "bg-white/10 text-white" : "text-white/80 hover:bg-white/10 hover:text-white"}`}>
+                  {g.label}
+                  <ChevronDown className="h-3.5 w-3.5" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56">
+                  {g.items.map((l) => (
+                    <DropdownMenuItem key={l.to} asChild>
+                      <Link to={l.to} className={pathname === l.to ? "font-semibold" : ""}>{l.label}</Link>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            );
+          })}
+
           {state.superUser.active && (
             <Link to="/admin"
-              className={`rounded-md px-3 py-1.5 text-sm inline-flex items-center gap-1 ${pathname.startsWith("/admin") ? "bg-white/10 text-white" : "text-white/80 hover:bg-white/10 hover:text-white"}`}>
+              className={`ml-1 inline-flex items-center gap-1 whitespace-nowrap rounded-md px-2.5 py-1.5 text-xs xl:text-sm ${pathname.startsWith("/admin") ? "bg-[var(--brand)] text-[var(--brand-foreground)]" : "text-white/80 hover:bg-white/10 hover:text-white"}`}>
               <ShieldCheck className="h-3.5 w-3.5" /> Super User
             </Link>
           )}
+        </nav>
+
         </nav>
 
         <div className="ml-auto flex items-center gap-1">
