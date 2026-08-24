@@ -1,6 +1,6 @@
 import { useBranding } from "@/lib/useBranding";
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Menu, User as UserIcon, ShieldCheck, LogOut, LogIn } from "lucide-react";
+import { Menu, User as UserIcon, ShieldCheck, LogOut, LogIn, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { useStore } from "@/lib/store";
 import { useAdmin } from "@/lib/admin-store";
