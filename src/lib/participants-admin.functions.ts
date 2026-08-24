@@ -56,6 +56,16 @@ export const listColleagues = createServerFn({ method: "GET" })
       .select("id, email, full_name")
       .in("id", rows.map((r: { user_id: string }) => r.user_id));
     const map = new Map((profiles ?? []).map((p: { id: string; email: string | null; full_name: string | null }) => [p.id, p] as const));
+
+    // Last sign-in comes from the auth directory (not mirrored into profiles).
+    const signIns = new Map<string, string | null>();
+    for (let page = 1; page <= 5; page++) {
+      const { data: list, error: authErr } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 1000 });
+      if (authErr) break;
+      const users = list?.users ?? [];
+      for (const u of users) signIns.set(u.id, u.last_sign_in_at ?? null);
+      if (users.length < 1000) break;
+    }
     return rows.map((r) => ({
       user_id: r.user_id,
       email: map.get(r.user_id)?.email ?? "(unknown)",
