@@ -189,10 +189,10 @@ function AnnouncementsAdmin() {
               </div>
               <div className="space-y-1">
                 <Label>CTA link</Label>
-                <Select value={editing.ctaHref ?? ""} onValueChange={(v) => setEditing({ ...editing, ctaHref: v })}>
+                <Select value={editing.ctaHref || "none"} onValueChange={(v) => setEditing({ ...editing, ctaHref: v === "none" ? "" : v })}>
                   <SelectTrigger><SelectValue placeholder="No link" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No link</SelectItem>
+                    <SelectItem value="none">No link</SelectItem>
                     <SelectItem value="/register">Register</SelectItem>
                     <SelectItem value="/dashboard">My Dashboard</SelectItem>
                     <SelectItem value="/profile">My Profile</SelectItem>
