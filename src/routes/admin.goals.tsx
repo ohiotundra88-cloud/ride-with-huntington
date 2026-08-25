@@ -1,5 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { getPelotoniaTeamData } from "@/lib/pelotonia.functions";
 import { AdminShell } from "@/components/AdminShell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,6 +38,18 @@ function GoalsAdmin() {
   const { state, setState, audit, isApiManaged } = useAdmin();
   const [editing, setEditing] = useState<Goal | null>(null);
   const [isNew, setIsNew] = useState(false);
+  const fetchLive = useServerFn(getPelotoniaTeamData);
+  const { data: live } = useQuery({
+    queryKey: ["pelotonia-team-data"],
+    queryFn: () => fetchLive(),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // API-managed goals mirror the same live Pelotonia totals shown on the team page.
+  const withLive = (g: Goal): Goal =>
+    API_MANAGED_GOALS.has(g.id) && live
+      ? { ...g, current: live.raised, target: live.goal || g.target }
+      : g;
 
   const save = (pub?: Goal["publish"]) => {
     if (!editing) return;
@@ -64,7 +79,8 @@ function GoalsAdmin() {
       actions={<Button onClick={() => { setEditing(blank()); setIsNew(true); }} className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90"><Plus className="mr-1 h-4 w-4" /> New goal</Button>}
     >
       <div className="grid gap-3">
-        {state.goals.map((g) => {
+        {state.goals.map((raw) => {
+          const g = withLive(raw);
           const pct = g.target > 0 ? Math.round((g.current / g.target) * 100) : 0;
           const f = formatGoalValue(g);
           const managed = isApiManaged("team.goal.current") && g.id === "g-1";
