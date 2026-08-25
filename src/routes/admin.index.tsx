@@ -23,6 +23,15 @@ export const Route = createFileRoute("/admin/")({
 
 function SuperUserDashboard() {
   const { state } = useAdmin();
+  const fetchLive = useServerFn(getPelotoniaTeamData);
+  const { data: live } = useQuery({
+    queryKey: ["pelotonia-team-data"],
+    queryFn: () => fetchLive(),
+    staleTime: 5 * 60 * 1000,
+  });
+  const goalCurrent = live?.raised ?? state.team.goalCurrent;
+  const goalTarget = live?.goal || state.team.goalTarget;
+
 
   const activeAnnouncements = state.announcements.filter(announcementIsActive);
   const drafts = [
