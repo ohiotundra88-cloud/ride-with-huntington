@@ -55,7 +55,7 @@ function SuperUserDashboard() {
     .filter((t) => t.publish === "published" && t.time && (t.time.includes("Jul") || t.time.includes("Aug") || t.time.includes("Due")))
     .slice(0, 5);
 
-  const teamPct = state.team.goalTarget > 0 ? Math.round((state.team.goalCurrent / state.team.goalTarget) * 100) : 0;
+  const teamPct = goalTarget > 0 ? Math.round((goalCurrent / goalTarget) * 100) : 0;
 
   const quickActions = [
     { icon: Plus, label: "Add FAQ", to: "/admin/faqs" },
