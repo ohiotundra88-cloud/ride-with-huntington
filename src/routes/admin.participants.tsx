@@ -153,17 +153,28 @@ function ParticipantsAdmin() {
     const headers = [
       "email", "name", "participation", "completion", "riderId", "hbNumber", "employmentType",
       "payGrade74Below", "highRoller", "survivor", "arrivalDate", "hotelName", "bikeType",
-      "jerseySize", "jerseyStyle", "shirtSize", "city", "state", "zip", "seasonLocked", "lastLoggedIn", "lastUpdated",
+      "jerseySize", "jerseyStyle", "shirtSize",
+      "shipToName", "street", "unit", "city", "state", "zip", "country", "addressType",
+      "addressConfirmed", "fullAddress",
+      "seasonLocked", "lastLoggedIn", "lastUpdated",
     ];
-    const body = filtered.map((r) => [
-      r.email, r.full_name ?? "", r.participation ?? "", `${completionOf(r)}%`,
-      r.pelotonia.confirmation ?? "", r.pelotonia.hbNumber ?? "", r.pelotonia.employmentType ?? "",
-      r.pelotonia.payGrade74Below ?? "", r.pelotonia.highRoller ?? "", r.pelotonia.survivor ?? "",
-      r.travel.arrivalDate ?? "", r.travel.hotelName ?? "", r.bike.bikeType ?? "",
-      r.apparel.jerseySize ?? "", r.apparel.jerseyStyle ?? "", r.apparel.shirtSize ?? "",
-      r.address.city ?? "", r.address.state ?? "", r.address.zip ?? "", r.season_locked,
-      r.last_sign_in_at ?? "", r.updated_at ?? "",
-    ]);
+    const body = filtered.map((r) => {
+      const a = r.address ?? {};
+      const line1 = [a.street, a.unit].filter(Boolean).join(" ");
+      const cityState = [a.city, [a.state, a.zip].filter(Boolean).join(" ")].filter(Boolean).join(", ");
+      const fullAddress = [line1, cityState, a.country].filter(Boolean).join(", ");
+      return [
+        r.email, r.full_name ?? "", r.participation ?? "", `${completionOf(r)}%`,
+        r.pelotonia.confirmation ?? "", r.pelotonia.hbNumber ?? "", r.pelotonia.employmentType ?? "",
+        r.pelotonia.payGrade74Below ?? "", r.pelotonia.highRoller ?? "", r.pelotonia.survivor ?? "",
+        r.travel.arrivalDate ?? "", r.travel.hotelName ?? "", r.bike.bikeType ?? "",
+        r.apparel.jerseySize ?? "", r.apparel.jerseyStyle ?? "", r.apparel.shirtSize ?? "",
+        a.name ?? "", a.street ?? "", a.unit ?? "", a.city ?? "", a.state ?? "", a.zip ?? "",
+        a.country ?? "", a.type ?? "", a.confirmed ?? "", fullAddress,
+        r.season_locked, r.last_sign_in_at ?? "", r.updated_at ?? "",
+      ];
+    });
+
     const csv = [headers, ...body].map((line) => line.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
     const a = document.createElement("a");
