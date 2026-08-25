@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { getPelotoniaTeamData } from "@/lib/pelotonia.functions";
 import { AdminShell } from "@/components/AdminShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,6 +23,15 @@ export const Route = createFileRoute("/admin/")({
 
 function SuperUserDashboard() {
   const { state } = useAdmin();
+  const fetchLive = useServerFn(getPelotoniaTeamData);
+  const { data: live } = useQuery({
+    queryKey: ["pelotonia-team-data"],
+    queryFn: () => fetchLive(),
+    staleTime: 5 * 60 * 1000,
+  });
+  const goalCurrent = live?.raised ?? state.team.goalCurrent;
+  const goalTarget = live?.goal || state.team.goalTarget;
+
 
   const activeAnnouncements = state.announcements.filter(announcementIsActive);
   const drafts = [
@@ -44,7 +55,7 @@ function SuperUserDashboard() {
     .filter((t) => t.publish === "published" && t.time && (t.time.includes("Jul") || t.time.includes("Aug") || t.time.includes("Due")))
     .slice(0, 5);
 
-  const teamPct = state.team.goalTarget > 0 ? Math.round((state.team.goalCurrent / state.team.goalTarget) * 100) : 0;
+  const teamPct = goalTarget > 0 ? Math.round((goalCurrent / goalTarget) * 100) : 0;
 
   const quickActions = [
     { icon: Plus, label: "Add FAQ", to: "/admin/faqs" },
@@ -70,7 +81,7 @@ function SuperUserDashboard() {
         <StatCard label="Active announcements" value={activeAnnouncements.length} />
         <StatCard label="Published FAQs" value={"see FAQ manager"} sub="managed separately" href="/admin/faqs" />
         <StatCard label="Draft items" value={drafts.length} />
-        <StatCard label="Team goal" value={`${formatCurrencyUSD(state.team.goalCurrent)} / ${formatCurrencyUSD(state.team.goalTarget)}`} sub={`${teamPct}% of goal`} />
+        <StatCard label="Team goal" value={`${formatCurrencyUSD(goalCurrent)} / ${formatCurrencyUSD(goalTarget)}`} sub={`${teamPct}% of goal${live ? " · live" : ""}`} />
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-3">
