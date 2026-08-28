@@ -97,3 +97,55 @@ export const getPelotoniaTeamData = createServerFn({ method: "GET" }).handler(
     }
   },
 );
+
+export interface RiderFundraising {
+  publicId: string;
+  name: string;
+  raised: number;
+  goal: number;
+  committed: number;
+  allTimeRaised: number;
+  teamName: string;
+  isHighRoller: boolean;
+  isSurvivor: boolean;
+  lastUpdated: string | null;
+}
+
+/**
+ * Individual fundraising totals for one participant, looked up by their
+ * Pelotonia public/rider ID (the value captured during registration).
+ */
+export const getRiderFundraising = createServerFn({ method: "GET" })
+  .inputValidator((data: { publicId: string }) => ({
+    publicId: String(data?.publicId ?? "").trim(),
+  }))
+  .handler(async ({ data }): Promise<RiderFundraising | null> => {
+    if (!data.publicId) return null;
+    try {
+      const res = await fetch(`${DASHBOARD_BASE}/api/members`, {
+        headers: { Accept: "application/json" },
+      });
+      if (!res.ok) return null;
+      const rows = (await res.json()) as Record<string, unknown>[];
+      const wanted = data.publicId.toLowerCase();
+      const row = rows.find(
+        (r) => String(r["public_id"] ?? "").trim().toLowerCase() === wanted,
+      );
+      if (!row) return null;
+      const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
+      return {
+        publicId: String(row["public_id"] ?? data.publicId),
+        name: String(row["name"] ?? ""),
+        raised: num(row["raised"]),
+        goal: num(row["fundraising_goal"]) || num(row["personal_goal"]),
+        committed: num(row["committed_amount"]) || num(row["commitment_amount"]),
+        allTimeRaised: num(row["all_time_raised"]),
+        teamName: String(row["team_name"] ?? ""),
+        isHighRoller: num(row["committed_high_roller"]) === 1,
+        isSurvivor: num(row["is_cancer_survivor"]) === 1,
+        lastUpdated: typeof row["last_scraped"] === "string" ? (row["last_scraped"] as string) : null,
+      };
+    } catch {
+      return null;
+    }
+  });
