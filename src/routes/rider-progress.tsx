@@ -183,19 +183,29 @@ function RiderProgressPage() {
 
   const exportCsv = () => {
     const headers = [
-      "Name", "Email", "Participation", "Rider ID", "Registered with Pelotonia", "Registration step",
+      "Name", "Email", "Participation", "Rider ID", "Pelotonia name", "Sub-peloton / team",
+      "Route", "Ride type", "Registration types", "Tags", "Captain", "Challenger",
+      "Rider (Pelotonia)", "Volunteer (Pelotonia)", "Survivor", "High roller",
+      "Registered with Pelotonia", "Registration step",
       "Travel step", "Travel needs", "Hotel booked", "Hotel", "Hotel check-in", "Hotel check-out",
-      "Bike step", "Bike plan", "Bike confirmed", "Apparel step", "Completion %",
-      "Raised", "Fundraising goal", "Committed", "All-time raised", "Submitted", "Last updated",
+      "Bike step", "Bike plan", "Bike type", "Bike size", "Pedals", "Bike confirmed",
+      "Apparel step", "Jersey style", "Jersey size", "Completion %",
+      "Raised", "Fundraising goal", "Personal goal", "Committed", "All-time raised", "Submitted", "Last updated",
     ];
     const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const yn = (v: boolean) => (v ? "Yes" : "No");
     const lines = filtered.map((r) =>
       [
-        r.name, r.email, r.participation ?? "", r.riderId ?? "", r.registeredWithPelotonia ? "Yes" : "No",
-        label(r.pelotoniaStatus), label(r.travelStatus), r.travelNeeds ?? "", r.hotelBooked ? "Yes" : "No",
+        r.name, r.email, r.participation ?? "", r.riderId ?? "", r.pelotoniaName ?? "", r.subPeloton ?? "",
+        r.rideRoute ?? "", r.rideType ?? "", r.registrationTypes.join("; "), r.tags.join("; "),
+        yn(r.isCaptain), yn(r.isChallenger), yn(r.isRiderOnPelotonia), yn(r.isVolunteerOnPelotonia),
+        yn(r.isSurvivor), yn(r.highRoller),
+        yn(r.registeredWithPelotonia),
+        label(r.pelotoniaStatus), label(r.travelStatus), r.travelNeeds ?? "", yn(r.hotelBooked),
         r.hotelName ?? "", r.hotelCheckIn ?? "", r.hotelCheckOut ?? "", label(r.bikeStatus), r.bikePlan ?? "",
-        r.bikeConfirmed ? "Yes" : "No", label(r.apparelStatus), r.completion,
-        r.raised ?? "", r.goal ?? "", r.committed ?? "", r.allTimeRaised ?? "",
+        r.bikeType ?? "", r.bikeSize ?? "", r.pedals ?? "", yn(r.bikeConfirmed),
+        label(r.apparelStatus), r.jerseyStyle ?? "", r.jerseySize ?? "", r.completion,
+        r.raised ?? "", r.goal ?? "", r.personalGoal ?? "", r.committed ?? "", r.allTimeRaised ?? "",
         r.submittedAt ?? "", r.updatedAt,
       ].map(esc).join(","),
     );
