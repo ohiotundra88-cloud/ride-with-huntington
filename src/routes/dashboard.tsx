@@ -326,8 +326,12 @@ function RiderView({ readiness }: { readiness: EditableReadinessItem[] }) {
                       {s.label}
                     </span>
                   </div>
-                  <h3 className="mt-4 font-bold text-[var(--brand-dark)]">{r.title}</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">{r.detail}</p>
+                  <h3 className="mt-4 font-bold text-[var(--brand-dark)]">
+                    <InlineEditText editing={editing} value={r.title} onCommit={(v) => setReadiness(r.id, { title: v })} placeholder="Card title" />
+                  </h3>
+                  <div className="mt-1 text-sm text-muted-foreground">
+                    <InlineEditText as="div" multiline editing={editing} value={r.detail} onCommit={(v) => setReadiness(r.id, { detail: v })} placeholder="Card description" />
+                  </div>
                   {r.progressGoal && r.progressCurrent !== undefined && (
                     <div className="mt-3">
                       <Progress value={Math.round((r.progressCurrent / r.progressGoal) * 100)} className="h-2 [&>div]:bg-[var(--brand)]" />
@@ -335,8 +339,10 @@ function RiderView({ readiness }: { readiness: EditableReadinessItem[] }) {
                   )}
                   <div className="mt-4 flex items-center justify-between gap-2">
                     <span className="inline-flex items-center text-sm font-semibold text-[var(--brand-dark)]">
-                      {r.ctaLabel} <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                      <InlineEditText editing={editing} value={r.ctaLabel} onCommit={(v) => setReadiness(r.id, { ctaLabel: v })} placeholder="Link label" />
+                      <ArrowRight className="ml-1 h-3.5 w-3.5" />
                     </span>
+
                     {managed && (
                       <span className="inline-flex items-center gap-1 rounded-full border border-[var(--brand-dark)]/20 bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--brand-dark)]/80" title={`Synced from ${managed.source}`}>
                         <LockIcon className="h-3 w-3" /> Synced
