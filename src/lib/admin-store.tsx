@@ -578,7 +578,13 @@ function load(): AdminState {
     if (!raw) return initialState();
     const parsed = JSON.parse(raw) as Partial<AdminState>;
     const base = initialState();
-    return { ...base, ...parsed, superUser: { ...base.superUser, ...parsed.superUser } };
+    return {
+      ...base,
+      ...parsed,
+      superUser: { ...base.superUser, ...parsed.superUser },
+      journeyCopy: { ...journeyCopyDefaults, ...(parsed.journeyCopy ?? {}) },
+    };
+
   } catch {
     return initialState();
   }
