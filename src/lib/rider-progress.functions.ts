@@ -1,0 +1,142 @@
+import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
+export interface RiderProgressRow {
+  userId: string;
+  name: string;
+  email: string;
+  participation: string | null;
+  riderId: string | null;
+  registeredWithPelotonia: boolean;
+  pelotoniaStatus: string;
+  travelStatus: string;
+  hotelBooked: boolean;
+  hotelName: string | null;
+  hotelCheckIn: string | null;
+  hotelCheckOut: string | null;
+  travelNeeds: string | null;
+  bikeStatus: string;
+  bikePlan: string | null;
+  bikeConfirmed: boolean;
+  apparelStatus: string;
+  completion: number;
+  raised: number | null;
+  goal: number | null;
+  committed: number | null;
+  allTimeRaised: number | null;
+  updatedAt: string;
+  submittedAt: string | null;
+}
+
+export interface RiderProgressAccess {
+  allowed: boolean;
+  roles: string[];
+}
+
+const ALLOWED_ROLES = ["captain", "cochair", "superuser", "admin"];
+
+/** Roles allowed to view rider progress reporting. */
+export const getRiderProgressAccess = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<RiderProgressAccess> => {
+    const { data } = await context.supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId);
+    const roles = (data ?? []).map((r: { role: string }) => String(r.role));
+    return { allowed: roles.some((r) => ALLOWED_ROLES.includes(r)), roles };
+  });
+
+const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : null);
+const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
+
+/**
+ * Roster-wide readiness snapshot (registration, travel/hotel, bike, apparel)
+ * joined with live Pelotonia fundraising totals by rider/public ID.
+ * Authorization is enforced here, not by the route guard.
+ */
+export const listRiderProgress = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<RiderProgressRow[]> => {
+    const { data: roleRows } = await context.supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId);
+    const roles = (roleRows ?? []).map((r: { role: string }) => String(r.role));
+    if (!roles.some((r) => ALLOWED_ROLES.includes(r))) {
+      throw new Error("Forbidden — captain, co-chair or super user access required.");
+    }
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("participants")
+      .select("*")
+      .order("updated_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    const rows = data ?? [];
+
+    const { data: profiles } = await supabaseAdmin
+      .from("profiles")
+      .select("id, email, full_name")
+      .in("id", rows.map((r: { user_id: string }) => r.user_id));
+    const people = new Map(
+      (profiles ?? []).map((p: { id: string; email: string | null; full_name: string | null }) => [p.id, p] as const),
+    );
+
+    // Live fundraising totals, keyed by Pelotonia public/rider ID.
+    const fundraising = new Map<string, Record<string, unknown>>();
+    try {
+      const res = await fetch(
+        "https://pelotonia-dashboard-401340053598.us-central1.run.app/api/members",
+        { headers: { Accept: "application/json" } },
+      );
+      if (res.ok) {
+        const members = (await res.json()) as Record<string, unknown>[];
+        for (const m of members) {
+          const id = String(m["public_id"] ?? "").trim().toLowerCase();
+          if (id) fundraising.set(id, m);
+        }
+      }
+    } catch {
+      // Fundraising is best-effort; readiness data still renders.
+    }
+
+    return rows.map((r): RiderProgressRow => {
+      const p = (r.pelotonia ?? {}) as Record<string, unknown>;
+      const t = (r.travel ?? {}) as Record<string, unknown>;
+      const b = (r.bike ?? {}) as Record<string, unknown>;
+      const a = (r.apparel ?? {}) as Record<string, unknown>;
+      const statuses = [p["status"], t["status"], b["status"], a["status"]];
+      const riderId = str(p["confirmation"]);
+      const member = riderId ? fundraising.get(riderId.toLowerCase()) : undefined;
+      const profile = people.get(r.user_id);
+
+      return {
+        userId: r.user_id,
+        name: profile?.full_name ?? str(profile?.email) ?? "(unknown)",
+        email: profile?.email ?? "(unknown)",
+        participation: r.participation,
+        riderId,
+        registeredWithPelotonia: p["completed"] === true || p["status"] === "complete",
+        pelotoniaStatus: String(p["status"] ?? "not_started"),
+        travelStatus: String(t["status"] ?? "not_started"),
+        hotelBooked: !!str(t["hotelConfirmation"]) || (!!str(t["hotelName"]) && !!str(t["hotelCheckIn"])),
+        hotelName: str(t["hotelName"]),
+        hotelCheckIn: str(t["hotelCheckIn"]),
+        hotelCheckOut: str(t["hotelCheckOut"]),
+        travelNeeds: str(t["needs"]),
+        bikeStatus: String(b["status"] ?? "not_started"),
+        bikePlan:
+          b["needs"] === "yes" ? "Rental" : b["needs"] === "no" ? "Own bike" : b["needs"] === "unsure" ? "Undecided" : null,
+        bikeConfirmed: b["needs"] === "no" || b["status"] === "complete",
+        apparelStatus: String(a["status"] ?? "not_started"),
+        completion: Math.round((statuses.filter((s) => s === "complete").length / 4) * 100),
+        raised: member ? num(member["raised"]) : null,
+        goal: member ? num(member["fundraising_goal"]) || num(member["personal_goal"]) : null,
+        committed: member ? num(member["committed_amount"]) || num(member["commitment_amount"]) : null,
+        allTimeRaised: member ? num(member["all_time_raised"]) : null,
+        updatedAt: r.updated_at,
+        submittedAt: r.submitted_at,
+      };
+    });
+  });

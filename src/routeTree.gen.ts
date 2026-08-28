@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TeamRouteImport } from './routes/team'
 import { Route as SigninRouteImport } from './routes/signin'
+import { Route as RiderProgressRouteImport } from './routes/rider-progress'
 import { Route as ResourcesRouteImport } from './routes/resources'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ProfileRouteImport } from './routes/profile'
@@ -71,6 +72,11 @@ const TeamRoute = TeamRouteImport.update({
 const SigninRoute = SigninRouteImport.update({
   id: '/signin',
   path: '/signin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RiderProgressRoute = RiderProgressRouteImport.update({
+  id: '/rider-progress',
+  path: '/rider-progress',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResourcesRoute = ResourcesRouteImport.update({
@@ -350,6 +356,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/resources': typeof ResourcesRouteWithChildren
+  '/rider-progress': typeof RiderProgressRoute
   '/signin': typeof SigninRoute
   '/team': typeof TeamRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -405,6 +412,7 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/resources': typeof ResourcesRouteWithChildren
+  '/rider-progress': typeof RiderProgressRoute
   '/signin': typeof SigninRoute
   '/team': typeof TeamRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -461,6 +469,7 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/resources': typeof ResourcesRouteWithChildren
+  '/rider-progress': typeof RiderProgressRoute
   '/signin': typeof SigninRoute
   '/team': typeof TeamRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -518,6 +527,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/register'
     | '/resources'
+    | '/rider-progress'
     | '/signin'
     | '/team'
     | '/.mcp/list-tools'
@@ -573,6 +583,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/register'
     | '/resources'
+    | '/rider-progress'
     | '/signin'
     | '/team'
     | '/.mcp/list-tools'
@@ -628,6 +639,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/register'
     | '/resources'
+    | '/rider-progress'
     | '/signin'
     | '/team'
     | '/.mcp/list-tools'
@@ -684,6 +696,7 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
   ResourcesRoute: typeof ResourcesRouteWithChildren
+  RiderProgressRoute: typeof RiderProgressRoute
   SigninRoute: typeof SigninRoute
   TeamRoute: typeof TeamRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
@@ -737,6 +750,13 @@ declare module '@tanstack/react-router' {
       path: '/signin'
       fullPath: '/signin'
       preLoaderRoute: typeof SigninRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rider-progress': {
+      id: '/rider-progress'
+      path: '/rider-progress'
+      fullPath: '/rider-progress'
+      preLoaderRoute: typeof RiderProgressRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/resources': {
@@ -1127,6 +1147,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,
   ResourcesRoute: ResourcesRouteWithChildren,
+  RiderProgressRoute: RiderProgressRoute,
   SigninRoute: SigninRoute,
   TeamRoute: TeamRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
