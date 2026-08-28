@@ -20,6 +20,10 @@ import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { ApiManagedField } from "@/components/ApiManagedField";
 import { InlineEditText } from "@/components/InlineEditText";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { getRiderFundraising } from "@/lib/pelotonia.functions";
+
 
 /** True when the signed-in Super User has switched on inline text editing. */
 const EditCtx = createContext(false);
