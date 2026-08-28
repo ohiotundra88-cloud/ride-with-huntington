@@ -150,7 +150,7 @@ function RiderProgressPage() {
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
     const out = rows.filter((r) => {
-      const haystack = [r.name, r.email, r.riderId ?? "", r.subPeloton ?? "", r.rideRoute ?? "", ...r.tags];
+      const haystack = [r.name, r.email, r.riderId ?? "", r.subPeloton ?? "", r.rideRoute ?? "", ...(r.tags ?? [])];
       if (needle && !haystack.some((v) => v.toLowerCase().includes(needle))) return false;
       if (participation !== "all" && r.participation !== participation) return false;
       if (peloton !== "all" && r.subPeloton !== peloton) return false;
@@ -197,7 +197,7 @@ function RiderProgressPage() {
     const lines = filtered.map((r) =>
       [
         r.name, r.email, r.participation ?? "", r.riderId ?? "", r.pelotoniaName ?? "", r.subPeloton ?? "",
-        r.rideRoute ?? "", r.rideType ?? "", r.registrationTypes.join("; "), r.tags.join("; "),
+        r.rideRoute ?? "", r.rideType ?? "", (r.registrationTypes ?? []).join("; "), (r.tags ?? []).join("; "),
         yn(r.isCaptain), yn(r.isChallenger), yn(r.isRiderOnPelotonia), yn(r.isVolunteerOnPelotonia),
         yn(r.isSurvivor), yn(r.highRoller),
         yn(r.registeredWithPelotonia),
@@ -384,7 +384,7 @@ function RiderProgressPage() {
                         </TableCell>
                         <TableCell>
                           <div className="text-xs text-muted-foreground">
-                            {r.rideRoute || r.rideType || r.registrationTypes.join(", ") || "—"}
+                            {r.rideRoute || r.rideType || (r.registrationTypes ?? []).join(", ") || "—"}
                           </div>
                           {r.rideRoute && r.rideType && (
                             <div className="text-[11px] text-muted-foreground/80">{r.rideType}</div>
@@ -397,7 +397,7 @@ function RiderProgressPage() {
                               ...(r.isChallenger ? ["Challenger"] : []),
                               ...(r.isSurvivor ? ["Survivor"] : []),
                               ...(r.highRoller ? ["High roller"] : []),
-                              ...r.tags,
+                              ...(r.tags ?? []),
                             ].map((t) => (
                               <Badge key={t} variant="outline" className="text-[10px] font-normal">
                                 {t}
