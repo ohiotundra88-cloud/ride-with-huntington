@@ -220,9 +220,18 @@ function DashboardPage() {
   const firstName = user.name.split(" ")[0];
   const canEdit = user.isSuperUser;
 
+  const riderId = (registration.pelotonia.confirmation ?? "").trim();
+  const fetchRider = useServerFn(getRiderFundraising);
+  const { data: riderFundraising } = useQuery({
+    queryKey: ["rider-fundraising", riderId],
+    queryFn: () => fetchRider({ data: { publicId: riderId } }),
+    enabled: riderId.length > 0,
+    staleTime: 5 * 60_000,
+  });
+
   const merged = useMemo(
-    () => mergeReadinessWithRegistration(state.readiness, registration),
-    [state.readiness, registration]
+    () => mergeReadinessWithRegistration(state.readiness, registration, riderFundraising ?? null),
+    [state.readiness, registration, riderFundraising]
   );
   const readiness = useMemo(
     () => merged.filter((r) => r.active && r.publish === "published"),
