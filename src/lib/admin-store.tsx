@@ -11,7 +11,9 @@ import {
   useEffect,
   useMemo,
   useState,
+  type Context,
   type ReactNode,
+
 } from "react";
 import {
   conciergeFallback as seedConciergeFallback,
@@ -601,7 +603,13 @@ interface AdminCtx {
   isApiManaged: (key: string) => APIManagedField | undefined;
 }
 
-const Ctx = createContext<AdminCtx | null>(null);
+// Keep a single context instance across hot-module reloads. Without this, an
+// HMR update re-evaluates this module, creating a fresh context that consumers
+// read while the mounted provider still uses the old one — which surfaced as
+// "useAdmin must be used inside AdminStoreProvider" with a blank screen.
+const g = globalThis as unknown as { __adminStoreCtx?: Context<AdminCtx | null> };
+const Ctx = (g.__adminStoreCtx ??= createContext<AdminCtx | null>(null));
+
 
 export function AdminStoreProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AdminState>(() => initialState());
