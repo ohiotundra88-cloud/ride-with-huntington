@@ -306,10 +306,33 @@ function RiderProgressPage() {
                   <SelectItem value="no_fundraising">No funds raised</SelectItem>
                 </SelectContent>
               </Select>
+              {pelotonOptions.length > 0 && (
+                <Select value={peloton} onValueChange={setPeloton}>
+                  <SelectTrigger className="w-52"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All sub-pelotons</SelectItem>
+                    {pelotonOptions.map((p) => (
+                      <SelectItem key={p} value={p}>{p}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+              {routeOptions.length > 0 && (
+                <Select value={route} onValueChange={setRoute}>
+                  <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All routes</SelectItem>
+                    {routeOptions.map((p) => (
+                      <SelectItem key={p} value={p}>{p}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
               <Select value={sort} onValueChange={(v) => setSort(v as SortKey)}>
                 <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="name">Sort: Name</SelectItem>
+                  <SelectItem value="subPeloton">Sort: Sub-peloton</SelectItem>
                   <SelectItem value="completion">Sort: Completion</SelectItem>
                   <SelectItem value="raised">Sort: Raised</SelectItem>
                 </SelectContent>
