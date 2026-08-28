@@ -17,8 +17,13 @@ export interface RiderProgressRow {
   travelNeeds: string | null;
   bikeStatus: string;
   bikePlan: string | null;
+  bikeType: string | null;
+  bikeSize: string | null;
+  pedals: string | null;
   bikeConfirmed: boolean;
   apparelStatus: string;
+  jerseyStyle: string | null;
+  jerseySize: string | null;
   completion: number;
   raised: number | null;
   goal: number | null;
@@ -26,6 +31,20 @@ export interface RiderProgressRow {
   allTimeRaised: number | null;
   updatedAt: string;
   submittedAt: string | null;
+  // Live Pelotonia profile details (null when the rider ID has no match)
+  pelotoniaName: string | null;
+  subPeloton: string | null;
+  rideRoute: string | null;
+  rideType: string | null;
+  registrationTypes: string[];
+  tags: string[];
+  isCaptain: boolean;
+  isChallenger: boolean;
+  isRiderOnPelotonia: boolean;
+  isVolunteerOnPelotonia: boolean;
+  isSurvivor: boolean;
+  highRoller: boolean;
+  personalGoal: number | null;
 }
 
 export interface RiderProgressAccess {
