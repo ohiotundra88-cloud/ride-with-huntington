@@ -123,7 +123,8 @@ const REGISTER_STEP_BY_CARD: Record<string, "A" | "B" | "C" | "D" | "E" | "F" | 
  */
 function mergeReadinessWithRegistration(
   items: EditableReadinessItem[],
-  reg: Registration
+  reg: Registration,
+  fundraising?: { raised: number; committed: number; goal: number } | null
 ): EditableReadinessItem[] {
   const participation = reg.participation;
   const isRider = participation === "rider" || participation === "both";
@@ -187,6 +188,21 @@ function mergeReadinessWithRegistration(
         if (a.status === "pending") return over("in_progress", "Apparel started — confirm sizes and mailing address.", "Finish apparel");
         return item;
       }
+      case "fundraising": {
+        // Score against the live Pelotonia commitment, not seeded demo values.
+        if (participation && !isRider) return over("not_applicable", "You're registered as a Volunteer — no fundraising commitment.", item.ctaLabel);
+        if (!fundraising) return item;
+        const target = fundraising.committed || fundraising.goal;
+        const next: EditableReadinessItem = {
+          ...item,
+          progressCurrent: fundraising.raised,
+          progressGoal: target || item.progressGoal,
+        };
+        if (target > 0 && fundraising.raised >= target) {
+          return { ...next, status: "complete", detail: "Commitment met — thank you!" };
+        }
+        return { ...next, status: "in_progress" };
+      }
       default:
         return item;
     }
@@ -204,9 +220,18 @@ function DashboardPage() {
   const firstName = user.name.split(" ")[0];
   const canEdit = user.isSuperUser;
 
+  const riderId = (registration.pelotonia.confirmation ?? "").trim();
+  const fetchRider = useServerFn(getRiderFundraising);
+  const { data: riderFundraising } = useQuery({
+    queryKey: ["rider-fundraising", riderId],
+    queryFn: () => fetchRider({ data: { publicId: riderId } }),
+    enabled: riderId.length > 0,
+    staleTime: 5 * 60_000,
+  });
+
   const merged = useMemo(
-    () => mergeReadinessWithRegistration(state.readiness, registration),
-    [state.readiness, registration]
+    () => mergeReadinessWithRegistration(state.readiness, registration, riderFundraising ?? null),
+    [state.readiness, registration, riderFundraising]
   );
   const readiness = useMemo(
     () => merged.filter((r) => r.active && r.publish === "published"),
