@@ -562,7 +562,9 @@ function initialState(): AdminState {
     },
     apiManaged: apiManagedSeed,
     audit: [],
+    journeyCopy: { ...journeyCopyDefaults },
   };
+
 }
 
 // ============ PERSISTENCE ============
