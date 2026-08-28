@@ -388,6 +388,8 @@ function RiderView({ readiness }: { readiness: EditableReadinessItem[] }) {
 
 function FamilyView() {
   const { state } = useAdmin();
+  const editing = useEditing();
+  const { setFamilySection } = useJourneyEdits();
   const sections = state.family.sections
     .filter((s) => s.active && s.publish === "published")
     .sort((a, b) => a.order - b.order);
@@ -409,8 +411,12 @@ function FamilyView() {
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-[var(--brand-dark)] text-white">
                 <AdminIcon name={s.icon} className="h-5 w-5" />
               </div>
-              <h3 className="mt-4 font-bold text-[var(--brand-dark)]">{s.title}</h3>
-              <p className="mt-1 text-sm text-muted-foreground line-clamp-3">{s.body}</p>
+              <h3 className="mt-4 font-bold text-[var(--brand-dark)]">
+                <InlineEditText editing={editing} value={s.title} onCommit={(v) => setFamilySection(s.id, { title: v })} placeholder="Section title" />
+              </h3>
+              <div className={`mt-1 text-sm text-muted-foreground ${editing ? "" : "line-clamp-3"}`}>
+                <InlineEditText as="div" multiline editing={editing} value={s.body} onCommit={(v) => setFamilySection(s.id, { body: v })} placeholder="Section body" />
+              </div>
               <span className="mt-3 inline-flex items-center text-sm font-semibold text-[var(--brand-dark)]">
                 Open <ArrowRight className="ml-1 h-3.5 w-3.5" />
               </span>
@@ -423,13 +429,24 @@ function FamilyView() {
 }
 
 
-function QuickAction({ icon: Icon, label, to, onClick }: {
-  icon: typeof ArrowRight; label: string; to?: string; onClick?: () => void;
+function QuickAction({ icon: Icon, label, to, onClick, copyKey, onEdit }: {
+  icon: typeof ArrowRight;
+  label: string;
+  to?: string;
+  onClick?: () => void;
+  copyKey?: string;
+  onEdit?: (key: string, value: string) => void;
 }) {
+  const editing = useEditing();
   const inner = (
     <div className="flex items-center justify-between rounded-lg border bg-card px-4 py-3 hover:bg-accent transition-colors">
       <span className="flex items-center gap-2 text-sm font-semibold text-[var(--brand-dark)]">
-        <Icon className="h-4 w-4" /> {label}
+        <Icon className="h-4 w-4" />
+        {editing && copyKey && onEdit ? (
+          <InlineEditText editing value={label} onCommit={(v) => onEdit(copyKey, v)} placeholder="Button label" />
+        ) : (
+          label
+        )}
       </span>
       <ArrowRight className="h-4 w-4 text-muted-foreground" />
     </div>
@@ -440,6 +457,8 @@ function QuickAction({ icon: Icon, label, to, onClick }: {
 
 function Timeline() {
   const { state } = useAdmin();
+  const editing = useEditing();
+  const { copy, setCopy } = useJourneyEdits();
   const byPhase = useMemo(() => {
     const g: Record<string, EditableTimelineItem[]> = {};
     state.timeline
@@ -452,16 +471,20 @@ function Timeline() {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <CalendarDays className="h-5 w-5 text-[var(--brand)]" /> My Ride Weekend timeline
+          <CalendarDays className="h-5 w-5 text-[var(--brand)]" />
+          <InlineEditText editing={editing} value={copy.timelineHeading} onCommit={(v) => setCopy("timelineHeading", v)} />
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {timelineSections.map((sec) => {
           const items = byPhase[sec.phase] ?? [];
           if (items.length === 0) return null;
+          const key = `phase.${sec.phase}`;
           return (
             <div key={sec.phase}>
-              <p className="text-xs font-bold uppercase tracking-wider text-[var(--brand-dark)]/70">{sec.label}</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-[var(--brand-dark)]/70">
+                <InlineEditText editing={editing} value={copy[key] ?? sec.label} onCommit={(v) => setCopy(key, v)} />
+              </p>
               <ol className="relative mt-3 border-l-2 border-dashed border-[var(--brand)]/40 pl-6">
                 {items.map((item) => (<TimelineEntry key={item.id} item={item} />))}
               </ol>
@@ -472,6 +495,7 @@ function Timeline() {
     </Card>
   );
 }
+
 
 function TimelineEntry({ item }: { item: EditableTimelineItem }) {
   const [open, setOpen] = useState(item.state === "current");
