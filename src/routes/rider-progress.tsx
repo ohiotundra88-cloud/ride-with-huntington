@@ -197,7 +197,7 @@ function RiderProgressPage() {
     const lines = filtered.map((r) =>
       [
         r.name, r.email, r.participation ?? "", r.riderId ?? "", r.pelotoniaName ?? "", r.subPeloton ?? "",
-        r.rideRoute ?? "", r.rideType ?? "", r.registrationTypes.join("; "), r.tags.join("; "),
+        r.rideRoute ?? "", r.rideType ?? "", (r.registrationTypes ?? []).join("; "), (r.tags ?? []).join("; "),
         yn(r.isCaptain), yn(r.isChallenger), yn(r.isRiderOnPelotonia), yn(r.isVolunteerOnPelotonia),
         yn(r.isSurvivor), yn(r.highRoller),
         yn(r.registeredWithPelotonia),
@@ -384,7 +384,7 @@ function RiderProgressPage() {
                         </TableCell>
                         <TableCell>
                           <div className="text-xs text-muted-foreground">
-                            {r.rideRoute || r.rideType || r.registrationTypes.join(", ") || "—"}
+                            {r.rideRoute || r.rideType || (r.registrationTypes ?? []).join(", ") || "—"}
                           </div>
                           {r.rideRoute && r.rideType && (
                             <div className="text-[11px] text-muted-foreground/80">{r.rideType}</div>
