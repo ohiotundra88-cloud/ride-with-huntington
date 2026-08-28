@@ -147,8 +147,13 @@ export const listRiderProgress = createServerFn({ method: "GET" })
         bikeStatus: String(b["status"] ?? "not_started"),
         bikePlan:
           b["needs"] === "yes" ? "Rental" : b["needs"] === "no" ? "Own bike" : b["needs"] === "unsure" ? "Undecided" : null,
+        bikeType: str(b["bikeType"]),
+        bikeSize: str(b["bikeSize"]),
+        pedals: str(b["pedals"]),
         bikeConfirmed: b["needs"] === "no" || b["status"] === "complete",
         apparelStatus: String(a["status"] ?? "not_started"),
+        jerseyStyle: str(a["jerseyStyle"]),
+        jerseySize: str(a["jerseySize"]),
         completion: Math.round((statuses.filter((s) => s === "complete").length / 4) * 100),
         raised: member ? num(member["raised"]) : null,
         goal: member ? num(member["fundraising_goal"]) || num(member["personal_goal"]) : null,
@@ -156,6 +161,19 @@ export const listRiderProgress = createServerFn({ method: "GET" })
         allTimeRaised: member ? num(member["all_time_raised"]) : null,
         updatedAt: r.updated_at,
         submittedAt: r.submitted_at,
+        pelotoniaName: member ? str(member["name"]) : null,
+        subPeloton: member ? str(member["team_name"]) : null,
+        rideRoute: member ? str(member["route_names"]) : null,
+        rideType: member ? str(member["ride_type"]) : null,
+        registrationTypes: member ? jsonList(member["registration_types"]) : [],
+        tags: member ? jsonList(member["tags"]) : [],
+        isCaptain: !!member && flag(member["is_captain"]),
+        isChallenger: !!member && flag(member["is_challenger"]),
+        isRiderOnPelotonia: !!member && flag(member["is_rider"]),
+        isVolunteerOnPelotonia: !!member && flag(member["is_volunteer"]),
+        isSurvivor: !!member && flag(member["is_cancer_survivor"]),
+        highRoller: !!member && flag(member["committed_high_roller"]),
+        personalGoal: member ? num(member["personal_goal"]) || null : null,
       };
     });
   });
