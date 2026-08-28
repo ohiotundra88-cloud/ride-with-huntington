@@ -498,7 +498,10 @@ function Timeline() {
 
 
 function TimelineEntry({ item }: { item: EditableTimelineItem }) {
+  const editing = useEditing();
+  const { setTimeline } = useJourneyEdits();
   const [open, setOpen] = useState(item.state === "current");
+  useEffect(() => { if (editing) setOpen(true); }, [editing]);
   const dot = item.state === "completed" ? "bg-[var(--brand)] text-[var(--brand-foreground)]"
     : item.state === "current" ? "bg-[var(--brand-dark)] text-white ring-4 ring-[var(--brand)]/30"
     : "bg-muted text-muted-foreground";
@@ -511,10 +514,13 @@ function TimelineEntry({ item }: { item: EditableTimelineItem }) {
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div className="min-w-0">
             <p className={`font-semibold ${item.state === "completed" ? "text-muted-foreground line-through" : "text-[var(--brand-dark)]"}`}>
-              {item.title}
+              <InlineEditText editing={editing} value={item.title} onCommit={(v) => setTimeline(item.id, { title: v })} placeholder="Timeline title" />
             </p>
-            {item.time && (
-              <p className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" /> {item.time}</p>
+            {(item.time || editing) && (
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                <InlineEditText editing={editing} value={item.time ?? ""} onCommit={(v) => setTimeline(item.id, { time: v })} placeholder="Add time" />
+              </p>
             )}
           </div>
           <div className="flex items-center gap-2">
@@ -528,11 +534,30 @@ function TimelineEntry({ item }: { item: EditableTimelineItem }) {
         </div>
         <CollapsibleContent>
           <div className="mt-2 rounded-md border bg-muted/30 p-3 text-sm space-y-1.5">
-            {item.location && <p className="flex items-center gap-1.5 text-muted-foreground"><MapPin className="h-3.5 w-3.5" /> {item.location}</p>}
-            {item.instructions && <p>{item.instructions}</p>}
-            {item.note && <p className="text-xs text-muted-foreground">Note: {item.note}</p>}
-            {item.contact && <p className="text-xs text-muted-foreground">Contact: {item.contact}</p>}
-            {item.ctaLabel && (
+            {(item.location || editing) && (
+              <p className="flex items-center gap-1.5 text-muted-foreground">
+                <MapPin className="h-3.5 w-3.5" />
+                <InlineEditText editing={editing} value={item.location ?? ""} onCommit={(v) => setTimeline(item.id, { location: v })} placeholder="Add location" />
+              </p>
+            )}
+            {(item.instructions || editing) && (
+              <InlineEditText as="div" multiline editing={editing} value={item.instructions ?? ""} onCommit={(v) => setTimeline(item.id, { instructions: v })} placeholder="Add instructions" />
+            )}
+            {(item.note || editing) && (
+              <p className="text-xs text-muted-foreground">
+                Note: <InlineEditText editing={editing} value={item.note ?? ""} onCommit={(v) => setTimeline(item.id, { note: v })} placeholder="Add note" />
+              </p>
+            )}
+            {(item.contact || editing) && (
+              <p className="text-xs text-muted-foreground">
+                Contact: <InlineEditText editing={editing} value={item.contact ?? ""} onCommit={(v) => setTimeline(item.id, { contact: v })} placeholder="Add contact" />
+              </p>
+            )}
+            {editing ? (
+              <p className="text-xs text-muted-foreground">
+                Button: <InlineEditText editing value={item.ctaLabel ?? ""} onCommit={(v) => setTimeline(item.id, { ctaLabel: v })} placeholder="Add button label" />
+              </p>
+            ) : item.ctaLabel ? (
               item.action === "concierge" ? (
                 <Button size="sm" variant="outline" onClick={openConcierge} className="mt-1">
                   <MessageSquare className="mr-1 h-3.5 w-3.5" /> {item.ctaLabel}
@@ -542,9 +567,10 @@ function TimelineEntry({ item }: { item: EditableTimelineItem }) {
                   <Link to={item.href}>{item.ctaLabel}</Link>
                 </Button>
               ) : null
-            )}
+            ) : null}
           </div>
         </CollapsibleContent>
+
       </Collapsible>
     </li>
   );
