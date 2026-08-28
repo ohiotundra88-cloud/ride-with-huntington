@@ -124,12 +124,23 @@ function RiderProgressPage() {
   const allowed = !!access.data?.allowed;
   const canEditRiderId = (access.data?.roles ?? []).includes("superuser");
 
-  const { data: rows = [], isLoading, error } = useQuery<RiderProgressRow[]>({
+  const { data: rawRows = [], isLoading, error } = useQuery<RiderProgressRow[]>({
     queryKey: ["rider-progress"],
     queryFn: () => listRiderProgress(),
     enabled: allowed,
     staleTime: 5 * 60_000,
   });
+
+  // Older cached payloads can miss the list fields; normalize so spreads/joins are always safe.
+  const rows = useMemo<RiderProgressRow[]>(
+    () =>
+      (rawRows ?? []).map((r) => ({
+        ...r,
+        tags: Array.isArray(r.tags) ? r.tags : [],
+        registrationTypes: Array.isArray(r.registrationTypes) ? r.registrationTypes : [],
+      })),
+    [rawRows],
+  );
 
   const [q, setQ] = useState("");
   const [participation, setParticipation] = useState("all");
