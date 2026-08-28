@@ -397,7 +397,7 @@ function RiderProgressPage() {
                               ...(r.isChallenger ? ["Challenger"] : []),
                               ...(r.isSurvivor ? ["Survivor"] : []),
                               ...(r.highRoller ? ["High roller"] : []),
-                              ...r.tags,
+                              ...(r.tags ?? []),
                             ].map((t) => (
                               <Badge key={t} variant="outline" className="text-[10px] font-normal">
                                 {t}
