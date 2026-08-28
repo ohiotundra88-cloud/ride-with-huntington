@@ -140,3 +140,49 @@ export const listRiderProgress = createServerFn({ method: "GET" })
       };
     });
   });
+
+/**
+ * Super-user-only correction of a participant's Pelotonia rider/public ID.
+ * Role is verified server-side against user_roles before any write.
+ */
+export const updateRiderId = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { userId: string; riderId: string }) => {
+    const userId = String(input?.userId ?? "").trim();
+    const riderId = String(input?.riderId ?? "").trim();
+    if (!userId) throw new Error("A participant is required.");
+    if (riderId && !/^[A-Za-z0-9-]{2,32}$/.test(riderId)) {
+      throw new Error("Rider ID may only contain letters, numbers and dashes.");
+    }
+    return { userId, riderId };
+  })
+  .handler(async ({ data, context }): Promise<{ riderId: string | null }> => {
+    const { data: roleRows } = await context.supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId);
+    const roles = (roleRows ?? []).map((r: { role: string }) => String(r.role));
+    if (!roles.includes("superuser")) {
+      throw new Error("Only super users can change a rider ID.");
+    }
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row, error: readError } = await supabaseAdmin
+      .from("participants")
+      .select("pelotonia")
+      .eq("user_id", data.userId)
+      .maybeSingle();
+    if (readError) throw new Error(readError.message);
+    if (!row) throw new Error("Participant not found.");
+
+    const pelotonia = { ...((row.pelotonia ?? {}) as Record<string, unknown>) };
+    pelotonia["confirmation"] = data.riderId || "";
+
+    const { error } = await supabaseAdmin
+      .from("participants")
+      .update({ pelotonia })
+      .eq("user_id", data.userId);
+    if (error) throw new Error(error.message);
+
+    return { riderId: data.riderId || null };
+  });
