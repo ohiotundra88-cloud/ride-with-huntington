@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type Context, type ReactNode } from "react";
 import { supabaseBrowser as supabase } from "@/integrations/supabase/proxy-client";
 import { upsertMyParticipant, getMyParticipant } from "@/lib/participants.functions";
 
@@ -225,7 +225,11 @@ interface StoreCtx {
 
 }
 
-const Ctx = createContext<StoreCtx | null>(null);
+// Reuse one context instance across hot-module reloads so a re-evaluated
+// module never leaves consumers reading a different context than the mounted
+// provider ("useStore must be used within StoreProvider").
+const g = globalThis as unknown as { __appStoreCtx?: Context<StoreCtx | null> };
+const Ctx = (g.__appStoreCtx ??= createContext<StoreCtx | null>(null));
 const REG_KEY = "hh_reg_v2";
 
 function loadRegistrationFromStorage(): Registration | null {
