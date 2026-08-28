@@ -553,18 +553,58 @@ function QuickAction({ icon: Icon, label, to, onClick, copyKey, onEdit }: {
   return <Link to={to!} className="rounded-lg">{inner}</Link>;
 }
 
+/**
+ * Presentation-only overlay: reflect the participant's registration answers on
+ * timeline steps so they aren't told to do things they opted out of.
+ */
+function mergeTimelineWithRegistration(
+  items: EditableTimelineItem[],
+  reg: Registration
+): EditableTimelineItem[] {
+  const isRider = reg.participation === "rider" || reg.participation === "both";
+  const bikeTitle = /bike/i;
+  return items.map((item) => {
+    if (!bikeTitle.test(item.title)) return item;
+    if (reg.participation && !isRider) {
+      return {
+        ...item,
+        state: "completed",
+        time: "Not applicable",
+        instructions: "You're registered as a Volunteer — no bike needed.",
+        note: undefined,
+        location: undefined,
+      };
+    }
+    if (reg.bike.needs === "no") {
+      return {
+        ...item,
+        title: "Bring your own bike",
+        state: "completed",
+        time: "Confirmed",
+        instructions: "You're using your own bike — no rental to reserve. Optional free inspections run Friday at packet pickup.",
+        note: undefined,
+        location: undefined,
+        ctaLabel: "Update bike plan",
+      };
+    }
+    return item;
+  });
+}
+
 function Timeline() {
   const { state } = useAdmin();
+  const { registration } = useStore();
   const editing = useEditing();
   const { copy, setCopy } = useJourneyEdits();
   const byPhase = useMemo(() => {
     const g: Record<string, EditableTimelineItem[]> = {};
-    state.timeline
+    mergeTimelineWithRegistration(state.timeline, registration)
       .filter((t) => t.publish === "published")
       .sort((a, b) => a.order - b.order)
       .forEach((i) => { (g[i.phase] ||= []).push(i); });
     return g;
-  }, [state.timeline]);
+  }, [state.timeline, registration]);
+
   return (
     <Card>
       <CardHeader>
