@@ -138,7 +138,7 @@ export const getRiderFundraising = createServerFn({ method: "GET" })
         name: String(row["name"] ?? ""),
         raised: num(row["raised"]),
         goal: num(row["fundraising_goal"]) || num(row["personal_goal"]),
-        committed: num(row["committed_amount"]) || num(row["commitment_amount"]),
+        committed: num(row["commitment_amount"]) || num(row["committed_amount"]),
         allTimeRaised: num(row["all_time_raised"]),
         teamName: String(row["team_name"] ?? ""),
         isHighRoller: num(row["committed_high_roller"]) === 1,

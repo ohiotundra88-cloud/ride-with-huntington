@@ -367,8 +367,9 @@ function MyFundraisingCard({ riderId }: { riderId: string }) {
     );
   }
 
-  const goal = data.goal || data.committed;
-  const pct = goal > 0 ? Math.min(100, Math.round((data.raised / goal) * 100)) : 0;
+  const commitment = data.committed || data.goal;
+  const pct = commitment > 0 ? Math.min(100, Math.round((data.raised / commitment) * 100)) : 0;
+  const showGoal = data.goal > 0 && data.goal !== commitment;
 
   return (
     <Card>
