@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -10,14 +10,54 @@ import { useStore, type Registration } from "@/lib/store";
 import {
   ArrowRight, CalendarClock, CheckCircle2, ChevronDown, Clock,
   DollarSign, ListChecks, MessageSquare, MapPin, Users, CalendarDays,
-  Lock as LockIcon,
+  Lock as LockIcon, Pencil, Check, RotateCcw,
 } from "lucide-react";
 import { openConcierge } from "@/components/Concierge";
 import { RIDE_WEEKEND_DATE, timelineSections, type ReadinessStatus } from "@/lib/mock-data";
-import { useAdmin, readinessScore, type EditableReadinessItem, type EditableTimelineItem } from "@/lib/admin-store";
+import { useAdmin, readinessScore, journeyCopyDefaults, type EditableReadinessItem, type EditableTimelineItem } from "@/lib/admin-store";
 import { AdminIcon } from "@/components/AdminIcon";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { ApiManagedField } from "@/components/ApiManagedField";
+import { InlineEditText } from "@/components/InlineEditText";
+import { toast } from "sonner";
+
+/** True when the signed-in Super User has switched on inline text editing. */
+const EditCtx = createContext(false);
+const useEditing = () => useContext(EditCtx);
+
+/** Hooks for committing inline edits back into the admin store. */
+function useJourneyEdits() {
+  const { state, setState, audit } = useAdmin();
+  return {
+    copy: { ...journeyCopyDefaults, ...state.journeyCopy },
+    setCopy: (key: string, value: string) => {
+      setState((s) => ({ ...s, journeyCopy: { ...s.journeyCopy, [key]: value } }));
+      audit({ action: "update", entity: "Journey copy", entityId: key, detail: value });
+    },
+    setReadiness: (id: string, patch: Partial<EditableReadinessItem>) => {
+      setState((s) => ({
+        ...s,
+        readiness: s.readiness.map((r) => (r.id === id ? { ...r, ...patch, updatedAt: new Date().toISOString() } : r)),
+      }));
+      audit({ action: "update", entity: "Readiness", entityId: id, detail: Object.keys(patch).join(", ") });
+    },
+    setTimeline: (id: string, patch: Partial<EditableTimelineItem>) => {
+      setState((s) => ({
+        ...s,
+        timeline: s.timeline.map((t) => (t.id === id ? { ...t, ...patch, updatedAt: new Date().toISOString() } : t)),
+      }));
+      audit({ action: "update", entity: "Timeline", entityId: id, detail: Object.keys(patch).join(", ") });
+    },
+    setFamilySection: (id: string, patch: { title?: string; body?: string }) => {
+      setState((s) => ({
+        ...s,
+        family: { ...s.family, sections: s.family.sections.map((x) => (x.id === id ? { ...x, ...patch } : x)) },
+      }));
+      audit({ action: "update", entity: "Family section", entityId: id, detail: Object.keys(patch).join(", ") });
+    },
+  };
+}
+
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
