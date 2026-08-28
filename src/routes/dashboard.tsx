@@ -371,12 +371,13 @@ function RiderView({ readiness }: { readiness: EditableReadinessItem[] }) {
 
       {state.flags.dashboardQuickActions && (
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          <QuickAction icon={ArrowRight} label="Continue My Journey" to="/register" />
-          {state.flags.packingList && <QuickAction icon={ListChecks} label="View Packing List" to="/packing" />}
-          {state.flags.familyMode && <QuickAction icon={Users} label="Family Guide" to="/family" />}
-          {state.flags.concierge && <QuickAction icon={MessageSquare} label="Ask the Concierge" onClick={openConcierge} />}
-          <QuickAction icon={CalendarDays} label="View Team Events" to="/team" />
-          {state.flags.fundraisingProgress && <QuickAction icon={DollarSign} label="Fundraising Resources" to="/team" />}
+          <QuickAction icon={ArrowRight} copyKey="qaContinue" label={copy.qaContinue} onEdit={setCopy} to="/register" />
+          {state.flags.packingList && <QuickAction icon={ListChecks} copyKey="qaPacking" label={copy.qaPacking} onEdit={setCopy} to="/packing" />}
+          {state.flags.familyMode && <QuickAction icon={Users} copyKey="qaFamily" label={copy.qaFamily} onEdit={setCopy} to="/family" />}
+          {state.flags.concierge && <QuickAction icon={MessageSquare} copyKey="qaConcierge" label={copy.qaConcierge} onEdit={setCopy} onClick={openConcierge} />}
+          <QuickAction icon={CalendarDays} copyKey="qaEvents" label={copy.qaEvents} onEdit={setCopy} to="/team" />
+          {state.flags.fundraisingProgress && <QuickAction icon={DollarSign} copyKey="qaFundraising" label={copy.qaFundraising} onEdit={setCopy} to="/team" />}
+
         </div>
       )}
 
