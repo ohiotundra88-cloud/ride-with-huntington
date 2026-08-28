@@ -68,6 +68,19 @@ export const getRiderProgressAccess = createServerFn({ method: "GET" })
 
 const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : null);
 const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
+/** Pelotonia sends tags / registration types as JSON-encoded strings. */
+const jsonList = (v: unknown): string[] => {
+  if (Array.isArray(v)) return v.map((x) => String(x)).filter(Boolean);
+  const raw = typeof v === "string" ? v.trim() : "";
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.map((x) => String(x)).filter(Boolean) : [raw];
+  } catch {
+    return raw.split(/\s*[,;|]\s*/).filter(Boolean);
+  }
+};
+const flag = (v: unknown) => v === true || v === 1 || v === "1" || v === "true";
 
 /**
  * Roster-wide readiness snapshot (registration, travel/hotel, bike, apparel)
