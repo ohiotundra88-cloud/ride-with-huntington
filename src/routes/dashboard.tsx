@@ -382,7 +382,8 @@ function MyFundraisingCard({ riderId }: { riderId: string }) {
             <p className="mt-1 text-3xl font-black text-[var(--brand-dark)]">{usd(data.raised)}</p>
             <p className="mt-1 text-xs text-muted-foreground">
               Rider ID {data.publicId}
-              {goal > 0 && <> · {pct}% of {usd(goal)} commitment</>}
+              {commitment > 0 && <> · {pct}% of {usd(commitment)} commitment</>}
+              {showGoal && <> · goal {usd(data.goal)}</>}
               {data.teamName && <> · {data.teamName.replace(/^Team Huntington Bank\s*-\s*/, "")}</>}
             </p>
           </div>
@@ -391,7 +392,7 @@ function MyFundraisingCard({ riderId }: { riderId: string }) {
             <div className="text-base font-bold text-[var(--brand-dark)]">{usd(data.allTimeRaised)}</div>
           </div>
         </div>
-        {goal > 0 && (
+        {commitment > 0 && (
           <div className="mt-4">
             <Progress value={pct} className="h-2.5 [&>div]:bg-[var(--brand)]" aria-label={`Fundraising ${pct}%`} />
           </div>
