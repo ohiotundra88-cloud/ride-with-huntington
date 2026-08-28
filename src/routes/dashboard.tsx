@@ -306,6 +306,96 @@ function DashboardPage() {
   );
 }
 
+const usd = (n: number) =>
+  n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+
+/**
+ * Individual fundraising progress, pulled live from Pelotonia using the
+ * participant's public/rider ID captured during registration.
+ */
+function MyFundraisingCard({ riderId }: { riderId: string }) {
+  const fetchRider = useServerFn(getRiderFundraising);
+  const id = (riderId ?? "").trim();
+  const { data, isLoading } = useQuery({
+    queryKey: ["rider-fundraising", id],
+    queryFn: () => fetchRider({ data: { publicId: id } }),
+    enabled: id.length > 0,
+    staleTime: 5 * 60_000,
+  });
+
+  if (!id) {
+    return (
+      <Card>
+        <CardContent className="flex flex-wrap items-center justify-between gap-3 p-5">
+          <div>
+            <h3 className="font-bold text-[var(--brand-dark)]">My fundraising</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Add your Pelotonia public/rider ID to see your live fundraising total here.
+            </p>
+          </div>
+          <Button asChild size="sm" variant="outline">
+            <Link to="/register" search={{ step: "B" }}>Add rider ID</Link>
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="p-5 text-sm text-muted-foreground">Loading your fundraising total…</CardContent>
+      </Card>
+    );
+  }
+
+  if (!data) {
+    return (
+      <Card>
+        <CardContent className="p-5">
+          <h3 className="font-bold text-[var(--brand-dark)]">My fundraising</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            We couldn't find rider ID <span className="font-semibold">{id}</span> on the Team Huntington roster yet.
+            It can take a day or two after registration to appear.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const goal = data.goal || data.committed;
+  const pct = goal > 0 ? Math.min(100, Math.round((data.raised / goal) * 100)) : 0;
+
+  return (
+    <Card>
+      <CardContent className="p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground">
+              <DollarSign className="h-3.5 w-3.5" /> My fundraising · live
+            </div>
+            <p className="mt-1 text-3xl font-black text-[var(--brand-dark)]">{usd(data.raised)}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Rider ID {data.publicId}
+              {goal > 0 && <> · {pct}% of {usd(goal)} commitment</>}
+              {data.teamName && <> · {data.teamName.replace(/^Team Huntington Bank\s*-\s*/, "")}</>}
+            </p>
+          </div>
+          <div className="text-right text-xs text-muted-foreground">
+            <div>All-time raised</div>
+            <div className="text-base font-bold text-[var(--brand-dark)]">{usd(data.allTimeRaised)}</div>
+          </div>
+        </div>
+        {goal > 0 && (
+          <div className="mt-4">
+            <Progress value={pct} className="h-2.5 [&>div]:bg-[var(--brand)]" aria-label={`Fundraising ${pct}%`} />
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 
 function RiderView({ readiness }: { readiness: EditableReadinessItem[] }) {
   const { state, isApiManaged } = useAdmin();
