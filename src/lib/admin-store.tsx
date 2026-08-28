@@ -607,7 +607,7 @@ interface AdminCtx {
 // HMR update re-evaluates this module, creating a fresh context that consumers
 // read while the mounted provider still uses the old one — which surfaced as
 // "useAdmin must be used inside AdminStoreProvider" with a blank screen.
-const g = globalThis as unknown as { __adminStoreCtx?: React.Context<AdminCtx | null> };
+const g = globalThis as unknown as { __adminStoreCtx?: Context<AdminCtx | null> };
 const Ctx = (g.__adminStoreCtx ??= createContext<AdminCtx | null>(null));
 
 
