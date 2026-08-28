@@ -117,7 +117,7 @@ function RiderIdCell({ row, canEdit }: { row: RiderProgressRow; canEdit: boolean
   );
 }
 
-type SortKey = "name" | "completion" | "raised";
+type SortKey = "name" | "completion" | "raised" | "subPeloton";
 
 function RiderProgressPage() {
   const access = useQuery({ queryKey: ["rider-progress-access"], queryFn: () => getRiderProgressAccess(), retry: false });
@@ -134,13 +134,27 @@ function RiderProgressPage() {
   const [q, setQ] = useState("");
   const [participation, setParticipation] = useState("all");
   const [status, setStatus] = useState("all");
+  const [peloton, setPeloton] = useState("all");
+  const [route, setRoute] = useState("all");
   const [sort, setSort] = useState<SortKey>("name");
+
+  const pelotonOptions = useMemo(
+    () => Array.from(new Set(rows.map((r) => r.subPeloton).filter((v): v is string => !!v))).sort(),
+    [rows],
+  );
+  const routeOptions = useMemo(
+    () => Array.from(new Set(rows.map((r) => r.rideRoute).filter((v): v is string => !!v))).sort(),
+    [rows],
+  );
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
     const out = rows.filter((r) => {
-      if (needle && ![r.name, r.email, r.riderId ?? ""].some((v) => v.toLowerCase().includes(needle))) return false;
+      const haystack = [r.name, r.email, r.riderId ?? "", r.subPeloton ?? "", r.rideRoute ?? "", ...r.tags];
+      if (needle && !haystack.some((v) => v.toLowerCase().includes(needle))) return false;
       if (participation !== "all" && r.participation !== participation) return false;
+      if (peloton !== "all" && r.subPeloton !== peloton) return false;
+      if (route !== "all" && r.rideRoute !== route) return false;
       if (status === "registered" && !r.registeredWithPelotonia) return false;
       if (status === "not_registered" && r.registeredWithPelotonia) return false;
       if (status === "no_hotel" && r.hotelBooked) return false;
@@ -151,9 +165,10 @@ function RiderProgressPage() {
     return out.sort((a, b) => {
       if (sort === "completion") return b.completion - a.completion;
       if (sort === "raised") return (b.raised ?? -1) - (a.raised ?? -1);
+      if (sort === "subPeloton") return (a.subPeloton ?? "zzz").localeCompare(b.subPeloton ?? "zzz");
       return a.name.localeCompare(b.name);
     });
-  }, [rows, q, participation, status, sort]);
+  }, [rows, q, participation, status, peloton, route, sort]);
 
   const totals = useMemo(
     () => ({
@@ -168,19 +183,29 @@ function RiderProgressPage() {
 
   const exportCsv = () => {
     const headers = [
-      "Name", "Email", "Participation", "Rider ID", "Registered with Pelotonia", "Registration step",
+      "Name", "Email", "Participation", "Rider ID", "Pelotonia name", "Sub-peloton / team",
+      "Route", "Ride type", "Registration types", "Tags", "Captain", "Challenger",
+      "Rider (Pelotonia)", "Volunteer (Pelotonia)", "Survivor", "High roller",
+      "Registered with Pelotonia", "Registration step",
       "Travel step", "Travel needs", "Hotel booked", "Hotel", "Hotel check-in", "Hotel check-out",
-      "Bike step", "Bike plan", "Bike confirmed", "Apparel step", "Completion %",
-      "Raised", "Fundraising goal", "Committed", "All-time raised", "Submitted", "Last updated",
+      "Bike step", "Bike plan", "Bike type", "Bike size", "Pedals", "Bike confirmed",
+      "Apparel step", "Jersey style", "Jersey size", "Completion %",
+      "Raised", "Fundraising goal", "Personal goal", "Committed", "All-time raised", "Submitted", "Last updated",
     ];
     const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const yn = (v: boolean) => (v ? "Yes" : "No");
     const lines = filtered.map((r) =>
       [
-        r.name, r.email, r.participation ?? "", r.riderId ?? "", r.registeredWithPelotonia ? "Yes" : "No",
-        label(r.pelotoniaStatus), label(r.travelStatus), r.travelNeeds ?? "", r.hotelBooked ? "Yes" : "No",
+        r.name, r.email, r.participation ?? "", r.riderId ?? "", r.pelotoniaName ?? "", r.subPeloton ?? "",
+        r.rideRoute ?? "", r.rideType ?? "", r.registrationTypes.join("; "), r.tags.join("; "),
+        yn(r.isCaptain), yn(r.isChallenger), yn(r.isRiderOnPelotonia), yn(r.isVolunteerOnPelotonia),
+        yn(r.isSurvivor), yn(r.highRoller),
+        yn(r.registeredWithPelotonia),
+        label(r.pelotoniaStatus), label(r.travelStatus), r.travelNeeds ?? "", yn(r.hotelBooked),
         r.hotelName ?? "", r.hotelCheckIn ?? "", r.hotelCheckOut ?? "", label(r.bikeStatus), r.bikePlan ?? "",
-        r.bikeConfirmed ? "Yes" : "No", label(r.apparelStatus), r.completion,
-        r.raised ?? "", r.goal ?? "", r.committed ?? "", r.allTimeRaised ?? "",
+        r.bikeType ?? "", r.bikeSize ?? "", r.pedals ?? "", yn(r.bikeConfirmed),
+        label(r.apparelStatus), r.jerseyStyle ?? "", r.jerseySize ?? "", r.completion,
+        r.raised ?? "", r.goal ?? "", r.personalGoal ?? "", r.committed ?? "", r.allTimeRaised ?? "",
         r.submittedAt ?? "", r.updatedAt,
       ].map(esc).join(","),
     );
@@ -281,10 +306,33 @@ function RiderProgressPage() {
                   <SelectItem value="no_fundraising">No funds raised</SelectItem>
                 </SelectContent>
               </Select>
+              {pelotonOptions.length > 0 && (
+                <Select value={peloton} onValueChange={setPeloton}>
+                  <SelectTrigger className="w-52"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All sub-pelotons</SelectItem>
+                    {pelotonOptions.map((p) => (
+                      <SelectItem key={p} value={p}>{p}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+              {routeOptions.length > 0 && (
+                <Select value={route} onValueChange={setRoute}>
+                  <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All routes</SelectItem>
+                    {routeOptions.map((p) => (
+                      <SelectItem key={p} value={p}>{p}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
               <Select value={sort} onValueChange={(v) => setSort(v as SortKey)}>
                 <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="name">Sort: Name</SelectItem>
+                  <SelectItem value="subPeloton">Sort: Sub-peloton</SelectItem>
                   <SelectItem value="completion">Sort: Completion</SelectItem>
                   <SelectItem value="raised">Sort: Raised</SelectItem>
                 </SelectContent>
@@ -310,6 +358,9 @@ function RiderProgressPage() {
                     <TableRow>
                       <TableHead>Name</TableHead>
                       <TableHead>Role</TableHead>
+                      <TableHead>Sub-peloton</TableHead>
+                      <TableHead>Ride</TableHead>
+                      <TableHead>Tags</TableHead>
                       <TableHead>Registered</TableHead>
                       <TableHead>Hotel</TableHead>
                       <TableHead>Bike</TableHead>
@@ -328,6 +379,32 @@ function RiderProgressPage() {
                           <RiderIdCell row={r} canEdit={canEditRiderId} />
                         </TableCell>
                         <TableCell className="capitalize">{r.participation ?? "—"}</TableCell>
+                        <TableCell className="max-w-[14rem]">
+                          <span className="text-xs text-muted-foreground">{r.subPeloton ?? "—"}</span>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-xs text-muted-foreground">
+                            {r.rideRoute || r.rideType || r.registrationTypes.join(", ") || "—"}
+                          </div>
+                          {r.rideRoute && r.rideType && (
+                            <div className="text-[11px] text-muted-foreground/80">{r.rideType}</div>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex max-w-[16rem] flex-wrap gap-1">
+                            {[
+                              ...(r.isCaptain ? ["Captain"] : []),
+                              ...(r.isChallenger ? ["Challenger"] : []),
+                              ...(r.isSurvivor ? ["Survivor"] : []),
+                              ...(r.highRoller ? ["High roller"] : []),
+                              ...r.tags,
+                            ].map((t) => (
+                              <Badge key={t} variant="outline" className="text-[10px] font-normal">
+                                {t}
+                              </Badge>
+                            ))}
+                          </div>
+                        </TableCell>
                         <TableCell><YesNo value={r.registeredWithPelotonia} /></TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
@@ -338,10 +415,19 @@ function RiderProgressPage() {
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <YesNo value={r.bikeConfirmed} />
-                            <span className="text-xs text-muted-foreground">{r.bikePlan ?? ""}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {[r.bikePlan, r.bikeType, r.bikeSize && `Size ${r.bikeSize}`].filter(Boolean).join(" · ")}
+                            </span>
                           </div>
                         </TableCell>
-                        <TableCell><StatusBadge status={r.apparelStatus} /></TableCell>
+                        <TableCell>
+                          <StatusBadge status={r.apparelStatus} />
+                          {(r.jerseyStyle || r.jerseySize) && (
+                            <div className="mt-1 text-[11px] text-muted-foreground">
+                              {[r.jerseyStyle?.replace("-", " "), r.jerseySize].filter(Boolean).join(" · ")}
+                            </div>
+                          )}
+                        </TableCell>
                         <TableCell className="text-right">{money(r.raised)}</TableCell>
                         <TableCell className="text-right">{money(r.goal)}</TableCell>
                         <TableCell className="text-right">{r.completion}%</TableCell>
