@@ -180,7 +180,7 @@ export const updateRiderId = createServerFn({ method: "POST" })
 
     const { error } = await supabaseAdmin
       .from("participants")
-      .update({ pelotonia })
+      .update({ pelotonia: pelotonia as never })
       .eq("user_id", data.userId);
     if (error) throw new Error(error.message);
 
