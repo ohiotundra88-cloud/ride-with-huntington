@@ -123,7 +123,8 @@ const REGISTER_STEP_BY_CARD: Record<string, "A" | "B" | "C" | "D" | "E" | "F" | 
  */
 function mergeReadinessWithRegistration(
   items: EditableReadinessItem[],
-  reg: Registration
+  reg: Registration,
+  fundraising?: { raised: number; committed: number; goal: number } | null
 ): EditableReadinessItem[] {
   const participation = reg.participation;
   const isRider = participation === "rider" || participation === "both";
