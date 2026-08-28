@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
 import { AppNav } from "@/components/AppNav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,10 +10,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Download, Search, ShieldAlert, Check, X, Loader2 } from "lucide-react";
+import { Download, Search, ShieldAlert, Check, X, Loader2, Pencil } from "lucide-react";
 import {
   getRiderProgressAccess,
   listRiderProgress,
+  updateRiderId,
   type RiderProgressRow,
 } from "@/lib/rider-progress.functions";
 
@@ -53,11 +56,73 @@ function YesNo({ value }: { value: boolean }) {
   );
 }
 
+function RiderIdCell({ row, canEdit }: { row: RiderProgressRow; canEdit: boolean }) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(row.riderId ?? "");
+  const queryClient = useQueryClient();
+  const save = useServerFn(updateRiderId);
+
+  const mutation = useMutation({
+    mutationFn: (riderId: string) => save({ data: { userId: row.userId, riderId } }),
+    onSuccess: () => {
+      toast.success("Rider ID updated");
+      setEditing(false);
+      queryClient.invalidateQueries({ queryKey: ["rider-progress"] });
+    },
+    onError: (e: unknown) => toast.error((e as Error).message || "Could not update rider ID"),
+  });
+
+  if (!canEdit) {
+    return row.riderId ? <div className="text-xs text-muted-foreground">ID {row.riderId}</div> : null;
+  }
+
+  if (!editing) {
+    return (
+      <button
+        type="button"
+        onClick={() => {
+          setValue(row.riderId ?? "");
+          setEditing(true);
+        }}
+        className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-[var(--brand-dark)]"
+      >
+        <Pencil className="h-3 w-3" />
+        {row.riderId ? `ID ${row.riderId}` : "Add rider ID"}
+      </button>
+    );
+  }
+
+  return (
+    <div className="mt-1 flex items-center gap-1">
+      <Input
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        placeholder="Rider ID"
+        className="h-7 w-28 text-xs"
+        aria-label={`Rider ID for ${row.name}`}
+        autoFocus
+      />
+      <Button
+        size="sm"
+        className="h-7 px-2"
+        disabled={mutation.isPending}
+        onClick={() => mutation.mutate(value.trim())}
+      >
+        {mutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : "Save"}
+      </Button>
+      <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => setEditing(false)}>
+        Cancel
+      </Button>
+    </div>
+  );
+}
+
 type SortKey = "name" | "completion" | "raised";
 
 function RiderProgressPage() {
   const access = useQuery({ queryKey: ["rider-progress-access"], queryFn: () => getRiderProgressAccess(), retry: false });
   const allowed = !!access.data?.allowed;
+  const canEditRiderId = (access.data?.roles ?? []).includes("superuser");
 
   const { data: rows = [], isLoading, error } = useQuery<RiderProgressRow[]>({
     queryKey: ["rider-progress"],
@@ -260,7 +325,7 @@ function RiderProgressPage() {
                         <TableCell>
                           <div className="font-medium text-[var(--brand-dark)]">{r.name}</div>
                           <div className="text-xs text-muted-foreground">{r.email}</div>
-                          {r.riderId && <div className="text-xs text-muted-foreground">ID {r.riderId}</div>}
+                          <RiderIdCell row={r} canEdit={canEditRiderId} />
                         </TableCell>
                         <TableCell className="capitalize">{r.participation ?? "—"}</TableCell>
                         <TableCell><YesNo value={r.registeredWithPelotonia} /></TableCell>
