@@ -410,60 +410,60 @@ function RiderView({ readiness }: { readiness: EditableReadinessItem[] }) {
     <>
       {state.flags.dashboardReadiness && (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {readiness.map((r) => {
-            const s = statusStyles[r.status];
-            const managed = isApiManaged(`readiness.${r.id}.status`) || isApiManaged(`readiness.${r.id}.current`);
-            const CardInner = (
-              <Card className="h-full hover:shadow-md transition-shadow">
-                <CardContent className="p-5">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="grid h-10 w-10 place-items-center rounded-lg bg-[var(--brand)]/15 text-[var(--brand-dark)]">
-                      <AdminIcon name={r.icon} className="h-5 w-5" />
-                    </div>
-                    <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${s.className}`}>
-                      {s.label}
-                    </span>
-                  </div>
-                  <h3 className="mt-4 font-bold text-[var(--brand-dark)]">
-                    <InlineEditText editing={editing} value={r.title} onCommit={(v) => setReadiness(r.id, { title: v })} placeholder="Card title" />
-                  </h3>
-                  <div className="mt-1 text-sm text-muted-foreground">
-                    <InlineEditText as="div" multiline editing={editing} value={r.detail} onCommit={(v) => setReadiness(r.id, { detail: v })} placeholder="Card description" />
-                  </div>
-                  {r.progressGoal && r.progressCurrent !== undefined && (
-                    <div className="mt-3">
-                      <Progress value={Math.round((r.progressCurrent / r.progressGoal) * 100)} className="h-2 [&>div]:bg-[var(--brand)]" />
-                    </div>
-                  )}
-                  <div className="mt-4 flex items-center justify-between gap-2">
-                    <span className="inline-flex items-center text-sm font-semibold text-[var(--brand-dark)]">
-                      <InlineEditText editing={editing} value={r.ctaLabel} onCommit={(v) => setReadiness(r.id, { ctaLabel: v })} placeholder="Link label" />
-                      <ArrowRight className="ml-1 h-3.5 w-3.5" />
-                    </span>
-
-                    {managed && (
-                      <span className="inline-flex items-center gap-1 rounded-full border border-[var(--brand-dark)]/20 bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--brand-dark)]/80" title={`Synced from ${managed.source}`}>
-                        <LockIcon className="h-3 w-3" /> Synced
+          {readiness
+            .filter((r) => r.action !== "fundraising")
+            .map((r) => {
+              const s = statusStyles[r.status];
+              const managed = isApiManaged(`readiness.${r.id}.status`) || isApiManaged(`readiness.${r.id}.current`);
+              const CardInner = (
+                <Card className="h-full hover:shadow-md transition-shadow">
+                  <CardContent className="p-5">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="grid h-10 w-10 place-items-center rounded-lg bg-[var(--brand)]/15 text-[var(--brand-dark)]">
+                        <AdminIcon name={r.icon} className="h-5 w-5" />
+                      </div>
+                      <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${s.className}`}>
+                        {s.label}
                       </span>
+                    </div>
+                    <h3 className="mt-4 font-bold text-[var(--brand-dark)]">
+                      <InlineEditText editing={editing} value={r.title} onCommit={(v) => setReadiness(r.id, { title: v })} placeholder="Card title" />
+                    </h3>
+                    <div className="mt-1 text-sm text-muted-foreground">
+                      <InlineEditText as="div" multiline editing={editing} value={r.detail} onCommit={(v) => setReadiness(r.id, { detail: v })} placeholder="Card description" />
+                    </div>
+                    {r.progressGoal && r.progressCurrent !== undefined && (
+                      <div className="mt-3">
+                        <Progress value={Math.round((r.progressCurrent / r.progressGoal) * 100)} className="h-2 [&>div]:bg-[var(--brand)]" />
+                      </div>
                     )}
-                  </div>
-                </CardContent>
-              </Card>
-            );
-            const wizardStep = REGISTER_STEP_BY_CARD[r.id];
-            const wrap = (inner: React.ReactNode) =>
-              r.action === "concierge" ? (
-                <button key={r.id} type="button" onClick={openConcierge} className="text-left rounded-lg">{inner}</button>
-              ) : r.action === "fundraising" ? (
-                <Link key={r.id} to="/team" className="rounded-lg">{inner}</Link>
-              ) : wizardStep && (r.href ?? "/register").startsWith("/register") ? (
-                <Link key={r.id} to="/register" search={{ step: wizardStep }} className="rounded-lg">{inner}</Link>
-              ) : (
-                <Link key={r.id} to={r.href ?? "/dashboard"} className="rounded-lg">{inner}</Link>
-              );
+                    <div className="mt-4 flex items-center justify-between gap-2">
+                      <span className="inline-flex items-center text-sm font-semibold text-[var(--brand-dark)]">
+                        <InlineEditText editing={editing} value={r.ctaLabel} onCommit={(v) => setReadiness(r.id, { ctaLabel: v })} placeholder="Link label" />
+                        <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                      </span>
 
-            return wrap(CardInner);
-          })}
+                      {managed && (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-[var(--brand-dark)]/20 bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--brand-dark)]/80" title={`Synced from ${managed.source}`}>
+                          <LockIcon className="h-3 w-3" /> Synced
+                        </span>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+              const wizardStep = REGISTER_STEP_BY_CARD[r.id];
+              const wrap = (inner: React.ReactNode) =>
+                r.action === "concierge" ? (
+                  <button key={r.id} type="button" onClick={openConcierge} className="text-left rounded-lg">{inner}</button>
+                ) : wizardStep && (r.href ?? "/register").startsWith("/register") ? (
+                  <Link key={r.id} to="/register" search={{ step: wizardStep }} className="rounded-lg">{inner}</Link>
+                ) : (
+                  <Link key={r.id} to={r.href ?? "/dashboard"} className="rounded-lg">{inner}</Link>
+                );
+
+              return wrap(CardInner);
+            })}
         </div>
       )}
 
