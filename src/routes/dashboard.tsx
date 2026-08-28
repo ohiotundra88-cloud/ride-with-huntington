@@ -192,10 +192,13 @@ function mergeReadinessWithRegistration(
 
 function DashboardPage() {
   const { user, registration } = useStore();
-  const { state } = useAdmin();
+  const { state, resetSection, setState } = useAdmin();
+  const { copy, setCopy } = useJourneyEdits();
   const [view, setView] = useState<"rider" | "family">("rider");
+  const [editing, setEditing] = useState(false);
   const cd = useCountdown(RIDE_WEEKEND_DATE);
   const firstName = user.name.split(" ")[0];
+  const canEdit = user.isSuperUser;
 
   const merged = useMemo(
     () => mergeReadinessWithRegistration(state.readiness, registration),
@@ -207,53 +210,98 @@ function DashboardPage() {
   );
   const score = useMemo(() => readinessScore(merged), [merged]);
 
-
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 space-y-6">
-      <AnnouncementBanner />
+    <EditCtx.Provider value={canEdit && editing}>
+      <div className="mx-auto max-w-6xl px-4 py-8 space-y-6">
+        <AnnouncementBanner />
 
-      <Card className="overflow-hidden border-0 bg-gradient-to-br from-[var(--brand-dark)] to-[var(--brand-dark)]/85 text-white">
-        <CardContent className="p-6 sm:p-8">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="min-w-0 flex-1">
-              <p className="text-xs uppercase tracking-wider text-white/60">Your Ride Weekend Command Center</p>
-              <h1 className="mt-1 text-3xl sm:text-4xl font-black">{greeting()}, {firstName}</h1>
-              <p className="mt-2 text-white/85 text-base sm:text-lg">
-                You're <span className="font-bold text-[var(--brand)]">{score}%</span> ready for Ride Weekend.
-              </p>
-              <div className="mt-4 max-w-md">
-                <Progress value={score} className="h-2.5 bg-white/10 [&>div]:bg-[var(--brand)]" aria-label={`Readiness ${score}%`} />
-              </div>
-            </div>
-            <div className="rounded-xl bg-white/10 px-4 py-3 ring-1 ring-white/15">
-              <div className="flex items-center gap-2 text-white/70 text-xs uppercase tracking-wider">
-                <CalendarClock className="h-3.5 w-3.5" /> Countdown
-              </div>
-              <p className="mt-1 text-2xl sm:text-3xl font-black">
-                {cd.past ? "Ride day!" : <>{cd.days}<span className="text-base font-semibold text-white/70"> d </span>{cd.hours}<span className="text-base font-semibold text-white/70"> h</span></>}
-              </p>
-              <p className="mt-1 text-[10px] uppercase tracking-wide text-white/60">Sat Aug 7, 2027 · demo date</p>
+        {canEdit && (
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-dashed border-[var(--brand)]/60 bg-[var(--brand)]/5 px-4 py-3">
+            <p className="text-sm text-muted-foreground">
+              {editing
+                ? "Edit mode on — click any highlighted text to change it. Changes save as you go."
+                : "Super User: you can edit the text on this page."}
+            </p>
+            <div className="flex gap-2">
+              {editing && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    resetSection("readiness");
+                    resetSection("timeline");
+                    setState((s) => ({ ...s, journeyCopy: { ...journeyCopyDefaults } }));
+                    toast.success("Journey text reset to defaults");
+                  }}
+                >
+                  <RotateCcw className="mr-1 h-3.5 w-3.5" /> Reset text
+                </Button>
+              )}
+              <Button
+                size="sm"
+                variant={editing ? "default" : "outline"}
+                className={editing ? "bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90" : ""}
+                onClick={() => { setEditing((v) => !v); if (editing) toast.success("Edits saved"); }}
+              >
+                {editing ? <><Check className="mr-1 h-3.5 w-3.5" /> Done editing</> : <><Pencil className="mr-1 h-3.5 w-3.5" /> Edit text</>}
+              </Button>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        )}
 
-      {state.flags.familyMode && (
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <Tabs value={view} onValueChange={(v) => setView(v as "rider" | "family")}>
-            <TabsList>
-              <TabsTrigger value="rider">Rider View</TabsTrigger>
-              <TabsTrigger value="family">Family View</TabsTrigger>
-            </TabsList>
-          </Tabs>
-          <p className="text-xs text-muted-foreground">Switch views without losing your place — sample content.</p>
-        </div>
-      )}
+        <Card className="overflow-hidden border-0 bg-gradient-to-br from-[var(--brand-dark)] to-[var(--brand-dark)]/85 text-white">
+          <CardContent className="p-6 sm:p-8">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <p className="text-xs uppercase tracking-wider text-white/60">
+                  <InlineEditText editing={canEdit && editing} value={copy.heroEyebrow} onCommit={(v) => setCopy("heroEyebrow", v)} />
+                </p>
+                <h1 className="mt-1 text-3xl sm:text-4xl font-black">{greeting()}, {firstName}</h1>
+                <p className="mt-2 text-white/85 text-base sm:text-lg">
+                  <InlineEditText editing={canEdit && editing} value={copy.heroReadyPrefix} onCommit={(v) => setCopy("heroReadyPrefix", v)} />{" "}
+                  <span className="font-bold text-[var(--brand)]">{score}%</span>{" "}
+                  <InlineEditText editing={canEdit && editing} value={copy.heroReadySuffix} onCommit={(v) => setCopy("heroReadySuffix", v)} />
+                </p>
+                <div className="mt-4 max-w-md">
+                  <Progress value={score} className="h-2.5 bg-white/10 [&>div]:bg-[var(--brand)]" aria-label={`Readiness ${score}%`} />
+                </div>
+              </div>
+              <div className="rounded-xl bg-white/10 px-4 py-3 ring-1 ring-white/15">
+                <div className="flex items-center gap-2 text-white/70 text-xs uppercase tracking-wider">
+                  <CalendarClock className="h-3.5 w-3.5" />
+                  <InlineEditText editing={canEdit && editing} value={copy.countdownLabel} onCommit={(v) => setCopy("countdownLabel", v)} />
+                </div>
+                <p className="mt-1 text-2xl sm:text-3xl font-black">
+                  {cd.past ? "Ride day!" : <>{cd.days}<span className="text-base font-semibold text-white/70"> d </span>{cd.hours}<span className="text-base font-semibold text-white/70"> h</span></>}
+                </p>
+                <p className="mt-1 text-[10px] uppercase tracking-wide text-white/60">
+                  <InlineEditText editing={canEdit && editing} value={copy.countdownCaption} onCommit={(v) => setCopy("countdownCaption", v)} />
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-      {view === "rider" || !state.flags.familyMode ? <RiderView readiness={readiness} /> : <FamilyView />}
-    </div>
+        {state.flags.familyMode && (
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <Tabs value={view} onValueChange={(v) => setView(v as "rider" | "family")}>
+              <TabsList>
+                <TabsTrigger value="rider">Rider View</TabsTrigger>
+                <TabsTrigger value="family">Family View</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <p className="text-xs text-muted-foreground">
+              <InlineEditText editing={canEdit && editing} value={copy.viewSwitchNote} onCommit={(v) => setCopy("viewSwitchNote", v)} />
+            </p>
+          </div>
+        )}
+
+        {view === "rider" || !state.flags.familyMode ? <RiderView readiness={readiness} /> : <FamilyView />}
+      </div>
+    </EditCtx.Provider>
   );
 }
+
 
 function RiderView({ readiness }: { readiness: EditableReadinessItem[] }) {
   const { state, isApiManaged } = useAdmin();
