@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -10,14 +10,54 @@ import { useStore, type Registration } from "@/lib/store";
 import {
   ArrowRight, CalendarClock, CheckCircle2, ChevronDown, Clock,
   DollarSign, ListChecks, MessageSquare, MapPin, Users, CalendarDays,
-  Lock as LockIcon,
+  Lock as LockIcon, Pencil, Check, RotateCcw,
 } from "lucide-react";
 import { openConcierge } from "@/components/Concierge";
 import { RIDE_WEEKEND_DATE, timelineSections, type ReadinessStatus } from "@/lib/mock-data";
-import { useAdmin, readinessScore, type EditableReadinessItem, type EditableTimelineItem } from "@/lib/admin-store";
+import { useAdmin, readinessScore, journeyCopyDefaults, type EditableReadinessItem, type EditableTimelineItem } from "@/lib/admin-store";
 import { AdminIcon } from "@/components/AdminIcon";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { ApiManagedField } from "@/components/ApiManagedField";
+import { InlineEditText } from "@/components/InlineEditText";
+import { toast } from "sonner";
+
+/** True when the signed-in Super User has switched on inline text editing. */
+const EditCtx = createContext(false);
+const useEditing = () => useContext(EditCtx);
+
+/** Hooks for committing inline edits back into the admin store. */
+function useJourneyEdits() {
+  const { state, setState, audit } = useAdmin();
+  return {
+    copy: { ...journeyCopyDefaults, ...state.journeyCopy },
+    setCopy: (key: string, value: string) => {
+      setState((s) => ({ ...s, journeyCopy: { ...s.journeyCopy, [key]: value } }));
+      audit({ action: "update", entity: "Journey copy", entityId: key, detail: value });
+    },
+    setReadiness: (id: string, patch: Partial<EditableReadinessItem>) => {
+      setState((s) => ({
+        ...s,
+        readiness: s.readiness.map((r) => (r.id === id ? { ...r, ...patch, updatedAt: new Date().toISOString() } : r)),
+      }));
+      audit({ action: "update", entity: "Readiness", entityId: id, detail: Object.keys(patch).join(", ") });
+    },
+    setTimeline: (id: string, patch: Partial<EditableTimelineItem>) => {
+      setState((s) => ({
+        ...s,
+        timeline: s.timeline.map((t) => (t.id === id ? { ...t, ...patch, updatedAt: new Date().toISOString() } : t)),
+      }));
+      audit({ action: "update", entity: "Timeline", entityId: id, detail: Object.keys(patch).join(", ") });
+    },
+    setFamilySection: (id: string, patch: { title?: string; body?: string }) => {
+      setState((s) => ({
+        ...s,
+        family: { ...s.family, sections: s.family.sections.map((x) => (x.id === id ? { ...x, ...patch } : x)) },
+      }));
+      audit({ action: "update", entity: "Family section", entityId: id, detail: Object.keys(patch).join(", ") });
+    },
+  };
+}
+
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -152,10 +192,13 @@ function mergeReadinessWithRegistration(
 
 function DashboardPage() {
   const { user, registration } = useStore();
-  const { state } = useAdmin();
+  const { state, resetSection, setState } = useAdmin();
+  const { copy, setCopy } = useJourneyEdits();
   const [view, setView] = useState<"rider" | "family">("rider");
+  const [editing, setEditing] = useState(false);
   const cd = useCountdown(RIDE_WEEKEND_DATE);
   const firstName = user.name.split(" ")[0];
+  const canEdit = user.isSuperUser;
 
   const merged = useMemo(
     () => mergeReadinessWithRegistration(state.readiness, registration),
@@ -167,56 +210,104 @@ function DashboardPage() {
   );
   const score = useMemo(() => readinessScore(merged), [merged]);
 
-
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 space-y-6">
-      <AnnouncementBanner />
+    <EditCtx.Provider value={canEdit && editing}>
+      <div className="mx-auto max-w-6xl px-4 py-8 space-y-6">
+        <AnnouncementBanner />
 
-      <Card className="overflow-hidden border-0 bg-gradient-to-br from-[var(--brand-dark)] to-[var(--brand-dark)]/85 text-white">
-        <CardContent className="p-6 sm:p-8">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="min-w-0 flex-1">
-              <p className="text-xs uppercase tracking-wider text-white/60">Your Ride Weekend Command Center</p>
-              <h1 className="mt-1 text-3xl sm:text-4xl font-black">{greeting()}, {firstName}</h1>
-              <p className="mt-2 text-white/85 text-base sm:text-lg">
-                You're <span className="font-bold text-[var(--brand)]">{score}%</span> ready for Ride Weekend.
-              </p>
-              <div className="mt-4 max-w-md">
-                <Progress value={score} className="h-2.5 bg-white/10 [&>div]:bg-[var(--brand)]" aria-label={`Readiness ${score}%`} />
-              </div>
-            </div>
-            <div className="rounded-xl bg-white/10 px-4 py-3 ring-1 ring-white/15">
-              <div className="flex items-center gap-2 text-white/70 text-xs uppercase tracking-wider">
-                <CalendarClock className="h-3.5 w-3.5" /> Countdown
-              </div>
-              <p className="mt-1 text-2xl sm:text-3xl font-black">
-                {cd.past ? "Ride day!" : <>{cd.days}<span className="text-base font-semibold text-white/70"> d </span>{cd.hours}<span className="text-base font-semibold text-white/70"> h</span></>}
-              </p>
-              <p className="mt-1 text-[10px] uppercase tracking-wide text-white/60">Sat Aug 7, 2027 · demo date</p>
+        {canEdit && (
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-dashed border-[var(--brand)]/60 bg-[var(--brand)]/5 px-4 py-3">
+            <p className="text-sm text-muted-foreground">
+              {editing
+                ? "Edit mode on — click any highlighted text to change it. Changes save as you go."
+                : "Super User: you can edit the text on this page."}
+            </p>
+            <div className="flex gap-2">
+              {editing && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    resetSection("readiness");
+                    resetSection("timeline");
+                    setState((s) => ({ ...s, journeyCopy: { ...journeyCopyDefaults } }));
+                    toast.success("Journey text reset to defaults");
+                  }}
+                >
+                  <RotateCcw className="mr-1 h-3.5 w-3.5" /> Reset text
+                </Button>
+              )}
+              <Button
+                size="sm"
+                variant={editing ? "default" : "outline"}
+                className={editing ? "bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90" : ""}
+                onClick={() => { setEditing((v) => !v); if (editing) toast.success("Edits saved"); }}
+              >
+                {editing ? <><Check className="mr-1 h-3.5 w-3.5" /> Done editing</> : <><Pencil className="mr-1 h-3.5 w-3.5" /> Edit text</>}
+              </Button>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        )}
 
-      {state.flags.familyMode && (
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <Tabs value={view} onValueChange={(v) => setView(v as "rider" | "family")}>
-            <TabsList>
-              <TabsTrigger value="rider">Rider View</TabsTrigger>
-              <TabsTrigger value="family">Family View</TabsTrigger>
-            </TabsList>
-          </Tabs>
-          <p className="text-xs text-muted-foreground">Switch views without losing your place — sample content.</p>
-        </div>
-      )}
+        <Card className="overflow-hidden border-0 bg-gradient-to-br from-[var(--brand-dark)] to-[var(--brand-dark)]/85 text-white">
+          <CardContent className="p-6 sm:p-8">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <p className="text-xs uppercase tracking-wider text-white/60">
+                  <InlineEditText editing={canEdit && editing} value={copy.heroEyebrow} onCommit={(v) => setCopy("heroEyebrow", v)} />
+                </p>
+                <h1 className="mt-1 text-3xl sm:text-4xl font-black">{greeting()}, {firstName}</h1>
+                <p className="mt-2 text-white/85 text-base sm:text-lg">
+                  <InlineEditText editing={canEdit && editing} value={copy.heroReadyPrefix} onCommit={(v) => setCopy("heroReadyPrefix", v)} />{" "}
+                  <span className="font-bold text-[var(--brand)]">{score}%</span>{" "}
+                  <InlineEditText editing={canEdit && editing} value={copy.heroReadySuffix} onCommit={(v) => setCopy("heroReadySuffix", v)} />
+                </p>
+                <div className="mt-4 max-w-md">
+                  <Progress value={score} className="h-2.5 bg-white/10 [&>div]:bg-[var(--brand)]" aria-label={`Readiness ${score}%`} />
+                </div>
+              </div>
+              <div className="rounded-xl bg-white/10 px-4 py-3 ring-1 ring-white/15">
+                <div className="flex items-center gap-2 text-white/70 text-xs uppercase tracking-wider">
+                  <CalendarClock className="h-3.5 w-3.5" />
+                  <InlineEditText editing={canEdit && editing} value={copy.countdownLabel} onCommit={(v) => setCopy("countdownLabel", v)} />
+                </div>
+                <p className="mt-1 text-2xl sm:text-3xl font-black">
+                  {cd.past ? "Ride day!" : <>{cd.days}<span className="text-base font-semibold text-white/70"> d </span>{cd.hours}<span className="text-base font-semibold text-white/70"> h</span></>}
+                </p>
+                <p className="mt-1 text-[10px] uppercase tracking-wide text-white/60">
+                  <InlineEditText editing={canEdit && editing} value={copy.countdownCaption} onCommit={(v) => setCopy("countdownCaption", v)} />
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-      {view === "rider" || !state.flags.familyMode ? <RiderView readiness={readiness} /> : <FamilyView />}
-    </div>
+        {state.flags.familyMode && (
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <Tabs value={view} onValueChange={(v) => setView(v as "rider" | "family")}>
+              <TabsList>
+                <TabsTrigger value="rider">Rider View</TabsTrigger>
+                <TabsTrigger value="family">Family View</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <p className="text-xs text-muted-foreground">
+              <InlineEditText editing={canEdit && editing} value={copy.viewSwitchNote} onCommit={(v) => setCopy("viewSwitchNote", v)} />
+            </p>
+          </div>
+        )}
+
+        {view === "rider" || !state.flags.familyMode ? <RiderView readiness={readiness} /> : <FamilyView />}
+      </div>
+    </EditCtx.Provider>
   );
 }
 
+
 function RiderView({ readiness }: { readiness: EditableReadinessItem[] }) {
   const { state, isApiManaged } = useAdmin();
+  const editing = useEditing();
+  const { copy, setCopy, setReadiness } = useJourneyEdits();
+
   return (
     <>
       {state.flags.dashboardReadiness && (
@@ -235,8 +326,12 @@ function RiderView({ readiness }: { readiness: EditableReadinessItem[] }) {
                       {s.label}
                     </span>
                   </div>
-                  <h3 className="mt-4 font-bold text-[var(--brand-dark)]">{r.title}</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">{r.detail}</p>
+                  <h3 className="mt-4 font-bold text-[var(--brand-dark)]">
+                    <InlineEditText editing={editing} value={r.title} onCommit={(v) => setReadiness(r.id, { title: v })} placeholder="Card title" />
+                  </h3>
+                  <div className="mt-1 text-sm text-muted-foreground">
+                    <InlineEditText as="div" multiline editing={editing} value={r.detail} onCommit={(v) => setReadiness(r.id, { detail: v })} placeholder="Card description" />
+                  </div>
                   {r.progressGoal && r.progressCurrent !== undefined && (
                     <div className="mt-3">
                       <Progress value={Math.round((r.progressCurrent / r.progressGoal) * 100)} className="h-2 [&>div]:bg-[var(--brand)]" />
@@ -244,8 +339,10 @@ function RiderView({ readiness }: { readiness: EditableReadinessItem[] }) {
                   )}
                   <div className="mt-4 flex items-center justify-between gap-2">
                     <span className="inline-flex items-center text-sm font-semibold text-[var(--brand-dark)]">
-                      {r.ctaLabel} <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                      <InlineEditText editing={editing} value={r.ctaLabel} onCommit={(v) => setReadiness(r.id, { ctaLabel: v })} placeholder="Link label" />
+                      <ArrowRight className="ml-1 h-3.5 w-3.5" />
                     </span>
+
                     {managed && (
                       <span className="inline-flex items-center gap-1 rounded-full border border-[var(--brand-dark)]/20 bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--brand-dark)]/80" title={`Synced from ${managed.source}`}>
                         <LockIcon className="h-3 w-3" /> Synced
@@ -274,12 +371,13 @@ function RiderView({ readiness }: { readiness: EditableReadinessItem[] }) {
 
       {state.flags.dashboardQuickActions && (
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          <QuickAction icon={ArrowRight} label="Continue My Journey" to="/register" />
-          {state.flags.packingList && <QuickAction icon={ListChecks} label="View Packing List" to="/packing" />}
-          {state.flags.familyMode && <QuickAction icon={Users} label="Family Guide" to="/family" />}
-          {state.flags.concierge && <QuickAction icon={MessageSquare} label="Ask the Concierge" onClick={openConcierge} />}
-          <QuickAction icon={CalendarDays} label="View Team Events" to="/team" />
-          {state.flags.fundraisingProgress && <QuickAction icon={DollarSign} label="Fundraising Resources" to="/team" />}
+          <QuickAction icon={ArrowRight} copyKey="qaContinue" label={copy.qaContinue} onEdit={setCopy} to="/register" />
+          {state.flags.packingList && <QuickAction icon={ListChecks} copyKey="qaPacking" label={copy.qaPacking} onEdit={setCopy} to="/packing" />}
+          {state.flags.familyMode && <QuickAction icon={Users} copyKey="qaFamily" label={copy.qaFamily} onEdit={setCopy} to="/family" />}
+          {state.flags.concierge && <QuickAction icon={MessageSquare} copyKey="qaConcierge" label={copy.qaConcierge} onEdit={setCopy} onClick={openConcierge} />}
+          <QuickAction icon={CalendarDays} copyKey="qaEvents" label={copy.qaEvents} onEdit={setCopy} to="/team" />
+          {state.flags.fundraisingProgress && <QuickAction icon={DollarSign} copyKey="qaFundraising" label={copy.qaFundraising} onEdit={setCopy} to="/team" />}
+
         </div>
       )}
 
@@ -290,6 +388,8 @@ function RiderView({ readiness }: { readiness: EditableReadinessItem[] }) {
 
 function FamilyView() {
   const { state } = useAdmin();
+  const editing = useEditing();
+  const { setFamilySection } = useJourneyEdits();
   const sections = state.family.sections
     .filter((s) => s.active && s.publish === "published")
     .sort((a, b) => a.order - b.order);
@@ -311,8 +411,12 @@ function FamilyView() {
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-[var(--brand-dark)] text-white">
                 <AdminIcon name={s.icon} className="h-5 w-5" />
               </div>
-              <h3 className="mt-4 font-bold text-[var(--brand-dark)]">{s.title}</h3>
-              <p className="mt-1 text-sm text-muted-foreground line-clamp-3">{s.body}</p>
+              <h3 className="mt-4 font-bold text-[var(--brand-dark)]">
+                <InlineEditText editing={editing} value={s.title} onCommit={(v) => setFamilySection(s.id, { title: v })} placeholder="Section title" />
+              </h3>
+              <div className={`mt-1 text-sm text-muted-foreground ${editing ? "" : "line-clamp-3"}`}>
+                <InlineEditText as="div" multiline editing={editing} value={s.body} onCommit={(v) => setFamilySection(s.id, { body: v })} placeholder="Section body" />
+              </div>
               <span className="mt-3 inline-flex items-center text-sm font-semibold text-[var(--brand-dark)]">
                 Open <ArrowRight className="ml-1 h-3.5 w-3.5" />
               </span>
@@ -325,13 +429,24 @@ function FamilyView() {
 }
 
 
-function QuickAction({ icon: Icon, label, to, onClick }: {
-  icon: typeof ArrowRight; label: string; to?: string; onClick?: () => void;
+function QuickAction({ icon: Icon, label, to, onClick, copyKey, onEdit }: {
+  icon: typeof ArrowRight;
+  label: string;
+  to?: string;
+  onClick?: () => void;
+  copyKey?: string;
+  onEdit?: (key: string, value: string) => void;
 }) {
+  const editing = useEditing();
   const inner = (
     <div className="flex items-center justify-between rounded-lg border bg-card px-4 py-3 hover:bg-accent transition-colors">
       <span className="flex items-center gap-2 text-sm font-semibold text-[var(--brand-dark)]">
-        <Icon className="h-4 w-4" /> {label}
+        <Icon className="h-4 w-4" />
+        {editing && copyKey && onEdit ? (
+          <InlineEditText editing value={label} onCommit={(v) => onEdit(copyKey, v)} placeholder="Button label" />
+        ) : (
+          label
+        )}
       </span>
       <ArrowRight className="h-4 w-4 text-muted-foreground" />
     </div>
@@ -342,6 +457,8 @@ function QuickAction({ icon: Icon, label, to, onClick }: {
 
 function Timeline() {
   const { state } = useAdmin();
+  const editing = useEditing();
+  const { copy, setCopy } = useJourneyEdits();
   const byPhase = useMemo(() => {
     const g: Record<string, EditableTimelineItem[]> = {};
     state.timeline
@@ -354,16 +471,20 @@ function Timeline() {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <CalendarDays className="h-5 w-5 text-[var(--brand)]" /> My Ride Weekend timeline
+          <CalendarDays className="h-5 w-5 text-[var(--brand)]" />
+          <InlineEditText editing={editing} value={copy.timelineHeading} onCommit={(v) => setCopy("timelineHeading", v)} />
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {timelineSections.map((sec) => {
           const items = byPhase[sec.phase] ?? [];
           if (items.length === 0) return null;
+          const key = `phase.${sec.phase}`;
           return (
             <div key={sec.phase}>
-              <p className="text-xs font-bold uppercase tracking-wider text-[var(--brand-dark)]/70">{sec.label}</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-[var(--brand-dark)]/70">
+                <InlineEditText editing={editing} value={copy[key] ?? sec.label} onCommit={(v) => setCopy(key, v)} />
+              </p>
               <ol className="relative mt-3 border-l-2 border-dashed border-[var(--brand)]/40 pl-6">
                 {items.map((item) => (<TimelineEntry key={item.id} item={item} />))}
               </ol>
@@ -375,8 +496,12 @@ function Timeline() {
   );
 }
 
+
 function TimelineEntry({ item }: { item: EditableTimelineItem }) {
+  const editing = useEditing();
+  const { setTimeline } = useJourneyEdits();
   const [open, setOpen] = useState(item.state === "current");
+  useEffect(() => { if (editing) setOpen(true); }, [editing]);
   const dot = item.state === "completed" ? "bg-[var(--brand)] text-[var(--brand-foreground)]"
     : item.state === "current" ? "bg-[var(--brand-dark)] text-white ring-4 ring-[var(--brand)]/30"
     : "bg-muted text-muted-foreground";
@@ -389,10 +514,13 @@ function TimelineEntry({ item }: { item: EditableTimelineItem }) {
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div className="min-w-0">
             <p className={`font-semibold ${item.state === "completed" ? "text-muted-foreground line-through" : "text-[var(--brand-dark)]"}`}>
-              {item.title}
+              <InlineEditText editing={editing} value={item.title} onCommit={(v) => setTimeline(item.id, { title: v })} placeholder="Timeline title" />
             </p>
-            {item.time && (
-              <p className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" /> {item.time}</p>
+            {(item.time || editing) && (
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                <InlineEditText editing={editing} value={item.time ?? ""} onCommit={(v) => setTimeline(item.id, { time: v })} placeholder="Add time" />
+              </p>
             )}
           </div>
           <div className="flex items-center gap-2">
@@ -406,11 +534,30 @@ function TimelineEntry({ item }: { item: EditableTimelineItem }) {
         </div>
         <CollapsibleContent>
           <div className="mt-2 rounded-md border bg-muted/30 p-3 text-sm space-y-1.5">
-            {item.location && <p className="flex items-center gap-1.5 text-muted-foreground"><MapPin className="h-3.5 w-3.5" /> {item.location}</p>}
-            {item.instructions && <p>{item.instructions}</p>}
-            {item.note && <p className="text-xs text-muted-foreground">Note: {item.note}</p>}
-            {item.contact && <p className="text-xs text-muted-foreground">Contact: {item.contact}</p>}
-            {item.ctaLabel && (
+            {(item.location || editing) && (
+              <p className="flex items-center gap-1.5 text-muted-foreground">
+                <MapPin className="h-3.5 w-3.5" />
+                <InlineEditText editing={editing} value={item.location ?? ""} onCommit={(v) => setTimeline(item.id, { location: v })} placeholder="Add location" />
+              </p>
+            )}
+            {(item.instructions || editing) && (
+              <InlineEditText as="div" multiline editing={editing} value={item.instructions ?? ""} onCommit={(v) => setTimeline(item.id, { instructions: v })} placeholder="Add instructions" />
+            )}
+            {(item.note || editing) && (
+              <p className="text-xs text-muted-foreground">
+                Note: <InlineEditText editing={editing} value={item.note ?? ""} onCommit={(v) => setTimeline(item.id, { note: v })} placeholder="Add note" />
+              </p>
+            )}
+            {(item.contact || editing) && (
+              <p className="text-xs text-muted-foreground">
+                Contact: <InlineEditText editing={editing} value={item.contact ?? ""} onCommit={(v) => setTimeline(item.id, { contact: v })} placeholder="Add contact" />
+              </p>
+            )}
+            {editing ? (
+              <p className="text-xs text-muted-foreground">
+                Button: <InlineEditText editing value={item.ctaLabel ?? ""} onCommit={(v) => setTimeline(item.id, { ctaLabel: v })} placeholder="Add button label" />
+              </p>
+            ) : item.ctaLabel ? (
               item.action === "concierge" ? (
                 <Button size="sm" variant="outline" onClick={openConcierge} className="mt-1">
                   <MessageSquare className="mr-1 h-3.5 w-3.5" /> {item.ctaLabel}
@@ -420,9 +567,10 @@ function TimelineEntry({ item }: { item: EditableTimelineItem }) {
                   <Link to={item.href}>{item.ctaLabel}</Link>
                 </Button>
               ) : null
-            )}
+            ) : null}
           </div>
         </CollapsibleContent>
+
       </Collapsible>
     </li>
   );

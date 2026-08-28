@@ -266,7 +266,26 @@ export interface AdminState {
   };
   apiManaged: APIManagedField[];
   audit: AuditEntry[];
+  /** Static copy on the My Journey page, editable by a Super User. */
+  journeyCopy: Record<string, string>;
 }
+
+export const journeyCopyDefaults: Record<string, string> = {
+  heroEyebrow: "Your Ride Weekend Command Center",
+  heroReadyPrefix: "You're",
+  heroReadySuffix: "ready for Ride Weekend.",
+  countdownLabel: "Countdown",
+  countdownCaption: "Sat Aug 7, 2027 · demo date",
+  viewSwitchNote: "Switch views without losing your place — sample content.",
+  timelineHeading: "My Ride Weekend timeline",
+  qaContinue: "Continue My Journey",
+  qaPacking: "View Packing List",
+  qaFamily: "Family Guide",
+  qaConcierge: "Ask the Concierge",
+  qaEvents: "View Team Events",
+  qaFundraising: "Fundraising Resources",
+};
+
 
 // ============ SEED ============
 
@@ -543,7 +562,9 @@ function initialState(): AdminState {
     },
     apiManaged: apiManagedSeed,
     audit: [],
+    journeyCopy: { ...journeyCopyDefaults },
   };
+
 }
 
 // ============ PERSISTENCE ============
@@ -557,7 +578,13 @@ function load(): AdminState {
     if (!raw) return initialState();
     const parsed = JSON.parse(raw) as Partial<AdminState>;
     const base = initialState();
-    return { ...base, ...parsed, superUser: { ...base.superUser, ...parsed.superUser } };
+    return {
+      ...base,
+      ...parsed,
+      superUser: { ...base.superUser, ...parsed.superUser },
+      journeyCopy: { ...journeyCopyDefaults, ...(parsed.journeyCopy ?? {}) },
+    };
+
   } catch {
     return initialState();
   }
