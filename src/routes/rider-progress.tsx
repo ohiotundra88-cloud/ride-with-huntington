@@ -358,6 +358,9 @@ function RiderProgressPage() {
                     <TableRow>
                       <TableHead>Name</TableHead>
                       <TableHead>Role</TableHead>
+                      <TableHead>Sub-peloton</TableHead>
+                      <TableHead>Ride</TableHead>
+                      <TableHead>Tags</TableHead>
                       <TableHead>Registered</TableHead>
                       <TableHead>Hotel</TableHead>
                       <TableHead>Bike</TableHead>
@@ -376,6 +379,32 @@ function RiderProgressPage() {
                           <RiderIdCell row={r} canEdit={canEditRiderId} />
                         </TableCell>
                         <TableCell className="capitalize">{r.participation ?? "—"}</TableCell>
+                        <TableCell className="max-w-[14rem]">
+                          <span className="text-xs text-muted-foreground">{r.subPeloton ?? "—"}</span>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-xs text-muted-foreground">
+                            {r.rideRoute || r.rideType || r.registrationTypes.join(", ") || "—"}
+                          </div>
+                          {r.rideRoute && r.rideType && (
+                            <div className="text-[11px] text-muted-foreground/80">{r.rideType}</div>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex max-w-[16rem] flex-wrap gap-1">
+                            {[
+                              ...(r.isCaptain ? ["Captain"] : []),
+                              ...(r.isChallenger ? ["Challenger"] : []),
+                              ...(r.isSurvivor ? ["Survivor"] : []),
+                              ...(r.highRoller ? ["High roller"] : []),
+                              ...r.tags,
+                            ].map((t) => (
+                              <Badge key={t} variant="outline" className="text-[10px] font-normal">
+                                {t}
+                              </Badge>
+                            ))}
+                          </div>
+                        </TableCell>
                         <TableCell><YesNo value={r.registeredWithPelotonia} /></TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
@@ -386,10 +415,19 @@ function RiderProgressPage() {
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <YesNo value={r.bikeConfirmed} />
-                            <span className="text-xs text-muted-foreground">{r.bikePlan ?? ""}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {[r.bikePlan, r.bikeType, r.bikeSize && `Size ${r.bikeSize}`].filter(Boolean).join(" · ")}
+                            </span>
                           </div>
                         </TableCell>
-                        <TableCell><StatusBadge status={r.apparelStatus} /></TableCell>
+                        <TableCell>
+                          <StatusBadge status={r.apparelStatus} />
+                          {(r.jerseyStyle || r.jerseySize) && (
+                            <div className="mt-1 text-[11px] text-muted-foreground">
+                              {[r.jerseyStyle?.replace("-", " "), r.jerseySize].filter(Boolean).join(" · ")}
+                            </div>
+                          )}
+                        </TableCell>
                         <TableCell className="text-right">{money(r.raised)}</TableCell>
                         <TableCell className="text-right">{money(r.goal)}</TableCell>
                         <TableCell className="text-right">{r.completion}%</TableCell>
