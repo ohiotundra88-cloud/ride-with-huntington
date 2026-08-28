@@ -305,6 +305,9 @@ function DashboardPage() {
 
 function RiderView({ readiness }: { readiness: EditableReadinessItem[] }) {
   const { state, isApiManaged } = useAdmin();
+  const editing = useEditing();
+  const { copy, setCopy, setReadiness } = useJourneyEdits();
+
   return (
     <>
       {state.flags.dashboardReadiness && (
