@@ -117,7 +117,7 @@ function RiderIdCell({ row, canEdit }: { row: RiderProgressRow; canEdit: boolean
   );
 }
 
-type SortKey = "name" | "completion" | "raised";
+type SortKey = "name" | "completion" | "raised" | "subPeloton";
 
 function RiderProgressPage() {
   const access = useQuery({ queryKey: ["rider-progress-access"], queryFn: () => getRiderProgressAccess(), retry: false });
@@ -134,13 +134,27 @@ function RiderProgressPage() {
   const [q, setQ] = useState("");
   const [participation, setParticipation] = useState("all");
   const [status, setStatus] = useState("all");
+  const [peloton, setPeloton] = useState("all");
+  const [route, setRoute] = useState("all");
   const [sort, setSort] = useState<SortKey>("name");
+
+  const pelotonOptions = useMemo(
+    () => Array.from(new Set(rows.map((r) => r.subPeloton).filter((v): v is string => !!v))).sort(),
+    [rows],
+  );
+  const routeOptions = useMemo(
+    () => Array.from(new Set(rows.map((r) => r.rideRoute).filter((v): v is string => !!v))).sort(),
+    [rows],
+  );
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
     const out = rows.filter((r) => {
-      if (needle && ![r.name, r.email, r.riderId ?? ""].some((v) => v.toLowerCase().includes(needle))) return false;
+      const haystack = [r.name, r.email, r.riderId ?? "", r.subPeloton ?? "", r.rideRoute ?? "", ...r.tags];
+      if (needle && !haystack.some((v) => v.toLowerCase().includes(needle))) return false;
       if (participation !== "all" && r.participation !== participation) return false;
+      if (peloton !== "all" && r.subPeloton !== peloton) return false;
+      if (route !== "all" && r.rideRoute !== route) return false;
       if (status === "registered" && !r.registeredWithPelotonia) return false;
       if (status === "not_registered" && r.registeredWithPelotonia) return false;
       if (status === "no_hotel" && r.hotelBooked) return false;
@@ -151,9 +165,10 @@ function RiderProgressPage() {
     return out.sort((a, b) => {
       if (sort === "completion") return b.completion - a.completion;
       if (sort === "raised") return (b.raised ?? -1) - (a.raised ?? -1);
+      if (sort === "subPeloton") return (a.subPeloton ?? "zzz").localeCompare(b.subPeloton ?? "zzz");
       return a.name.localeCompare(b.name);
     });
-  }, [rows, q, participation, status, sort]);
+  }, [rows, q, participation, status, peloton, route, sort]);
 
   const totals = useMemo(
     () => ({
