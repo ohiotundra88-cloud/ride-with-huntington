@@ -367,8 +367,9 @@ function MyFundraisingCard({ riderId }: { riderId: string }) {
     );
   }
 
-  const goal = data.goal || data.committed;
-  const pct = goal > 0 ? Math.min(100, Math.round((data.raised / goal) * 100)) : 0;
+  const commitment = data.committed || data.goal;
+  const pct = commitment > 0 ? Math.min(100, Math.round((data.raised / commitment) * 100)) : 0;
+  const showGoal = data.goal > 0 && data.goal !== commitment;
 
   return (
     <Card>
@@ -381,7 +382,8 @@ function MyFundraisingCard({ riderId }: { riderId: string }) {
             <p className="mt-1 text-3xl font-black text-[var(--brand-dark)]">{usd(data.raised)}</p>
             <p className="mt-1 text-xs text-muted-foreground">
               Rider ID {data.publicId}
-              {goal > 0 && <> · {pct}% of {usd(goal)} commitment</>}
+              {commitment > 0 && <> · {pct}% of {usd(commitment)} commitment</>}
+              {showGoal && <> · goal {usd(data.goal)}</>}
               {data.teamName && <> · {data.teamName.replace(/^Team Huntington Bank\s*-\s*/, "")}</>}
             </p>
           </div>
@@ -390,7 +392,7 @@ function MyFundraisingCard({ riderId }: { riderId: string }) {
             <div className="text-base font-bold text-[var(--brand-dark)]">{usd(data.allTimeRaised)}</div>
           </div>
         </div>
-        {goal > 0 && (
+        {commitment > 0 && (
           <div className="mt-4">
             <Progress value={pct} className="h-2.5 [&>div]:bg-[var(--brand)]" aria-label={`Fundraising ${pct}%`} />
           </div>
