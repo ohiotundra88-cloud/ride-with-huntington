@@ -282,6 +282,10 @@ function DashboardPage() {
           </CardContent>
         </Card>
 
+        <MyFundraisingCard riderId={registration.pelotonia.confirmation} />
+
+
+
         {state.flags.familyMode && (
           <div className="flex flex-wrap items-center justify-between gap-3">
             <Tabs value={view} onValueChange={(v) => setView(v as "rider" | "family")}>
