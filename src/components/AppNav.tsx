@@ -94,8 +94,16 @@ export function AppNav() {
     riderProgress: !!riderProgress?.allowed,
     messaging: !!messaging?.allowed,
   };
+  // Signed-out visitors only see genuinely public destinations.
+  const PUBLIC_TO = ["/family", "/fundraisers"];
+  const visibleTop = ctx.signedIn ? topLinks : topLinks.filter((l) => l.to === "/");
   const visibleGroups = groups
-    .map((g) => ({ ...g, items: g.items.filter((i) => !i.show || i.show(ctx)) }))
+    .map((g) => ({
+      ...g,
+      items: g.items.filter(
+        (i) => (!i.show || i.show(ctx)) && (ctx.signedIn || PUBLIC_TO.includes(i.to)),
+      ),
+    }))
     .filter((g) => g.items.length > 0);
 
 
