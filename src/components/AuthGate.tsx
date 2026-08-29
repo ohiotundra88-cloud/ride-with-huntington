@@ -47,7 +47,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
       </p>
       <div className="mt-6 flex flex-wrap justify-center gap-2">
         <Button asChild className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90">
-          <Link to="/signin" search={{ redirect: pathname }}>Sign in</Link>
+          <Link to="/signin">Sign in</Link>
         </Button>
         <Button asChild variant="outline"><Link to="/family">Family &amp; Spectator Guide</Link></Button>
       </div>
