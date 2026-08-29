@@ -1,29 +1,43 @@
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { Bell, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useAdmin } from "@/lib/admin-store";
+import { useStore } from "@/lib/store";
+import { listMyMessages, updateMyMessageState } from "@/lib/messages.functions";
 
 export function NotificationCenter() {
-  const { state, setState } = useAdmin();
-  const items = useMemo(
-    () => state.notifications.filter((n) => n.publish === "published"),
-    [state.notifications]
-  );
+  const { user } = useStore();
+  const qc = useQueryClient();
   const [open, setOpen] = useState(false);
-  const unread = useMemo(() => items.filter((i) => !i.read).length, [items]);
 
-  const markOne = (id: string) =>
-    setState((s) => ({
-      ...s,
-      notifications: s.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)),
-    }));
-  const markAll = () =>
-    setState((s) => ({
-      ...s,
-      notifications: s.notifications.map((n) => ({ ...n, read: true })),
-    }));
+  const { data = [] } = useQuery({
+    queryKey: ["my-messages"],
+    queryFn: () => listMyMessages(),
+    enabled: user.signedIn,
+    retry: false,
+    staleTime: 60_000,
+    refetchInterval: 5 * 60_000,
+  });
+
+  const items = useMemo(() => data.filter((m) => !m.dismissedAt).slice(0, 20), [data]);
+  const unread = useMemo(() => items.filter((m) => !m.readAt).length, [items]);
+
+  const updateState = useServerFn(updateMyMessageState);
+  const mark = useMutation({
+    mutationFn: (id: string) => updateState({ data: { id, read: true } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["my-messages"] }),
+  });
+  const markAll = useMutation({
+    mutationFn: async () => {
+      for (const m of items.filter((i) => !i.readAt)) {
+        await updateState({ data: { id: m.id, read: true } });
+      }
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["my-messages"] }),
+  });
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -51,8 +65,8 @@ export function NotificationCenter() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={markAll}
-            disabled={unread === 0}
+            onClick={() => markAll.mutate()}
+            disabled={unread === 0 || markAll.isPending}
             className="text-xs h-7"
           >
             <CheckCheck className="mr-1 h-3.5 w-3.5" /> Mark all read
@@ -65,12 +79,12 @@ export function NotificationCenter() {
           {items.map((n) => (
             <li key={n.id}>
               <Link
-                to={n.href ?? "/dashboard"}
-                onClick={() => { markOne(n.id); setOpen(false); }}
-                className={`block p-3 hover:bg-muted focus-visible:bg-muted outline-none ${n.read ? "" : "bg-[var(--brand)]/5"}`}
+                to="/inbox"
+                onClick={() => { if (!n.readAt) mark.mutate(n.id); setOpen(false); }}
+                className={`block p-3 hover:bg-muted focus-visible:bg-muted outline-none ${n.readAt ? "" : "bg-[var(--brand)]/5"}`}
               >
                 <div className="flex items-start gap-2">
-                  {!n.read && <span aria-hidden="true" className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[var(--brand)]" />}
+                  {!n.readAt && <span aria-hidden="true" className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[var(--brand)]" />}
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-foreground truncate flex items-center gap-1">
                       {n.priority === "urgent" && <span className="rounded bg-red-600 text-white text-[9px] font-bold uppercase px-1 py-0.5">Urgent</span>}
@@ -78,14 +92,19 @@ export function NotificationCenter() {
                       {n.title}
                     </p>
                     <p className="text-xs text-muted-foreground line-clamp-2">{n.body}</p>
-                    <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">{n.kind}</p>
+                    <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">{n.category}</p>
                   </div>
                 </div>
-                <span className="sr-only">{n.read ? "Read" : "Unread"}</span>
+                <span className="sr-only">{n.readAt ? "Read" : "Unread"}</span>
               </Link>
             </li>
           ))}
         </ul>
+        <div className="border-t p-2">
+          <Button asChild variant="ghost" size="sm" className="w-full text-xs" onClick={() => setOpen(false)}>
+            <Link to="/inbox">View all messages</Link>
+          </Button>
+        </div>
       </PopoverContent>
     </Popover>
   );
