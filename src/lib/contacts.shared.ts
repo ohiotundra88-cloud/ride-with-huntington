@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const CONTACT_COLUMNS =
-  "id, name, role, email, phone, department, region, category, hours, emergency, active, sort_order, updated_by_email, updated_at";
+  "id, name, role, email, phone, department, region, category, hours, emergency, internal_only, active, sort_order, updated_by_email, updated_at";
 
 export interface DirectoryContact {
   id: string;
@@ -14,6 +14,7 @@ export interface DirectoryContact {
   category: string;
   hours: string;
   emergency: boolean;
+  internal_only: boolean;
   active: boolean;
   sort_order: number;
   updated_by_email: string | null;
@@ -35,6 +36,8 @@ export const contactInputSchema = z.object({
   category: z.string().trim().max(60).default("General"),
   hours: z.string().trim().max(120).default(""),
   emergency: z.boolean().default(false),
+  /** Leadership-only rows stay out of the general team directory. */
+  internal_only: z.boolean().default(false),
   active: z.boolean().default(true),
 });
 
@@ -58,6 +61,7 @@ export function blankContactInput(): ContactInput {
     category: "General",
     hours: "Mon–Fri 9–5 ET",
     emergency: false,
+    internal_only: false,
     active: true,
   };
 }
