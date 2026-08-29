@@ -69,6 +69,7 @@ export type Database = {
           emergency: boolean
           hours: string
           id: string
+          internal_only: boolean
           name: string
           phone: string
           region: string
@@ -87,6 +88,7 @@ export type Database = {
           emergency?: boolean
           hours?: string
           id?: string
+          internal_only?: boolean
           name: string
           phone?: string
           region?: string
@@ -105,6 +107,7 @@ export type Database = {
           emergency?: boolean
           hours?: string
           id?: string
+          internal_only?: boolean
           name?: string
           phone?: string
           region?: string
