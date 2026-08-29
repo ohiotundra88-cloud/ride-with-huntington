@@ -1,61 +1,67 @@
-# Recommended Next Addition: Pelotonia Sync & Admin Data Health
+# Bulk Communications: Role- and Tag-Targeted Messaging
 
-Based on your priorities — **admin efficiency** first, with **deeper Pelotonia API sync**, serving **riders and leaders** — the highest-impact next build is an automated Pelotonia sync layer plus a data-health dashboard for captains/co-chairs.
+Give captains, co-chairs and super users a real messaging tool: compose a message once, target it by role and by individual rider tags, and deliver it in-app to exactly the right people — with a full send history.
 
-## Why this first
+## Current state
 
-Right now the app relies on manual Rider ID entry and live API calls on page load. Captains and super users spend time chasing down who has registered, who is missing a Rider ID, whether Pelotonia route/sub-peloton data matches the app, and whether fundraising totals reconcile. A sync layer turns that into a 30-second review instead of hours of spreadsheet work.
+The notification manager under Super User is demo-only: notifications live in browser state (`admin-store`), so what one person composes nobody else sees, and "audience" is a single dropdown with no role or tag awareness. This plan replaces that with database-backed, targeted messaging.
 
-## What we would build
+## What gets built
 
-### 1. Pelotonia sync table + scheduled sync
-- New `pelotonia_sync` table storing the latest Pelotonia snapshot per rider (raised, goal, commitment, route, sub-peloton, registration status, last synced at).
-- Nightly/scheduled background sync via a public `/api/public/sync-pelotonia` route invoked by a Lovable Cloud cron job.
-- Server-side merge logic that matches Pelotonia riders to app participants by Rider ID and surfaces unmatched records.
+### 1. Audience targeting engine
+Build a saved-audience concept where a message targets any combination of:
 
-### 2. Admin Data Health dashboard
-- New Super User / Captain view at `/admin/data-health`.
-- Cards showing:
-  - App participants with no matching Pelotonia rider
-  - Pelotonia riders not found in the app
-  - Missing Rider IDs
-  - Fundraising total discrepancy between app and Pelotonia
-  - Riders missing hotel / bike / jersey info
-- One-click "Remind rider" or "Copy missing Rider ID" actions.
+- **Roles** — Rider, Volunteer, Captain, Co-Chair, Vendor Captain, Legal, Risk, Compliance, Marketing, Super User (multi-select, from existing roles).
+- **Rider tags** — the tags already pulled from Pelotonia and shown on Rider Progress (High Roller, Survivor, Captain, etc.), plus sub-peloton and ride route.
+- **Readiness / status filters** — no Rider ID, not registered with Pelotonia, no hotel booked, no bike reserved, below a fundraising threshold, missing shipping address.
+- **Individuals** — search and add or exclude specific people by name/email on top of the group rules.
 
-### 3. Enrichment of existing surfaces
-- Rider Progress and admin participants screens pull from the synced snapshot so they load instantly and work offline/VPN.
-- "Last synced" timestamp shown on dashboard and rider progress.
-- Auto-fill route, sub-peloton, and high-roller/survivor flags from Pelotonia where the API exposes them.
+The audience builder shows a **live recipient count and preview list** as you adjust the rules, so you know exactly who receives it before sending.
 
-### 4. Audit and controls
-- Sync log table (`pelotonia_sync_runs`) with run time, rows changed, errors.
-- Manual "Sync now" button for Super Users.
-- Toggle to pause auto-sync in `/admin/flags`.
+### 2. Compose and send
+- Title, body (rich text-lite: bold, links, line breaks), optional call-to-action button with a link into the app.
+- Priority (Info / Important / Urgent) and category (Reminder, Deadline, Event, Fundraising, General).
+- Save as draft, schedule for a future date/time, or send now.
+- Duplicate a past message to reuse its audience and copy.
 
-## Out of scope for this plan
+### 3. Delivery: in-app inbox
+- Messages are stored per recipient, so each person's notification bell shows only their messages with accurate unread counts.
+- Full message inbox page for riders, with read/unread state and CTA links.
+- Urgent messages surface as a dismissible banner on My Journey.
 
-- Real-time Pelotonia push webhooks (Pelotonia does not expose them; polling is the practical approach).
-- Stripe/live payment integration — recommended as the **next follow-up** once sync is stable.
-- Bulk email sending outside the existing notification system.
+### 4. Send history and reporting
+- Sent-messages list with audience summary, recipient count, send time, and sender.
+- Per-message read stats: how many recipients opened it, and a drill-down list of who has and has not read it.
+- CSV export of the recipient list and read status.
+
+### 5. Email delivery (important note)
+Lovable's built-in email service is intentionally limited to one-recipient, event-triggered messages and does not permit bulk sends to a list, so we cannot blast these messages out as email through the platform. Two practical options, both included:
+
+- **Copy recipients / export** — one click copies the targeted email addresses (or downloads a CSV) so you can paste them into Outlook and send from your Huntington account, keeping the same audience rules.
+- **Optional future path** — if you want true automated email later, that needs a dedicated bulk-email service (e.g. Mailchimp or a corporate mail relay); we can wire the audience engine into that as a follow-up.
+
+For now, the messaging itself is fully functional in-app, with email handled via the export handoff.
+
+## Permissions
+
+- **Captains, Co-Chairs, Super Users**: compose and send.
+- **Co-Chairs and Super Users**: send to leadership-only audiences and to all roles.
+- **Captains**: send to riders/volunteers and their own sub-peloton audiences.
+- **Everyone else**: receive only — no access to compose or to the send history.
+
+All checks are enforced server-side on every read and write, not just hidden in the UI.
 
 ## Technical notes
 
-- Uses `createServerFn` and a TanStack server route (`/api/public/sync-pelotonia`) for the cron endpoint.
-- Cron route verifies a bearer token via the generated `authenticateCronRequest` helper.
-- Adds two new `public` tables with RLS + GRANTs following the existing pattern.
-- Snapshot data is read-only for riders; leaders get the data-health view.
-- No Supabase Edge Functions; everything runs through TanStack Start server functions.
+- New tables: `messages` (content, audience rules as JSON, status, schedule, sender), `message_recipients` (resolved recipient rows with read state), and `message_audit` (append-only send log). All with RLS + grants: senders scoped by role, recipients can read only their own rows.
+- Audience resolution happens in a server function that joins `user_roles`, `profiles`, `participants` and the Pelotonia-derived rider data — the same source Rider Progress already uses — then writes resolved recipient rows at send time so history is immutable.
+- Scheduled sends run through a cron-invoked public API route with bearer verification.
+- Notification bell and message inbox read from the database instead of local state; the existing demo notification store is retired for participant-facing messages.
+- Styling reuses the existing Super User shell, cards, tables and brand tokens; the rider inbox matches My Journey.
 
 ## Success criteria
 
-- Super Users can click "Sync now" and see matched/unmatched counts within seconds.
-- Captains/Co-Chairs see the Data Health dashboard and can identify missing Rider IDs without leaving the app.
-- Rider Progress loads from the synced table and still reflects live fundraising figures (refreshed by the sync job).
-- A failed sync run is visible in the log and does not silently leave stale data.
-
-## Follow-up options after this
-
-1. **Stripe-powered mini-fundraising pages** — turn the demo fundraising module into live donation pages with receipts and payout tracking.
-2. **Bulk communications** — automated, segmented reminders to riders based on readiness gaps (no hotel, no bike, no fundraising, etc.).
-3. **Vendor CRM → donation pipeline** — link vendor spend/donations directly to fundraising totals and vendor recognition pages.
+- A captain can select "Riders + High Roller tag + no hotel booked", see the exact count, and send.
+- Each recipient sees only their own messages, with correct unread badge.
+- Sender can see who has read a message and export the list.
+- A rider with no matching role/tag never receives the message and cannot reach it by URL or API.
