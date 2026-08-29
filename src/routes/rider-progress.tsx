@@ -377,7 +377,7 @@ function RiderProgressPage() {
                       <TableHead>Bike</TableHead>
                       <TableHead>Apparel</TableHead>
                       <TableHead className="text-right">Raised</TableHead>
-                      <TableHead className="text-right">Goal</TableHead>
+                      <TableHead className="text-right">Commitment</TableHead>
                       <TableHead className="text-right">Complete</TableHead>
                     </TableRow>
                   </TableHeader>
