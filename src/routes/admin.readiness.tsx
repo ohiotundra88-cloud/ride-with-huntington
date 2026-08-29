@@ -13,7 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAdmin, readinessScore, type EditableReadinessItem, type Audience } from "@/lib/admin-store";
 import { iconOptions } from "@/components/AdminIcon";
-import { Plus, Pencil, Trash2, RotateCcw } from "lucide-react";
+import { Plus, Pencil, Trash2, RotateCcw, Scale } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/readiness")({
@@ -41,6 +41,28 @@ function ReadinessAdmin() {
 
   const score = useMemo(() => readinessScore(state.readiness), [state.readiness]);
   const totalWeight = state.readiness.filter((r) => r.active && r.publish === "published").reduce((n, r) => n + r.weight, 0);
+
+  /** Proportionally rescales active published weights so they total 100. */
+  const balanceWeights = () => {
+    const active = state.readiness.filter((r) => r.active && r.publish === "published");
+    if (!active.length) { toast.error("No active items to balance"); return; }
+    const sum = active.reduce((n, r) => n + r.weight, 0);
+    const base = sum > 0
+      ? active.map((r) => ({ id: r.id, w: (r.weight / sum) * 100 }))
+      : active.map((r) => ({ id: r.id, w: 100 / active.length }));
+    const rounded = base.map((b) => ({ id: b.id, w: Math.round(b.w) }));
+    const drift = 100 - rounded.reduce((n, r) => n + r.w, 0);
+    if (rounded.length) rounded[0].w = Math.max(0, rounded[0].w + drift);
+    const byId = new Map(rounded.map((r) => [r.id, r.w]));
+    setState((s) => ({
+      ...s,
+      readiness: s.readiness.map((r) => byId.has(r.id)
+        ? { ...r, weight: byId.get(r.id)!, updatedAt: new Date().toISOString() }
+        : r),
+    }));
+    audit({ action: "update", entity: "Readiness", detail: "Balanced weights to 100%" });
+    toast.success("Weights balanced to 100%");
+  };
 
   const save = (pub?: EditableReadinessItem["publish"]) => {
     if (!editing) return;
@@ -71,6 +93,9 @@ function ReadinessAdmin() {
     <AdminShell title="Readiness scoring" description="Weighted items drive the dashboard readiness ring. Weights must sum to a value > 0 for scoring to work."
       actions={
         <div className="flex gap-2">
+          <Button variant="outline" onClick={balanceWeights} disabled={totalWeight === 100}>
+            <Scale className="mr-1 h-4 w-4" /> Balance to 100%
+          </Button>
           <Button variant="outline" onClick={() => { resetSection("readiness"); audit({ action: "reset", entity: "Readiness" }); toast.success("Reset to defaults"); }}>
             <RotateCcw className="mr-1 h-4 w-4" /> Reset
           </Button>

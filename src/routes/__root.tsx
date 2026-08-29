@@ -18,6 +18,7 @@ import { SuperUserBar } from "@/components/AdminShell";
 import { Toaster } from "@/components/ui/sonner";
 import { ConciergeLauncher } from "@/components/Concierge";
 import { NetworkNotice } from "@/components/NetworkNotice";
+import { AuthGate } from "@/components/AuthGate";
 
 function NotFoundComponent() {
   return (
@@ -133,7 +134,9 @@ function RootComponent() {
             <SuperUserBar />
 
             <main className="flex-1 relative">
-              <Outlet />
+              <AuthGate>
+                <Outlet />
+              </AuthGate>
             </main>
             <footer className="border-t bg-[var(--brand-dark)] text-white/70 py-6 text-xs">
               <div className="mx-auto max-w-7xl px-4 flex flex-wrap gap-4 justify-between">

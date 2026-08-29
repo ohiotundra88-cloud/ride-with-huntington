@@ -211,6 +211,8 @@ export const seedParticipants: AdminParticipant[] = names.map((name, i) => {
 
 // ============ CONTEXT ============
 interface StoreCtx {
+  /** False until the Supabase session has been resolved once. */
+  authReady: boolean;
   user: User;
   setUser: (u: Partial<User>) => void;
   registration: Registration;
@@ -242,6 +244,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [registration, setRegState] = useState<Registration>(emptyReg);
   const [participants, setParticipants] = useState<AdminParticipant[]>(seedParticipants);
   const [hydrated, setHydrated] = useState(false);
+  const [authReady, setAuthReady] = useState(false);
   const skipNextPersist = useRef(false);
 
   // Hydrate registration from localStorage (works offline / guest preview)
@@ -323,8 +326,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
 
     supabase.auth.getSession().then(({ data }) => {
-      applySession(data.session?.user ? { id: data.session.user.id, email: data.session.user.email } : null);
-    });
+      applySession(data.session?.user ? { id: data.session.user.id, email: data.session.user.email } : null)
+        .finally(() => { if (!cancelled) setAuthReady(true); });
+    }).catch(() => { if (!cancelled) setAuthReady(true); });
 
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED") {
@@ -419,7 +423,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [registration]);
 
   return (
-    <Ctx.Provider value={{ user, setUser, saveProfile, registration, setRegistration, participants, addNote, reset, completion, incompleteStep, signOut }}>
+    <Ctx.Provider value={{ authReady, user, setUser, saveProfile, registration, setRegistration, participants, addNote, reset, completion, incompleteStep, signOut }}>
       {children}
     </Ctx.Provider>
   );
