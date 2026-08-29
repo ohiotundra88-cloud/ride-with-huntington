@@ -807,6 +807,142 @@ export type Database = {
         }
         Relationships: []
       }
+      message_audit: {
+        Row: {
+          action: string
+          actor_email: string
+          actor_id: string | null
+          created_at: string
+          details: Json
+          id: string
+          message_id: string
+        }
+        Insert: {
+          action: string
+          actor_email?: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          message_id: string
+        }
+        Update: {
+          action?: string
+          actor_email?: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          message_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_audit_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_recipients: {
+        Row: {
+          created_at: string
+          dismissed_at: string | null
+          email: string
+          id: string
+          message_id: string
+          name: string
+          read_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dismissed_at?: string | null
+          email?: string
+          id?: string
+          message_id: string
+          name?: string
+          read_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          dismissed_at?: string | null
+          email?: string
+          id?: string
+          message_id?: string
+          name?: string
+          read_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_recipients_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          audience: Json
+          body: string
+          category: string
+          created_at: string
+          created_by: string
+          created_by_email: string
+          cta_href: string
+          cta_label: string
+          id: string
+          priority: string
+          recipient_count: number
+          scheduled_at: string | null
+          sent_at: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          audience?: Json
+          body?: string
+          category?: string
+          created_at?: string
+          created_by: string
+          created_by_email?: string
+          cta_href?: string
+          cta_label?: string
+          id?: string
+          priority?: string
+          recipient_count?: number
+          scheduled_at?: string | null
+          sent_at?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          audience?: Json
+          body?: string
+          category?: string
+          created_at?: string
+          created_by?: string
+          created_by_email?: string
+          cta_href?: string
+          cta_label?: string
+          id?: string
+          priority?: string
+          recipient_count?: number
+          scheduled_at?: string | null
+          sent_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       participants: {
         Row: {
           address: Json
@@ -1319,6 +1455,7 @@ export type Database = {
       can_archive_vendors: { Args: { _user_id: string }; Returns: boolean }
       can_manage_events: { Args: { _user_id: string }; Returns: boolean }
       can_purge_vendors: { Args: { _user_id: string }; Returns: boolean }
+      can_send_messages: { Args: { _user_id: string }; Returns: boolean }
       can_view_vendors: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
