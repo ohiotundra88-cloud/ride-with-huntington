@@ -211,6 +211,8 @@ export const seedParticipants: AdminParticipant[] = names.map((name, i) => {
 
 // ============ CONTEXT ============
 interface StoreCtx {
+  /** False until the Supabase session has been resolved once. */
+  authReady: boolean;
   user: User;
   setUser: (u: Partial<User>) => void;
   registration: Registration;
