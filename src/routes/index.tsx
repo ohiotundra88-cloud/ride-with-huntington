@@ -313,10 +313,10 @@ function GuestHero() {
         </p>
         <div className="mt-10 flex flex-wrap gap-3">
           <Button asChild size="lg" className="bg-[var(--brand)] text-[var(--brand-foreground)] hover:bg-[var(--brand)]/90 h-12 px-6 text-base font-semibold">
-            <Link to="/register">Let's Go <ArrowRight className="ml-1 h-4 w-4" /></Link>
+            <Link to="/signin">Sign in to get started <ArrowRight className="ml-1 h-4 w-4" /></Link>
           </Button>
           <Button asChild size="lg" variant="outline" className="h-12 px-6 text-base bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white">
-            <Link to="/dashboard">View My Registration</Link>
+            <Link to="/signin">View My Registration</Link>
           </Button>
         </div>
       </div>
