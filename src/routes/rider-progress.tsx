@@ -377,7 +377,7 @@ function RiderProgressPage() {
                       <TableHead>Bike</TableHead>
                       <TableHead>Apparel</TableHead>
                       <TableHead className="text-right">Raised</TableHead>
-                      <TableHead className="text-right">Goal</TableHead>
+                      <TableHead className="text-right">Commitment</TableHead>
                       <TableHead className="text-right">Complete</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -440,7 +440,7 @@ function RiderProgressPage() {
                           )}
                         </TableCell>
                         <TableCell className="text-right">{money(r.raised)}</TableCell>
-                        <TableCell className="text-right">{money(r.goal)}</TableCell>
+                        <TableCell className="text-right">{money(r.committed)}</TableCell>
                         <TableCell className="text-right">{r.completion}%</TableCell>
                       </TableRow>
                     ))}
