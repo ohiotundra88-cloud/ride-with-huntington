@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { AppNav } from "@/components/AppNav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -272,7 +271,6 @@ function MessagesPage() {
   if (access.isLoading) {
     return (
       <>
-        <AppNav />
         <main className="mx-auto max-w-3xl px-4 py-16 text-center text-muted-foreground">
           <Loader2 className="mx-auto h-6 w-6 animate-spin" />
         </main>
@@ -283,7 +281,6 @@ function MessagesPage() {
   if (!allowed) {
     return (
       <>
-        <AppNav />
         <main className="mx-auto max-w-2xl px-4 py-16">
           <Card>
             <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
@@ -301,7 +298,6 @@ function MessagesPage() {
 
   return (
     <>
-      <AppNav />
       <main className="mx-auto max-w-7xl px-4 py-8">
         <header className="mb-6">
           <h1 className="text-2xl font-black tracking-tight sm:text-3xl">Team messages</h1>

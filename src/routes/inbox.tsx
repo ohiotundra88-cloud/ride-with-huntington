@@ -2,7 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { AppNav } from "@/components/AppNav";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -50,7 +49,6 @@ function InboxPage() {
 
   return (
     <>
-      <AppNav />
       <main className="mx-auto max-w-3xl px-4 py-8">
         <header className="mb-6 flex flex-wrap items-end justify-between gap-3">
           <div>
