@@ -94,8 +94,16 @@ export function AppNav() {
     riderProgress: !!riderProgress?.allowed,
     messaging: !!messaging?.allowed,
   };
+  // Signed-out visitors only see genuinely public destinations.
+  const PUBLIC_TO = ["/family", "/fundraisers"];
+  const visibleTop = ctx.signedIn ? topLinks : topLinks.filter((l) => l.to === "/");
   const visibleGroups = groups
-    .map((g) => ({ ...g, items: g.items.filter((i) => !i.show || i.show(ctx)) }))
+    .map((g) => ({
+      ...g,
+      items: g.items.filter(
+        (i) => (!i.show || i.show(ctx)) && (ctx.signedIn || PUBLIC_TO.includes(i.to)),
+      ),
+    }))
     .filter((g) => g.items.length > 0);
 
 
@@ -124,7 +132,7 @@ export function AppNav() {
           </SheetTrigger>
           <SheetContent side="left" className="w-72 overflow-y-auto bg-[var(--brand-dark)] text-white border-r border-white/10">
             <div className="mt-8 flex flex-col gap-1">
-              {topLinks.map((l) => (
+              {visibleTop.map((l) => (
                 <Link key={l.to} to={l.to} onClick={() => setOpen(false)}
                   className={`rounded-md px-3 py-2 text-sm ${pathname === l.to ? "bg-[var(--brand)] text-[var(--brand-foreground)]" : "hover:bg-white/10"}`}>
                   {l.label}
@@ -159,7 +167,7 @@ export function AppNav() {
         </Link>
 
         <nav className="ml-4 hidden items-center gap-0.5 md:flex">
-          {topLinks.map((l) => (
+          {visibleTop.map((l) => (
             <Link key={l.to} to={l.to}
               className={`whitespace-nowrap rounded-md px-2.5 py-1.5 text-xs xl:text-sm transition-colors ${pathname === l.to ? "bg-white/10 text-white" : "text-white/80 hover:bg-white/10 hover:text-white"}`}>
               {l.label}

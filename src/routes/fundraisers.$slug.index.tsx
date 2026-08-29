@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ShareFundraiserButton } from "@/components/ShareFundraiserButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -115,6 +116,13 @@ function FundraiserPublicPage() {
             Organized by {f.organizer_name}
             {f.beneficiary ? ` · benefiting ${f.beneficiary}` : ""}
           </p>
+
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <ShareFundraiserButton slug={f.slug} title={f.title} />
+            <span className="text-xs text-muted-foreground">
+              Anyone with this link can give — no hub account needed.
+            </span>
+          </div>
 
           <DemoPaymentBanner className="mt-4" />
 
