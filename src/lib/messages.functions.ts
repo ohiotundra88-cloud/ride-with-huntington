@@ -299,10 +299,11 @@ export const updateMyMessageState = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
     const now = new Date().toISOString();
-    const patch: Record<string, string> = {};
-    if (data.read) patch["read_at"] = now;
-    if (data.dismissed) patch["dismissed_at"] = now;
-    if (!Object.keys(patch).length) return { ok: true };
+    if (!data.read && !data.dismissed) return { ok: true };
+    const patch = {
+      ...(data.read ? { read_at: now } : {}),
+      ...(data.dismissed ? { dismissed_at: now } : {}),
+    };
 
     const { error } = await context.supabase
       .from("message_recipients")
