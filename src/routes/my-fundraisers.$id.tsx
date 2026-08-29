@@ -9,6 +9,7 @@ import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ShareFundraiserButton } from "@/components/ShareFundraiserButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -207,6 +208,7 @@ function ManageFundraiser() {
               </Link>
             </Button>
           )}
+          {f.status !== "draft" && <ShareFundraiserButton slug={f.slug} title={f.title} />}
           {f.status === "draft" && (
             <Button size="sm" onClick={() => submit.mutate()} disabled={submit.isPending || issues.length > 0}>
               <Send className="mr-1.5 h-4 w-4" /> Submit for approval
