@@ -205,3 +205,143 @@ export function audienceOptionsFrom(roster: AudiencePerson[]) {
     routes: sorted(routes),
   };
 }
+
+// ---------------------------------------------------------------------------
+// Authorization + row mapping helpers used by the messaging server functions.
+// ---------------------------------------------------------------------------
+
+import {
+  LEADERSHIP_ONLY_ROLES,
+  ROLE_LABELS,
+  describeAudience,
+  normalizeAudience,
+  type MessageCategory,
+  type MessagePriority,
+  type MessageStatus,
+  type MessageSummary,
+  type MessagingAccess,
+} from "./messages.shared";
+
+type AnySupabase = {
+  from: (table: string) => any;
+};
+
+const SENDER_ROLES = ["captain", "cochair", "superuser", "admin"];
+
+export async function loadRoles(supabase: AnySupabase, userId: string): Promise<string[]> {
+  const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+  return ((data ?? []) as { role: string }[]).map((r) => String(r.role));
+}
+
+export function accessFromRoles(roles: string[]): MessagingAccess {
+  const canTargetLeadership = roles.some((r) => ["cochair", "superuser", "admin"].includes(r));
+  return {
+    allowed: roles.some((r) => SENDER_ROLES.includes(r)),
+    roles,
+    canTargetLeadership,
+    canDelete: roles.includes("superuser"),
+  };
+}
+
+/** Throws unless the caller may compose/send messages. */
+export async function requireSender(
+  supabase: AnySupabase,
+  userId: string,
+): Promise<MessagingAccess> {
+  const access = accessFromRoles(await loadRoles(supabase, userId));
+  if (!access.allowed) {
+    throw new Error("Forbidden — captain, co-chair or super user access required.");
+  }
+  return access;
+}
+
+/** Captains may not target leadership roles; enforced server-side. */
+export function assertAudienceAllowed(access: MessagingAccess, roles: string[]) {
+  if (access.canTargetLeadership) return;
+  const blocked = roles.filter((r) => LEADERSHIP_ONLY_ROLES.includes(r));
+  if (blocked.length) {
+    throw new Error(
+      `Only co-chairs and super users can message ${blocked
+        .map((r) => ROLE_LABELS[r] ?? r)
+        .join(", ")}.`,
+    );
+  }
+}
+
+export function mapMessageRow(row: Record<string, unknown>, readCount = 0): MessageSummary {
+  const audience = normalizeAudience(row["audience"]);
+  return {
+    id: String(row["id"]),
+    title: String(row["title"] ?? ""),
+    body: String(row["body"] ?? ""),
+    ctaLabel: String(row["cta_label"] ?? ""),
+    ctaHref: String(row["cta_href"] ?? ""),
+    priority: String(row["priority"] ?? "info") as MessagePriority,
+    category: String(row["category"] ?? "general") as MessageCategory,
+    status: String(row["status"] ?? "draft") as MessageStatus,
+    audience,
+    audienceSummary: describeAudience(audience),
+    recipientCount: Number(row["recipient_count"] ?? 0),
+    readCount,
+    scheduledAt: (row["scheduled_at"] as string | null) ?? null,
+    sentAt: (row["sent_at"] as string | null) ?? null,
+    createdBy: String(row["created_by"] ?? ""),
+    createdByEmail: String(row["created_by_email"] ?? ""),
+    createdAt: String(row["created_at"] ?? ""),
+    updatedAt: String(row["updated_at"] ?? ""),
+  };
+}
+
+/**
+ * Resolves the audience for a stored message and writes immutable recipient
+ * rows, then flips the message to `sent`. Safe to call twice — existing
+ * recipient rows are left untouched by the unique (message_id, user_id) key.
+ */
+export async function deliverMessage(
+  supabase: AnySupabase,
+  messageId: string,
+  actorEmail: string,
+): Promise<{ recipientCount: number }> {
+  const { data: row, error } = await supabase
+    .from("messages")
+    .select("*")
+    .eq("id", messageId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!row) throw new Error("Message not found.");
+  if (row.status === "sent") throw new Error("This message has already been sent.");
+
+  const rules = normalizeAudience(row.audience);
+  const roster = await buildAudienceRoster();
+  const people = resolveAudience(roster, rules);
+  if (!people.length) throw new Error("That audience has no recipients right now.");
+
+  const { error: insertError } = await supabase.from("message_recipients").insert(
+    people.map((p) => ({
+      message_id: messageId,
+      user_id: p.userId,
+      email: p.email,
+      name: p.name,
+    })),
+  );
+  if (insertError) throw new Error(insertError.message);
+
+  const { error: updateError } = await supabase
+    .from("messages")
+    .update({
+      status: "sent",
+      sent_at: new Date().toISOString(),
+      recipient_count: people.length,
+    })
+    .eq("id", messageId);
+  if (updateError) throw new Error(updateError.message);
+
+  await supabase.from("message_audit").insert({
+    message_id: messageId,
+    action: "sent",
+    actor_email: actorEmail,
+    details: { recipientCount: people.length },
+  });
+
+  return { recipientCount: people.length };
+}
