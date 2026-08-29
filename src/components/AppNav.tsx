@@ -16,11 +16,12 @@ import { useApprovalNotifications } from "@/lib/useApprovalNotifications";
 import { useVendorAccess } from "@/components/VendorGate";
 import { useQuery } from "@tanstack/react-query";
 import { getRiderProgressAccess } from "@/lib/rider-progress.functions";
+import { getMessagingAccess } from "@/lib/messages.functions";
 
 
 type NavItem = { to: any; label: string; show?: (c: NavCtx) => boolean };
 type NavGroup = { label: string; items: NavItem[] };
-type NavCtx = { signedIn: boolean; isReviewer: boolean; vendorAccess: boolean; riderProgress: boolean };
+type NavCtx = { signedIn: boolean; isReviewer: boolean; vendorAccess: boolean; riderProgress: boolean; messaging: boolean };
 
 const topLinks: NavItem[] = [
   { to: "/", label: "Home" },
@@ -36,6 +37,8 @@ const groups: NavGroup[] = [
       { to: "/events", label: "Events" },
       { to: "/packing", label: "Packing" },
       { to: "/rider-progress", label: "Rider Progress", show: (c) => c.riderProgress },
+      { to: "/inbox", label: "My Inbox", show: (c) => c.signedIn },
+      { to: "/messages", label: "Team Messages", show: (c) => c.messaging },
     ],
   },
   {
@@ -76,11 +79,20 @@ export function AppNav() {
     staleTime: 60_000,
   });
 
+  const { data: messaging } = useQuery({
+    queryKey: ["messaging-access"],
+    queryFn: () => getMessagingAccess(),
+    enabled: user.signedIn,
+    retry: false,
+    staleTime: 60_000,
+  });
+
   const ctx: NavCtx = {
     signedIn: user.signedIn,
     isReviewer: !!user.isReviewer,
     vendorAccess: !!vendorAccess?.allowed,
     riderProgress: !!riderProgress?.allowed,
+    messaging: !!messaging?.allowed,
   };
   const visibleGroups = groups
     .map((g) => ({ ...g, items: g.items.filter((i) => !i.show || i.show(ctx)) }))
