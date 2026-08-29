@@ -16,6 +16,7 @@ import { Route as ResourcesRouteImport } from './routes/resources'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PackingRouteImport } from './routes/packing'
+import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as HealthRouteImport } from './routes/health'
 import { Route as FundraiserRequestRouteImport } from './routes/fundraiser-request'
@@ -97,6 +98,11 @@ const ProfileRoute = ProfileRouteImport.update({
 const PackingRoute = PackingRouteImport.update({
   id: '/packing',
   path: '/packing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MessagesRoute = MessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
   getParentRoute: () => rootRouteImport,
 } as any)
 const McpRoute = McpRouteImport.update({
@@ -352,6 +358,7 @@ export interface FileRoutesByFullPath {
   '/fundraiser-request': typeof FundraiserRequestRoute
   '/health': typeof HealthRoute
   '/mcp': typeof McpRoute
+  '/messages': typeof MessagesRoute
   '/packing': typeof PackingRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
@@ -408,6 +415,7 @@ export interface FileRoutesByTo {
   '/fundraiser-request': typeof FundraiserRequestRoute
   '/health': typeof HealthRoute
   '/mcp': typeof McpRoute
+  '/messages': typeof MessagesRoute
   '/packing': typeof PackingRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
@@ -465,6 +473,7 @@ export interface FileRoutesById {
   '/fundraiser-request': typeof FundraiserRequestRoute
   '/health': typeof HealthRoute
   '/mcp': typeof McpRoute
+  '/messages': typeof MessagesRoute
   '/packing': typeof PackingRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
@@ -523,6 +532,7 @@ export interface FileRouteTypes {
     | '/fundraiser-request'
     | '/health'
     | '/mcp'
+    | '/messages'
     | '/packing'
     | '/profile'
     | '/register'
@@ -579,6 +589,7 @@ export interface FileRouteTypes {
     | '/fundraiser-request'
     | '/health'
     | '/mcp'
+    | '/messages'
     | '/packing'
     | '/profile'
     | '/register'
@@ -635,6 +646,7 @@ export interface FileRouteTypes {
     | '/fundraiser-request'
     | '/health'
     | '/mcp'
+    | '/messages'
     | '/packing'
     | '/profile'
     | '/register'
@@ -692,6 +704,7 @@ export interface RootRouteChildren {
   FundraiserRequestRoute: typeof FundraiserRequestRoute
   HealthRoute: typeof HealthRoute
   McpRoute: typeof McpRoute
+  MessagesRoute: typeof MessagesRoute
   PackingRoute: typeof PackingRoute
   ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
@@ -785,6 +798,13 @@ declare module '@tanstack/react-router' {
       path: '/packing'
       fullPath: '/packing'
       preLoaderRoute: typeof PackingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/messages': {
+      id: '/messages'
+      path: '/messages'
+      fullPath: '/messages'
+      preLoaderRoute: typeof MessagesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mcp': {
@@ -1143,6 +1163,7 @@ const rootRouteChildren: RootRouteChildren = {
   FundraiserRequestRoute: FundraiserRequestRoute,
   HealthRoute: HealthRoute,
   McpRoute: McpRoute,
+  MessagesRoute: MessagesRoute,
   PackingRoute: PackingRoute,
   ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,
