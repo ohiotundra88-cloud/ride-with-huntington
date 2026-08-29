@@ -16,7 +16,9 @@ import { Route as ResourcesRouteImport } from './routes/resources'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PackingRouteImport } from './routes/packing'
+import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as McpRouteImport } from './routes/mcp'
+import { Route as InboxRouteImport } from './routes/inbox'
 import { Route as HealthRouteImport } from './routes/health'
 import { Route as FundraiserRequestRouteImport } from './routes/fundraiser-request'
 import { Route as FamilyRouteImport } from './routes/family'
@@ -99,9 +101,19 @@ const PackingRoute = PackingRouteImport.update({
   path: '/packing',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MessagesRoute = MessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const McpRoute = McpRouteImport.update({
   id: '/mcp',
   path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InboxRoute = InboxRouteImport.update({
+  id: '/inbox',
+  path: '/inbox',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HealthRoute = HealthRouteImport.update({
@@ -351,7 +363,9 @@ export interface FileRoutesByFullPath {
   '/family': typeof FamilyRoute
   '/fundraiser-request': typeof FundraiserRequestRoute
   '/health': typeof HealthRoute
+  '/inbox': typeof InboxRoute
   '/mcp': typeof McpRoute
+  '/messages': typeof MessagesRoute
   '/packing': typeof PackingRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
@@ -407,7 +421,9 @@ export interface FileRoutesByTo {
   '/family': typeof FamilyRoute
   '/fundraiser-request': typeof FundraiserRequestRoute
   '/health': typeof HealthRoute
+  '/inbox': typeof InboxRoute
   '/mcp': typeof McpRoute
+  '/messages': typeof MessagesRoute
   '/packing': typeof PackingRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
@@ -464,7 +480,9 @@ export interface FileRoutesById {
   '/family': typeof FamilyRoute
   '/fundraiser-request': typeof FundraiserRequestRoute
   '/health': typeof HealthRoute
+  '/inbox': typeof InboxRoute
   '/mcp': typeof McpRoute
+  '/messages': typeof MessagesRoute
   '/packing': typeof PackingRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
@@ -522,7 +540,9 @@ export interface FileRouteTypes {
     | '/family'
     | '/fundraiser-request'
     | '/health'
+    | '/inbox'
     | '/mcp'
+    | '/messages'
     | '/packing'
     | '/profile'
     | '/register'
@@ -578,7 +598,9 @@ export interface FileRouteTypes {
     | '/family'
     | '/fundraiser-request'
     | '/health'
+    | '/inbox'
     | '/mcp'
+    | '/messages'
     | '/packing'
     | '/profile'
     | '/register'
@@ -634,7 +656,9 @@ export interface FileRouteTypes {
     | '/family'
     | '/fundraiser-request'
     | '/health'
+    | '/inbox'
     | '/mcp'
+    | '/messages'
     | '/packing'
     | '/profile'
     | '/register'
@@ -691,7 +715,9 @@ export interface RootRouteChildren {
   FamilyRoute: typeof FamilyRoute
   FundraiserRequestRoute: typeof FundraiserRequestRoute
   HealthRoute: typeof HealthRoute
+  InboxRoute: typeof InboxRoute
   McpRoute: typeof McpRoute
+  MessagesRoute: typeof MessagesRoute
   PackingRoute: typeof PackingRoute
   ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
@@ -787,11 +813,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PackingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/messages': {
+      id: '/messages'
+      path: '/messages'
+      fullPath: '/messages'
+      preLoaderRoute: typeof MessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/mcp': {
       id: '/mcp'
       path: '/mcp'
       fullPath: '/mcp'
       preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inbox': {
+      id: '/inbox'
+      path: '/inbox'
+      fullPath: '/inbox'
+      preLoaderRoute: typeof InboxRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/health': {
@@ -1142,7 +1182,9 @@ const rootRouteChildren: RootRouteChildren = {
   FamilyRoute: FamilyRoute,
   FundraiserRequestRoute: FundraiserRequestRoute,
   HealthRoute: HealthRoute,
+  InboxRoute: InboxRoute,
   McpRoute: McpRoute,
+  MessagesRoute: MessagesRoute,
   PackingRoute: PackingRoute,
   ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,
