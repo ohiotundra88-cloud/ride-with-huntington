@@ -60,7 +60,7 @@ function ContactsAdmin() {
     setEditingId(c.id);
     setForm({
       name: c.name, role: c.role, email: c.email, phone: c.phone, department: c.department,
-      region: c.region, category: c.category, hours: c.hours, emergency: c.emergency, active: c.active,
+      region: c.region, category: c.category, hours: c.hours, emergency: c.emergency, internal_only: c.internal_only, active: c.active,
     });
   };
 
@@ -97,6 +97,7 @@ function ContactsAdmin() {
                     {c.emergency && <Badge className="bg-red-600 text-white text-[10px]"><ShieldAlert className="mr-1 h-3 w-3" /> Emergency</Badge>}
                     <Badge variant="outline" className="text-[10px]">{c.category}</Badge>
                     {!c.active && <Badge variant="outline" className="text-[10px]">Hidden</Badge>}
+                    {c.internal_only && <Badge variant="outline" className="text-[10px]">Leadership only</Badge>}
                   </div>
                   <p className="text-xs text-muted-foreground">{[c.role, c.department].filter(Boolean).join(" · ")}</p>
                   {c.email && <p className="mt-2 flex items-center gap-1 text-xs break-all"><Mail className="h-3 w-3 shrink-0" /> {c.email}</p>}
@@ -146,6 +147,7 @@ function ContactsAdmin() {
               </div>
               <div className="space-y-1"><Label htmlFor="c-hours">Hours</Label><Input id="c-hours" value={form.hours} onChange={(e) => setForm({ ...form, hours: e.target.value })} /></div>
               <div className="flex items-center gap-2"><Switch checked={form.emergency} onCheckedChange={(v) => setForm({ ...form, emergency: v })} id="em" /><Label htmlFor="em">Emergency contact</Label></div>
+              <div className="flex items-center gap-2"><Switch checked={form.internal_only} onCheckedChange={(v) => setForm({ ...form, internal_only: v })} id="io" /><Label htmlFor="io">Leadership only (hidden from the general team directory)</Label></div>
               <div className="flex items-center gap-2"><Switch checked={form.active} onCheckedChange={(v) => setForm({ ...form, active: v })} id="ac" /><Label htmlFor="ac">Active</Label></div>
             </div>
           )}
