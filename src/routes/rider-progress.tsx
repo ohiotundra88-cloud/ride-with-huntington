@@ -440,7 +440,7 @@ function RiderProgressPage() {
                           )}
                         </TableCell>
                         <TableCell className="text-right">{money(r.raised)}</TableCell>
-                        <TableCell className="text-right">{money(r.goal)}</TableCell>
+                        <TableCell className="text-right">{money(r.committed)}</TableCell>
                         <TableCell className="text-right">{r.completion}%</TableCell>
                       </TableRow>
                     ))}
