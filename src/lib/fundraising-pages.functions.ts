@@ -10,6 +10,7 @@ import {
   type FundraiserAccess,
   type FundraiserDetail,
   type FundraiserListRow,
+  type FundraiserYearRow,
   type PublicFundraiser,
 } from "@/lib/fundraising-pages.shared";
 
@@ -124,6 +125,21 @@ export const setFundraiserStatus = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { setStatus } = await import("@/lib/fundraising-pages.server");
     return setStatus(context as any, data.id, data.status);
+  });
+
+export const setFundraiserPublicVisibility = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ id: z.string().uuid(), hidden: z.boolean() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { setPublicVisibility } = await import("@/lib/fundraising-pages.server");
+    return setPublicVisibility(context as any, data.id, data.hidden);
+  });
+
+export const getFundraiserYearSummary = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<FundraiserYearRow[]> => {
+    const { yearlySummary } = await import("@/lib/fundraising-pages.server");
+    return yearlySummary(context as any);
   });
 
 export const refundFundraiserOrder = createServerFn({ method: "POST" })
