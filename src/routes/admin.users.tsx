@@ -28,7 +28,6 @@ export const Route = createFileRoute("/admin/users")({
 
 function AdminUsersPage() {
   const qc = useQueryClient();
-  const [email, setEmail] = useState("");
 
   const { data: admins = [], isLoading, error } = useQuery<AdminUserRow[]>({
     queryKey: ["admins"],
@@ -39,7 +38,6 @@ function AdminUsersPage() {
     mutationFn: (e: string) => grantAdminByEmail({ data: { email: e } }),
     onSuccess: (res) => {
       toast.success(`Granted admin to ${res.email}`);
-      setEmail("");
       qc.invalidateQueries({ queryKey: ["admins"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -68,24 +66,15 @@ function AdminUsersPage() {
           <CardTitle className="text-base flex items-center gap-2"><UserPlus className="h-4 w-4" /> Grant admin access</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={submit} className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
-            <div className="space-y-1.5">
-              <Label htmlFor="grant-email">Huntington email</Label>
-              <Input
-                id="grant-email"
-                type="email"
-                placeholder="colleague@huntington.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <Button type="submit" disabled={grant.isPending} className="bg-[var(--brand-dark)] hover:bg-[var(--brand-dark)]/90 text-white">
-              {grant.isPending ? "Granting…" : "Grant admin"}
-            </Button>
-          </form>
+          <UserSearchPicker
+            id="grant-email"
+            label="Add a colleague"
+            placeholder="Search by name or email…"
+            disabled={grant.isPending}
+            onSelect={(u) => grant.mutate(u.email)}
+          />
           <p className="mt-2 text-xs text-muted-foreground">
-            The colleague must sign in once so their profile exists. New admins can enter Super User Mode from their profile menu.
+            Start typing to search registered colleagues, then click their name to grant admin. New admins can enter Super User Mode from their profile menu.
           </p>
         </CardContent>
       </Card>
