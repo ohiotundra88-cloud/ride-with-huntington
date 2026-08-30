@@ -129,8 +129,22 @@ export interface FundraiserRecord {
   organizer_name: string;
   published_at: string | null;
   closed_at: string | null;
+  public_hidden: boolean;
+  hidden_at: string | null;
   created_at: string;
   updated_at: string;
+}
+
+/** Year-by-year rollup across every fundraiser (leadership reporting). */
+export interface FundraiserYearRow {
+  year: string;
+  gross: number;
+  fees: number;
+  net: number;
+  refunded: number;
+  supporters: number;
+  fundraisers: number;
+  fundraiserTitles: string[];
 }
 
 export interface FundraiserTotals {

@@ -16,6 +16,7 @@ import {
   type FundraiserOrderRow,
   type FundraiserPayoutRow,
   type FundraiserRecord,
+  type FundraiserYearRow,
   type FundraiserStatus,
   type PayoutInput,
   type PublicFundraiser,
@@ -136,6 +137,7 @@ export async function listPublic(): Promise<FundraiserListRow[]> {
     .from("fundraisers")
     .select("*")
     .in("status", ["live", "closed", "paid_out"])
+    .eq("public_hidden", false)
     .order("created_at", { ascending: false });
   if (error) throw new Error(error.message);
   const rows = (data ?? []) as FundraiserRecord[];
@@ -166,6 +168,7 @@ export async function getPublic(slug: string): Promise<PublicFundraiser> {
     .from("fundraisers")
     .select("*")
     .eq("slug", slug)
+    .eq("public_hidden", false)
     .in("status", ["live", "closed", "paid_out"])
     .maybeSingle();
   if (error) throw new Error(error.message);
@@ -626,6 +629,84 @@ export async function setStatus(ctx: Ctx, id: string, status: FundraiserStatus) 
   if (error) throw new Error(error.message);
   await audit(id, `status_${status}`, ctx, { from: record.status });
   return { ok: true };
+}
+
+/**
+ * Take a finished fundraiser off the public site (or put it back) without
+ * deleting it — the record stays available for reporting and reflection.
+ * Leadership only (admins, super users, captains, co-chairs).
+ */
+export async function setPublicVisibility(ctx: Ctx, id: string, hidden: boolean) {
+  const { record, access } = await assertManageable(ctx, id);
+  if (!access.canManageAll) {
+    throw new Error("Only captains, co-chairs, admins and super users can change public visibility.");
+  }
+  if (hidden && record.status === "live") {
+    throw new Error("Close the fundraiser first, then hide it from public view.");
+  }
+  const db = await admin();
+  const { error } = await db
+    .from("fundraisers")
+    .update({
+      public_hidden: hidden,
+      hidden_at: hidden ? new Date().toISOString() : null,
+      hidden_by: hidden ? ctx.userId : null,
+    })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+  await audit(id, hidden ? "hidden_from_public" : "restored_to_public", ctx, { status: record.status });
+  return { ok: true, public_hidden: hidden };
+}
+
+/** Raised-by-year rollup across every fundraiser. Leadership only. */
+export async function yearlySummary(ctx: Ctx): Promise<FundraiserYearRow[]> {
+  const access = await getAccess(ctx);
+  if (!access.canManageAll) throw new Error("Leadership access required for fundraising reports.");
+  const db = await admin();
+
+  const [{ data: fundraisers }, { data: orders }] = await Promise.all([
+    db.from("fundraisers").select("id, title"),
+    db.from("fundraiser_orders").select("fundraiser_id, amount, fee_amount, net_amount, status, supporter_email, paid_at, created_at"),
+  ]);
+
+  const titles = new Map<string, string>(((fundraisers ?? []) as any[]).map((f) => [f.id, f.title as string]));
+  const buckets = new Map<
+    string,
+    { gross: number; fees: number; net: number; refunded: number; emails: Set<string>; ids: Set<string> }
+  >();
+
+  for (const o of (orders ?? []) as any[]) {
+    const stamp = o.paid_at ?? o.created_at;
+    if (!stamp) continue;
+    const year = String(new Date(stamp).getUTCFullYear());
+    let b = buckets.get(year);
+    if (!b) {
+      b = { gross: 0, fees: 0, net: 0, refunded: 0, emails: new Set(), ids: new Set() };
+      buckets.set(year, b);
+    }
+    if (o.status === "paid") {
+      b.gross += Number(o.amount) || 0;
+      b.fees += Number(o.fee_amount) || 0;
+      b.net += Number(o.net_amount) || 0;
+      if (o.supporter_email) b.emails.add(String(o.supporter_email).toLowerCase());
+      b.ids.add(o.fundraiser_id);
+    } else if (o.status === "refunded") {
+      b.refunded += Number(o.amount) || 0;
+    }
+  }
+
+  return [...buckets.entries()]
+    .sort((a, b) => Number(b[0]) - Number(a[0]))
+    .map(([year, b]) => ({
+      year,
+      gross: round2(b.gross),
+      fees: round2(b.fees),
+      net: round2(b.net),
+      refunded: round2(b.refunded),
+      supporters: b.emails.size,
+      fundraisers: b.ids.size,
+      fundraiserTitles: [...b.ids].map((id) => titles.get(id) ?? "Untitled").sort(),
+    }));
 }
 
 export async function refundOrder(ctx: Ctx, orderId: string) {
