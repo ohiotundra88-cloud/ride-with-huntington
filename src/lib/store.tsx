@@ -407,20 +407,31 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(REG_KEY);
   };
 
-  const completion = useMemo(() => {
-    const s = [registration.pelotonia.status, registration.travel.status, registration.bike.status, registration.apparel.status];
-    return Math.round((s.filter((x) => x === "complete").length / 4) * 100);
+  /**
+   * Effective step statuses: opting out counts as done. "No hotel needed" and
+   * "using my own bike" are complete answers, and volunteers skip the bike step.
+   */
+  const effective = useMemo(() => {
+    const isRider = registration.participation === "rider" || registration.participation === "both";
+    const travel = registration.travel.needs === "none" ? "complete" : registration.travel.status;
+    const bike = !isRider || registration.bike.needs === "no" ? "complete" : registration.bike.status;
+    return { pelotonia: registration.pelotonia.status, travel, bike, apparel: registration.apparel.status };
   }, [registration]);
+
+  const completion = useMemo(() => {
+    const s = [effective.pelotonia, effective.travel, effective.bike, effective.apparel];
+    return Math.round((s.filter((x) => x === "complete").length / 4) * 100);
+  }, [effective]);
 
   const incompleteStep = useMemo(() => {
     if (!registration.participation) return 0;
-    if (registration.pelotonia.status !== "complete") return 1;
-    if (registration.travel.status !== "complete") return 2;
-    const isRider = registration.participation === "rider" || registration.participation === "both";
-    if (isRider && registration.bike.status !== "complete") return 3;
-    if (registration.apparel.status !== "complete") return 4;
+    if (effective.pelotonia !== "complete") return 1;
+    if (effective.travel !== "complete") return 2;
+    if (effective.bike !== "complete") return 3;
+    if (effective.apparel !== "complete") return 4;
     return 5;
-  }, [registration]);
+  }, [registration.participation, effective]);
+
 
   return (
     <Ctx.Provider value={{ authReady, user, setUser, saveProfile, registration, setRegistration, participants, addNote, reset, completion, incompleteStep, signOut }}>
