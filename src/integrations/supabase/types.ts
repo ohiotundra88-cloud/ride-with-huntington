@@ -665,6 +665,8 @@ export type Database = {
           flier_name: string | null
           flier_path: string | null
           goal_amount: number
+          hidden_at: string | null
+          hidden_by: string | null
           id: string
           is_demo: boolean
           kind: string
@@ -672,6 +674,7 @@ export type Database = {
           opens_at: string | null
           organizer_id: string
           organizer_name: string
+          public_hidden: boolean
           published_at: string | null
           request_id: string | null
           season: string
@@ -697,6 +700,8 @@ export type Database = {
           flier_name?: string | null
           flier_path?: string | null
           goal_amount?: number
+          hidden_at?: string | null
+          hidden_by?: string | null
           id?: string
           is_demo?: boolean
           kind?: string
@@ -704,6 +709,7 @@ export type Database = {
           opens_at?: string | null
           organizer_id: string
           organizer_name?: string
+          public_hidden?: boolean
           published_at?: string | null
           request_id?: string | null
           season?: string
@@ -729,6 +735,8 @@ export type Database = {
           flier_name?: string | null
           flier_path?: string | null
           goal_amount?: number
+          hidden_at?: string | null
+          hidden_by?: string | null
           id?: string
           is_demo?: boolean
           kind?: string
@@ -736,6 +744,7 @@ export type Database = {
           opens_at?: string | null
           organizer_id?: string
           organizer_name?: string
+          public_hidden?: boolean
           published_at?: string | null
           request_id?: string | null
           season?: string
