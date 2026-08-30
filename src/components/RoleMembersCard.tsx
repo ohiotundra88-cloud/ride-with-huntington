@@ -13,6 +13,7 @@ import {
 import {
   listRoleMembers, grantRoleByEmail, revokeRoleFromUser, type RoleMemberRow,
 } from "@/lib/roles-manage.functions";
+import { UserSearchPicker } from "@/components/UserSearchPicker";
 import type { ManageableRole } from "@/lib/roles.shared";
 
 export function RoleMembersCard({
