@@ -21,7 +21,7 @@ import { DemoPaymentBanner } from "@/components/DemoPaymentBanner";
 import {
   drawFundraiserWinner, getFundraiserAccess, getFundraiserApproval, getFundraiserDetail,
   recordFundraiserPayout, refundFundraiserOrder, removeFundraiserFlier, saveFundraiserPage,
-  seedFundraiserDemoSupporters, setFundraiserStatus, submitFundraiserForApproval, uploadFundraiserFlier,
+  seedFundraiserDemoSupporters, setFundraiserPublicVisibility, setFundraiserStatus, submitFundraiserForApproval, uploadFundraiserFlier,
 } from "@/lib/fundraising-pages.functions";
 import {
   ALLOWED_FUNDRAISER_FLIER_TYPES, fundraiserFlierUrl, KIND_ITEM_NOUN, KIND_LABELS,
@@ -128,6 +128,15 @@ function ManageFundraiser() {
     onError: (e: any) => toast.error(e?.message ?? "Couldn't change the status."),
   });
 
+  const visibility = useMutation({
+    mutationFn: (hidden: boolean) => setFundraiserPublicVisibility({ data: { id, hidden } }),
+    onSuccess: (r) => {
+      toast.success(r.public_hidden ? "Hidden from public view" : "Back on the public site");
+      invalidate();
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Couldn't change visibility."),
+  });
+
   const refund = useMutation({
     mutationFn: (order_id: string) => refundFundraiserOrder({ data: { order_id } }),
     onSuccess: () => {
@@ -194,6 +203,7 @@ function ManageFundraiser() {
             <Badge variant="secondary">{KIND_LABELS[f.kind]}</Badge>
             <Badge variant={f.status === "live" ? "default" : "outline"}>{STATUS_LABELS[f.status]}</Badge>
             {f.is_demo && <Badge variant="outline">Demo</Badge>}
+            {f.public_hidden && <Badge variant="outline" className="border-amber-400 text-amber-700">Hidden from public</Badge>}
           </div>
           <h1 className="mt-2 text-2xl font-bold text-[var(--brand-dark)]">{f.title}</h1>
           <p className="text-xs text-muted-foreground">
@@ -201,14 +211,14 @@ function ManageFundraiser() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {f.status !== "draft" && (
+          {f.status !== "draft" && !f.public_hidden && (
             <Button asChild variant="outline" size="sm">
               <Link to="/fundraisers/$slug" params={{ slug: f.slug }}>
                 <ExternalLink className="mr-1.5 h-4 w-4" /> View public page
               </Link>
             </Button>
           )}
-          {f.status !== "draft" && <ShareFundraiserButton slug={f.slug} title={f.title} />}
+          {f.status !== "draft" && !f.public_hidden && <ShareFundraiserButton slug={f.slug} title={f.title} />}
           {f.status === "draft" && (
             <Button size="sm" onClick={() => submit.mutate()} disabled={submit.isPending || issues.length > 0}>
               <Send className="mr-1.5 h-4 w-4" /> Submit for approval
@@ -224,8 +234,28 @@ function ManageFundraiser() {
               Close fundraiser
             </Button>
           )}
+          {canPublish && f.status !== "draft" && f.status !== "pending_approval" && f.status !== "live" && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => visibility.mutate(!f.public_hidden)}
+              disabled={visibility.isPending}
+            >
+              {f.public_hidden ? "Show on public site" : "Hide from public view"}
+            </Button>
+          )}
         </div>
       </div>
+
+      {f.public_hidden && (
+        <Card className="mt-4 border-amber-300 bg-amber-50/60">
+          <CardContent className="p-4 text-sm text-amber-900">
+            This fundraiser is closed to the public — supporters can no longer find or open the page. It stays here as a past
+            fundraiser with all totals, supporters and activity intact for reporting.
+            {f.hidden_at ? ` Hidden ${new Date(f.hidden_at).toLocaleDateString()}.` : ""}
+          </CardContent>
+        </Card>
+      )}
 
       <DemoPaymentBanner className="mt-4" />
 
