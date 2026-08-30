@@ -1,11 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
 import { AdminShell } from "@/components/AdminShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { ShieldCheck, Trash2, UserPlus } from "lucide-react";
 import {
@@ -16,6 +13,7 @@ import { listAdmins, grantAdminByEmail, revokeAdmin, type AdminUserRow } from "@
 import { listCaptains, grantCaptainByEmail, revokeCaptain, type CaptainRow } from "@/lib/captains.functions";
 import { Flag, Scale, ShieldAlert, BadgeCheck, Megaphone, Crown, Briefcase } from "lucide-react";
 import { RoleMembersCard } from "@/components/RoleMembersCard";
+import { UserSearchPicker } from "@/components/UserSearchPicker";
 import { VendorAccessCard } from "@/components/VendorAccessCard";
 
 
@@ -31,7 +29,6 @@ export const Route = createFileRoute("/admin/users")({
 
 function AdminUsersPage() {
   const qc = useQueryClient();
-  const [email, setEmail] = useState("");
 
   const { data: admins = [], isLoading, error } = useQuery<AdminUserRow[]>({
     queryKey: ["admins"],
@@ -42,7 +39,6 @@ function AdminUsersPage() {
     mutationFn: (e: string) => grantAdminByEmail({ data: { email: e } }),
     onSuccess: (res) => {
       toast.success(`Granted admin to ${res.email}`);
-      setEmail("");
       qc.invalidateQueries({ queryKey: ["admins"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -57,13 +53,6 @@ function AdminUsersPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const submit = (ev: React.FormEvent) => {
-    ev.preventDefault();
-    const v = email.trim();
-    if (!v) return;
-    grant.mutate(v);
-  };
-
   return (
     <AdminShell title="Admins & Super Users" description="Anyone listed here can enter Super User Mode and manage Team Huntington content.">
       <Card>
@@ -71,24 +60,15 @@ function AdminUsersPage() {
           <CardTitle className="text-base flex items-center gap-2"><UserPlus className="h-4 w-4" /> Grant admin access</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={submit} className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
-            <div className="space-y-1.5">
-              <Label htmlFor="grant-email">Huntington email</Label>
-              <Input
-                id="grant-email"
-                type="email"
-                placeholder="colleague@huntington.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <Button type="submit" disabled={grant.isPending} className="bg-[var(--brand-dark)] hover:bg-[var(--brand-dark)]/90 text-white">
-              {grant.isPending ? "Granting…" : "Grant admin"}
-            </Button>
-          </form>
+          <UserSearchPicker
+            id="grant-email"
+            label="Add a colleague"
+            placeholder="Search by name or email…"
+            disabled={grant.isPending}
+            onSelect={(u) => grant.mutate(u.email)}
+          />
           <p className="mt-2 text-xs text-muted-foreground">
-            The colleague must sign in once so their profile exists. New admins can enter Super User Mode from their profile menu.
+            Start typing to search registered colleagues, then click their name to grant admin. New admins can enter Super User Mode from their profile menu.
           </p>
         </CardContent>
       </Card>
@@ -181,7 +161,6 @@ function AdminUsersPage() {
 
 function CaptainsCard() {
   const qc = useQueryClient();
-  const [email, setEmail] = useState("");
 
   const { data: captains = [], isLoading, error } = useQuery<CaptainRow[]>({
     queryKey: ["captains"],
@@ -192,7 +171,6 @@ function CaptainsCard() {
     mutationFn: (e: string) => grantCaptainByEmail({ data: { email: e } }),
     onSuccess: (res) => {
       toast.success(`${res.email} can now post fundraising events`);
-      setEmail("");
       qc.invalidateQueries({ queryKey: ["captains"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -207,13 +185,6 @@ function CaptainsCard() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const submit = (ev: React.FormEvent) => {
-    ev.preventDefault();
-    const v = email.trim();
-    if (!v) return;
-    grant.mutate(v);
-  };
-
   return (
     <Card className="mt-6">
       <CardHeader>
@@ -225,22 +196,18 @@ function CaptainsCard() {
         <p className="text-sm text-muted-foreground">
           Captains can post and manage fundraising events on the Events calendar. They can only edit the events they create.
         </p>
-        <form onSubmit={submit} className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
-          <div className="space-y-1.5">
-            <Label htmlFor="captain-email">Huntington email</Label>
-            <Input
-              id="captain-email"
-              type="email"
-              placeholder="captain@huntington.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <Button type="submit" disabled={grant.isPending} className="bg-[var(--brand-dark)] hover:bg-[var(--brand-dark)]/90 text-white">
-            {grant.isPending ? "Adding…" : "Make captain"}
-          </Button>
-        </form>
+        <div className="mt-4">
+          <UserSearchPicker
+            id="captain-email"
+            label="Add a captain"
+            placeholder="Search by name or email…"
+            disabled={grant.isPending}
+            onSelect={(u) => grant.mutate(u.email)}
+          />
+          <p className="mt-1.5 text-xs text-muted-foreground">
+            Start typing to search registered colleagues, then click their name to make them a captain.
+          </p>
+        </div>
 
         <div className="mt-5">
           {isLoading ? (

@@ -1,9 +1,6 @@
-import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
 import {
@@ -13,6 +10,7 @@ import {
 import {
   listRoleMembers, grantRoleByEmail, revokeRoleFromUser, type RoleMemberRow,
 } from "@/lib/roles-manage.functions";
+import { UserSearchPicker } from "@/components/UserSearchPicker";
 import type { ManageableRole } from "@/lib/roles.shared";
 
 export function RoleMembersCard({
@@ -27,7 +25,6 @@ export function RoleMembersCard({
   icon?: React.ReactNode;
 }) {
   const qc = useQueryClient();
-  const [email, setEmail] = useState("");
 
   const { data: members = [], isLoading, error } = useQuery<RoleMemberRow[]>({
     queryKey: ["role-members", role],
@@ -38,7 +35,6 @@ export function RoleMembersCard({
     mutationFn: (e: string) => grantRoleByEmail({ data: { role, email: e } }),
     onSuccess: (res) => {
       toast.success(`${res.email} added to ${title}`);
-      setEmail("");
       qc.invalidateQueries({ queryKey: ["role-members", role] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -60,29 +56,18 @@ export function RoleMembersCard({
       </CardHeader>
       <CardContent>
         <p className="text-sm text-muted-foreground">{description}</p>
-        <form
-          onSubmit={(ev) => {
-            ev.preventDefault();
-            const v = email.trim();
-            if (v) grant.mutate(v);
-          }}
-          className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end"
-        >
-          <div className="space-y-1.5">
-            <Label htmlFor={`role-email-${role}`}>Huntington email</Label>
-            <Input
-              id={`role-email-${role}`}
-              type="email"
-              placeholder="colleague@huntington.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <Button type="submit" disabled={grant.isPending} className="bg-[var(--brand-dark)] hover:bg-[var(--brand-dark)]/90 text-white">
-            {grant.isPending ? "Adding…" : "Add"}
-          </Button>
-        </form>
+        <div className="mt-4">
+          <UserSearchPicker
+            id={`role-email-${role}`}
+            label="Add a colleague"
+            placeholder="Search by name or email…"
+            disabled={grant.isPending}
+            onSelect={(u) => grant.mutate(u.email)}
+          />
+          <p className="mt-1.5 text-xs text-muted-foreground">
+            Start typing to search registered colleagues, then click their name to add them.
+          </p>
+        </div>
 
         <div className="mt-5">
           {isLoading ? (
