@@ -161,7 +161,6 @@ function AdminUsersPage() {
 
 function CaptainsCard() {
   const qc = useQueryClient();
-  const [email, setEmail] = useState("");
 
   const { data: captains = [], isLoading, error } = useQuery<CaptainRow[]>({
     queryKey: ["captains"],
@@ -172,7 +171,6 @@ function CaptainsCard() {
     mutationFn: (e: string) => grantCaptainByEmail({ data: { email: e } }),
     onSuccess: (res) => {
       toast.success(`${res.email} can now post fundraising events`);
-      setEmail("");
       qc.invalidateQueries({ queryKey: ["captains"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -186,13 +184,6 @@ function CaptainsCard() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
-
-  const submit = (ev: React.FormEvent) => {
-    ev.preventDefault();
-    const v = email.trim();
-    if (!v) return;
-    grant.mutate(v);
-  };
 
   return (
     <Card className="mt-6">
