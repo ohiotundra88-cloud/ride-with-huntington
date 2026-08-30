@@ -15,10 +15,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { DemoPaymentBanner } from "@/components/DemoPaymentBanner";
-import { getFundraiserAccess, listMyFundraisers, saveFundraiserPage } from "@/lib/fundraising-pages.functions";
+import {
+  getFundraiserAccess, getFundraiserYearSummary, listMyFundraisers, saveFundraiserPage,
+} from "@/lib/fundraising-pages.functions";
 import {
   FUNDRAISER_KINDS, KIND_BLURBS, KIND_LABELS, money, STATUS_LABELS,
-  type FundraiserKind, type FundraiserListRow,
+  type FundraiserKind, type FundraiserListRow, type FundraiserYearRow,
 } from "@/lib/fundraising-pages.shared";
 
 export const Route = createFileRoute("/my-fundraisers/")({
@@ -91,6 +93,8 @@ function MyFundraisers() {
         </label>
       )}
 
+      {canSeeAll && <YearSummary />}
+
       {isPending ? (
         <p className="mt-8 text-sm text-muted-foreground">Loading your pages…</p>
       ) : rows.length === 0 ? (
@@ -113,6 +117,9 @@ function MyFundraisers() {
                     <Badge variant="secondary">{KIND_LABELS[f.kind]}</Badge>
                     <Badge variant={f.status === "live" ? "default" : "outline"}>{STATUS_LABELS[f.status]}</Badge>
                     {f.is_demo && <Badge variant="outline">Demo</Badge>}
+                    {f.public_hidden && (
+                      <Badge variant="outline" className="border-amber-400 text-amber-700">Hidden from public</Badge>
+                    )}
                   </div>
                   <p className="mt-2 font-semibold text-[var(--brand-dark)]">{f.title}</p>
                   <p className="text-xs text-muted-foreground">
@@ -134,6 +141,66 @@ function MyFundraisers() {
         </div>
       )}
     </main>
+  );
+}
+
+function YearSummary() {
+  const { data: years = [], isPending } = useQuery<FundraiserYearRow[]>({
+    queryKey: ["fundraiser-year-summary"],
+    queryFn: () => getFundraiserYearSummary(),
+  });
+
+  const allTime = years.reduce(
+    (acc, y) => ({ gross: acc.gross + y.gross, net: acc.net + y.net, supporters: acc.supporters + y.supporters }),
+    { gross: 0, net: 0, supporters: 0 },
+  );
+
+  return (
+    <Card className="mt-6">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base">Raised by year — all fundraisers</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isPending ? (
+          <p className="text-sm text-muted-foreground">Loading totals…</p>
+        ) : years.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No completed contributions to report yet.</p>
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[520px] text-sm">
+                <thead>
+                  <tr className="border-b text-left text-xs uppercase tracking-wide text-muted-foreground">
+                    <th className="py-2 pr-3">Year</th>
+                    <th className="py-2 pr-3 text-right">Raised</th>
+                    <th className="py-2 pr-3 text-right">Fees</th>
+                    <th className="py-2 pr-3 text-right">Net to team</th>
+                    <th className="py-2 pr-3 text-right">Supporters</th>
+                    <th className="py-2 text-right">Fundraisers</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {years.map((y) => (
+                    <tr key={y.year} className="border-b last:border-0">
+                      <td className="py-2 pr-3 font-semibold text-[var(--brand-dark)]">{y.year}</td>
+                      <td className="py-2 pr-3 text-right font-medium">{money(y.gross)}</td>
+                      <td className="py-2 pr-3 text-right text-muted-foreground">{money(y.fees)}</td>
+                      <td className="py-2 pr-3 text-right">{money(y.net)}</td>
+                      <td className="py-2 pr-3 text-right">{y.supporters}</td>
+                      <td className="py-2 text-right">{y.fundraisers}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="mt-3 text-xs text-muted-foreground">
+              All time: {money(allTime.gross)} raised · {money(allTime.net)} net · {allTime.supporters} supporter records.
+              Hidden past fundraisers stay counted here.
+            </p>
+          </>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
