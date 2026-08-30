@@ -13,6 +13,7 @@ import { listAdmins, grantAdminByEmail, revokeAdmin, type AdminUserRow } from "@
 import { listCaptains, grantCaptainByEmail, revokeCaptain, type CaptainRow } from "@/lib/captains.functions";
 import { Flag, Scale, ShieldAlert, BadgeCheck, Megaphone, Crown, Briefcase } from "lucide-react";
 import { RoleMembersCard } from "@/components/RoleMembersCard";
+import { UserSearchPicker } from "@/components/UserSearchPicker";
 import { VendorAccessCard } from "@/components/VendorAccessCard";
 
 
@@ -51,13 +52,6 @@ function AdminUsersPage() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
-
-  const submit = (ev: React.FormEvent) => {
-    ev.preventDefault();
-    const v = email.trim();
-    if (!v) return;
-    grant.mutate(v);
-  };
 
   return (
     <AdminShell title="Admins & Super Users" description="Anyone listed here can enter Super User Mode and manage Team Huntington content.">
