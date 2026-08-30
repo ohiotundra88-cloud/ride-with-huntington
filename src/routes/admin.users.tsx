@@ -196,22 +196,18 @@ function CaptainsCard() {
         <p className="text-sm text-muted-foreground">
           Captains can post and manage fundraising events on the Events calendar. They can only edit the events they create.
         </p>
-        <form onSubmit={submit} className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
-          <div className="space-y-1.5">
-            <Label htmlFor="captain-email">Huntington email</Label>
-            <Input
-              id="captain-email"
-              type="email"
-              placeholder="captain@huntington.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <Button type="submit" disabled={grant.isPending} className="bg-[var(--brand-dark)] hover:bg-[var(--brand-dark)]/90 text-white">
-            {grant.isPending ? "Adding…" : "Make captain"}
-          </Button>
-        </form>
+        <div className="mt-4">
+          <UserSearchPicker
+            id="captain-email"
+            label="Add a captain"
+            placeholder="Search by name or email…"
+            disabled={grant.isPending}
+            onSelect={(u) => grant.mutate(u.email)}
+          />
+          <p className="mt-1.5 text-xs text-muted-foreground">
+            Start typing to search registered colleagues, then click their name to make them a captain.
+          </p>
+        </div>
 
         <div className="mt-5">
           {isLoading ? (
