@@ -1120,6 +1120,160 @@ export type Database = {
         }
         Relationships: []
       }
+      team_event_audit: {
+        Row: {
+          action: string
+          actor_email: string
+          actor_id: string | null
+          created_at: string
+          details: Json
+          event_id: string
+          id: string
+        }
+        Insert: {
+          action: string
+          actor_email?: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          event_id: string
+          id?: string
+        }
+        Update: {
+          action?: string
+          actor_email?: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          event_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_event_audit_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "team_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_event_invitees: {
+        Row: {
+          created_at: string
+          email: string
+          event_id: string
+          id: string
+          name: string
+          notified_at: string | null
+          responded_at: string | null
+          rsvp: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string
+          event_id: string
+          id?: string
+          name?: string
+          notified_at?: string | null
+          responded_at?: string | null
+          rsvp?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          event_id?: string
+          id?: string
+          name?: string
+          notified_at?: string | null
+          responded_at?: string | null
+          rsvp?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_event_invitees_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "team_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_events: {
+        Row: {
+          audience: Json
+          cancelled_at: string | null
+          created_at: string
+          created_by: string
+          created_by_email: string
+          description: string
+          end_time: string | null
+          event_date: string
+          flier_content_type: string | null
+          flier_name: string | null
+          flier_path: string | null
+          id: string
+          invited_count: number
+          location: string | null
+          organizer_email: string
+          organizer_name: string
+          published_at: string | null
+          start_time: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          audience?: Json
+          cancelled_at?: string | null
+          created_at?: string
+          created_by: string
+          created_by_email?: string
+          description?: string
+          end_time?: string | null
+          event_date: string
+          flier_content_type?: string | null
+          flier_name?: string | null
+          flier_path?: string | null
+          id?: string
+          invited_count?: number
+          location?: string | null
+          organizer_email?: string
+          organizer_name?: string
+          published_at?: string | null
+          start_time?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          audience?: Json
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string
+          created_by_email?: string
+          description?: string
+          end_time?: string | null
+          event_date?: string
+          flier_content_type?: string | null
+          flier_name?: string | null
+          flier_path?: string | null
+          id?: string
+          invited_count?: number
+          location?: string | null
+          organizer_email?: string
+          organizer_name?: string
+          published_at?: string | null
+          start_time?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1466,6 +1620,7 @@ export type Database = {
     Functions: {
       can_archive_vendors: { Args: { _user_id: string }; Returns: boolean }
       can_manage_events: { Args: { _user_id: string }; Returns: boolean }
+      can_manage_team_events: { Args: { _user_id: string }; Returns: boolean }
       can_purge_vendors: { Args: { _user_id: string }; Returns: boolean }
       can_send_messages: { Args: { _user_id: string }; Returns: boolean }
       can_view_vendors: { Args: { _user_id: string }; Returns: boolean }
