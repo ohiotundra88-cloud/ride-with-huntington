@@ -50,8 +50,10 @@ function FlagsAdmin() {
           <TabsTrigger value="danger">Danger zone</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="flags" className="mt-4">
+        <TabsContent value="flags" className="mt-4 space-y-4">
+          <SiteSwitchesCard />
           <Card><CardContent className="p-4 grid gap-2 sm:grid-cols-2">
+
             {(Object.keys(state.flags) as (keyof FeatureFlags)[]).map((k) => (
               <label key={k} className="flex items-start justify-between gap-3 rounded-md border p-3">
                 <div>
