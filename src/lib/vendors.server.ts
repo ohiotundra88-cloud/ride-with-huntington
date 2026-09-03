@@ -31,18 +31,25 @@ export async function getAccess(ctx: Ctx): Promise<VendorAccess> {
 
   const isSuper = roles.includes("superuser");
   const isCochair = roles.includes("cochair");
-  const allowed = isSuper || isCochair || (roles.includes("vendor_captain") && flag);
+  const hasRole = isSuper || isCochair || (roles.includes("vendor_captain") && flag);
 
-  return { allowed, roles, canArchive: isSuper || isCochair, canPurge: isSuper };
+  // Site switch: when the Vendor CRM is off, only Super Users get through.
+  const { vendorCrmPaused } = await import("@/lib/site-settings.server");
+  const paused = await vendorCrmPaused();
+  const allowed = hasRole && (!paused || isSuper);
+
+  return { allowed, roles, canArchive: allowed && (isSuper || isCochair), canPurge: allowed && isSuper, paused };
 }
 
 export async function assertVendorAccess(ctx: Ctx) {
   const access = await getAccess(ctx);
   if (!access.allowed) {
+    if (access.paused) throw new Error("The Vendor CRM is switched off right now.");
     throw new Error("The Vendor CRM is limited to vendor captains with dashboard access, co-chairs, and super users.");
   }
   return access;
 }
+
 
 export async function assertCanArchive(ctx: Ctx) {
   const access = await assertVendorAccess(ctx);
