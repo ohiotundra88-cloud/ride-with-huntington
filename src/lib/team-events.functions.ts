@@ -128,7 +128,7 @@ export const publishTeamEvent = createServerFn({ method: "POST" })
     if (!row) throw new Error("Event not found.");
     if (row.status === "cancelled") throw new Error("This event was cancelled.");
 
-    assertAudienceAllowed(access, (row.audience?.roles ?? []) as string[]);
+    assertAudienceAllowed(access, ((row.audience as any)?.roles ?? []) as string[]);
 
     const people = resolveAudience(await buildAudienceRoster(), row.audience as never);
     if (!people.length) throw new Error("That audience has no one in it right now.");
