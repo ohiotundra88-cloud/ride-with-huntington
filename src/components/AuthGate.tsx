@@ -20,12 +20,13 @@ function isPublicPath(pathname: string) {
   return PUBLIC_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 
-/** Blocks signed-out visitors from any non-public route. */
+/** Blocks signed-out and not-yet-activated visitors from any non-public route. */
 export function AuthGate({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user, authReady } = useStore();
 
-  if (isPublicPath(pathname) || user.signedIn) return <>{children}</>;
+  if (isPublicPath(pathname)) return <>{children}</>;
+  if (user.signedIn && user.activated) return <>{children}</>;
 
   if (!authReady) {
     return (
@@ -34,6 +35,27 @@ export function AuthGate({ children }: { children: ReactNode }) {
       </div>
     );
   }
+
+  if (user.signedIn && !user.activated) {
+    return (
+      <div className="mx-auto max-w-md px-4 py-20 text-center">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+          <Lock className="h-5 w-5 text-muted-foreground" />
+        </div>
+        <h1 className="mt-4 text-2xl font-bold">Finish activating your access</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Your account still needs the one-time passcode we email to your Huntington mailbox. Head back to
+          sign-in to request a code and finish activation.
+        </p>
+        <div className="mt-6 flex justify-center">
+          <Button asChild className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90">
+            <Link to="/signin">Enter my passcode</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
 
   return (
     <div className="mx-auto max-w-md px-4 py-20 text-center">
