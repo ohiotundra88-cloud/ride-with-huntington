@@ -159,6 +159,8 @@ const guestUser: User = {
   manager: "",
   consent: false,
   signedIn: false,
+  activated: false,
+
   isAdmin: false,
   isCaptain: false,
   isSuperUser: false,
