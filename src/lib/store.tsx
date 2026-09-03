@@ -300,6 +300,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         manager: prof?.manager ?? "",
         consent: !!prof?.consent,
         signedIn: true,
+        activated: !!prof?.activated_at,
+
         isAdmin,
         isCaptain,
         isSuperUser,
