@@ -15,6 +15,8 @@ export interface User {
   manager: string;
   consent: boolean;
   signedIn: boolean;
+  activated: boolean;
+
   isAdmin: boolean;
   isCaptain: boolean;
   isSuperUser: boolean;
