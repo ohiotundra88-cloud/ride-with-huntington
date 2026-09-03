@@ -15,6 +15,8 @@ import { Flag, Scale, ShieldAlert, BadgeCheck, Megaphone, Crown, Briefcase } fro
 import { RoleMembersCard } from "@/components/RoleMembersCard";
 import { UserSearchPicker } from "@/components/UserSearchPicker";
 import { VendorAccessCard } from "@/components/VendorAccessCard";
+import { ActivationCard } from "@/components/ActivationCard";
+
 
 
 export const Route = createFileRoute("/admin/users")({
