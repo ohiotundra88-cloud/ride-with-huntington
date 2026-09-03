@@ -1,12 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { SiteSettings } from "@/lib/site-settings.shared";
 
-export interface SiteSettings {
-  fundraiserPagesEnabled: boolean;
-}
+export { DEFAULT_SITE_SETTINGS, type SiteSettings } from "@/lib/site-settings.shared";
 
-export const DEFAULT_SITE_SETTINGS: SiteSettings = { fundraiserPagesEnabled: true };
 
 /** Readable by everyone (including signed-out visitors and SSR). */
 export const getSiteSettings = createServerFn({ method: "GET" }).handler(
