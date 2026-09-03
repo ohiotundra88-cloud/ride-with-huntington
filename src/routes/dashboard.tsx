@@ -313,6 +313,9 @@ function DashboardPage() {
 
         <MyFundraisingCard riderId={registration.pelotonia.confirmation} />
 
+        <MyEventsCard />
+
+
 
 
         {state.flags.familyMode && (
