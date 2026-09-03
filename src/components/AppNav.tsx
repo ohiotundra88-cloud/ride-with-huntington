@@ -1,3 +1,4 @@
+import { useSiteSettings } from "@/lib/useSiteSettings";
 import { useBranding } from "@/lib/useBranding";
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { Menu, User as UserIcon, ShieldCheck, LogOut, LogIn, ChevronDown } from "lucide-react";
@@ -21,7 +22,7 @@ import { getMessagingAccess } from "@/lib/messages.functions";
 
 type NavItem = { to: any; label: string; show?: (c: NavCtx) => boolean };
 type NavGroup = { label: string; items: NavItem[] };
-type NavCtx = { signedIn: boolean; isReviewer: boolean; vendorAccess: boolean; riderProgress: boolean; messaging: boolean };
+type NavCtx = { signedIn: boolean; isReviewer: boolean; vendorAccess: boolean; riderProgress: boolean; messaging: boolean; fundraiserPages: boolean };
 
 const topLinks: NavItem[] = [
   { to: "/", label: "Home" },
@@ -47,9 +48,9 @@ const groups: NavGroup[] = [
   {
     label: "Fundraising",
     items: [
-      { to: "/fundraisers", label: "Fundraisers" },
+      { to: "/fundraisers", label: "Fundraisers", show: (c) => c.fundraiserPages },
       { to: "/fundraiser-request", label: "Fundraiser Request" },
-      { to: "/my-fundraisers", label: "My Fundraisers", show: (c) => c.signedIn },
+      { to: "/my-fundraisers", label: "My Fundraisers", show: (c) => c.signedIn && c.fundraiserPages },
       { to: "/captains-lounge", label: "Captains Lounge", show: (c) => c.signedIn && c.isReviewer },
       { to: "/vendors", label: "Vendor CRM", show: (c) => c.vendorAccess },
     ],
@@ -82,6 +83,8 @@ export function AppNav() {
     staleTime: 60_000,
   });
 
+  const { fundraiserPagesEnabled } = useSiteSettings();
+
   const { data: messaging } = useQuery({
     queryKey: ["messaging-access"],
     queryFn: () => getMessagingAccess(),
@@ -96,9 +99,10 @@ export function AppNav() {
     vendorAccess: !!vendorAccess?.allowed,
     riderProgress: !!riderProgress?.allowed,
     messaging: !!messaging?.allowed,
+    fundraiserPages: fundraiserPagesEnabled,
   };
   // Signed-out visitors only see genuinely public destinations.
-  const PUBLIC_TO = ["/family", "/fundraisers"];
+  const PUBLIC_TO = fundraiserPagesEnabled ? ["/family", "/fundraisers"] : ["/family"];
   const visibleTop = ctx.signedIn ? topLinks : topLinks.filter((l) => l.to === "/");
   const visibleGroups = groups
     .map((g) => ({
