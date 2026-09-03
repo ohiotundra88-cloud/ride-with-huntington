@@ -10,7 +10,10 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useAdmin, type FeatureFlags } from "@/lib/admin-store";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { RotateCcw, Lock, ShieldAlert } from "lucide-react";
+import { RotateCcw, Lock, ShieldAlert, Globe } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { setFundraiserPagesEnabled } from "@/lib/site-settings.functions";
+import { useSiteSettings, SITE_SETTINGS_KEY } from "@/lib/useSiteSettings";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/flags")({
@@ -131,5 +134,57 @@ function FlagsAdmin() {
         </TabsContent>
       </Tabs>
     </AdminShell>
+  );
+}
+
+/**
+ * Server-side site switch: pauses the public fundraiser donate/sign-up pages
+ * for everyone. Fundraiser requests and the approval flow are unaffected.
+ */
+function SiteSwitchesCard() {
+  const { audit } = useAdmin();
+  const qc = useQueryClient();
+  const { settings, isPending } = useSiteSettings();
+  const save = useMutation({
+    mutationFn: (enabled: boolean) => setFundraiserPagesEnabled({ data: { enabled } }),
+    onSuccess: (res) => {
+      qc.setQueryData(SITE_SETTINGS_KEY, res);
+      qc.invalidateQueries({ queryKey: SITE_SETTINGS_KEY });
+      audit({
+        action: "toggle",
+        entity: "SiteSwitch",
+        entityId: "fundraiserPages",
+        detail: `fundraiserPages=${res.fundraiserPagesEnabled}`,
+      });
+      toast.success(res.fundraiserPagesEnabled ? "Fundraiser pages are live" : "Fundraiser pages paused");
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Could not change that switch"),
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Globe className="h-4 w-4" /> Site switches (apply to everyone)
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-4 pt-0">
+        <label className="flex items-start justify-between gap-3 rounded-md border p-3">
+          <div>
+            <p className="font-semibold text-[var(--brand-dark)]">Fundraiser pages</p>
+            <p className="text-xs text-muted-foreground">
+              Public donate and sign-up pages, plus My Fundraisers. Switching this off pauses donations
+              site-wide and hides the pages — fundraiser requests and the approval flow keep working, and
+              no pages or history are deleted.
+            </p>
+          </div>
+          <Switch
+            checked={settings.fundraiserPagesEnabled}
+            disabled={isPending || save.isPending}
+            onCheckedChange={(v) => save.mutate(v)}
+          />
+        </label>
+      </CardContent>
+    </Card>
   );
 }
