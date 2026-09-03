@@ -3,11 +3,10 @@ import { z } from "zod";
 
 const HUNTINGTON_DOMAIN = "huntington.com";
 
-// Demo-mode: ensure an account exists for the given @huntington.com email
-// with a caller-provided deterministic password. Verification codes are
-// temporarily disabled — this replaces the OTP flow. Safe to call for both
-// new and existing users; for existing users we reset their password so
-// sign-in works even if they were created earlier via the OTP flow.
+// Instant sign-in path for ALREADY ACTIVATED accounts only. First-time users
+// must verify a one-time passcode emailed to their @huntington.com mailbox
+// (see activation.functions.ts) — this function refuses to touch an account
+// that has not been activated yet, so the passcode step cannot be skipped.
 export const ensureDemoAccount = createServerFn({ method: "POST" })
   .inputValidator((data) =>
     z
@@ -24,6 +23,16 @@ export const ensureDemoAccount = createServerFn({ method: "POST" })
     }
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: profile } = await supabaseAdmin
+      .from("profiles")
+      .select("activated_at")
+      .ilike("email", email)
+      .maybeSingle();
+    if (!profile?.activated_at) {
+      throw new Error("This account needs to be activated with an emailed passcode first.");
+    }
+
 
     // Look up existing user by email via admin listUsers (paginated).
     let existingId: string | null = null;

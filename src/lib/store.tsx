@@ -15,6 +15,8 @@ export interface User {
   manager: string;
   consent: boolean;
   signedIn: boolean;
+  activated: boolean;
+
   isAdmin: boolean;
   isCaptain: boolean;
   isSuperUser: boolean;
@@ -157,6 +159,8 @@ const guestUser: User = {
   manager: "",
   consent: false,
   signedIn: false,
+  activated: false,
+
   isAdmin: false,
   isCaptain: false,
   isSuperUser: false,
@@ -270,7 +274,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         supabase.from("user_roles").select("role").eq("user_id", sessionUser.id),
         supabase
           .from("profiles")
-          .select("full_name, email, mobile, segment, market, manager, consent")
+          .select("full_name, email, mobile, segment, market, manager, consent, activated_at")
           .eq("id", sessionUser.id)
           .maybeSingle(),
       ]);
@@ -280,8 +284,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const isCaptain = isAdmin || isSuperUser || myRoles.includes("captain");
       const isReviewer = isCaptain || ["legal", "risk", "compliance", "marketing", "cochair"].some((r) => myRoles.includes(r));
       const prof = profileRes.data as
-        | { full_name?: string | null; mobile?: string | null; segment?: string | null; market?: string | null; manager?: string | null; consent?: boolean | null }
+        | { full_name?: string | null; mobile?: string | null; segment?: string | null; market?: string | null; manager?: string | null; consent?: boolean | null; activated_at?: string | null }
         | null;
+
       const fullName = prof?.full_name || nameGuess;
       if (cancelled) return;
       setUserState({
@@ -295,6 +300,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         manager: prof?.manager ?? "",
         consent: !!prof?.consent,
         signedIn: true,
+        activated: !!prof?.activated_at,
+
         isAdmin,
         isCaptain,
         isSuperUser,
