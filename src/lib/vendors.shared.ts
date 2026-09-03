@@ -236,6 +236,8 @@ export interface VendorAccess {
   roles: string[];
   canArchive: boolean;
   canPurge: boolean;
+  /** The tool is switched off site-wide; only Super Users may still use it. */
+  paused?: boolean;
 }
 
 // ---------------------------------------------------------------- rollups
