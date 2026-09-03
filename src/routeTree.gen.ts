@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TeamEventsRouteImport } from './routes/team-events'
 import { Route as TeamRouteImport } from './routes/team'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as RiderProgressRouteImport } from './routes/rider-progress'
@@ -66,6 +67,11 @@ import { Route as ApiPublicEventFlierIdRouteImport } from './routes/api/public/e
 import { Route as ApiPublicBrandingKindRouteImport } from './routes/api/public/branding/$kind'
 import { Route as ApiPublicAvatarUserIdRouteImport } from './routes/api/public/avatar/$userId'
 
+const TeamEventsRoute = TeamEventsRouteImport.update({
+  id: '/team-events',
+  path: '/team-events',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TeamRoute = TeamRouteImport.update({
   id: '/team',
   path: '/team',
@@ -373,6 +379,7 @@ export interface FileRoutesByFullPath {
   '/rider-progress': typeof RiderProgressRoute
   '/signin': typeof SigninRoute
   '/team': typeof TeamRoute
+  '/team-events': typeof TeamEventsRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
@@ -431,6 +438,7 @@ export interface FileRoutesByTo {
   '/rider-progress': typeof RiderProgressRoute
   '/signin': typeof SigninRoute
   '/team': typeof TeamRoute
+  '/team-events': typeof TeamEventsRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
@@ -490,6 +498,7 @@ export interface FileRoutesById {
   '/rider-progress': typeof RiderProgressRoute
   '/signin': typeof SigninRoute
   '/team': typeof TeamRoute
+  '/team-events': typeof TeamEventsRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
@@ -550,6 +559,7 @@ export interface FileRouteTypes {
     | '/rider-progress'
     | '/signin'
     | '/team'
+    | '/team-events'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin/announcements'
@@ -608,6 +618,7 @@ export interface FileRouteTypes {
     | '/rider-progress'
     | '/signin'
     | '/team'
+    | '/team-events'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin/announcements'
@@ -666,6 +677,7 @@ export interface FileRouteTypes {
     | '/rider-progress'
     | '/signin'
     | '/team'
+    | '/team-events'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin/announcements'
@@ -725,6 +737,7 @@ export interface RootRouteChildren {
   RiderProgressRoute: typeof RiderProgressRoute
   SigninRoute: typeof SigninRoute
   TeamRoute: typeof TeamRoute
+  TeamEventsRoute: typeof TeamEventsRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   AdminAnnouncementsRoute: typeof AdminAnnouncementsRoute
@@ -764,6 +777,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/team-events': {
+      id: '/team-events'
+      path: '/team-events'
+      fullPath: '/team-events'
+      preLoaderRoute: typeof TeamEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/team': {
       id: '/team'
       path: '/team'
@@ -1192,6 +1212,7 @@ const rootRouteChildren: RootRouteChildren = {
   RiderProgressRoute: RiderProgressRoute,
   SigninRoute: SigninRoute,
   TeamRoute: TeamRoute,
+  TeamEventsRoute: TeamEventsRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
