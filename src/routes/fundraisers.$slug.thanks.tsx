@@ -8,6 +8,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { DemoPaymentBanner } from "@/components/DemoPaymentBanner";
 import { getOrderReceipt } from "@/lib/fundraising-pages.functions";
 import { money } from "@/lib/fundraising-pages.shared";
+import { FundraiserPagesPaused } from "@/components/FundraiserPagesPaused";
+import { useSiteSettings } from "@/lib/useSiteSettings";
 
 export const Route = createFileRoute("/fundraisers/$slug/thanks")({
   validateSearch: z.object({ order: z.string().uuid().optional() }),
@@ -25,6 +27,7 @@ export const Route = createFileRoute("/fundraisers/$slug/thanks")({
 });
 
 function ThanksPage() {
+  const { fundraiserPagesPaused } = useSiteSettings();
   const { slug } = Route.useParams();
   const { order } = Route.useSearch();
 

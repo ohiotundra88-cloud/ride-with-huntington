@@ -16,6 +16,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { DemoPaymentBanner } from "@/components/DemoPaymentBanner";
 import { getPublicFundraiser, startCheckout } from "@/lib/fundraising-pages.functions";
 import {
+import { FundraiserPagesPaused } from "@/components/FundraiserPagesPaused";
+import { useSiteSettings } from "@/lib/useSiteSettings";
   fundraiserFlierUrl, KIND_ITEM_NOUN, KIND_LABELS, money, remainingQuantity,
   type FundraiserItem, type PublicFundraiser,
 } from "@/lib/fundraising-pages.shared";
@@ -35,6 +37,7 @@ export const Route = createFileRoute("/fundraisers/$slug/")({
 });
 
 function FundraiserPublicPage() {
+  const { fundraiserPagesPaused } = useSiteSettings();
   const { slug } = Route.useParams();
   const navigate = useNavigate();
 

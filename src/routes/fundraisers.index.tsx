@@ -9,6 +9,8 @@ import { Progress } from "@/components/ui/progress";
 import { DemoPaymentBanner } from "@/components/DemoPaymentBanner";
 import { listPublicFundraisers } from "@/lib/fundraising-pages.functions";
 import { KIND_LABELS, money, STATUS_LABELS, type FundraiserKind, type FundraiserListRow } from "@/lib/fundraising-pages.shared";
+import { FundraiserPagesPaused } from "@/components/FundraiserPagesPaused";
+import { useSiteSettings } from "@/lib/useSiteSettings";
 
 export const Route = createFileRoute("/fundraisers/")({
   component: FundraiserDirectory,
@@ -36,6 +38,7 @@ const KIND_ICON: Record<FundraiserKind, typeof Ticket> = {
 };
 
 function FundraiserDirectory() {
+  const { fundraiserPagesPaused } = useSiteSettings();
   const { data = [], isPending } = useQuery<FundraiserListRow[]>({
     queryKey: ["public-fundraisers"],
     queryFn: () => listPublicFundraisers(),

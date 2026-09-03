@@ -19,6 +19,8 @@ import {
   getFundraiserAccess, getFundraiserYearSummary, listMyFundraisers, saveFundraiserPage,
 } from "@/lib/fundraising-pages.functions";
 import {
+import { FundraiserPagesPaused } from "@/components/FundraiserPagesPaused";
+import { useSiteSettings } from "@/lib/useSiteSettings";
   FUNDRAISER_KINDS, KIND_BLURBS, KIND_LABELS, money, STATUS_LABELS,
   type FundraiserKind, type FundraiserListRow, type FundraiserYearRow,
 } from "@/lib/fundraising-pages.shared";
@@ -38,6 +40,7 @@ export const Route = createFileRoute("/my-fundraisers/")({
 });
 
 function MyFundraisers() {
+  const { fundraiserPagesPaused } = useSiteSettings();
   const { data: access, isPending: accessPending } = useQuery({
     queryKey: ["fundraiser-access"],
     queryFn: () => getFundraiserAccess(),

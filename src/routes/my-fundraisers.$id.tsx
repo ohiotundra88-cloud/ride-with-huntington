@@ -24,6 +24,8 @@ import {
   seedFundraiserDemoSupporters, setFundraiserPublicVisibility, setFundraiserStatus, submitFundraiserForApproval, uploadFundraiserFlier,
 } from "@/lib/fundraising-pages.functions";
 import {
+import { FundraiserPagesPaused } from "@/components/FundraiserPagesPaused";
+import { useSiteSettings } from "@/lib/useSiteSettings";
   ALLOWED_FUNDRAISER_FLIER_TYPES, fundraiserFlierUrl, KIND_ITEM_NOUN, KIND_LABELS,
   MAX_FUNDRAISER_FLIER_BYTES, money, moneyExact, STATUS_LABELS, validationIssues,
   type FundraiserDetail, type FundraiserInput, type ItemInput,
@@ -46,6 +48,7 @@ export const Route = createFileRoute("/my-fundraisers/$id")({
 const dateInput = (v: string | null) => (v ? v.slice(0, 10) : "");
 
 function ManageFundraiser() {
+  const { fundraiserPagesPaused } = useSiteSettings();
   const { id } = Route.useParams();
   const qc = useQueryClient();
   const navigate = useNavigate();
