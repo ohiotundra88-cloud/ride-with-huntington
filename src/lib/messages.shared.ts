@@ -117,9 +117,13 @@ export function normalizeAudience(raw: unknown): AudienceRules {
   };
 }
 
-/** True when no group rule is set (i.e. the whole roster matches). */
+/**
+ * True when no group rule is set and no individuals were hand-picked (i.e. the
+ * whole roster matches). Picking specific people means only those people.
+ */
 export function audienceIsEveryone(a: AudienceRules): boolean {
   return (
+    a.includeUserIds.length === 0 &&
     a.roles.length === 0 &&
     a.participation.length === 0 &&
     a.tags.length === 0 &&
@@ -129,6 +133,7 @@ export function audienceIsEveryone(a: AudienceRules): boolean {
     a.gaps.length === 0
   );
 }
+
 
 /** Short human summary of the audience rules, for lists and history. */
 export function describeAudience(a: AudienceRules): string {
