@@ -1,44 +1,45 @@
-# Hardening PII (names, addresses, phone numbers)
+# Re-enable one-time email passcode activation
 
-Your site stores real personal data: rider shipping addresses, mobile numbers, emails, plus vendor contracts and W9s. The database rules are already in decent shape — addresses in `participants` are readable only by the row owner or an admin, vendor data is gated by role functions, and file buckets are private. The gaps below are the ones worth closing.
+Bring back the emailed 6-digit code, required once per person, to prove they control an @huntington.com mailbox before their account can access the Hub. After activation, sign-in stays as instant as it is today.
 
-## What to fix
+## What changes for users
 
-### 1. Close the profile self-escalation gap for real
-A user's own profile row can currently be updated without column restrictions. A database trigger already blocks changes to the vendor-access flag, but the permission grant itself is still wide open, so the security scanner (rightly) treats it as a hole and any future trigger change re-opens it.
-- Restrict update permission on the profile table to only the columns a person should be able to edit (name, phone, photo, consent, segment/market/manager).
-- Keep the existing trigger as a second layer.
+1. Someone enters their work email on the sign-in screen (still restricted to @huntington.com).
+2. If their account has never been activated, the Hub emails them a 6-digit code and shows a code entry step.
+3. Entering the correct code activates the account and signs them in.
+4. Every later sign-in for that person is instant — no code.
+5. Anyone already signed in today stays signed in and is treated as already activated, so nobody is locked out.
+6. If the code doesn't arrive, a "Resend code" button is available after a short cooldown.
 
-### 2. Lock down the public profile-photo endpoint
-Anyone who knows or guesses a user ID can fetch that person's photo from `/api/public/avatar/<id>` without signing in.
-- Move photo delivery behind sign-in (an authenticated endpoint), keeping the same on-page experience for logged-in users.
-- Public-facing surfaces (fundraiser pages) keep working because they don't rely on rider photos.
+## Prerequisite: email sending
 
-### 3. Short-lived, non-shareable links for sensitive files
-Vendor contracts, W9s and captain documents should never be reachable through a link that keeps working after it's been forwarded.
-- Serve them through signed URLs that expire in ~60 seconds, generated only after the server confirms the caller's role.
+Auth emails currently have no sender domain configured for this project, so codes cannot be delivered yet. Built-in Cloud email still needs a real domain you own for the sender address. Two options:
 
-### 4. Log every bulk export of personal data
-Right now a captain, co-chair or super user can export the full roster with home addresses and no record is kept.
-- Add an append-only export log capturing who exported, when, how many rows, and which report.
-- Show recent export activity on the super-user screen.
+- Use ridewithhuntington.com (already connected to the site) as the email sender domain — recommended.
+- Skip and keep the current instant sign-in until a domain is ready.
 
-### 5. Only show addresses where they're actually needed
-Addresses are needed for apparel shipping, not for day-to-day roster browsing.
-- Mask addresses in on-screen roster/rider-progress views (city + state only) with a "reveal" action for admins and super users.
-- Keep the full address in the export, which is now logged.
+Setting this up is a short guided dialog; DNS records get verified in the background. Codes only reach inboxes after verification, so the passcode step gets enabled last, once sending is live.
 
-### 6. Account-level protections
-- Turn on leaked-password protection and a shorter session lifetime.
-- Require re-authentication before a super user changes roles or the vendor-dashboard flag.
+Note: Huntington's mail security may filter or delay mail from a newly verified domain. Plan on testing with a couple of real @huntington.com mailboxes before turning it on for everyone.
+
+## Build steps
+
+1. **Email setup** — configure ridewithhuntington.com as the sender domain and scaffold branded auth email templates matching the Hub's look. Style the passcode email with the existing brand colors and clear "code expires in 10 minutes" wording.
+2. **Activation state** — add an `activated_at` timestamp to user profiles. Backfill every existing profile as activated so current users never see the code step.
+3. **Send code** — a server-side action that validates the @huntington.com domain and triggers the emailed one-time code for that address. Rate-limited per email to prevent abuse.
+4. **Verify code** — a server-side action that verifies the submitted code, and only on success marks the profile activated and returns a session.
+5. **Sign-in screen** — two-step UI: email step, then code step (using the existing OTP input component). Resend with cooldown, clear error states, back link to change the email.
+6. **Enforce server-side** — the access gate treats "no `activated_at`" as not activated. Unactivated accounts get sent back to the code step even if they hold a session, so the check cannot be skipped by navigating directly.
+7. **Raise the auth email hourly limit** so a burst of new participants signing up doesn't hit the default cap.
+8. **Super User escape hatch** — on the existing user management screen, let a Super User manually mark a user activated for the rare case where email delivery fails entirely.
 
 ## Technical notes
-- Column-level `GRANT (…) UPDATE ON public.profiles TO authenticated`, replacing the table-wide grant; keep `profiles_own_update` policy and `protect_profile_privileged_columns` trigger.
-- Replace `src/routes/api/public/avatar/$userId.ts` with an authenticated server function returning a short-lived signed URL from the private `avatars` bucket; update `useBranding`/profile photo consumers.
-- `vendor-files` and `captain-docs` downloads switch from admin-client passthrough to `createSignedUrl(path, 60)` inside role-checked server functions.
-- New table `public.pii_export_log` (actor id/email, report key, row count, filters, created_at) with insert via server function only, select for admin/superuser, no update/delete; write to it from the rider-progress and participants CSV export paths.
-- Address masking happens server-side in the list payload — unmasked values are only returned by the export path, so hiding is not just a UI concern.
-- Auth settings changed through the backend auth configuration, not code.
 
-## Not changing
-- Vendor CRM role gating, contacts `internal_only` split, and participant/profile row-level rules — those are already enforced server-side and working.
+- Uses Cloud's built-in email OTP (`signInWithOtp` with a 6-digit code, verified via `verifyOtp`) rather than a hand-rolled code table, so codes, expiry, and single-use enforcement are handled by the auth layer.
+- Auto-confirm on email signup gets turned off as part of this, otherwise the verification step is bypassed.
+- The existing deterministic-password path in `src/lib/auth-demo.functions.ts` stays for already-activated users, keeping sign-in instant; it is gated on `activated_at` being set.
+- `profiles.activated_at` is writable only by the server (service role) or a Super User; a database trigger blocks users from setting it on themselves, matching the existing pattern used for vendor dashboard access.
+
+## Open question
+
+Once activation is live, should the fully public pages (family & spectator guide, shared fundraiser links) stay open to non-Huntington visitors? The plan assumes yes — they remain public.
