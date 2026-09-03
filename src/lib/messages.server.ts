@@ -153,11 +153,17 @@ export function resolveAudience(
   const excluded = new Set(rules.excludeUserIds);
   const included = new Set(rules.includeUserIds);
   const everyone = audienceIsEveryone(rules);
+  // Hand-picking people with no group rule means only those people.
+  const individualsOnly = !everyone && included.size > 0 &&
+    !rules.roles.length && !rules.participation.length && !rules.tags.length &&
+    !rules.subPelotons.length && !rules.routes.length && !rules.flags.length && !rules.gaps.length;
 
   const matched = roster.filter((person) => {
     if (excluded.has(person.userId)) return false;
     if (included.has(person.userId)) return true;
+    if (individualsOnly) return false;
     if (everyone) return true;
+
 
     if (rules.roles.length) {
       const has = rules.roles.some((r) =>

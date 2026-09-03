@@ -17,6 +17,7 @@ import { Route as ResourcesRouteImport } from './routes/resources'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PackingRouteImport } from './routes/packing'
+import { Route as MyEventsRouteImport } from './routes/my-events'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as InboxRouteImport } from './routes/inbox'
@@ -105,6 +106,11 @@ const ProfileRoute = ProfileRouteImport.update({
 const PackingRoute = PackingRouteImport.update({
   id: '/packing',
   path: '/packing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyEventsRoute = MyEventsRouteImport.update({
+  id: '/my-events',
+  path: '/my-events',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MessagesRoute = MessagesRouteImport.update({
@@ -372,6 +378,7 @@ export interface FileRoutesByFullPath {
   '/inbox': typeof InboxRoute
   '/mcp': typeof McpRoute
   '/messages': typeof MessagesRoute
+  '/my-events': typeof MyEventsRoute
   '/packing': typeof PackingRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
@@ -431,6 +438,7 @@ export interface FileRoutesByTo {
   '/inbox': typeof InboxRoute
   '/mcp': typeof McpRoute
   '/messages': typeof MessagesRoute
+  '/my-events': typeof MyEventsRoute
   '/packing': typeof PackingRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
@@ -491,6 +499,7 @@ export interface FileRoutesById {
   '/inbox': typeof InboxRoute
   '/mcp': typeof McpRoute
   '/messages': typeof MessagesRoute
+  '/my-events': typeof MyEventsRoute
   '/packing': typeof PackingRoute
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
@@ -552,6 +561,7 @@ export interface FileRouteTypes {
     | '/inbox'
     | '/mcp'
     | '/messages'
+    | '/my-events'
     | '/packing'
     | '/profile'
     | '/register'
@@ -611,6 +621,7 @@ export interface FileRouteTypes {
     | '/inbox'
     | '/mcp'
     | '/messages'
+    | '/my-events'
     | '/packing'
     | '/profile'
     | '/register'
@@ -670,6 +681,7 @@ export interface FileRouteTypes {
     | '/inbox'
     | '/mcp'
     | '/messages'
+    | '/my-events'
     | '/packing'
     | '/profile'
     | '/register'
@@ -730,6 +742,7 @@ export interface RootRouteChildren {
   InboxRoute: typeof InboxRoute
   McpRoute: typeof McpRoute
   MessagesRoute: typeof MessagesRoute
+  MyEventsRoute: typeof MyEventsRoute
   PackingRoute: typeof PackingRoute
   ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
@@ -831,6 +844,13 @@ declare module '@tanstack/react-router' {
       path: '/packing'
       fullPath: '/packing'
       preLoaderRoute: typeof PackingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-events': {
+      id: '/my-events'
+      path: '/my-events'
+      fullPath: '/my-events'
+      preLoaderRoute: typeof MyEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/messages': {
@@ -1205,6 +1225,7 @@ const rootRouteChildren: RootRouteChildren = {
   InboxRoute: InboxRoute,
   McpRoute: McpRoute,
   MessagesRoute: MessagesRoute,
+  MyEventsRoute: MyEventsRoute,
   PackingRoute: PackingRoute,
   ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,

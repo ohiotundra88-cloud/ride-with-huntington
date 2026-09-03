@@ -37,8 +37,11 @@ const groups: NavGroup[] = [
       { to: "/events", label: "Events" },
       { to: "/packing", label: "Packing" },
       { to: "/rider-progress", label: "Rider Progress", show: (c) => c.riderProgress },
+      { to: "/my-events", label: "My Team Events", show: (c) => c.signedIn },
       { to: "/inbox", label: "My Inbox", show: (c) => c.signedIn },
       { to: "/messages", label: "Team Messages", show: (c) => c.messaging },
+      { to: "/team-events", label: "Team Events", show: (c) => c.messaging },
+
     ],
   },
   {
