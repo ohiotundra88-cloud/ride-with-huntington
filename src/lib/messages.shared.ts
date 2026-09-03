@@ -155,9 +155,14 @@ export function describeAudience(a: AudienceRules): string {
       a.gaps.map((g) => READINESS_GAPS.find((x) => x.key === g)?.label ?? g).join(", "),
     );
   }
-  if (!parts.length) parts.push("Everyone");
-  if (a.includeUserIds.length) parts.push(`+${a.includeUserIds.length} individual`);
+  if (!parts.length && !a.includeUserIds.length) parts.push("Everyone");
+  if (a.includeUserIds.length) {
+    parts.push(
+      `${a.includeUserIds.length} hand-picked ${a.includeUserIds.length === 1 ? "person" : "people"}`,
+    );
+  }
   if (a.excludeUserIds.length) parts.push(`−${a.excludeUserIds.length} excluded`);
+
   return parts.join(" · ");
 }
 
