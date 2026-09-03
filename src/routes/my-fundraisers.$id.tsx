@@ -1,3 +1,5 @@
+import { FundraiserPagesPaused } from "@/components/FundraiserPagesPaused";
+import { useSiteSettings } from "@/lib/useSiteSettings";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -24,8 +26,6 @@ import {
   seedFundraiserDemoSupporters, setFundraiserPublicVisibility, setFundraiserStatus, submitFundraiserForApproval, uploadFundraiserFlier,
 } from "@/lib/fundraising-pages.functions";
 import {
-import { FundraiserPagesPaused } from "@/components/FundraiserPagesPaused";
-import { useSiteSettings } from "@/lib/useSiteSettings";
   ALLOWED_FUNDRAISER_FLIER_TYPES, fundraiserFlierUrl, KIND_ITEM_NOUN, KIND_LABELS,
   MAX_FUNDRAISER_FLIER_BYTES, money, moneyExact, STATUS_LABELS, validationIssues,
   type FundraiserDetail, type FundraiserInput, type ItemInput,

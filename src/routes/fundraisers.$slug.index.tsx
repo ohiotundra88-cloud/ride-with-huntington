@@ -1,3 +1,5 @@
+import { FundraiserPagesPaused } from "@/components/FundraiserPagesPaused";
+import { useSiteSettings } from "@/lib/useSiteSettings";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
@@ -16,8 +18,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { DemoPaymentBanner } from "@/components/DemoPaymentBanner";
 import { getPublicFundraiser, startCheckout } from "@/lib/fundraising-pages.functions";
 import {
-import { FundraiserPagesPaused } from "@/components/FundraiserPagesPaused";
-import { useSiteSettings } from "@/lib/useSiteSettings";
   fundraiserFlierUrl, KIND_ITEM_NOUN, KIND_LABELS, money, remainingQuantity,
   type FundraiserItem, type PublicFundraiser,
 } from "@/lib/fundraising-pages.shared";
