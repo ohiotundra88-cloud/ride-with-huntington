@@ -18,10 +18,13 @@ import { DemoPaymentBanner } from "@/components/DemoPaymentBanner";
 import {
   getFundraiserAccess, getFundraiserYearSummary, listMyFundraisers, saveFundraiserPage,
 } from "@/lib/fundraising-pages.functions";
+import { FundraiserPagesPaused } from "@/components/FundraiserPagesPaused";
+import { useSiteSettings } from "@/lib/useSiteSettings";
 import {
   FUNDRAISER_KINDS, KIND_BLURBS, KIND_LABELS, money, STATUS_LABELS,
   type FundraiserKind, type FundraiserListRow, type FundraiserYearRow,
 } from "@/lib/fundraising-pages.shared";
+
 
 export const Route = createFileRoute("/my-fundraisers/")({
   component: MyFundraisers,
@@ -38,6 +41,7 @@ export const Route = createFileRoute("/my-fundraisers/")({
 });
 
 function MyFundraisers() {
+  const { fundraiserPagesPaused } = useSiteSettings();
   const { data: access, isPending: accessPending } = useQuery({
     queryKey: ["fundraiser-access"],
     queryFn: () => getFundraiserAccess(),
@@ -71,6 +75,8 @@ function MyFundraisers() {
       </main>
     );
   }
+
+  if (fundraiserPagesPaused) return <FundraiserPagesPaused />;
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">

@@ -1,3 +1,5 @@
+import { FundraiserPagesPaused } from "@/components/FundraiserPagesPaused";
+import { useSiteSettings } from "@/lib/useSiteSettings";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -46,6 +48,7 @@ export const Route = createFileRoute("/my-fundraisers/$id")({
 const dateInput = (v: string | null) => (v ? v.slice(0, 10) : "");
 
 function ManageFundraiser() {
+  const { fundraiserPagesPaused } = useSiteSettings();
   const { id } = Route.useParams();
   const qc = useQueryClient();
   const navigate = useNavigate();
@@ -190,6 +193,8 @@ function ManageFundraiser() {
     setForm((prev) =>
       prev ? { ...prev, items: prev.items.map((it, idx) => (idx === i ? { ...it, ...patch } : it)) } : prev,
     );
+
+  if (fundraiserPagesPaused) return <FundraiserPagesPaused />;
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">

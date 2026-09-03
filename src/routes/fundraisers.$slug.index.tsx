@@ -1,3 +1,5 @@
+import { FundraiserPagesPaused } from "@/components/FundraiserPagesPaused";
+import { useSiteSettings } from "@/lib/useSiteSettings";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
@@ -35,6 +37,7 @@ export const Route = createFileRoute("/fundraisers/$slug/")({
 });
 
 function FundraiserPublicPage() {
+  const { fundraiserPagesPaused } = useSiteSettings();
   const { slug } = Route.useParams();
   const navigate = useNavigate();
 
@@ -100,6 +103,8 @@ function FundraiserPublicPage() {
   }
 
   const total = selected ? selected.unit_price * quantity : Number(amount || 0);
+
+  if (fundraiserPagesPaused) return <FundraiserPagesPaused />;
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
