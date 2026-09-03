@@ -284,8 +284,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const isCaptain = isAdmin || isSuperUser || myRoles.includes("captain");
       const isReviewer = isCaptain || ["legal", "risk", "compliance", "marketing", "cochair"].some((r) => myRoles.includes(r));
       const prof = profileRes.data as
-        | { full_name?: string | null; mobile?: string | null; segment?: string | null; market?: string | null; manager?: string | null; consent?: boolean | null }
+        | { full_name?: string | null; mobile?: string | null; segment?: string | null; market?: string | null; manager?: string | null; consent?: boolean | null; activated_at?: string | null }
         | null;
+
       const fullName = prof?.full_name || nameGuess;
       if (cancelled) return;
       setUserState({
