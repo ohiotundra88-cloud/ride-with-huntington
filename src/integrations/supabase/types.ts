@@ -1108,18 +1108,21 @@ export type Database = {
           id: number
           updated_at: string
           updated_by: string | null
+          vendor_crm_enabled: boolean
         }
         Insert: {
           fundraiser_pages_enabled?: boolean
           id?: number
           updated_at?: string
           updated_by?: string | null
+          vendor_crm_enabled?: boolean
         }
         Update: {
           fundraiser_pages_enabled?: boolean
           id?: number
           updated_at?: string
           updated_by?: string | null
+          vendor_crm_enabled?: boolean
         }
         Relationships: []
       }
