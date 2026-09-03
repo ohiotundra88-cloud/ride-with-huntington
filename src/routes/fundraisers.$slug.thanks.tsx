@@ -37,6 +37,8 @@ function ThanksPage() {
     enabled: Boolean(order),
   });
 
+  if (fundraiserPagesPaused) return <FundraiserPagesPaused />;
+
   return (
     <main className="mx-auto max-w-xl px-4 py-12">
       <Card>

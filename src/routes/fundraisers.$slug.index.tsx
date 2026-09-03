@@ -104,6 +104,8 @@ function FundraiserPublicPage() {
 
   const total = selected ? selected.unit_price * quantity : Number(amount || 0);
 
+  if (fundraiserPagesPaused) return <FundraiserPagesPaused />;
+
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
       <Link to="/fundraisers" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground">
