@@ -17,6 +17,8 @@ import { RIDE_WEEKEND_DATE, timelineSections, type ReadinessStatus } from "@/lib
 import { useAdmin, readinessScore, journeyCopyDefaults, type EditableReadinessItem, type EditableTimelineItem } from "@/lib/admin-store";
 import { AdminIcon } from "@/components/AdminIcon";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
+import { MyEventsCard } from "@/components/MyEventsCard";
+
 import { ApiManagedField } from "@/components/ApiManagedField";
 import { InlineEditText } from "@/components/InlineEditText";
 import { toast } from "sonner";
