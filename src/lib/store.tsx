@@ -274,7 +274,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         supabase.from("user_roles").select("role").eq("user_id", sessionUser.id),
         supabase
           .from("profiles")
-          .select("full_name, email, mobile, segment, market, manager, consent")
+          .select("full_name, email, mobile, segment, market, manager, consent, activated_at")
           .eq("id", sessionUser.id)
           .maybeSingle(),
       ]);
