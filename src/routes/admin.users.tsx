@@ -140,6 +140,9 @@ function AdminUsersPage() {
 
       <VendorAccessCard />
 
+      <ActivationCard />
+
+
       <RoleMembersCard
         role="superuser"
         title="Super users"
