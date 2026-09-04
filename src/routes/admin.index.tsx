@@ -159,16 +159,23 @@ function SuperUserDashboard() {
         <Card>
           <CardHeader><CardTitle>Current goals</CardTitle></CardHeader>
           <CardContent className="space-y-2 text-sm">
-            {state.goals.slice(0, 5).map((g) => (
+            {state.goals.slice(0, 5).map((g) => {
+              // Keep the team fundraising row consistent with the live figures
+              // shown in the stat cards above instead of the stored snapshot.
+              const isTeamFundraising = g.unit === "dollars" && /team .*fundrais/i.test(g.name);
+              const current = isTeamFundraising && live ? goalCurrent : g.current;
+              const target = isTeamFundraising && live ? goalTarget : g.target;
+              return (
               <div key={g.id} className="flex items-center justify-between rounded-md border p-2">
                 <div className="min-w-0">
                   <p className="font-medium truncate">{g.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {g.unit === "dollars" ? `${formatCurrencyUSD(g.current)} / ${formatCurrencyUSD(g.target)}` :
-                     g.unit === "percentage" ? `${g.current}% / ${g.target}%` :
-                     `${g.current.toLocaleString()} / ${g.target.toLocaleString()} ${g.unit}`}
+                    {g.unit === "dollars" ? `${formatCurrencyUSD(current)} / ${formatCurrencyUSD(target)}${isTeamFundraising && live ? " · live" : ""}` :
+                     g.unit === "percentage" ? `${current}% / ${target}%` :
+                     `${current.toLocaleString()} / ${target.toLocaleString()} ${g.unit}`}
                   </p>
                 </div>
+
                 <Badge variant="outline" className="text-[10px] uppercase">{g.status.replace("_", " ")}</Badge>
               </div>
             ))}
