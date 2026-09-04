@@ -39,7 +39,7 @@ export const InviteEmail = ({
         </Text>
         <Text style={s.text}>
           Accept below, or go to {siteUrl} and sign in with your Huntington
-          email address — we'll email you a 6-digit code to activate access.
+          email address — we'll email you a verification code to activate access.
         </Text>
         <Button style={s.button} href={confirmationUrl}>
           Accept invitation

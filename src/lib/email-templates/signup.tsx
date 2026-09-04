@@ -19,7 +19,7 @@ interface SignupEmailProps {
 }
 
 /**
- * First-time activation email. The 6-digit passcode is the whole point here —
+ * First-time activation email. The passcode is the whole point here —
  * corporate web filters block click-through links, so no link is included.
  */
 export const SignupEmail = ({ siteName, recipient, token }: SignupEmailProps) => (
@@ -33,7 +33,7 @@ export const SignupEmail = ({ siteName, recipient, token }: SignupEmailProps) =>
         </Section>
         <Heading style={h1}>Your verification code</Heading>
         <Text style={text}>
-          Enter this 6-digit code on the sign-in screen to activate access for {recipient}.
+          Enter the code from this email on the sign-in screen to activate access for {recipient}.
         </Text>
         <Section style={codeBox}>
           <Text style={codeText}>{token}</Text>

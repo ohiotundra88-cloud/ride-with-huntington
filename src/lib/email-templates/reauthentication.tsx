@@ -30,7 +30,7 @@ export const ReauthenticationEmail = ({
           <Text style={s.brandMark}>{siteName}</Text>
         </Section>
         <Heading style={s.h1}>Confirm it's you</Heading>
-        <Text style={s.text}>Enter this 6-digit code to confirm your identity.</Text>
+        <Text style={s.text}>Enter the code from this email to confirm your identity.</Text>
         <Section style={s.codeBox}>
           <Text style={s.codeText}>{token}</Text>
         </Section>
