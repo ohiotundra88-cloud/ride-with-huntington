@@ -16,6 +16,7 @@ import { RoleMembersCard } from "@/components/RoleMembersCard";
 import { UserSearchPicker } from "@/components/UserSearchPicker";
 import { VendorAccessCard } from "@/components/VendorAccessCard";
 import { ActivationCard } from "@/components/ActivationCard";
+import { AuthEmailTimeline } from "@/components/AuthEmailTimeline";
 
 
 
@@ -143,6 +144,8 @@ function AdminUsersPage() {
       <VendorAccessCard />
 
       <ActivationCard />
+
+      <AuthEmailTimeline />
 
 
       <RoleMembersCard
