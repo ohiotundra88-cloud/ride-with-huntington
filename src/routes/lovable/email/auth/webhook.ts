@@ -92,7 +92,8 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
               subject: 'Your verification code',
               render: (data) => {
                 audit('reauthentication', 'Your verification code', data.email)
-                return React.createElement(ReauthenticationEmail, { token: data.token ?? '' }),
+                return React.createElement(ReauthenticationEmail, { token: data.token ?? '' })
+              },
             },
           },
         })
