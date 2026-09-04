@@ -1134,11 +1134,16 @@ export type Database = {
       }
       site_branding: {
         Row: {
+          hero_accent_color: string
           hero_content_type: string | null
           hero_name: string | null
           hero_overlay: number
           hero_path: string | null
           hero_position: string
+          hero_primary_button_color: string
+          hero_secondary_button_color: string
+          hero_supporting_color: string
+          hero_text_color: string
           id: number
           logo_content_type: string | null
           logo_name: string | null
@@ -1147,11 +1152,16 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          hero_accent_color?: string
           hero_content_type?: string | null
           hero_name?: string | null
           hero_overlay?: number
           hero_path?: string | null
           hero_position?: string
+          hero_primary_button_color?: string
+          hero_secondary_button_color?: string
+          hero_supporting_color?: string
+          hero_text_color?: string
           id?: number
           logo_content_type?: string | null
           logo_name?: string | null
@@ -1160,11 +1170,16 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          hero_accent_color?: string
           hero_content_type?: string | null
           hero_name?: string | null
           hero_overlay?: number
           hero_path?: string | null
           hero_position?: string
+          hero_primary_button_color?: string
+          hero_secondary_button_color?: string
+          hero_supporting_color?: string
+          hero_text_color?: string
           id?: number
           logo_content_type?: string | null
           logo_name?: string | null
