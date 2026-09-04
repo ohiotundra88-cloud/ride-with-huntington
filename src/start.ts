@@ -5,7 +5,9 @@ import { renderErrorPage } from "./lib/error-page";
 // same-origin proxied client so no browser request hits the backend host.
 import { attachSupabaseAuthSameOrigin } from "@/lib/supabase-auth-attacher";
 
-const errorMiddleware = createMiddleware().server(async ({ next }) => {
+const errorMiddleware = createMiddleware().server(async ({ next, request }) => {
+  // Email/webhook routes must never be redirected or wrapped.
+  if (new URL(request.url).pathname.startsWith("/lovable/")) return next();
   try {
     return await next();
   } catch (error) {
