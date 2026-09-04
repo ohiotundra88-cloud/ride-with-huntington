@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions } from "@tanstack/react-query";
+import type { CSSProperties, ReactNode } from "react";
 
 import { ArrowRight, Plane, Bike, Shirt, CheckCircle2, LifeBuoy, FileText, ClipboardCheck, HelpCircle, Calendar, User, Target, BarChart3 } from "lucide-react";
 
@@ -11,6 +12,37 @@ import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { useStore } from "@/lib/store";
 import { recordSiteVisit } from "@/lib/analytics.functions";
 import { useBranding } from "@/lib/useBranding";
+import type { SiteBranding } from "@/lib/branding.shared";
+
+type HeroStyle = CSSProperties & {
+  "--hero-text": string;
+  "--hero-accent": string;
+  "--hero-supporting": string;
+  "--hero-primary-button": string;
+  "--hero-primary-button-text": string;
+  "--hero-secondary-button": string;
+};
+
+function readableText(hex: string) {
+  const value = hex.slice(1);
+  const r = Number.parseInt(value.slice(0, 2), 16);
+  const g = Number.parseInt(value.slice(2, 4), 16);
+  const b = Number.parseInt(value.slice(4, 6), 16);
+  return (r * 299 + g * 587 + b * 114) / 1000 > 145 ? "#153a35" : "#ffffff";
+}
+
+function HeroFrame({ children }: { children: ReactNode }) {
+  const { branding } = useBranding();
+  const style: HeroStyle = {
+    "--hero-text": branding.hero_text_color,
+    "--hero-accent": branding.hero_accent_color,
+    "--hero-supporting": branding.hero_supporting_color,
+    "--hero-primary-button": branding.hero_primary_button_color,
+    "--hero-primary-button-text": readableText(branding.hero_primary_button_color),
+    "--hero-secondary-button": branding.hero_secondary_button_color,
+  };
+  return <section className="relative overflow-hidden bg-brand-dark text-[var(--hero-text)]" style={style}>{children}</section>;
+}
 
 /** Optional super-user uploaded background image behind the green hero bar. */
 function HeroBackdrop() {
@@ -232,29 +264,29 @@ function SignedInHero() {
         : "Let's get your Pelotonia registration started.";
 
   return (
-    <section className="relative bg-[var(--brand-dark)] text-white overflow-hidden">
+    <HeroFrame>
       <HeroBackdrop />
       <div className="text-[var(--brand)]"><ArrowMotif /></div>
       <div className="mx-auto max-w-7xl px-4 py-12 sm:py-20 relative">
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium ring-1 ring-white/15">
-              <span className="h-1.5 w-1.5 rounded-full bg-[var(--brand)]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--hero-accent)]" />
               Welcome back
             </div>
             <h1 className="mt-6 text-3xl sm:text-5xl font-black tracking-tight leading-[1.08]">
-              Hi, {firstName}. <span className="text-[var(--brand)]">Let's ride.</span>
+              Hi, {firstName}. <span className="text-[var(--hero-accent)]">Let's ride.</span>
             </h1>
-            <p className="mt-4 text-base sm:text-lg leading-relaxed text-white/80">
+            <p className="mt-4 text-base sm:text-lg leading-relaxed text-[var(--hero-supporting)]">
               {nextSub}
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <Button asChild size="lg" className="bg-[var(--brand)] text-[var(--brand-foreground)] hover:bg-[var(--brand)]/90 h-12 px-6 text-base font-semibold">
+              <Button asChild size="lg" className="bg-[var(--hero-primary-button)] text-[var(--hero-primary-button-text)] hover:opacity-90 h-12 px-6 text-base font-semibold">
                 <Link to="/register" search={{ step: nextStepKey }}>
                   {nextLabel} <ArrowRight className="ml-1 h-4 w-4" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="h-12 px-6 text-base bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white">
+              <Button asChild size="lg" variant="outline" className="h-12 px-6 text-base bg-transparent border-[var(--hero-secondary-button)]/60 text-[var(--hero-secondary-button)] hover:bg-white/10 hover:text-[var(--hero-secondary-button)]">
                 <Link to="/team">See our progress</Link>
               </Button>
             </div>
@@ -290,37 +322,37 @@ function SignedInHero() {
           </Card>
         </div>
       </div>
-    </section>
+    </HeroFrame>
   );
 }
 
 function GuestHero() {
   return (
-    <section className="relative bg-[var(--brand-dark)] text-white overflow-hidden">
+    <HeroFrame>
       <HeroBackdrop />
       <div className="text-[var(--brand)]"><ArrowMotif /></div>
       <div className="mx-auto max-w-7xl px-4 py-16 sm:py-24 relative">
         <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium ring-1 ring-white/15">
-          <span className="h-1.5 w-1.5 rounded-full bg-[var(--brand)]" />
+          <span className="h-1.5 w-1.5 rounded-full bg-[var(--hero-accent)]" />
           Team Huntington · Pelotonia 2027
         </div>
         <h1 className="mt-8 text-4xl sm:text-6xl font-black tracking-tight leading-[1.08] max-w-5xl">
-          Your Team Huntington Pelotonia <span className="text-[var(--brand)]">Journey Starts Here.</span>
+          Your Team Huntington Pelotonia <span className="text-[var(--hero-accent)]">Journey Starts Here.</span>
         </h1>
-        <p className="mt-6 max-w-2xl text-base sm:text-lg leading-relaxed text-white/80">
+        <p className="mt-6 max-w-2xl text-base sm:text-lg leading-relaxed text-[var(--hero-supporting)]">
           One place to register, plan travel, rent a bike, pick apparel, and access support —
           guided step by step, saved as you go.
         </p>
         <div className="mt-10 flex flex-wrap gap-3">
-          <Button asChild size="lg" className="bg-[var(--brand)] text-[var(--brand-foreground)] hover:bg-[var(--brand)]/90 h-12 px-6 text-base font-semibold">
+          <Button asChild size="lg" className="bg-[var(--hero-primary-button)] text-[var(--hero-primary-button-text)] hover:opacity-90 h-12 px-6 text-base font-semibold">
             <Link to="/signin">Sign in to get started <ArrowRight className="ml-1 h-4 w-4" /></Link>
           </Button>
-          <Button asChild size="lg" variant="outline" className="h-12 px-6 text-base bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white">
+          <Button asChild size="lg" variant="outline" className="h-12 px-6 text-base bg-transparent border-[var(--hero-secondary-button)]/60 text-[var(--hero-secondary-button)] hover:bg-white/10 hover:text-[var(--hero-secondary-button)]">
             <Link to="/signin">View My Registration</Link>
           </Button>
         </div>
       </div>
-    </section>
+    </HeroFrame>
   );
 }
 
