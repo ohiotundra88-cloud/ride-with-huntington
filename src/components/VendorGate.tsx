@@ -22,7 +22,10 @@ export function VendorGate({ children }: { children: React.ReactNode }) {
     return <p className="mx-auto max-w-md px-4 py-24 text-center text-sm text-muted-foreground">Checking access…</p>;
   }
 
+  if (!error && data?.paused && !data.allowed) return <VendorCrmPaused />;
+
   if (error || !data?.allowed) {
+
     return (
       <div className="mx-auto max-w-md px-4 py-20 text-center">
         <ShieldAlert className="mx-auto h-10 w-10 text-[var(--brand-dark)]" />
