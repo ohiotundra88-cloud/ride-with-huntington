@@ -1,4 +1,6 @@
 import type { ComponentType } from 'react'
+import { template as teamAnnouncementTemplate } from './team-announcement'
+
 
 export interface TemplateEntry {
   component: ComponentType<any>
