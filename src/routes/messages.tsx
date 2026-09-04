@@ -214,7 +214,9 @@ function MessagesPage() {
   const sendExisting = useMutation({
     mutationFn: (id: string) => send({ data: { id } }),
     onSuccess: (r) => {
-      toast.success(`Sent to ${r.recipientCount} recipients`);
+      toast.success(
+        `Sent to ${r.recipientCount} recipients` + (r.emailsSent ? ` · ${r.emailsSent} emailed` : ""),
+      );
       qc.invalidateQueries({ queryKey: ["messages"] });
     },
     onError: (e: Error) => toast.error(e.message || "Couldn't send the message"),
