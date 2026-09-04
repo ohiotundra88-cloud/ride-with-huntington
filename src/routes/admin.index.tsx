@@ -79,7 +79,7 @@ function SuperUserDashboard() {
     >
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Active announcements" value={activeAnnouncements.length} />
-        <StatCard label="Published FAQs" value={"see FAQ manager"} sub="managed separately" href="/admin/faqs" />
+        <StatCard label="FAQs" value="Manage" sub="open the FAQ manager" href="/admin/faqs" />
         <StatCard label="Draft items" value={drafts.length} />
         <StatCard label="Team goal" value={`${formatCurrencyUSD(goalCurrent)} / ${formatCurrencyUSD(goalTarget)}`} sub={`${teamPct}% of goal${live ? " · live" : ""}`} />
       </div>
