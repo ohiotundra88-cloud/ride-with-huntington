@@ -548,7 +548,142 @@ function MessagesPage() {
                     </div>
                   </CardContent>
                 </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <Mail className="h-4 w-4" /> Email notification
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <label className="flex items-start gap-2.5">
+                      <Checkbox
+                        checked={emailNotify}
+                        onCheckedChange={(v) => setEmailNotify(v === true)}
+                        className="mt-0.5"
+                      />
+                      <span className="text-sm">
+                        Also email this announcement to everyone in the audience
+                        <span className="block text-xs text-muted-foreground">
+                          Recipients always see it in the Hub. Emails go out from the team address
+                          when you send.
+                        </span>
+                      </span>
+                    </label>
+
+                    {emailNotify && (
+                      <div className="space-y-3 border-t pt-4">
+                        <div className="space-y-2">
+                          <Label className="text-xs uppercase tracking-wide text-muted-foreground">
+                            Don't email these people (this send only)
+                          </Label>
+                          <div className="relative">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input className="pl-8" placeholder="Search a name or email"
+                              value={emailQuery} onChange={(e) => setEmailQuery(e.target.value)} />
+                          </div>
+                          {emailMatches.length > 0 && (
+                            <div className="rounded-md border divide-y">
+                              {emailMatches.map((p) => (
+                                <div key={p.userId} className="flex items-center justify-between gap-2 p-2">
+                                  <div className="min-w-0">
+                                    <p className="truncate text-sm font-medium">{p.name}</p>
+                                    <p className="truncate text-xs text-muted-foreground">{p.email}</p>
+                                  </div>
+                                  <Button size="sm" variant="outline" className="h-7 shrink-0 text-xs"
+                                    onClick={() => {
+                                      setEmailExclude((list) =>
+                                        list.includes(p.userId) ? list : [...list, p.userId],
+                                      );
+                                      setEmailQuery("");
+                                    }}>
+                                    Skip email
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          {emailExclude.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 pt-1">
+                              {emailExclude.map((id) => (
+                                <Badge key={`x-${id}`} variant="outline" className="gap-1">
+                                  <MailX className="h-3 w-3" /> {nameFor(id)}
+                                  <button type="button" aria-label="Remove"
+                                    onClick={() => setEmailExclude((l) => l.filter((x) => x !== id))}>
+                                    <X className="h-3 w-3" />
+                                  </button>
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="space-y-2 border-t pt-4">
+                          <Label className="text-xs uppercase tracking-wide text-muted-foreground">
+                            Permanent no-email list
+                          </Label>
+                          <p className="text-xs text-muted-foreground">
+                            These colleagues never receive announcement emails — they still see every
+                            announcement in the Hub.
+                          </p>
+                          {canTargetLeadership ? (
+                            <>
+                              <div className="relative">
+                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                <Input className="pl-8" placeholder="Add someone to the no-email list"
+                                  value={optOutQuery} onChange={(e) => setOptOutQuery(e.target.value)} />
+                              </div>
+                              {optOutMatches.length > 0 && (
+                                <div className="rounded-md border divide-y">
+                                  {optOutMatches.map((p) => (
+                                    <div key={p.userId} className="flex items-center justify-between gap-2 p-2">
+                                      <div className="min-w-0">
+                                        <p className="truncate text-sm font-medium">{p.name}</p>
+                                        <p className="truncate text-xs text-muted-foreground">{p.email}</p>
+                                      </div>
+                                      <Button size="sm" variant="outline" className="h-7 shrink-0 text-xs"
+                                        disabled={changeOptOut.isPending}
+                                        onClick={() => {
+                                          changeOptOut.mutate({ userId: p.userId, optOut: true });
+                                          setOptOutQuery("");
+                                        }}>
+                                        Never email
+                                      </Button>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <p className="text-xs text-muted-foreground">
+                              Only co-chairs and super users can change this list.
+                            </p>
+                          )}
+                          {permanentOptOuts.length === 0 ? (
+                            <p className="text-xs text-muted-foreground">No one is on the list yet.</p>
+                          ) : (
+                            <div className="flex flex-wrap gap-1.5">
+                              {permanentOptOuts.map((p) => (
+                                <Badge key={`o-${p.userId}`} variant="secondary" className="gap-1">
+                                  <MailX className="h-3 w-3" /> {p.name}
+                                  {canTargetLeadership && (
+                                    <button type="button" aria-label={`Remove ${p.name}`}
+                                      disabled={changeOptOut.isPending}
+                                      onClick={() => changeOptOut.mutate({ userId: p.userId, optOut: false })}>
+                                      <X className="h-3 w-3" />
+                                    </button>
+                                  )}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               </div>
+
 
               {/* ---- live preview rail ---- */}
               <div className="space-y-4">
