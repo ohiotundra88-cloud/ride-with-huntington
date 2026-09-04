@@ -5,12 +5,13 @@ import { AdminShell } from "@/components/AdminShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ImageIcon, Upload, Trash2, Save } from "lucide-react";
+import { ImageIcon, Upload, Trash2, Save, RotateCcw, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { useBranding, brandingQueryKey } from "@/lib/useBranding";
-import { HERO_POSITIONS, MAX_BRANDING_BYTES, brandingImageUrl, type SiteBranding } from "@/lib/branding.shared";
+import { DEFAULT_HERO_COLORS, HERO_POSITIONS, MAX_BRANDING_BYTES, brandingImageUrl, type SiteBranding } from "@/lib/branding.shared";
 import { removeBrandingImage, saveBrandingSettings, uploadBrandingImage } from "@/lib/branding.functions";
 
 export const Route = createFileRoute("/admin/branding")({
@@ -32,18 +33,60 @@ function fileToBase64(file: File) {
   });
 }
 
+type ColorKey = keyof typeof DEFAULT_HERO_COLORS;
+
+const colorChoices: { key: ColorKey; label: string }[] = [
+  { key: "hero_text_color", label: "Main text" },
+  { key: "hero_accent_color", label: "Highlighted text" },
+  { key: "hero_supporting_color", label: "Supporting text" },
+  { key: "hero_primary_button_color", label: "Primary button" },
+  { key: "hero_secondary_button_color", label: "Secondary button" },
+];
+
+function rgb(hex: string) {
+  return [1, 3, 5].map((start) => Number.parseInt(hex.slice(start, start + 2), 16) / 255);
+}
+
+function luminance(hex: string) {
+  return rgb(hex).map((value) => value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4)
+    .reduce((sum, value, index) => sum + value * [0.2126, 0.7152, 0.0722][index], 0);
+}
+
+function contrast(a: string, b: string) {
+  const [light, dark] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (light + 0.05) / (dark + 0.05);
+}
+
+function readableText(hex: string) {
+  return contrast(hex, "#ffffff") >= contrast(hex, "#153a35") ? "#ffffff" : "#153a35";
+}
+
 function BrandingAdmin() {
   const { branding, heroUrl, logoUrl } = useBranding();
   const qc = useQueryClient();
   const [overlay, setOverlay] = useState(branding.hero_overlay);
   const [position, setPosition] = useState(branding.hero_position);
+  const [colors, setColors] = useState<Record<ColorKey, string>>(() => ({
+    hero_text_color: branding.hero_text_color,
+    hero_accent_color: branding.hero_accent_color,
+    hero_supporting_color: branding.hero_supporting_color,
+    hero_primary_button_color: branding.hero_primary_button_color,
+    hero_secondary_button_color: branding.hero_secondary_button_color,
+  }));
   const heroInput = useRef<HTMLInputElement>(null);
   const logoInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setOverlay(branding.hero_overlay);
     setPosition(branding.hero_position);
-  }, [branding.hero_overlay, branding.hero_position]);
+    setColors({
+      hero_text_color: branding.hero_text_color,
+      hero_accent_color: branding.hero_accent_color,
+      hero_supporting_color: branding.hero_supporting_color,
+      hero_primary_button_color: branding.hero_primary_button_color,
+      hero_secondary_button_color: branding.hero_secondary_button_color,
+    });
+  }, [branding]);
 
   const applyResult = (row: SiteBranding) => qc.setQueryData(brandingQueryKey, row);
 
@@ -66,12 +109,16 @@ function BrandingAdmin() {
   });
 
   const saveSettings = useMutation({
-    mutationFn: () => saveBrandingSettings({ data: { hero_overlay: overlay, hero_position: position as any } }),
+    mutationFn: () => saveBrandingSettings({ data: { hero_overlay: overlay, hero_position: position as typeof HERO_POSITIONS[number], ...colors } }),
     onSuccess: (row) => { applyResult(row); toast.success("Hero settings saved"); },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const previewHero = brandingImageUrl({ ...branding }, "hero");
+  const previewBackground = "#153a35";
+  const lowContrast = colorChoices.filter(({ key }) =>
+    key !== "hero_primary_button_color" && contrast(colors[key], previewBackground) < 3,
+  );
 
   return (
     <AdminShell
@@ -83,15 +130,20 @@ function BrandingAdmin() {
         <Card>
           <CardHeader><CardTitle className="text-base">Landing page hero background</CardTitle></CardHeader>
           <CardContent className="space-y-4">
-            <div className="relative overflow-hidden rounded-lg border bg-[var(--brand-dark)] text-white h-40">
+            <div className="relative h-56 overflow-hidden rounded-lg border bg-brand-dark" style={{ color: colors.hero_text_color }}>
               {previewHero && (
                 <>
                   <img src={previewHero} alt="Hero preview" className="h-full w-full object-cover" style={{ objectPosition: position }} />
                   <div className="absolute inset-0 bg-[var(--brand-dark)]" style={{ opacity: overlay / 100 }} />
                 </>
               )}
-              <div className="absolute inset-0 grid place-items-center px-4 text-center">
-                <span className="text-lg font-black">Your Team Huntington Pelotonia Journey</span>
+              <div className="absolute inset-0 flex flex-col items-start justify-center px-5 text-left">
+                <span className="text-xl font-black">Hi, Chris. <span style={{ color: colors.hero_accent_color }}>Let's ride.</span></span>
+                <span className="mt-2 text-sm" style={{ color: colors.hero_supporting_color }}>You're all set for Ride Weekend.</span>
+                <div className="mt-4 flex gap-2">
+                  <span className="rounded-md px-3 py-2 text-xs font-semibold" style={{ backgroundColor: colors.hero_primary_button_color, color: readableText(colors.hero_primary_button_color) }}>Review confirmation</span>
+                  <span className="rounded-md border px-3 py-2 text-xs font-semibold" style={{ borderColor: colors.hero_secondary_button_color, color: colors.hero_secondary_button_color }}>See progress</span>
+                </div>
               </div>
             </div>
 
@@ -99,6 +151,34 @@ function BrandingAdmin() {
               <Label>Darkening overlay — {overlay}%</Label>
               <Slider value={[overlay]} min={0} max={95} step={5} onValueChange={(v) => setOverlay(v[0] ?? 0)} />
               <p className="text-xs text-muted-foreground">Keeps headline text readable over a photo.</p>
+            </div>
+
+            <div className="space-y-3 border-t pt-4">
+              <div className="flex items-center justify-between gap-3">
+                <Label>Banner colors</Label>
+                <Button type="button" size="sm" variant="ghost" onClick={() => setColors({ ...DEFAULT_HERO_COLORS })}>
+                  <RotateCcw className="mr-1.5 h-3.5 w-3.5" /> Restore defaults
+                </Button>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {colorChoices.map(({ key, label }) => (
+                  <label key={key} className="flex items-center gap-3 rounded-md border p-2.5">
+                    <Input type="color" value={colors[key]} aria-label={`${label} color`}
+                      onChange={(event) => setColors((current) => ({ ...current, [key]: event.target.value }))}
+                      className="h-9 w-12 cursor-pointer p-1" />
+                    <span className="min-w-0">
+                      <span className="block text-sm font-medium">{label}</span>
+                      <span className="block text-xs uppercase text-muted-foreground">{colors[key]}</span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+              {lowContrast.length > 0 && (
+                <div className="flex gap-2 rounded-md border border-destructive/30 bg-destructive/5 p-3 text-xs text-foreground">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+                  <span>Some selected colors may be difficult to read on the dark banner. Check the preview before saving.</span>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">

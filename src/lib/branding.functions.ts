@@ -45,7 +45,16 @@ export const saveBrandingSettings = createServerFn({ method: "POST" })
     await assertBrandingManager(context as any);
     const { data: row, error } = await context.supabase
       .from("site_branding")
-      .update({ hero_overlay: data.hero_overlay, hero_position: data.hero_position, updated_by: context.userId })
+      .update({
+        hero_overlay: data.hero_overlay,
+        hero_position: data.hero_position,
+        hero_text_color: data.hero_text_color,
+        hero_accent_color: data.hero_accent_color,
+        hero_supporting_color: data.hero_supporting_color,
+        hero_primary_button_color: data.hero_primary_button_color,
+        hero_secondary_button_color: data.hero_secondary_button_color,
+        updated_by: context.userId,
+      })
       .eq("id", 1)
       .select(BRANDING_COLUMNS)
       .single();
