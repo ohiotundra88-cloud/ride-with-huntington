@@ -231,18 +231,13 @@ function RiderProgressPage() {
 
   if (access.isPending) {
     return (
-      <>
-        <AppNav />
-        <p className="mx-auto max-w-md px-4 py-24 text-center text-sm text-muted-foreground">Checking access…</p>
-      </>
+      <p className="mx-auto max-w-md px-4 py-24 text-center text-sm text-muted-foreground">Checking access…</p>
     );
   }
 
   if (!allowed) {
     return (
-      <>
-        <AppNav />
-        <div className="mx-auto max-w-md px-4 py-20 text-center">
+      <div className="mx-auto max-w-md px-4 py-20 text-center">
           <ShieldAlert className="mx-auto h-10 w-10 text-[var(--brand-dark)]" />
           <h1 className="mt-4 text-xl font-bold text-[var(--brand-dark)]">Rider progress is restricted</h1>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -251,15 +246,12 @@ function RiderProgressPage() {
           <Button asChild className="mt-6 bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90">
             <Link to="/">Back to the hub</Link>
           </Button>
-        </div>
-      </>
+      </div>
     );
   }
 
   return (
-    <>
-      <AppNav />
-      <main className="mx-auto max-w-7xl px-4 py-8">
+    <main className="mx-auto max-w-7xl px-4 py-8">
         <h1 className="text-2xl font-bold text-[var(--brand-dark)]">Rider progress</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Search the roster and see registration, hotel, bike and live fundraising progress.
