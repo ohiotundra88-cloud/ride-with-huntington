@@ -12,7 +12,7 @@ import { useAdmin, type FeatureFlags } from "@/lib/admin-store";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { RotateCcw, Lock, ShieldAlert, Globe } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { setFundraiserPagesEnabled } from "@/lib/site-settings.functions";
+import { setFundraiserPagesEnabled, setVendorCrmEnabled } from "@/lib/site-settings.functions";
 import { useSiteSettings, SITE_SETTINGS_KEY } from "@/lib/useSiteSettings";
 import { toast } from "sonner";
 
