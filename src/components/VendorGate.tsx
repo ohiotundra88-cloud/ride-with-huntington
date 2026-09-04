@@ -4,6 +4,8 @@ import { ShieldAlert } from "lucide-react";
 import { getVendorAccess } from "@/lib/vendors.functions";
 import type { VendorAccess } from "@/lib/vendors.shared";
 import { Button } from "@/components/ui/button";
+import { VendorCrmPaused } from "@/components/VendorCrmPaused";
+
 
 export function useVendorAccess() {
   return useQuery<VendorAccess>({
