@@ -103,7 +103,7 @@ export function SuperUserBar() {
           <ShieldCheck className="h-4 w-4" /> Super User Mode
         </span>
         <span className="hidden sm:inline rounded-full bg-black/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide">
-          Demo access — production authentication required
+          Elevated access — every change is recorded in the audit log
         </span>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -142,9 +142,8 @@ export function AdminShell({ title, description, actions, children }: {
         <ShieldCheck className="mx-auto h-10 w-10 text-[var(--brand-dark)]" />
         <h1 className="mt-4 text-2xl font-bold text-[var(--brand-dark)]">Super User access required</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Open the profile menu and choose "Super User Mode" to enter the administration experience.
-          <br />
-          Demo access — production authentication required.
+          Open the profile menu and choose "Enter Super User Mode" to open the administration
+          experience. This area is limited to accounts with the Super User role.
         </p>
         <Button asChild className="mt-6"><Link to="/"><Home className="mr-1 h-4 w-4" /> Go home</Link></Button>
       </div>

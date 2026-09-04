@@ -75,7 +75,7 @@ function SuperUserDashboard() {
   return (
     <AdminShell
       title="Super User dashboard"
-      description="Centralized control for Team Huntington Hub content, goals, notifications, and configuration. Demo access — production requires authenticated identity and access management."
+      description="Centralized control for Team Huntington Hub content, goals, notifications, and configuration. Every change here applies to everyone and is recorded in the audit log."
     >
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Active announcements" value={activeAnnouncements.length} />
