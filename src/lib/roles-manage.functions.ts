@@ -10,7 +10,7 @@ const roleSchema = z.enum(MANAGEABLE_ROLES);
 
 export const listRoleMembers = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d) => z.object({ role: roleSchema }).parse(d))
+  .inputValidator((d) => z.object({ role: roleSchema }).parse(d))
   .handler(async ({ data, context }): Promise<RoleMemberRow[]> => {
     const { listMembersOfRole } = await import("@/lib/roles-admin.server");
     return listMembersOfRole(context, data.role);
@@ -18,7 +18,7 @@ export const listRoleMembers = createServerFn({ method: "POST" })
 
 export const grantRoleByEmail = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d) => z.object({ role: roleSchema, email: z.string().email() }).parse(d))
+  .inputValidator((d) => z.object({ role: roleSchema, email: z.string().email() }).parse(d))
   .handler(async ({ data, context }) => {
     const { grantRoleGuarded } = await import("@/lib/roles-admin.server");
     return grantRoleGuarded(context, data.email, data.role);
@@ -26,7 +26,7 @@ export const grantRoleByEmail = createServerFn({ method: "POST" })
 
 export const revokeRoleFromUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d) => z.object({ role: roleSchema, user_id: z.string().uuid() }).parse(d))
+  .inputValidator((d) => z.object({ role: roleSchema, user_id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { revokeRoleGuarded } = await import("@/lib/roles-admin.server");
     return revokeRoleGuarded(context, data.user_id, data.role);
@@ -40,7 +40,7 @@ export interface RegisteredUserRow {
 
 export const searchRegisteredUsers = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d) => z.object({ query: z.string().trim().min(2).max(120) }).parse(d))
+  .inputValidator((d) => z.object({ query: z.string().trim().min(2).max(120) }).parse(d))
   .handler(async ({ data, context }): Promise<RegisteredUserRow[]> => {
     const { assertAdmin } = await import("@/lib/roles-admin.server");
     await assertAdmin(context);
