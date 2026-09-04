@@ -1021,6 +1021,7 @@ export type Database = {
           manager: string | null
           market: string | null
           mobile: string | null
+          password_set_at: string | null
           segment: string | null
           updated_at: string
         }
@@ -1038,6 +1039,7 @@ export type Database = {
           manager?: string | null
           market?: string | null
           mobile?: string | null
+          password_set_at?: string | null
           segment?: string | null
           updated_at?: string
         }
@@ -1055,7 +1057,35 @@ export type Database = {
           manager?: string | null
           market?: string | null
           mobile?: string | null
+          password_set_at?: string | null
           segment?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      signin_attempts: {
+        Row: {
+          created_at: string
+          email_key: string
+          failures: number
+          id: string
+          locked_until: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email_key: string
+          failures?: number
+          id?: string
+          locked_until?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email_key?: string
+          failures?: number
+          id?: string
+          locked_until?: string | null
           updated_at?: string
         }
         Relationships: []
