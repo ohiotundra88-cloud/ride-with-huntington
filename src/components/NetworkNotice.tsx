@@ -14,8 +14,12 @@ export function NetworkNotice() {
 
   useEffect(() => {
     let cancelled = false;
+    let timedOut = false;
     const ctl = new AbortController();
-    const t = setTimeout(() => ctl.abort(), 6000);
+    const t = setTimeout(() => {
+      timedOut = true;
+      ctl.abort();
+    }, 6000);
 
     fetch(`${window.location.origin}/api/public/sb/auth/v1/health`, {
       headers: KEY ? { apikey: KEY } : undefined,
@@ -26,10 +30,10 @@ export function NetworkNotice() {
         if (!cancelled && !res.ok) setBlocked(true);
       })
       .catch((err: unknown) => {
-        // An abort is either our own unmount cleanup or the 6s timeout — the
-        // former says nothing about connectivity, so never flag it.
+        // A hung request (timeout) means the network really is blocking us. An
+        // abort from our own unmount cleanup says nothing, so never flag that.
         const aborted = err instanceof DOMException && err.name === "AbortError";
-        if (!cancelled && !aborted) setBlocked(true);
+        if (!cancelled && (!aborted || timedOut)) setBlocked(true);
       })
       .finally(() => clearTimeout(t));
 
@@ -39,6 +43,7 @@ export function NetworkNotice() {
       ctl.abort();
     };
   }, []);
+
 
   if (!blocked) return null;
 
