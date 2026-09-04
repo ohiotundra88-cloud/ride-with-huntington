@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
-  Send, ShieldAlert, Loader2, Users, Copy, Download, Trash2, Pencil, Clock, Search, X,
+  Send, ShieldAlert, Loader2, Users, Copy, Download, Trash2, Pencil, Clock, Search, X, Mail, MailX,
 } from "lucide-react";
 import {
   MESSAGE_CATEGORIES, MESSAGE_PRIORITIES, PARTICIPATION_OPTIONS, PELOTONIA_FLAGS,
@@ -24,9 +24,9 @@ import {
   type AudienceRules, type MessageSummary,
 } from "@/lib/messages.shared";
 import {
-  deleteMessage, getAudienceOptions, getMessagingAccess, listMessageRecipients,
-  listMessages, listRosterPeople, previewAudience, processDueMessages, saveMessage,
-  sendMessageNow,
+  deleteMessage, getAudienceOptions, getMessagingAccess, listEmailOptOuts,
+  listMessageRecipients, listMessages, listRosterPeople, previewAudience,
+  processDueMessages, saveMessage, sendMessageNow, setEmailOptOut,
 } from "@/lib/messages.functions";
 
 export const Route = createFileRoute("/messages")({
@@ -137,6 +137,10 @@ function MessagesPage() {
   const [category, setCategory] = useState<string>("general");
   const [scheduledAt, setScheduledAt] = useState("");
   const [audience, setAudience] = useState<AudienceRules>(emptyAudience());
+  const [emailNotify, setEmailNotify] = useState(false);
+  const [emailExclude, setEmailExclude] = useState<string[]>([]);
+  const [emailQuery, setEmailQuery] = useState("");
+  const [optOutQuery, setOptOutQuery] = useState("");
   const [personQuery, setPersonQuery] = useState("");
   const [tab, setTab] = useState("compose");
   const [recipientsFor, setRecipientsFor] = useState<MessageSummary | null>(null);
@@ -160,6 +164,7 @@ function MessagesPage() {
     setTitle(""); setBody(""); setCtaLabel(""); setCtaHref("");
     setPriority("info"); setCategory("general"); setScheduledAt("");
     setAudience(emptyAudience());
+    setEmailNotify(false); setEmailExclude([]); setEmailQuery("");
   };
 
   const save = useServerFn(saveMessage);
@@ -171,7 +176,7 @@ function MessagesPage() {
         data: {
           id: editingId, title, body, ctaLabel, ctaHref, priority, category,
           scheduledAt: scheduledAt ? new Date(scheduledAt).toISOString() : null,
-          audience,
+          audience, emailNotify, emailExcludeUserIds: emailExclude,
         },
       }),
     onSuccess: () => {
@@ -188,13 +193,17 @@ function MessagesPage() {
       const saved = await save({
         data: {
           id: editingId, title, body, ctaLabel, ctaHref, priority, category,
-          scheduledAt: null, audience,
+          scheduledAt: null, audience, emailNotify, emailExcludeUserIds: emailExclude,
         },
       });
       return send({ data: { id: saved.id } });
     },
     onSuccess: (r) => {
-      toast.success(`Sent to ${r.recipientCount} ${r.recipientCount === 1 ? "person" : "people"}`);
+      toast.success(
+        `Sent to ${r.recipientCount} ${r.recipientCount === 1 ? "person" : "people"}` +
+          (r.emailsSent ? ` · ${r.emailsSent} emailed` : "") +
+          (r.emailsSkipped ? ` · ${r.emailsSkipped} skipped` : ""),
+      );
       qc.invalidateQueries({ queryKey: ["messages"] });
       resetCompose();
       setTab("history");
@@ -205,7 +214,9 @@ function MessagesPage() {
   const sendExisting = useMutation({
     mutationFn: (id: string) => send({ data: { id } }),
     onSuccess: (r) => {
-      toast.success(`Sent to ${r.recipientCount} recipients`);
+      toast.success(
+        `Sent to ${r.recipientCount} recipients` + (r.emailsSent ? ` · ${r.emailsSent} emailed` : ""),
+      );
       qc.invalidateQueries({ queryKey: ["messages"] });
     },
     onError: (e: Error) => toast.error(e.message || "Couldn't send the message"),
@@ -219,6 +230,22 @@ function MessagesPage() {
       qc.invalidateQueries({ queryKey: ["messages"] });
     },
     onError: (e: Error) => toast.error(e.message || "Couldn't delete the message"),
+  });
+
+  const optOuts = useQuery({
+    queryKey: ["email-opt-outs"],
+    queryFn: () => listEmailOptOuts(),
+    enabled: allowed,
+  });
+  const setOptOutFn = useServerFn(setEmailOptOut);
+  const changeOptOut = useMutation({
+    mutationFn: (v: { userId: string; optOut: boolean }) => setOptOutFn({ data: v }),
+    onSuccess: (_r, v) => {
+      toast.success(v.optOut ? "Added to the no-email list" : "Removed from the no-email list");
+      qc.invalidateQueries({ queryKey: ["email-opt-outs"] });
+      qc.invalidateQueries({ queryKey: ["roster-people"] });
+    },
+    onError: (e: Error) => toast.error(e.message || "Couldn't update the no-email list"),
   });
 
   const people = previewQuery.data?.people ?? [];
@@ -247,6 +274,8 @@ function MessagesPage() {
     setPriority(m.priority); setCategory(m.category);
     setScheduledAt(m.scheduledAt ? m.scheduledAt.slice(0, 16) : "");
     setAudience(m.audience);
+    setEmailNotify(m.emailNotify);
+    setEmailExclude(m.emailExcludeUserIds ?? []);
     setTab("compose");
   };
 
@@ -264,6 +293,17 @@ function MessagesPage() {
       .filter((p) => p.name.toLowerCase().includes(needle) || p.email.toLowerCase().includes(needle))
       .slice(0, 8);
   }, [roster.data, personQuery]);
+
+  const searchRoster = (q: string) => {
+    const needle = q.trim().toLowerCase();
+    if (!needle) return [];
+    return (roster.data ?? [])
+      .filter((p) => p.name.toLowerCase().includes(needle) || p.email.toLowerCase().includes(needle))
+      .slice(0, 8);
+  };
+  const emailMatches = useMemo(() => searchRoster(emailQuery), [roster.data, emailQuery]);
+  const optOutMatches = useMemo(() => searchRoster(optOutQuery), [roster.data, optOutQuery]);
+  const permanentOptOuts = optOuts.data ?? [];
 
   const nameFor = (userId: string) =>
     (roster.data ?? []).find((p) => p.userId === userId)?.name ?? userId.slice(0, 8);
@@ -510,7 +550,142 @@ function MessagesPage() {
                     </div>
                   </CardContent>
                 </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <Mail className="h-4 w-4" /> Email notification
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <label className="flex items-start gap-2.5">
+                      <Checkbox
+                        checked={emailNotify}
+                        onCheckedChange={(v) => setEmailNotify(v === true)}
+                        className="mt-0.5"
+                      />
+                      <span className="text-sm">
+                        Also email this announcement to everyone in the audience
+                        <span className="block text-xs text-muted-foreground">
+                          Recipients always see it in the Hub. Emails go out from the team address
+                          when you send.
+                        </span>
+                      </span>
+                    </label>
+
+                    {emailNotify && (
+                      <div className="space-y-3 border-t pt-4">
+                        <div className="space-y-2">
+                          <Label className="text-xs uppercase tracking-wide text-muted-foreground">
+                            Don't email these people (this send only)
+                          </Label>
+                          <div className="relative">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input className="pl-8" placeholder="Search a name or email"
+                              value={emailQuery} onChange={(e) => setEmailQuery(e.target.value)} />
+                          </div>
+                          {emailMatches.length > 0 && (
+                            <div className="rounded-md border divide-y">
+                              {emailMatches.map((p) => (
+                                <div key={p.userId} className="flex items-center justify-between gap-2 p-2">
+                                  <div className="min-w-0">
+                                    <p className="truncate text-sm font-medium">{p.name}</p>
+                                    <p className="truncate text-xs text-muted-foreground">{p.email}</p>
+                                  </div>
+                                  <Button size="sm" variant="outline" className="h-7 shrink-0 text-xs"
+                                    onClick={() => {
+                                      setEmailExclude((list) =>
+                                        list.includes(p.userId) ? list : [...list, p.userId],
+                                      );
+                                      setEmailQuery("");
+                                    }}>
+                                    Skip email
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          {emailExclude.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 pt-1">
+                              {emailExclude.map((id) => (
+                                <Badge key={`x-${id}`} variant="outline" className="gap-1">
+                                  <MailX className="h-3 w-3" /> {nameFor(id)}
+                                  <button type="button" aria-label="Remove"
+                                    onClick={() => setEmailExclude((l) => l.filter((x) => x !== id))}>
+                                    <X className="h-3 w-3" />
+                                  </button>
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="space-y-2 border-t pt-4">
+                          <Label className="text-xs uppercase tracking-wide text-muted-foreground">
+                            Permanent no-email list
+                          </Label>
+                          <p className="text-xs text-muted-foreground">
+                            These colleagues never receive announcement emails — they still see every
+                            announcement in the Hub.
+                          </p>
+                          {canTargetLeadership ? (
+                            <>
+                              <div className="relative">
+                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                <Input className="pl-8" placeholder="Add someone to the no-email list"
+                                  value={optOutQuery} onChange={(e) => setOptOutQuery(e.target.value)} />
+                              </div>
+                              {optOutMatches.length > 0 && (
+                                <div className="rounded-md border divide-y">
+                                  {optOutMatches.map((p) => (
+                                    <div key={p.userId} className="flex items-center justify-between gap-2 p-2">
+                                      <div className="min-w-0">
+                                        <p className="truncate text-sm font-medium">{p.name}</p>
+                                        <p className="truncate text-xs text-muted-foreground">{p.email}</p>
+                                      </div>
+                                      <Button size="sm" variant="outline" className="h-7 shrink-0 text-xs"
+                                        disabled={changeOptOut.isPending}
+                                        onClick={() => {
+                                          changeOptOut.mutate({ userId: p.userId, optOut: true });
+                                          setOptOutQuery("");
+                                        }}>
+                                        Never email
+                                      </Button>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <p className="text-xs text-muted-foreground">
+                              Only co-chairs and super users can change this list.
+                            </p>
+                          )}
+                          {permanentOptOuts.length === 0 ? (
+                            <p className="text-xs text-muted-foreground">No one is on the list yet.</p>
+                          ) : (
+                            <div className="flex flex-wrap gap-1.5">
+                              {permanentOptOuts.map((p) => (
+                                <Badge key={`o-${p.userId}`} variant="secondary" className="gap-1">
+                                  <MailX className="h-3 w-3" /> {p.name}
+                                  {canTargetLeadership && (
+                                    <button type="button" aria-label={`Remove ${p.name}`}
+                                      disabled={changeOptOut.isPending}
+                                      onClick={() => changeOptOut.mutate({ userId: p.userId, optOut: false })}>
+                                      <X className="h-3 w-3" />
+                                    </button>
+                                  )}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               </div>
+
 
               {/* ---- live preview rail ---- */}
               <div className="space-y-4">

@@ -98,6 +98,8 @@ export const saveMessage = createServerFn({ method: "POST" })
       category: string;
       scheduledAt?: string | null;
       audience: unknown;
+      emailNotify?: boolean;
+      emailExcludeUserIds?: unknown;
     }) => {
       const draft = {
         title: String(input?.title ?? "").trim(),
@@ -126,6 +128,10 @@ export const saveMessage = createServerFn({ method: "POST" })
         category,
         scheduledAt: scheduledAt ? scheduledAt.toISOString() : null,
         audience: normalizeAudience(input?.audience),
+        emailNotify: input?.emailNotify === true,
+        emailExcludeUserIds: Array.isArray(input?.emailExcludeUserIds)
+          ? input.emailExcludeUserIds.map((x) => String(x)).filter(Boolean)
+          : [],
       };
     },
   )
@@ -145,6 +151,8 @@ export const saveMessage = createServerFn({ method: "POST" })
       status: data.scheduledAt ? "scheduled" : "draft",
       scheduled_at: data.scheduledAt,
       audience: data.audience as never,
+      email_notify: data.emailNotify,
+      email_exclude_user_ids: data.emailExcludeUserIds as never,
     };
 
     if (data.id) {
@@ -183,10 +191,47 @@ export const sendMessageNow = createServerFn({ method: "POST" })
     return { id };
   })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ data, context }): Promise<{ recipientCount: number }> => {
+  .handler(async ({ data, context }): Promise<{
+    recipientCount: number;
+    emailsSent: number;
+    emailsSkipped: number;
+  }> => {
     await requireSender(context.supabase, context.userId);
     const email = String((context.claims as { email?: string } | null)?.email ?? "");
     return deliverMessage(context.supabase, data.id, email);
+  });
+
+/** Colleagues permanently excluded from announcement emails. */
+export const listEmailOptOuts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<{ userId: string; name: string; email: string }[]> => {
+    await requireSender(context.supabase, context.userId);
+    const roster = await buildAudienceRoster();
+    return roster
+      .filter((p) => p.emailOptOut)
+      .map((p) => ({ userId: p.userId, name: p.name, email: p.email }));
+  });
+
+/** Adds or removes someone from the permanent no-email list (leadership only). */
+export const setEmailOptOut = createServerFn({ method: "POST" })
+  .inputValidator((input: { userId: string; optOut: boolean }) => {
+    const userId = String(input?.userId ?? "").trim();
+    if (!userId) throw new Error("A person is required.");
+    return { userId, optOut: input?.optOut === true };
+  })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    const access = await requireSender(context.supabase, context.userId);
+    if (!access.canTargetLeadership) {
+      throw new Error("Only co-chairs and super users can change the no-email list.");
+    }
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("profiles")
+      .update({ email_opt_out: data.optOut })
+      .eq("id", data.userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
 
 /** Sends any scheduled message whose time has arrived. */

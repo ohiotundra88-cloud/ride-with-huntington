@@ -189,6 +189,8 @@ export interface AudiencePerson {
   riderOnPelotonia: boolean;
   volunteerOnPelotonia: boolean;
   raised: number | null;
+  /** Permanently excluded from announcement emails (still sees them in the Hub). */
+  emailOptOut: boolean;
 }
 
 export interface MessageSummary {
@@ -200,6 +202,10 @@ export interface MessageSummary {
   priority: MessagePriority;
   category: MessageCategory;
   status: MessageStatus;
+  emailNotify: boolean;
+  emailExcludeUserIds: string[];
+  emailSentCount: number;
+  emailSkippedCount: number;
   audience: AudienceRules;
   audienceSummary: string;
   recipientCount: number;

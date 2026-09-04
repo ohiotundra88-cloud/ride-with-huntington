@@ -932,6 +932,10 @@ export type Database = {
           created_by_email: string
           cta_href: string
           cta_label: string
+          email_exclude_user_ids: Json
+          email_notify: boolean
+          email_sent_count: number
+          email_skipped_count: number
           id: string
           priority: string
           recipient_count: number
@@ -950,6 +954,10 @@ export type Database = {
           created_by_email?: string
           cta_href?: string
           cta_label?: string
+          email_exclude_user_ids?: Json
+          email_notify?: boolean
+          email_sent_count?: number
+          email_skipped_count?: number
           id?: string
           priority?: string
           recipient_count?: number
@@ -968,6 +976,10 @@ export type Database = {
           created_by_email?: string
           cta_href?: string
           cta_label?: string
+          email_exclude_user_ids?: Json
+          email_notify?: boolean
+          email_sent_count?: number
+          email_skipped_count?: number
           id?: string
           priority?: string
           recipient_count?: number
@@ -1042,6 +1054,7 @@ export type Database = {
           consent: boolean
           created_at: string
           email: string | null
+          email_opt_out: boolean
           full_name: string | null
           has_vendor_dashboard_access: boolean
           id: string
@@ -1060,6 +1073,7 @@ export type Database = {
           consent?: boolean
           created_at?: string
           email?: string | null
+          email_opt_out?: boolean
           full_name?: string | null
           has_vendor_dashboard_access?: boolean
           id: string
@@ -1078,6 +1092,7 @@ export type Database = {
           consent?: boolean
           created_at?: string
           email?: string | null
+          email_opt_out?: boolean
           full_name?: string | null
           has_vendor_dashboard_access?: boolean
           id?: string

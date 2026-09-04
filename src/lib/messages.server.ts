@@ -33,7 +33,7 @@ export async function buildAudienceRoster(): Promise<AudiencePerson[]> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
   const [{ data: profiles }, { data: participants }, { data: roleRows }] = await Promise.all([
-    supabaseAdmin.from("profiles").select("id, email, full_name"),
+    supabaseAdmin.from("profiles").select("id, email, full_name, email_opt_out"),
     supabaseAdmin
       .from("participants")
       .select("user_id, participation, pelotonia, travel, bike, apparel, address"),
@@ -98,6 +98,7 @@ export async function buildAudienceRoster(): Promise<AudiencePerson[]> {
       riderOnPelotonia: !!member && flag(member["is_rider"]),
       volunteerOnPelotonia: !!member && flag(member["is_volunteer"]),
       raised: member ? num(member["raised"]) : null,
+      emailOptOut: (profile as { email_opt_out?: boolean }).email_opt_out === true,
     };
   });
 }
@@ -288,6 +289,12 @@ export function mapMessageRow(row: Record<string, unknown>, readCount = 0): Mess
     audience,
     audienceSummary: describeAudience(audience),
     recipientCount: Number(row["recipient_count"] ?? 0),
+    emailNotify: row["email_notify"] === true,
+    emailExcludeUserIds: Array.isArray(row["email_exclude_user_ids"])
+      ? (row["email_exclude_user_ids"] as unknown[]).map((x) => String(x)).filter(Boolean)
+      : [],
+    emailSentCount: Number(row["email_sent_count"] ?? 0),
+    emailSkippedCount: Number(row["email_skipped_count"] ?? 0),
     readCount,
     scheduledAt: (row["scheduled_at"] as string | null) ?? null,
     sentAt: (row["sent_at"] as string | null) ?? null,
@@ -307,7 +314,7 @@ export async function deliverMessage(
   supabase: AnySupabase,
   messageId: string,
   actorEmail: string,
-): Promise<{ recipientCount: number }> {
+): Promise<{ recipientCount: number; emailsSent: number; emailsSkipped: number }> {
   const { data: row, error } = await supabase
     .from("messages")
     .select("*")
@@ -332,12 +339,38 @@ export async function deliverMessage(
   );
   if (insertError) throw new Error(insertError.message);
 
+  // Optional email notification of the same announcement, honouring both the
+  // per-send skip list and each colleague's permanent no-email preference.
+  let emailsSent = 0;
+  let emailsSkipped = 0;
+  if (row.email_notify === true) {
+    const skip = new Set(
+      Array.isArray(row.email_exclude_user_ids)
+        ? (row.email_exclude_user_ids as unknown[]).map((x) => String(x))
+        : [],
+    );
+    const targets = people.filter((p) => {
+      if (!p.email || !p.email.includes("@")) return false;
+      if (skip.has(p.userId) || p.emailOptOut) {
+        emailsSkipped += 1;
+        return false;
+      }
+      return true;
+    });
+
+    const result = await emailAnnouncement(messageId, row as Record<string, unknown>, targets);
+    emailsSent = result.sent;
+    emailsSkipped += result.suppressed;
+  }
+
   const { error: updateError } = await supabase
     .from("messages")
     .update({
       status: "sent",
       sent_at: new Date().toISOString(),
       recipient_count: people.length,
+      email_sent_count: emailsSent,
+      email_skipped_count: emailsSkipped,
     })
     .eq("id", messageId);
   if (updateError) throw new Error(updateError.message);
@@ -346,8 +379,55 @@ export async function deliverMessage(
     message_id: messageId,
     action: "sent",
     actor_email: actorEmail,
-    details: { recipientCount: people.length },
+    details: { recipientCount: people.length, emailsSent, emailsSkipped },
   });
 
-  return { recipientCount: people.length };
+  return { recipientCount: people.length, emailsSent, emailsSkipped };
+}
+
+/**
+ * Emails one copy of the announcement to each recipient who hasn't been
+ * excluded. Sends run in small batches so a large roster doesn't trip the
+ * provider's rate limit; a single failure never blocks the rest.
+ */
+async function emailAnnouncement(
+  messageId: string,
+  row: Record<string, unknown>,
+  targets: AudiencePerson[],
+): Promise<{ sent: number; suppressed: number }> {
+  const { sendTemplateEmail } = await import("@/lib/email-templates/send-email");
+
+  const templateData = {
+    title: String(row["title"] ?? ""),
+    body: String(row["body"] ?? ""),
+    ctaLabel: String(row["cta_label"] ?? ""),
+    ctaHref: String(row["cta_href"] ?? ""),
+    priority: String(row["priority"] ?? "info"),
+    fromEmail: String(row["created_by_email"] ?? ""),
+  };
+
+  let sent = 0;
+  let suppressed = 0;
+  const BATCH = 5;
+
+  for (let i = 0; i < targets.length; i += BATCH) {
+    const batch = targets.slice(i, i + BATCH);
+    await Promise.all(
+      batch.map(async (person) => {
+        try {
+          const result = await sendTemplateEmail("team-announcement", person.email, {
+            templateData: { ...templateData, recipientName: person.name.split(" ")[0] ?? "" },
+            idempotencyKey: `announcement-${messageId}-${person.userId}`,
+          });
+          if (result.sent) sent += 1;
+          else suppressed += 1;
+        } catch (error) {
+          suppressed += 1;
+          console.error("Announcement email failed", person.email, error);
+        }
+      }),
+    );
+  }
+
+  return { sent, suppressed };
 }
