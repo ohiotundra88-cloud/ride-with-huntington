@@ -2,41 +2,41 @@ import * as React from 'react'
 
 import {
   Body,
-  Button,
   Container,
   Head,
   Heading,
   Html,
   Preview,
+  Section,
   Text,
 } from '@react-email/components'
 
 interface MagicLinkEmailProps {
   siteName: string
-  confirmationUrl: string
+  token: string
 }
 
-export const MagicLinkEmail = ({
-  siteName,
-  confirmationUrl,
-}: MagicLinkEmailProps) => (
+/**
+ * Sign-in passcode email. Code-only by design: corporate web filters block
+ * click-through sign-in links.
+ */
+export const MagicLinkEmail = ({ siteName, token }: MagicLinkEmailProps) => (
   <Html lang="en" dir="ltr">
-    <Head>
-      <style>{darkModeCss}</style>
-    </Head>
-    <Preview>Your login link for {siteName}</Preview>
+    <Head />
+    <Preview>Your {siteName} sign-in code: {token}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Your login link</Heading>
-        <Text style={text}>
-          Click the button below to log in to {siteName}. This link will expire
-          shortly.
-        </Text>
-        <Button className="dm-btn" style={button} href={confirmationUrl}>
-          Log In
-        </Button>
+        <Section style={header}>
+          <Text style={brandMark}>{siteName}</Text>
+        </Section>
+        <Heading style={h1}>Your sign-in code</Heading>
+        <Text style={text}>Enter this 6-digit code on the sign-in screen to continue.</Text>
+        <Section style={codeBox}>
+          <Text style={codeText}>{token}</Text>
+        </Section>
+        <Text style={text}>This code expires in 10 minutes and can be used once.</Text>
         <Text style={footer}>
-          If you didn't request this link, you can safely ignore this email.
+          If you didn't try to sign in, you can safely ignore this email.
         </Text>
       </Container>
     </Body>
@@ -45,35 +45,33 @@ export const MagicLinkEmail = ({
 
 export default MagicLinkEmail
 
-const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
-const container = { padding: '20px 25px' }
-const h1 = {
-  fontSize: '22px',
+const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, Helvetica, sans-serif' }
+const container = { padding: '24px 26px', maxWidth: '520px' }
+const header = { borderBottom: '3px solid #7ECF1C', paddingBottom: '10px', marginBottom: '22px' }
+const brandMark = {
+  margin: '0',
+  fontSize: '15px',
   fontWeight: 'bold' as const,
-  color: '#000000',
+  letterSpacing: '0.04em',
+  color: '#002D2A',
+  textTransform: 'uppercase' as const,
+}
+const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: '#002D2A', margin: '0 0 16px' }
+const text = { fontSize: '14px', color: '#44514e', lineHeight: '1.6', margin: '0 0 18px' }
+const codeBox = {
+  backgroundColor: '#f2fae6',
+  border: '1px solid #7ECF1C',
+  borderRadius: '10px',
+  padding: '18px 12px',
+  textAlign: 'center' as const,
   margin: '0 0 20px',
 }
-const text = {
-  fontSize: '14px',
-  color: '#55575d',
-  lineHeight: '1.5',
-  margin: '0 0 25px',
+const codeText = {
+  margin: '0',
+  fontSize: '34px',
+  lineHeight: '1.2',
+  fontWeight: 'bold' as const,
+  letterSpacing: '0.22em',
+  color: '#002D2A',
 }
-const button = {
-  backgroundColor: '#000000',
-  color: '#ffffff',
-  fontSize: '14px',
-  border: '1px solid #000000',
-  borderRadius: '8px',
-  padding: '12px 20px',
-  textDecoration: 'none',
-}
-const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
-// Rendered as a text child, which React may HTML-escape: keep this CSS free of >, &, and quotes.
-const darkModeCss = `
-  @media (prefers-color-scheme: dark) {
-    .dm-btn { background-color: #ffffff !important; color: #000000 !important; }
-  }
-  [data-ogsc] .dm-btn { background-color: #ffffff !important; color: #000000 !important; }
-  [data-ogsb] .dm-btn { background-color: #ffffff !important; color: #000000 !important; }
-`
+const footer = { fontSize: '12px', color: '#8a938f', margin: '26px 0 0' }
