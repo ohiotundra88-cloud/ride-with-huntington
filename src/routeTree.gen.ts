@@ -61,6 +61,8 @@ import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]
 import { Route as FundraisersSlugIndexRouteImport } from './routes/fundraisers.$slug.index'
 import { Route as FundraisersSlugThanksRouteImport } from './routes/fundraisers.$slug.thanks'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
+import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicSbSplatRouteImport } from './routes/api/public/sb/$'
 import { Route as ApiPublicFundraisingAssetIdRouteImport } from './routes/api/public/fundraising-asset/$id'
 import { Route as ApiPublicFundraiserFlierIdRouteImport } from './routes/api/public/fundraiser-flier/$id'
@@ -331,6 +333,16 @@ const Char91DotmcpChar93InvokeToolToolRoute =
     path: '/.mcp/invoke-tool/$tool',
     getParentRoute: () => rootRouteImport,
   } as any)
+const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
+  id: '/lovable/email/auth/webhook',
+  path: '/lovable/email/auth/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
+  id: '/lovable/email/auth/preview',
+  path: '/lovable/email/auth/preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicSbSplatRoute = ApiPublicSbSplatRouteImport.update({
   id: '/api/public/sb/$',
   path: '/api/public/sb/$',
@@ -423,6 +435,8 @@ export interface FileRoutesByFullPath {
   '/api/public/fundraiser-flier/$id': typeof ApiPublicFundraiserFlierIdRoute
   '/api/public/fundraising-asset/$id': typeof ApiPublicFundraisingAssetIdRoute
   '/api/public/sb/$': typeof ApiPublicSbSplatRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -483,6 +497,8 @@ export interface FileRoutesByTo {
   '/api/public/fundraiser-flier/$id': typeof ApiPublicFundraiserFlierIdRoute
   '/api/public/fundraising-asset/$id': typeof ApiPublicFundraisingAssetIdRoute
   '/api/public/sb/$': typeof ApiPublicSbSplatRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -544,6 +560,8 @@ export interface FileRoutesById {
   '/api/public/fundraiser-flier/$id': typeof ApiPublicFundraiserFlierIdRoute
   '/api/public/fundraising-asset/$id': typeof ApiPublicFundraisingAssetIdRoute
   '/api/public/sb/$': typeof ApiPublicSbSplatRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -606,6 +624,8 @@ export interface FileRouteTypes {
     | '/api/public/fundraiser-flier/$id'
     | '/api/public/fundraising-asset/$id'
     | '/api/public/sb/$'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -666,6 +686,8 @@ export interface FileRouteTypes {
     | '/api/public/fundraiser-flier/$id'
     | '/api/public/fundraising-asset/$id'
     | '/api/public/sb/$'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
   id:
     | '__root__'
     | '/'
@@ -726,6 +748,8 @@ export interface FileRouteTypes {
     | '/api/public/fundraiser-flier/$id'
     | '/api/public/fundraising-asset/$id'
     | '/api/public/sb/$'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -786,6 +810,8 @@ export interface RootRouteChildren {
   ApiPublicFundraiserFlierIdRoute: typeof ApiPublicFundraiserFlierIdRoute
   ApiPublicFundraisingAssetIdRoute: typeof ApiPublicFundraisingAssetIdRoute
   ApiPublicSbSplatRoute: typeof ApiPublicSbSplatRoute
+  LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
+  LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1154,6 +1180,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lovable/email/auth/webhook': {
+      id: '/lovable/email/auth/webhook'
+      path: '/lovable/email/auth/webhook'
+      fullPath: '/lovable/email/auth/webhook'
+      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/auth/preview': {
+      id: '/lovable/email/auth/preview'
+      path: '/lovable/email/auth/preview'
+      fullPath: '/lovable/email/auth/preview'
+      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/sb/$': {
       id: '/api/public/sb/$'
       path: '/api/public/sb/$'
@@ -1270,6 +1310,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicFundraiserFlierIdRoute: ApiPublicFundraiserFlierIdRoute,
   ApiPublicFundraisingAssetIdRoute: ApiPublicFundraisingAssetIdRoute,
   ApiPublicSbSplatRoute: ApiPublicSbSplatRoute,
+  LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
+  LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
