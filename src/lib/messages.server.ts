@@ -33,7 +33,7 @@ export async function buildAudienceRoster(): Promise<AudiencePerson[]> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
   const [{ data: profiles }, { data: participants }, { data: roleRows }] = await Promise.all([
-    supabaseAdmin.from("profiles").select("id, email, full_name"),
+    supabaseAdmin.from("profiles").select("id, email, full_name, email_opt_out"),
     supabaseAdmin
       .from("participants")
       .select("user_id, participation, pelotonia, travel, bike, apparel, address"),
@@ -98,6 +98,7 @@ export async function buildAudienceRoster(): Promise<AudiencePerson[]> {
       riderOnPelotonia: !!member && flag(member["is_rider"]),
       volunteerOnPelotonia: !!member && flag(member["is_volunteer"]),
       raised: member ? num(member["raised"]) : null,
+      emailOptOut: (profile as { email_opt_out?: boolean }).email_opt_out === true,
     };
   });
 }
@@ -288,6 +289,12 @@ export function mapMessageRow(row: Record<string, unknown>, readCount = 0): Mess
     audience,
     audienceSummary: describeAudience(audience),
     recipientCount: Number(row["recipient_count"] ?? 0),
+    emailNotify: row["email_notify"] === true,
+    emailExcludeUserIds: Array.isArray(row["email_exclude_user_ids"])
+      ? (row["email_exclude_user_ids"] as unknown[]).map((x) => String(x)).filter(Boolean)
+      : [],
+    emailSentCount: Number(row["email_sent_count"] ?? 0),
+    emailSkippedCount: Number(row["email_skipped_count"] ?? 0),
     readCount,
     scheduledAt: (row["scheduled_at"] as string | null) ?? null,
     sentAt: (row["sent_at"] as string | null) ?? null,
