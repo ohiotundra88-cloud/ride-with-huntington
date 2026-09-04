@@ -231,12 +231,6 @@ export const setEmailOptOut = createServerFn({ method: "POST" })
       .update({ email_opt_out: data.optOut })
       .eq("id", data.userId);
     if (error) throw new Error(error.message);
-    await context.supabase.from("message_audit").insert({
-      message_id: null,
-      action: data.optOut ? "email_opt_out_added" : "email_opt_out_removed",
-      actor_email: String((context.claims as { email?: string } | null)?.email ?? ""),
-      details: { userId: data.userId },
-    });
     return { ok: true };
   });
 
