@@ -13,10 +13,6 @@ export async function assertManager(context: { supabase: any; userId: string; cl
   return context.claims?.email ?? "admin";
 }
 
-export function demoPasswordFor(email: string) {
-  return `Huntington!${email.split("@")[0]?.replace(/[^a-z0-9]/gi, "") ?? "colleague"}2027`;
-}
-
 export function appendAudit(current: unknown, what: string) {
   const list = Array.isArray(current) ? current : [];
   return [...list, { at: new Date().toISOString(), what }];
