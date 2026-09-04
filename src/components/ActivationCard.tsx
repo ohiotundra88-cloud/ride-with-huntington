@@ -72,7 +72,7 @@ export function ActivationCard() {
           />
           <p className="mt-2 flex items-start gap-2 text-xs text-muted-foreground">
             <KeyRound className="mt-[1px] h-3.5 w-3.5 shrink-0" />
-            Their current password stops working immediately. They'll get a 6-digit code by email and choose
+            Their current password stops working immediately. They'll get a verification code by email and choose
             a new one — no one ever sees or sets a password for them.
           </p>
         </div>

@@ -30,7 +30,7 @@ export const MagicLinkEmail = ({ siteName, token }: MagicLinkEmailProps) => (
           <Text style={brandMark}>{siteName}</Text>
         </Section>
         <Heading style={h1}>Your sign-in code</Heading>
-        <Text style={text}>Enter this 6-digit code on the sign-in screen to continue.</Text>
+        <Text style={text}>Enter the code from this email on the sign-in screen to continue.</Text>
         <Section style={codeBox}>
           <Text style={codeText}>{token}</Text>
         </Section>

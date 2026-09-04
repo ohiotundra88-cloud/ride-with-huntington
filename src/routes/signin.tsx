@@ -108,7 +108,7 @@ function SignIn() {
       setReason(mode === "activate" ? "activate" : "reset");
       await sendCode(addr, mode === "activate");
       setStep("code");
-      toast.success("Verification code sent", { description: `Check ${addr} for a 6-digit code.` });
+      toast.success("Verification code sent", { description: `Check ${addr} for a verification code.` });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Please try again.";
       toast.error("Couldn't continue", { description: message });
@@ -154,7 +154,7 @@ function SignIn() {
       await sendCode(addr, false);
       setStep("code");
       setPassword("");
-      toast.success("Verification code sent", { description: `Check ${addr} for a 6-digit code.` });
+      toast.success("Verification code sent", { description: `Check ${addr} for a verification code.` });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Please try again.";
       toast.error("Couldn't send a code", { description: message });
@@ -230,7 +230,7 @@ function SignIn() {
   const blurbs: Record<Step, string> = {
     email: "Enter your @huntington.com work email. First-time colleagues verify with a one-time passcode we email you.",
     password: `Signing in as ${cleanEmail()}.`,
-    code: `We emailed a 6-digit code to ${cleanEmail()}. It expires in 10 minutes.`,
+    code: `We emailed a verification code to ${cleanEmail()}. It expires in 10 minutes.`,
     choose: `Pick a password only you know — at least ${MIN_PASSWORD} characters. You'll use it every time you sign in.`,
   };
 

@@ -32,7 +32,7 @@ export const RecoveryEmail = ({ siteName, token }: RecoveryEmailProps) => (
         </Section>
         <Heading style={s.h1}>Reset your password</Heading>
         <Text style={s.text}>
-          Enter this 6-digit code on the sign-in screen to choose a new password.
+          Enter the code from this email on the sign-in screen to choose a new password.
         </Text>
         <Section style={s.codeBox}>
           <Text style={s.codeText}>{token}</Text>
