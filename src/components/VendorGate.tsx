@@ -4,6 +4,8 @@ import { ShieldAlert } from "lucide-react";
 import { getVendorAccess } from "@/lib/vendors.functions";
 import type { VendorAccess } from "@/lib/vendors.shared";
 import { Button } from "@/components/ui/button";
+import { VendorCrmPaused } from "@/components/VendorCrmPaused";
+
 
 export function useVendorAccess() {
   return useQuery<VendorAccess>({
@@ -22,7 +24,10 @@ export function VendorGate({ children }: { children: React.ReactNode }) {
     return <p className="mx-auto max-w-md px-4 py-24 text-center text-sm text-muted-foreground">Checking access…</p>;
   }
 
+  if (!error && data?.paused && !data.allowed) return <VendorCrmPaused />;
+
   if (error || !data?.allowed) {
+
     return (
       <div className="mx-auto max-w-md px-4 py-20 text-center">
         <ShieldAlert className="mx-auto h-10 w-10 text-[var(--brand-dark)]" />

@@ -30,5 +30,26 @@ export const setFundraiserPagesEnabled = createServerFn({ method: "POST" })
       .eq("id", 1);
     if (error) throw new Error(error.message);
 
-    return { fundraiserPagesEnabled: data.enabled };
+    const { readSiteSettings } = await import("@/lib/site-settings.server");
+    return readSiteSettings();
+  });
+
+export const setVendorCrmEnabled = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ enabled: z.boolean() }).parse(d))
+  .handler(async ({ data, context }): Promise<SiteSettings> => {
+    const { data: allowed, error: rErr } = await context.supabase.rpc("is_superuser", {
+      _user_id: context.userId,
+    });
+    if (rErr) throw new Error(rErr.message);
+    if (!allowed) throw new Error("Only Super Users can change site switches.");
+
+    const { error } = await context.supabase
+      .from("site_settings")
+      .update({ vendor_crm_enabled: data.enabled, updated_by: context.userId })
+      .eq("id", 1);
+    if (error) throw new Error(error.message);
+
+    const { readSiteSettings } = await import("@/lib/site-settings.server");
+    return readSiteSettings();
   });
