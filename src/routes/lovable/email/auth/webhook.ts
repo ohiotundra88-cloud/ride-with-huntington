@@ -66,12 +66,12 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
               },
             },
             recovery: {
-              subject: 'Reset your password',
+              subject: 'Your Team Huntington Hub password reset code',
               render: (data) => {
-                audit('recovery', 'Reset your password', data.email)
+                audit('recovery', 'Your Team Huntington Hub password reset code', data.email)
                 return React.createElement(RecoveryEmail, {
                   siteName: SITE_NAME,
-                  confirmationUrl: data.url,
+                  token: data.token ?? '',
                 })
               },
             },
