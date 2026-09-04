@@ -175,10 +175,11 @@ function SuperUserDashboard() {
                      `${current.toLocaleString()} / ${target.toLocaleString()} ${g.unit}`}
                   </p>
                 </div>
-
                 <Badge variant="outline" className="text-[10px] uppercase">{g.status.replace("_", " ")}</Badge>
               </div>
-            ))}
+              );
+            })}
+
           </CardContent>
         </Card>
 
