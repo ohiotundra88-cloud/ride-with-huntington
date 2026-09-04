@@ -333,24 +333,27 @@ function SignIn() {
               <>
                 <div className="flex justify-center py-2">
                   <InputOTP
-                    maxLength={6}
+                    maxLength={8}
                     value={code}
                     autoFocus
                     onChange={(v) => {
                       setCode(v);
-                      if (v.length === 6 && !busy) verify(v);
+                      if (v.length === 8 && !busy) verify(v);
                     }}
                   >
                     <InputOTPGroup>
-                      {[0, 1, 2, 3, 4, 5].map((i) => (
-                        <InputOTPSlot key={i} index={i} />
+                      {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+                        <InputOTPSlot key={i} index={i} className="h-11 w-9 text-base" />
                       ))}
                     </InputOTPGroup>
                   </InputOTP>
                 </div>
+                <p className="text-center text-xs text-muted-foreground">
+                  Enter the code from the email exactly as shown — it may be 6 or 8 digits.
+                </p>
                 <Button
                   onClick={() => verify(code)}
-                  disabled={busy || code.length !== 6}
+                  disabled={busy || code.length < 6}
                   className="w-full h-11 bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90 font-semibold"
                 >
                   {busy ? "Verifying…" : "Continue"}
