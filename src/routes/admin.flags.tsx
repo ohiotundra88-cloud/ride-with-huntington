@@ -161,6 +161,23 @@ function SiteSwitchesCard() {
     onError: (e: any) => toast.error(e?.message ?? "Could not change that switch"),
   });
 
+  const saveVendor = useMutation({
+    mutationFn: (enabled: boolean) => setVendorCrmEnabled({ data: { enabled } }),
+    onSuccess: (res) => {
+      qc.setQueryData(SITE_SETTINGS_KEY, res);
+      qc.invalidateQueries({ queryKey: SITE_SETTINGS_KEY });
+      qc.invalidateQueries({ queryKey: ["vendor-access"] });
+      audit({
+        action: "toggle",
+        entity: "SiteSwitch",
+        entityId: "vendorCrm",
+        detail: `vendorCrm=${res.vendorCrmEnabled}`,
+      });
+      toast.success(res.vendorCrmEnabled ? "Vendor CRM is live" : "Vendor CRM paused");
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Could not change that switch"),
+  });
+
   return (
     <Card>
       <CardHeader>
@@ -168,7 +185,7 @@ function SiteSwitchesCard() {
           <Globe className="h-4 w-4" /> Site switches (apply to everyone)
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-4 pt-0">
+      <CardContent className="grid gap-2 p-4 pt-0">
         <label className="flex items-start justify-between gap-3 rounded-md border p-3">
           <div>
             <p className="font-semibold text-[var(--brand-dark)]">Fundraiser pages</p>
@@ -184,7 +201,23 @@ function SiteSwitchesCard() {
             onCheckedChange={(v) => save.mutate(v)}
           />
         </label>
+
+        <label className="flex items-start justify-between gap-3 rounded-md border p-3">
+          <div>
+            <p className="font-semibold text-[var(--brand-dark)]">Vendor CRM</p>
+            <p className="text-xs text-muted-foreground">
+              Vendor relationship tracking, spend, and donations. Switching this off hides the tool from
+              everyone except Super Users; no vendor records are deleted.
+            </p>
+          </div>
+          <Switch
+            checked={settings.vendorCrmEnabled}
+            disabled={isPending || saveVendor.isPending}
+            onCheckedChange={(v) => saveVendor.mutate(v)}
+          />
+        </label>
       </CardContent>
     </Card>
+
   );
 }
