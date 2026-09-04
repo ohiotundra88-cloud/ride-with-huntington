@@ -25,8 +25,11 @@ export function NetworkNotice() {
       .then((res) => {
         if (!cancelled && !res.ok) setBlocked(true);
       })
-      .catch(() => {
-        if (!cancelled) setBlocked(true);
+      .catch((err: unknown) => {
+        // An abort is either our own unmount cleanup or the 6s timeout — the
+        // former says nothing about connectivity, so never flag it.
+        const aborted = err instanceof DOMException && err.name === "AbortError";
+        if (!cancelled && !aborted) setBlocked(true);
       })
       .finally(() => clearTimeout(t));
 
