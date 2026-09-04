@@ -282,7 +282,7 @@ function DashboardPage() {
 
         <Card className="overflow-hidden border-0 bg-gradient-to-br from-[var(--brand-dark)] to-[var(--brand-dark)]/85 text-white">
           <CardContent className="p-6 sm:p-8">
-            <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
               <div className="min-w-0 flex-1">
                 <p className="text-xs uppercase tracking-wider text-white/60">
                   <InlineEditText editing={canEdit && editing} value={copy.heroEyebrow} onCommit={(v) => setCopy("heroEyebrow", v)} />
@@ -297,7 +297,8 @@ function DashboardPage() {
                   <Progress value={score} className="h-2.5 bg-white/10 [&>div]:bg-[var(--brand)]" aria-label={`Readiness ${score}%`} />
                 </div>
               </div>
-              <div className="rounded-xl bg-white/10 px-4 py-3 ring-1 ring-white/15">
+              <div className="w-full rounded-xl bg-white/10 px-4 py-3 ring-1 ring-white/15 sm:w-auto">
+
                 <div className="flex items-center gap-2 text-white/70 text-xs uppercase tracking-wider">
                   <CalendarClock className="h-3.5 w-3.5" />
                   <InlineEditText editing={canEdit && editing} value={copy.countdownLabel} onCommit={(v) => setCopy("countdownLabel", v)} />

@@ -140,7 +140,7 @@ function RootComponent() {
             </main>
             <footer className="border-t bg-[var(--brand-dark)] text-white/70 py-6 text-xs">
               <div className="mx-auto max-w-7xl px-4 flex flex-wrap gap-4 justify-between">
-                <span>© Team Huntington Hub · Internal prototype</span>
+                <span>© {new Date().getFullYear()} Team Huntington Hub · Internal colleague resource</span>
                 <span className="flex gap-4">
                   <Link to="/health" className="hover:text-white underline-offset-2 hover:underline">
                     Network check
