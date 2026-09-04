@@ -242,7 +242,8 @@ export const getMyActivation = createServerFn({ method: "GET" })
     return { activated: !!data?.activated_at, passwordSet: !!data?.password_set_at };
   });
 
-async function assertSuperuser(context: { supabase: { rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }> }; userId: string }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function assertSuperuser(context: { supabase: any; userId: string }) {
   const { data: isSuper, error } = await context.supabase.rpc("is_superuser", {
     _user_id: context.userId,
   });
