@@ -133,7 +133,7 @@ export const createColleague = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
-    const { supabaseAdmin, assertManager, demoPasswordFor } = await import("@/lib/participants-admin.server");
+    const { supabaseAdmin, assertManager } = await import("@/lib/participants-admin.server");
     const actor = await assertManager(context);
 
     let userId: string | null = null;
@@ -147,7 +147,6 @@ export const createColleague = createServerFn({ method: "POST" })
     } else {
       const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
         email: data.email,
-        password: demoPasswordFor(data.email),
         email_confirm: true,
         user_metadata: { full_name: data.full_name },
       });
