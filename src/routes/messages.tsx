@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
-  Send, ShieldAlert, Loader2, Users, Copy, Download, Trash2, Pencil, Clock, Search, X,
+  Send, ShieldAlert, Loader2, Users, Copy, Download, Trash2, Pencil, Clock, Search, X, Mail, MailX,
 } from "lucide-react";
 import {
   MESSAGE_CATEGORIES, MESSAGE_PRIORITIES, PARTICIPATION_OPTIONS, PELOTONIA_FLAGS,
@@ -24,9 +24,9 @@ import {
   type AudienceRules, type MessageSummary,
 } from "@/lib/messages.shared";
 import {
-  deleteMessage, getAudienceOptions, getMessagingAccess, listMessageRecipients,
-  listMessages, listRosterPeople, previewAudience, processDueMessages, saveMessage,
-  sendMessageNow,
+  deleteMessage, getAudienceOptions, getMessagingAccess, listEmailOptOuts,
+  listMessageRecipients, listMessages, listRosterPeople, previewAudience,
+  processDueMessages, saveMessage, sendMessageNow, setEmailOptOut,
 } from "@/lib/messages.functions";
 
 export const Route = createFileRoute("/messages")({
@@ -137,6 +137,10 @@ function MessagesPage() {
   const [category, setCategory] = useState<string>("general");
   const [scheduledAt, setScheduledAt] = useState("");
   const [audience, setAudience] = useState<AudienceRules>(emptyAudience());
+  const [emailNotify, setEmailNotify] = useState(false);
+  const [emailExclude, setEmailExclude] = useState<string[]>([]);
+  const [emailQuery, setEmailQuery] = useState("");
+  const [optOutQuery, setOptOutQuery] = useState("");
   const [personQuery, setPersonQuery] = useState("");
   const [tab, setTab] = useState("compose");
   const [recipientsFor, setRecipientsFor] = useState<MessageSummary | null>(null);
@@ -160,6 +164,7 @@ function MessagesPage() {
     setTitle(""); setBody(""); setCtaLabel(""); setCtaHref("");
     setPriority("info"); setCategory("general"); setScheduledAt("");
     setAudience(emptyAudience());
+    setEmailNotify(false); setEmailExclude([]); setEmailQuery("");
   };
 
   const save = useServerFn(saveMessage);
@@ -171,7 +176,7 @@ function MessagesPage() {
         data: {
           id: editingId, title, body, ctaLabel, ctaHref, priority, category,
           scheduledAt: scheduledAt ? new Date(scheduledAt).toISOString() : null,
-          audience,
+          audience, emailNotify, emailExcludeUserIds: emailExclude,
         },
       }),
     onSuccess: () => {
@@ -188,13 +193,17 @@ function MessagesPage() {
       const saved = await save({
         data: {
           id: editingId, title, body, ctaLabel, ctaHref, priority, category,
-          scheduledAt: null, audience,
+          scheduledAt: null, audience, emailNotify, emailExcludeUserIds: emailExclude,
         },
       });
       return send({ data: { id: saved.id } });
     },
     onSuccess: (r) => {
-      toast.success(`Sent to ${r.recipientCount} ${r.recipientCount === 1 ? "person" : "people"}`);
+      toast.success(
+        `Sent to ${r.recipientCount} ${r.recipientCount === 1 ? "person" : "people"}` +
+          (r.emailsSent ? ` · ${r.emailsSent} emailed` : "") +
+          (r.emailsSkipped ? ` · ${r.emailsSkipped} skipped` : ""),
+      );
       qc.invalidateQueries({ queryKey: ["messages"] });
       resetCompose();
       setTab("history");
@@ -219,6 +228,22 @@ function MessagesPage() {
       qc.invalidateQueries({ queryKey: ["messages"] });
     },
     onError: (e: Error) => toast.error(e.message || "Couldn't delete the message"),
+  });
+
+  const optOuts = useQuery({
+    queryKey: ["email-opt-outs"],
+    queryFn: () => listEmailOptOuts(),
+    enabled: allowed,
+  });
+  const setOptOutFn = useServerFn(setEmailOptOut);
+  const changeOptOut = useMutation({
+    mutationFn: (v: { userId: string; optOut: boolean }) => setOptOutFn({ data: v }),
+    onSuccess: (_r, v) => {
+      toast.success(v.optOut ? "Added to the no-email list" : "Removed from the no-email list");
+      qc.invalidateQueries({ queryKey: ["email-opt-outs"] });
+      qc.invalidateQueries({ queryKey: ["roster-people"] });
+    },
+    onError: (e: Error) => toast.error(e.message || "Couldn't update the no-email list"),
   });
 
   const people = previewQuery.data?.people ?? [];
@@ -247,6 +272,8 @@ function MessagesPage() {
     setPriority(m.priority); setCategory(m.category);
     setScheduledAt(m.scheduledAt ? m.scheduledAt.slice(0, 16) : "");
     setAudience(m.audience);
+    setEmailNotify(m.emailNotify);
+    setEmailExclude(m.emailExcludeUserIds ?? []);
     setTab("compose");
   };
 
@@ -264,6 +291,17 @@ function MessagesPage() {
       .filter((p) => p.name.toLowerCase().includes(needle) || p.email.toLowerCase().includes(needle))
       .slice(0, 8);
   }, [roster.data, personQuery]);
+
+  const searchRoster = (q: string) => {
+    const needle = q.trim().toLowerCase();
+    if (!needle) return [];
+    return (roster.data ?? [])
+      .filter((p) => p.name.toLowerCase().includes(needle) || p.email.toLowerCase().includes(needle))
+      .slice(0, 8);
+  };
+  const emailMatches = useMemo(() => searchRoster(emailQuery), [roster.data, emailQuery]);
+  const optOutMatches = useMemo(() => searchRoster(optOutQuery), [roster.data, optOutQuery]);
+  const permanentOptOuts = optOuts.data ?? [];
 
   const nameFor = (userId: string) =>
     (roster.data ?? []).find((p) => p.userId === userId)?.name ?? userId.slice(0, 8);
