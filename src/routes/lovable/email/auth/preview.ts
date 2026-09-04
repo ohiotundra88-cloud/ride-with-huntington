@@ -28,20 +28,24 @@ const ROOT_DOMAIN = "ridewithhuntington.com"
 // even if the project's domain has changed since the template was scaffolded.
 const SAMPLE_PROJECT_URL = "https://ride-with-huntington.lovable.app"
 const SAMPLE_EMAIL = "user@example.test"
+const SAMPLE_TOKEN = '123456'
 const SAMPLE_DATA: Record<string, object> = {
   signup: {
     siteName: SITE_NAME,
     siteUrl: SAMPLE_PROJECT_URL,
     recipient: SAMPLE_EMAIL,
     confirmationUrl: SAMPLE_PROJECT_URL,
+    token: SAMPLE_TOKEN,
   },
   magiclink: {
     siteName: SITE_NAME,
     confirmationUrl: SAMPLE_PROJECT_URL,
+    token: SAMPLE_TOKEN,
   },
   recovery: {
     siteName: SITE_NAME,
     confirmationUrl: SAMPLE_PROJECT_URL,
+    token: SAMPLE_TOKEN,
   },
   invite: {
     siteName: SITE_NAME,
@@ -54,9 +58,10 @@ const SAMPLE_DATA: Record<string, object> = {
     email: SAMPLE_EMAIL,
     newEmail: SAMPLE_EMAIL,
     confirmationUrl: SAMPLE_PROJECT_URL,
+    token: SAMPLE_TOKEN,
   },
   reauthentication: {
-    token: '123456',
+    token: SAMPLE_TOKEN,
   },
 }
 
