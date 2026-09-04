@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      auth_email_log: {
+        Row: {
+          created_at: string
+          email: string
+          email_type: string
+          id: string
+          sent_at: string
+          subject: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          email_type: string
+          id?: string
+          sent_at?: string
+          subject?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          email_type?: string
+          id?: string
+          sent_at?: string
+          subject?: string | null
+        }
+        Relationships: []
+      }
       captain_posts: {
         Row: {
           body: string
