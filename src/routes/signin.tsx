@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import type React from "react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -233,7 +234,7 @@ function SignIn() {
     choose: `Pick a password only you know — at least ${MIN_PASSWORD} characters. You'll use it every time you sign in.`,
   };
 
-  const icons: Record<Step, JSX.Element> = {
+  const icons: Record<Step, React.ReactNode> = {
     email: <Building2 className="h-6 w-6" />,
     password: <LockKeyhole className="h-6 w-6" />,
     code: <MailCheck className="h-6 w-6" />,
