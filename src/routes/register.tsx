@@ -52,7 +52,7 @@ export const Route = createFileRoute("/register")({
     { title: "Register — Team Huntington Hub" },
     { name: "description", content: "Multi-step Team Huntington Pelotonia registration wizard." },
   ] }),
-  component: RegisterPage;
+  component: RegisterPage,
 });
 
 /* ---------- content shell: loads config + Super User editing ---------- */
