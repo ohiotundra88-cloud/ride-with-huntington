@@ -66,6 +66,7 @@ export const DEFAULT_REGISTER_CONTENT: RegisterContent = {
     "B.instr2": "Select your event type (25/45/55/100/155/200 miles or Volunteer).",
     "B.instr3": "Apply the discount code below at checkout.",
     "B.discountLabel": "Team discount code",
+    "B.discountCode": "Huntington",
     "B.card2Title": "After you register",
     "B.hbHelp": "Required for team rostering and expense matching.",
     "B.completedLabel": "I completed registration on Pelotonia.",
