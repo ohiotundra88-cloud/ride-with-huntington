@@ -380,21 +380,26 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const setUser = (u: Partial<User>) => setUserState((prev) => ({ ...prev, ...u }));
 
-  // Persist colleague details to the cloud profile so they survive reloads
+  // Persist colleague details to the cloud profile so they survive reloads.
+  // Use .update() on the allowed columns only; upsert touches the protected id
+  // column and fails under the column-scoped UPDATE grant.
   const saveProfile = async (u: Partial<User>) => {
     setUserState((prev) => ({ ...prev, ...u }));
     const id = user.userId;
     if (!id) return;
-    const { error } = await supabase.from("profiles").upsert({
-      id,
-      email: u.email ?? user.email,
-      full_name: u.name ?? user.name,
-      mobile: u.mobile ?? user.mobile,
-      segment: u.segment ?? user.segment,
-      market: u.market ?? user.market,
-      manager: u.manager ?? user.manager,
-      consent: u.consent ?? user.consent,
-    });
+    const payload: Record<string, unknown> = {};
+    if (u.email !== undefined) payload.email = u.email;
+    if (u.name !== undefined) payload.full_name = u.name;
+    if (u.mobile !== undefined) payload.mobile = u.mobile;
+    if (u.segment !== undefined) payload.segment = u.segment;
+    if (u.market !== undefined) payload.market = u.market;
+    if (u.manager !== undefined) payload.manager = u.manager;
+    if (u.consent !== undefined) payload.consent = u.consent;
+    if (Object.keys(payload).length === 0) return;
+    const { error } = await supabase
+      .from("profiles")
+      .update(payload)
+      .eq("id", id);
     if (error) throw new Error(error.message);
   };
 
