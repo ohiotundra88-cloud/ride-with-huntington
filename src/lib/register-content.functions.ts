@@ -52,7 +52,7 @@ export const saveRegisterContent = createServerFn({ method: "POST" })
     const merged = mergeRegisterContent(data);
     const { error } = await context.supabase
       .from("register_content")
-      .upsert({ id: 1, content: merged as unknown as Record<string, unknown>, updated_by: context.userId });
+      .upsert({ id: 1, content: merged as never, updated_by: context.userId });
     if (error) throw new Error(error.message);
     return merged;
   });
