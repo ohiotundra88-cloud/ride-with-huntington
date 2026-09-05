@@ -1,6 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Copy, ExternalLink, Bike, Shirt, Plane, ClipboardCheck, CheckCircle2, Info } from "lucide-react";
+import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { ChevronLeft, ChevronRight, Copy as CopyIcon, ExternalLink, Bike, Shirt, Plane, ClipboardCheck, CheckCircle2, Info, Pencil, RotateCcw, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,10 +15,30 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/StatusBadge";
 import { addAudit, genRegId, useStore, type Participation } from "@/lib/store";
+import { useAdmin } from "@/lib/admin-store";
+import {
+  Copy,
+  FieldLabel,
+  LinkSettings,
+  ListSettings,
+  RegisterContentProvider,
+  useRegisterContent,
+} from "@/components/RegisterEditor";
+import {
+  DEFAULT_REGISTER_CONTENT,
+  type RegisterContent,
+} from "@/lib/register-content.shared";
+import { getRegisterContent, saveRegisterContent } from "@/lib/register-content.functions";
 import { toast } from "sonner";
 
 const STEP_KEYS = ["A", "B", "C", "D", "E", "F"] as const;
 export type StepKey = (typeof STEP_KEYS)[number];
+
+const registerContentQuery = queryOptions({
+  queryKey: ["register-content"],
+  queryFn: () => getRegisterContent(),
+  staleTime: 60_000,
+});
 
 export const Route = createFileRoute("/register")({
   validateSearch: (search: Record<string, unknown>): { step?: StepKey } => {
@@ -25,35 +47,131 @@ export const Route = createFileRoute("/register")({
       ? { step: s as StepKey }
       : {};
   },
+  loader: ({ context }) => context.queryClient.ensureQueryData(registerContentQuery),
   head: () => ({ meta: [
     { title: "Register — Team Huntington Hub" },
     { name: "description", content: "Multi-step Team Huntington Pelotonia registration wizard." },
   ] }),
-  component: RegisterWizard,
+  component: RegisterPage;
 });
 
-const SIZES = ["XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL"];
+/* ---------- content shell: loads config + Super User editing ---------- */
+function RegisterPage() {
+  const saved = useQuery(registerContentQuery).data ?? DEFAULT_REGISTER_CONTENT;
+  const qc = useQueryClient();
+  const { state } = useAdmin();
+  const { user } = useStore();
+  const persist = useServerFn(saveRegisterContent);
+
+  const canEdit =
+    state.superUser.active && (user.roles.includes("superuser") || user.roles.includes("admin"));
+
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState<RegisterContent | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => { if (!canEdit) { setEditing(false); setDraft(null); } }, [canEdit]);
+
+  const content = editing && draft ? draft : saved;
+
+  const startEditing = () => { setDraft(saved); setEditing(true); };
+  const discard = () => { setDraft(null); setEditing(false); };
+  const restoreDefaults = () => setDraft(DEFAULT_REGISTER_CONTENT);
+
+  const save = async () => {
+    if (!draft) return;
+    setSaving(true);
+    try {
+      const next = await persist({ data: { content: draft } });
+      qc.setQueryData(registerContentQuery.queryKey, next);
+      setDraft(null);
+      setEditing(false);
+      toast.success("Register page updated", { description: "Everyone sees the new wording and options." });
+    } catch (err) {
+      toast.error("Couldn't save changes", {
+        description: err instanceof Error ? err.message : "Please try again.",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <RegisterContentProvider
+      content={content}
+      editing={editing}
+      setContent={(next) => setDraft(next)}
+    >
+      {canEdit && (
+        <div className="border-b bg-[var(--brand)]/10">
+          <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-2 px-4 py-2">
+            <p className="text-xs font-semibold text-[var(--brand-dark)]">
+              {editing ? "Editing Register page — click any text or gear to change it" : "Super User"}
+            </p>
+            <div className="flex gap-2">
+              {editing ? (
+                <>
+                  <Button size="sm" variant="outline" onClick={restoreDefaults}>
+                    <RotateCcw className="mr-1 h-3.5 w-3.5" /> Restore defaults
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={discard}>
+                    <X className="mr-1 h-3.5 w-3.5" /> Discard
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={save}
+                    disabled={saving}
+                    className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90"
+                  >
+                    <Save className="mr-1 h-3.5 w-3.5" /> {saving ? "Saving…" : "Save"}
+                  </Button>
+                </>
+              ) : (
+                <Button size="sm" variant="outline" onClick={startEditing}>
+                  <Pencil className="mr-1 h-3.5 w-3.5" /> Edit this page
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+      <RegisterWizard />
+    </RegisterContentProvider>
+  );
+}
+
+/** Any visible+required field that has no answer yet. */
+function missingRequired(
+  field: (k: string) => { visible: boolean; required: boolean; label: string },
+  entries: [string, unknown][],
+) {
+  return entries.filter(([key, value]) => {
+    const f = field(key);
+    if (!f.visible || !f.required) return false;
+    return value === undefined || value === null || value === "" || value === false;
+  });
+}
 
 function RegisterWizard() {
-  const { registration, setRegistration, user } = useStore();
+  const { registration, setRegistration } = useStore();
+  const { t, list } = useRegisterContent();
   const nav = useNavigate();
   const { step: stepKeyParam } = Route.useSearch();
   const [step, setStep] = useState(1);
 
   const isRider = registration.participation === "rider" || registration.participation === "both";
-  const isVol = registration.participation === "volunteer" || registration.participation === "both";
 
   const steps = useMemo(() => {
     const base = [
-      { key: "A", label: "Participation", icon: ClipboardCheck },
-      { key: "B", label: "Pelotonia", icon: CheckCircle2 },
-      { key: "C", label: "Travel", icon: Plane },
+      { key: "A", label: t("step.A"), icon: ClipboardCheck },
+      { key: "B", label: t("step.B"), icon: CheckCircle2 },
+      { key: "C", label: t("step.C"), icon: Plane },
     ];
-    if (isRider) base.push({ key: "D", label: "Bike", icon: Bike });
-    base.push({ key: "E", label: "Apparel", icon: Shirt });
-    base.push({ key: "F", label: "Review", icon: CheckCircle2 });
+    if (isRider) base.push({ key: "D", label: t("step.D"), icon: Bike });
+    base.push({ key: "E", label: t("step.E"), icon: Shirt });
+    base.push({ key: "F", label: t("step.F"), icon: CheckCircle2 });
     return base;
-  }, [isRider]);
+  }, [isRider, t]);
 
   // Deep link: /register?step=D opens that step directly.
   useEffect(() => {
@@ -63,7 +181,6 @@ function RegisterWizard() {
   }, [stepKeyParam, steps]);
 
   const total = steps.length;
-
   const progress = Math.round(((step - 1) / (total - 1)) * 100);
   const back = () => setStep((s) => Math.max(1, s - 1));
   const next = () => setStep((s) => Math.min(total, s + 1));
@@ -75,6 +192,8 @@ function RegisterWizard() {
     nav({ to: "/confirmation" });
   };
 
+  void list; // lists are read inside the individual steps
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
       {/* PROGRESS */}
@@ -82,23 +201,25 @@ function RegisterWizard() {
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Step {step} of {total}</p>
-            <h1 className="text-lg font-black text-[var(--brand-dark)]">{steps[step - 1].label}</h1>
+            <Copy k={`step.${steps[step - 1].key}`} as="div" className="text-lg font-black text-[var(--brand-dark)]" />
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={back} disabled={step === 1}><ChevronLeft className="h-4 w-4" /> Back</Button>
+            <Button variant="outline" size="sm" onClick={back} disabled={step === 1}>
+              <ChevronLeft className="h-4 w-4" /> {t("btn.back")}
+            </Button>
             {step < total ? (
               <Button size="sm" onClick={next} className="bg-[var(--brand)] text-[var(--brand-foreground)] hover:bg-[var(--brand)]/90">
-                Next <ChevronRight className="h-4 w-4" />
+                {t("btn.next")} <ChevronRight className="h-4 w-4" />
               </Button>
             ) : (
               <Button size="sm" onClick={submit} className="bg-[var(--brand)] text-[var(--brand-foreground)] hover:bg-[var(--brand)]/90 font-semibold">
-                Complete Registration
+                {t("btn.submit")}
               </Button>
             )}
           </div>
         </div>
         <Progress value={progress} className="mt-3 h-2" />
-        <p className="mt-2 text-[11px] text-muted-foreground">Autosaved as you go. You can leave and return anytime.</p>
+        <Copy k="top.autosave" as="p" className="mt-2 text-[11px] text-muted-foreground" />
       </div>
 
       <div className="mt-6 space-y-6">
@@ -116,30 +237,31 @@ function RegisterWizard() {
 /* ---------- STEP A ---------- */
 function StepParticipation() {
   const { registration, setRegistration } = useStore();
+  const { list } = useRegisterContent();
   const set = (v: Participation) => setRegistration((prev) => addAudit({ ...prev, participation: v }, `Selected participation: ${v}`));
-  const opts: { v: Exclude<Participation, null>; title: string; desc: string }[] = [
-    { v: "rider", title: "Rider", desc: "I'll ride in the Team Huntington peloton." },
-    { v: "volunteer", title: "Volunteer", desc: "I'll support the event on the ground." },
-    { v: "both", title: "Both", desc: "Volunteering and riding at Team Huntington." },
-    { v: "unsure", title: "Not sure yet", desc: "Explore first — you can change this later." },
-  ];
+
   return (
     <Card>
-      <CardHeader><CardTitle>How would you like to participate?</CardTitle></CardHeader>
+      <CardHeader>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <CardTitle><Copy k="A.title" /></CardTitle>
+          <ListSettings listKey="participation" title="Participation choices" withDesc />
+        </div>
+      </CardHeader>
       <CardContent className="grid gap-3 sm:grid-cols-2">
-        {opts.map((o) => {
-          const selected = registration.participation === o.v;
+        {list("participation").map((o) => {
+          const selected = registration.participation === o.value;
           return (
             <button
-              key={o.v}
-              onClick={() => set(o.v)}
+              key={o.value}
+              onClick={() => set(o.value as Participation)}
               className={`text-left rounded-xl border-2 p-4 transition-all ${selected ? "border-[var(--brand)] bg-[var(--brand)]/10 shadow-sm" : "border-border hover:border-[var(--brand)]/50"}`}
             >
               <div className="flex items-center justify-between">
-                <h3 className="font-bold text-[var(--brand-dark)]">{o.title}</h3>
+                <h3 className="font-bold text-[var(--brand-dark)]">{o.label}</h3>
                 {selected && <CheckCircle2 className="h-5 w-5 text-[var(--brand-dark)]" />}
               </div>
-              <p className="mt-1 text-sm text-muted-foreground">{o.desc}</p>
+              {o.desc && <p className="mt-1 text-sm text-muted-foreground">{o.desc}</p>}
             </button>
           );
         })}
@@ -151,15 +273,22 @@ function StepParticipation() {
 /* ---------- STEP B ---------- */
 function StepPelotonia() {
   const { registration, setRegistration } = useStore();
+  const { t, field, list, link, editing, setLink } = useRegisterContent();
   const p = registration.pelotonia;
   const upd = (patch: Partial<typeof p>) => setRegistration((prev) => ({ ...prev, pelotonia: { ...prev.pelotonia, ...patch } }));
+  const code = link("discountCode")?.label ?? p.discountCode;
 
   const markComplete = () => {
-    const complete = !!(p.confirmation && p.hbNumber && p.employmentType && p.payGrade74Below);
-    upd({ completed: true, status: complete ? "complete" : "pending" });
+    const missing = missingRequired(field, [
+      ["confirmation", p.confirmation],
+      ["hbNumber", p.hbNumber],
+      ["employmentType", p.employmentType],
+      ["payGrade74Below", p.payGrade74Below],
+      ["completed", p.completed],
+    ]);
+    upd({ completed: true, status: missing.length === 0 ? "complete" : "pending" });
     setRegistration((prev) => addAudit(prev, "Pelotonia registration marked complete"));
-    toast.success(complete ? "Pelotonia step complete" : "Pelotonia step updated — some required answers are missing");
-
+    toast.success(missing.length === 0 ? "Pelotonia step complete" : "Pelotonia step updated — some required answers are missing");
   };
 
   return (
@@ -167,98 +296,126 @@ function StepPelotonia() {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Team Huntington Peloton</CardTitle>
+            <CardTitle><Copy k="B.card1Title" /></CardTitle>
             <StatusBadge status={p.status} />
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="rounded-lg bg-muted/50 p-4 text-sm">
-            <p className="font-semibold text-[var(--brand-dark)]">Register on Pelotonia:</p>
+            <Copy k="B.instructionsTitle" as="p" className="font-semibold text-[var(--brand-dark)]" />
             <ol className="mt-2 space-y-1 list-decimal pl-5 text-muted-foreground">
-              <li>Choose <b>Team Huntington</b> as your peloton.</li>
-              <li>Select your event type (25/45/55/100/155/200 miles or Volunteer).</li>
-              <li>Apply the discount code below at checkout.</li>
+              <li><Copy k="B.instr1" /></li>
+              <li><Copy k="B.instr2" /></li>
+              <li><Copy k="B.instr3" /></li>
             </ol>
           </div>
           <div>
-            <Label>Team discount code</Label>
+            <Label><Copy k="B.discountLabel" /></Label>
             <div className="mt-1.5 flex gap-2">
-              <Input readOnly value={p.discountCode} className="font-mono font-bold text-[var(--brand-dark)]" />
-              <Button variant="outline" onClick={() => { navigator.clipboard.writeText(p.discountCode); toast.success("Copied"); }}>
-                <Copy className="h-4 w-4" />
+              {editing ? (
+                <Input
+                  value={code}
+                  onChange={(e) => setLink("discountCode", { label: e.target.value, url: "" })}
+                  className="font-mono font-bold text-[var(--brand-dark)]"
+                />
+              ) : (
+                <Input readOnly value={code} className="font-mono font-bold text-[var(--brand-dark)]" />
+              )}
+              <Button variant="outline" onClick={() => { navigator.clipboard.writeText(code); toast.success("Copied"); }}>
+                <CopyIcon className="h-4 w-4" />
               </Button>
             </div>
           </div>
-          <Button
-            onClick={() => window.open("https://www.pelotonia.org", "_blank")}
-            className="w-full h-11 bg-[var(--brand-dark)] hover:bg-[var(--brand-dark)]/90 text-white"
-          >
-            <ExternalLink className="mr-2 h-4 w-4" /> Open Pelotonia Registration <span className="ml-1 text-xs opacity-70">(demo)</span>
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              onClick={() => window.open(link("pelotonia").url, "_blank")}
+              className="h-11 flex-1 bg-[var(--brand-dark)] hover:bg-[var(--brand-dark)]/90 text-white"
+            >
+              <ExternalLink className="mr-2 h-4 w-4" /> {link("pelotonia").label}
+            </Button>
+            <LinkSettings linkKey="pelotonia" />
+          </div>
         </CardContent>
       </Card>
 
       <Card>
-        <CardHeader><CardTitle>After you register</CardTitle></CardHeader>
+        <CardHeader><CardTitle><Copy k="B.card2Title" /></CardTitle></CardHeader>
         <CardContent className="space-y-3">
-          <div>
-            <Label>Pelotonia Public/Rider ID</Label>
-            <Input value={p.confirmation} onChange={(e) => upd({ confirmation: e.target.value })} placeholder="e.g. PELO-2027-12345" />
-          </div>
-          <div>
-            <Label>Huntington Bank HB number <span className="text-red-500">*</span></Label>
-            <Input value={p.hbNumber} onChange={(e) => upd({ hbNumber: e.target.value })} placeholder="e.g. HB123456" />
-            {!p.hbNumber && <p className="text-xs text-red-500 mt-1">Required for team rostering and expense matching.</p>}
-          </div>
-          <label className="flex items-center gap-2 text-sm">
-            <Checkbox checked={p.completed} onCheckedChange={(v) => upd({ completed: !!v })} />
-            I completed registration on Pelotonia.
-          </label>
-
-          <div className="rounded-lg border bg-muted/30 p-3 space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Pelotonia designations</p>
-            <label className="flex items-start gap-2 text-sm cursor-pointer">
-              <Checkbox checked={p.highRoller} onCheckedChange={(v) => upd({ highRoller: !!v })} className="mt-0.5" />
-              <span>
-                <b>High Roller</b>
-                <span className="block text-xs text-muted-foreground">I've committed to raise at or above the High Roller fundraising level.</span>
-              </span>
-            </label>
-            <label className="flex items-start gap-2 text-sm cursor-pointer">
-              <Checkbox checked={p.survivor} onCheckedChange={(v) => upd({ survivor: !!v })} className="mt-0.5" />
-              <span>
-                <b>Survivor</b>
-                <span className="block text-xs text-muted-foreground">I'm riding or volunteering as a cancer survivor.</span>
-              </span>
-            </label>
-          </div>
-
-          <div className="rounded-lg border bg-muted/30 p-3 space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Colleague details</p>
+          {field("confirmation").visible && (
             <div>
-              <Label>Are you a Salary or Hourly colleague? <span className="text-red-500">*</span></Label>
-              <Select value={p.employmentType} onValueChange={(v) => upd({ employmentType: v as "salary" | "hourly" })}>
-                <SelectTrigger className="mt-1.5"><SelectValue placeholder="Select..." /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="salary">Salary</SelectItem>
-                  <SelectItem value="hourly">Hourly</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label><FieldLabel name="confirmation" /></Label>
+              <Input value={p.confirmation} onChange={(e) => upd({ confirmation: e.target.value })} placeholder="e.g. PELO-2027-12345" />
             </div>
+          )}
+          {field("hbNumber").visible && (
             <div>
-              <Label>Are you a pay grade 74 and below? <span className="text-red-500">*</span></Label>
-              <Select value={p.payGrade74Below} onValueChange={(v) => upd({ payGrade74Below: v as "yes" | "no" })}>
-                <SelectTrigger className="mt-1.5"><SelectValue placeholder="Select..." /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="yes">Yes — pay grade 74 or below</SelectItem>
-                  <SelectItem value="no">No — pay grade 75 or above</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label><FieldLabel name="hbNumber" /></Label>
+              <Input value={p.hbNumber} onChange={(e) => upd({ hbNumber: e.target.value })} placeholder="e.g. HB123456" />
+              {!p.hbNumber && field("hbNumber").required && (
+                <Copy k="B.hbHelp" as="p" className="text-xs text-red-500 mt-1" />
+              )}
             </div>
-          </div>
+          )}
+          {field("completed").visible && (
+            <label className="flex items-center gap-2 text-sm">
+              <Checkbox checked={p.completed} onCheckedChange={(v) => upd({ completed: !!v })} />
+              <Copy k="B.completedLabel" />
+            </label>
+          )}
 
+          {(field("highRoller").visible || field("survivor").visible) && (
+            <div className="rounded-lg border bg-muted/30 p-3 space-y-2">
+              <Copy k="B.designationsTitle" as="p" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" />
+              {field("highRoller").visible && (
+                <label className="flex items-start gap-2 text-sm cursor-pointer">
+                  <Checkbox checked={p.highRoller} onCheckedChange={(v) => upd({ highRoller: !!v })} className="mt-0.5" />
+                  <span>
+                    <b><Copy k="B.highRollerTitle" /></b>
+                    <Copy k="B.highRollerDesc" as="span" className="block text-xs text-muted-foreground" />
+                  </span>
+                </label>
+              )}
+              {field("survivor").visible && (
+                <label className="flex items-start gap-2 text-sm cursor-pointer">
+                  <Checkbox checked={p.survivor} onCheckedChange={(v) => upd({ survivor: !!v })} className="mt-0.5" />
+                  <span>
+                    <b><Copy k="B.survivorTitle" /></b>
+                    <Copy k="B.survivorDesc" as="span" className="block text-xs text-muted-foreground" />
+                  </span>
+                </label>
+              )}
+            </div>
+          )}
 
-          <Button onClick={markComplete} variant="outline" className="w-full">Save status</Button>
+          {(field("employmentType").visible || field("payGrade74Below").visible) && (
+            <div className="rounded-lg border bg-muted/30 p-3 space-y-3">
+              <Copy k="B.colleagueTitle" as="p" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground" />
+              {field("employmentType").visible && (
+                <div>
+                  <Label><FieldLabel name="employmentType" listKey="employmentTypes" /></Label>
+                  <Select value={p.employmentType} onValueChange={(v) => upd({ employmentType: v as "salary" | "hourly" })}>
+                    <SelectTrigger className="mt-1.5"><SelectValue placeholder="Select..." /></SelectTrigger>
+                    <SelectContent>
+                      {list("employmentTypes").map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              {field("payGrade74Below").visible && (
+                <div>
+                  <Label><FieldLabel name="payGrade74Below" listKey="payGrades" /></Label>
+                  <Select value={p.payGrade74Below} onValueChange={(v) => upd({ payGrade74Below: v as "yes" | "no" })}>
+                    <SelectTrigger className="mt-1.5"><SelectValue placeholder="Select..." /></SelectTrigger>
+                    <SelectContent>
+                      {list("payGrades").map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+          )}
+
+          <Button onClick={markComplete} variant="outline" className="w-full">{t("B.saveBtn")}</Button>
         </CardContent>
       </Card>
     </>
@@ -268,12 +425,31 @@ function StepPelotonia() {
 /* ---------- STEP C ---------- */
 function StepTravel() {
   const { registration, setRegistration } = useStore();
-  const t = registration.travel;
-  const upd = (patch: Partial<typeof t>) => setRegistration((prev) => ({ ...prev, travel: { ...prev.travel, ...patch } }));
+  const { t, field, list, link } = useRegisterContent();
+  const tr = registration.travel;
+  const upd = (patch: Partial<typeof tr>) => setRegistration((prev) => ({ ...prev, travel: { ...prev.travel, ...patch } }));
 
   const save = () => {
-    const complete = (t.travelConfirmation || t.needs === "none") && !!t.needs;
-    upd({ status: t.needs === "none" ? "complete" : complete ? "complete" : "pending" });
+    if (!tr.needs) {
+      upd({ status: "pending" });
+    } else if (tr.needs === "none") {
+      upd({ status: "complete" });
+    } else {
+      const missing = missingRequired(field, [
+        ["departureCity", tr.departureCity],
+        ["arrivalDate", tr.arrivalDate],
+        ["departureDate", tr.departureDate],
+        ["hotelCheckIn", tr.hotelCheckIn],
+        ["hotelCheckOut", tr.hotelCheckOut],
+        ["travelNotes", tr.notes],
+        ["travelConfirmation", tr.travelConfirmation],
+        ["hotelConfirmation", tr.hotelConfirmation],
+        ["hotelName", tr.hotelName],
+        ["arrivalTime", tr.arrivalTime],
+        ["departureTime", tr.departureTime],
+      ]);
+      upd({ status: missing.length === 0 && tr.travelConfirmation ? "complete" : "pending" });
+    }
     setRegistration((prev) => addAudit(prev, "Travel details updated"));
     toast.success("Travel saved");
   };
@@ -282,62 +458,64 @@ function StepTravel() {
     <>
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Do you need travel or hotel?</CardTitle>
-            <StatusBadge status={t.status} />
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <CardTitle><Copy k="C.title" /></CardTitle>
+            <div className="flex items-center gap-2">
+              <ListSettings listKey="travelNeeds" title="Travel choices" />
+              <StatusBadge status={tr.status} />
+            </div>
           </div>
         </CardHeader>
         <CardContent>
-          <RadioGroup value={t.needs} onValueChange={(v) => upd({ needs: v as typeof t.needs })} className="grid gap-2 sm:grid-cols-2">
-            {[
-              { v: "none", l: "None — I'm covered" },
-              { v: "hotel", l: "Hotel only" },
-              { v: "airrail", l: "Air / Rail only" },
-              { v: "both", l: "Travel + Hotel" },
-              { v: "unsure", l: "Not sure yet" },
-            ].map((o) => (
-              <label key={o.v} className="flex items-center gap-2 rounded-lg border p-3 cursor-pointer has-[[data-state=checked]]:border-[var(--brand)] has-[[data-state=checked]]:bg-[var(--brand)]/10">
-                <RadioGroupItem value={o.v} /> <span className="text-sm">{o.l}</span>
+          <RadioGroup value={tr.needs} onValueChange={(v) => upd({ needs: v as typeof tr.needs })} className="grid gap-2 sm:grid-cols-2">
+            {list("travelNeeds").map((o) => (
+              <label key={o.value} className="flex items-center gap-2 rounded-lg border p-3 cursor-pointer has-[[data-state=checked]]:border-[var(--brand)] has-[[data-state=checked]]:bg-[var(--brand)]/10">
+                <RadioGroupItem value={o.value} /> <span className="text-sm">{o.label}</span>
               </label>
             ))}
           </RadioGroup>
         </CardContent>
       </Card>
 
-      {t.needs && t.needs !== "none" && (
+      {tr.needs && tr.needs !== "none" && (
         <>
           <Card>
-            <CardHeader><CardTitle>Trip details</CardTitle></CardHeader>
+            <CardHeader><CardTitle><Copy k="C.tripTitle" /></CardTitle></CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2"><Label>Departure city</Label><Input value={t.departureCity} onChange={(e) => upd({ departureCity: e.target.value })} /></div>
-              <div className="space-y-2"><Label>Arrival date</Label><Input type="date" value={t.arrivalDate} onChange={(e) => upd({ arrivalDate: e.target.value })} /></div>
-              <div className="space-y-2"><Label>Departure date</Label><Input type="date" value={t.departureDate} onChange={(e) => upd({ departureDate: e.target.value })} /></div>
-              <div className="space-y-2"><Label>Hotel check-in</Label><Input type="date" value={t.hotelCheckIn} onChange={(e) => upd({ hotelCheckIn: e.target.value })} /></div>
-              <div className="space-y-2"><Label>Hotel check-out</Label><Input type="date" value={t.hotelCheckOut} onChange={(e) => upd({ hotelCheckOut: e.target.value })} /></div>
-              <div className="space-y-2 sm:col-span-2"><Label>Accessibility / travel notes</Label><Textarea value={t.notes} onChange={(e) => upd({ notes: e.target.value })} /></div>
+              {field("departureCity").visible && <div className="space-y-2"><Label><FieldLabel name="departureCity" /></Label><Input value={tr.departureCity} onChange={(e) => upd({ departureCity: e.target.value })} /></div>}
+              {field("arrivalDate").visible && <div className="space-y-2"><Label><FieldLabel name="arrivalDate" /></Label><Input type="date" value={tr.arrivalDate} onChange={(e) => upd({ arrivalDate: e.target.value })} /></div>}
+              {field("departureDate").visible && <div className="space-y-2"><Label><FieldLabel name="departureDate" /></Label><Input type="date" value={tr.departureDate} onChange={(e) => upd({ departureDate: e.target.value })} /></div>}
+              {field("hotelCheckIn").visible && <div className="space-y-2"><Label><FieldLabel name="hotelCheckIn" /></Label><Input type="date" value={tr.hotelCheckIn} onChange={(e) => upd({ hotelCheckIn: e.target.value })} /></div>}
+              {field("hotelCheckOut").visible && <div className="space-y-2"><Label><FieldLabel name="hotelCheckOut" /></Label><Input type="date" value={tr.hotelCheckOut} onChange={(e) => upd({ hotelCheckOut: e.target.value })} /></div>}
+              {field("travelNotes").visible && <div className="space-y-2 sm:col-span-2"><Label><FieldLabel name="travelNotes" /></Label><Textarea value={tr.notes} onChange={(e) => upd({ notes: e.target.value })} /></div>}
             </CardContent>
           </Card>
-          <Button onClick={() => window.open("about:blank", "_blank")} className="w-full h-11 bg-[var(--brand-dark)] hover:bg-[var(--brand-dark)]/90 text-white">
-            <ExternalLink className="mr-2 h-4 w-4" /> Open Concur / ATG <span className="ml-1 text-xs opacity-70">(demo)</span>
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button onClick={() => window.open(link("travel").url, "_blank")} className="h-11 flex-1 bg-[var(--brand-dark)] hover:bg-[var(--brand-dark)]/90 text-white">
+              <ExternalLink className="mr-2 h-4 w-4" /> {link("travel").label}
+            </Button>
+            <LinkSettings linkKey="travel" />
+          </div>
 
           <Card>
-            <CardHeader><CardTitle>Confirmations</CardTitle></CardHeader>
+            <CardHeader><CardTitle><Copy k="C.confirmTitle" /></CardTitle></CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2"><Label>Travel confirmation #</Label><Input value={t.travelConfirmation} onChange={(e) => upd({ travelConfirmation: e.target.value })} /></div>
-              <div className="space-y-2"><Label>Hotel confirmation #</Label><Input value={t.hotelConfirmation} onChange={(e) => upd({ hotelConfirmation: e.target.value })} /></div>
-              <div className="space-y-2"><Label>Hotel name</Label><Input value={t.hotelName} onChange={(e) => upd({ hotelName: e.target.value })} /></div>
-              <div className="space-y-2"><Label>Arrival time</Label><Input type="time" value={t.arrivalTime} onChange={(e) => upd({ arrivalTime: e.target.value })} /></div>
-              <div className="space-y-2"><Label>Departure time</Label><Input type="time" value={t.departureTime} onChange={(e) => upd({ departureTime: e.target.value })} /></div>
-              <label className="sm:col-span-2 flex items-center gap-2 text-sm">
-                <Checkbox checked={t.bookLater} onCheckedChange={(v) => upd({ bookLater: !!v })} /> Book later — remind me
-              </label>
+              {field("travelConfirmation").visible && <div className="space-y-2"><Label><FieldLabel name="travelConfirmation" /></Label><Input value={tr.travelConfirmation} onChange={(e) => upd({ travelConfirmation: e.target.value })} /></div>}
+              {field("hotelConfirmation").visible && <div className="space-y-2"><Label><FieldLabel name="hotelConfirmation" /></Label><Input value={tr.hotelConfirmation} onChange={(e) => upd({ hotelConfirmation: e.target.value })} /></div>}
+              {field("hotelName").visible && <div className="space-y-2"><Label><FieldLabel name="hotelName" /></Label><Input value={tr.hotelName} onChange={(e) => upd({ hotelName: e.target.value })} /></div>}
+              {field("arrivalTime").visible && <div className="space-y-2"><Label><FieldLabel name="arrivalTime" /></Label><Input type="time" value={tr.arrivalTime} onChange={(e) => upd({ arrivalTime: e.target.value })} /></div>}
+              {field("departureTime").visible && <div className="space-y-2"><Label><FieldLabel name="departureTime" /></Label><Input type="time" value={tr.departureTime} onChange={(e) => upd({ departureTime: e.target.value })} /></div>}
+              {field("bookLater").visible && (
+                <label className="sm:col-span-2 flex items-center gap-2 text-sm">
+                  <Checkbox checked={tr.bookLater} onCheckedChange={(v) => upd({ bookLater: !!v })} /> <Copy k="C.bookLater" />
+                </label>
+              )}
             </CardContent>
           </Card>
         </>
       )}
 
-      <Button onClick={save} variant="outline" className="w-full">Save travel</Button>
+      <Button onClick={save} variant="outline" className="w-full">{t("C.saveBtn")}</Button>
     </>
   );
 }
@@ -345,6 +523,7 @@ function StepTravel() {
 /* ---------- STEP D ---------- */
 function StepBike() {
   const { registration, setRegistration } = useStore();
+  const { t, field, list, link } = useRegisterContent();
   const b = registration.bike;
   const upd = (patch: Partial<typeof b>) => setRegistration((prev) => ({ ...prev, bike: { ...prev.bike, ...patch } }));
 
@@ -352,9 +531,17 @@ function StepBike() {
     let status: "complete" | "pending" | "not_started" = "not_started";
     if (b.needs === "no") status = "complete";
     else if (b.needs === "yes") {
-      const specsFilled = !!(b.height && b.bikeSize && b.bikeType && b.pedals && b.pickupDate && b.returnDate);
-      status = specsFilled ? "complete" : "pending";
-    } else if (b.needs === "unsure") status = "pending";
+      const missing = missingRequired(field, [
+        ["height", b.height],
+        ["bikeSize", b.bikeSize],
+        ["bikeType", b.bikeType],
+        ["pedals", b.pedals],
+        ["pickupDate", b.pickupDate],
+        ["returnDate", b.returnDate],
+        ["bikeConfirmation", b.confirmation],
+      ]);
+      status = missing.length === 0 ? "complete" : "pending";
+    } else if (b.needs) status = "pending";
     upd({ status });
     setRegistration((prev) => addAudit(prev, "Bike rental updated"));
     toast.success("Bike info saved");
@@ -364,16 +551,19 @@ function StepBike() {
     <>
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Rent a bike?</CardTitle>
-            <StatusBadge status={b.status} />
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <CardTitle><Copy k="D.title" /></CardTitle>
+            <div className="flex items-center gap-2">
+              <ListSettings listKey="bikeNeeds" title="Rental choices" />
+              <StatusBadge status={b.status} />
+            </div>
           </div>
         </CardHeader>
         <CardContent>
           <RadioGroup value={b.needs} onValueChange={(v) => upd({ needs: v as typeof b.needs })} className="grid gap-2 sm:grid-cols-3">
-            {[{ v: "yes", l: "Yes" }, { v: "no", l: "No — bringing my own" }, { v: "unsure", l: "Not sure" }].map((o) => (
-              <label key={o.v} className="flex items-center gap-2 rounded-lg border p-3 cursor-pointer has-[[data-state=checked]]:border-[var(--brand)] has-[[data-state=checked]]:bg-[var(--brand)]/10">
-                <RadioGroupItem value={o.v} /> <span className="text-sm">{o.l}</span>
+            {list("bikeNeeds").map((o) => (
+              <label key={o.value} className="flex items-center gap-2 rounded-lg border p-3 cursor-pointer has-[[data-state=checked]]:border-[var(--brand)] has-[[data-state=checked]]:bg-[var(--brand)]/10">
+                <RadioGroupItem value={o.value} /> <span className="text-sm">{o.label}</span>
               </label>
             ))}
           </RadioGroup>
@@ -383,56 +573,63 @@ function StepBike() {
       {b.needs === "yes" && (
         <>
           <Card>
-            <CardHeader><CardTitle>Rider specs</CardTitle></CardHeader>
+            <CardHeader><CardTitle><Copy k="D.specsTitle" /></CardTitle></CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2"><Label>Height</Label><Input placeholder="e.g. 5'10&quot;" value={b.height} onChange={(e) => upd({ height: e.target.value })} /></div>
-              <div className="space-y-2">
-                <Label>Preferred bike size</Label>
-                <Select value={b.bikeSize} onValueChange={(v) => upd({ bikeSize: v })}>
-                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
-                  <SelectContent>{["XS", "S", "M", "L", "XL"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Bike type</Label>
-                <Select value={b.bikeType} onValueChange={(v) => upd({ bikeType: v })}>
-                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="road">Road</SelectItem>
-                    <SelectItem value="hybrid">Hybrid</SelectItem>
-                    <SelectItem value="ebike">E-Bike</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Pedal preference</Label>
-                <Select value={b.pedals} onValueChange={(v) => upd({ pedals: v })}>
-                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="flat">Flat</SelectItem>
-                    <SelectItem value="clip">Clip-in (SPD)</SelectItem>
-                    <SelectItem value="clip-road">Clip-in (Road)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <label className="sm:col-span-2 flex items-center gap-2 text-sm"><Checkbox checked={b.helmet} onCheckedChange={(v) => upd({ helmet: !!v })} /> Helmet needed</label>
-              <div className="space-y-2"><Label>Pickup date</Label><Input type="date" value={b.pickupDate} onChange={(e) => upd({ pickupDate: e.target.value })} /></div>
-              <div className="space-y-2"><Label>Return date</Label><Input type="date" value={b.returnDate} onChange={(e) => upd({ returnDate: e.target.value })} /></div>
+              {field("height").visible && <div className="space-y-2"><Label><FieldLabel name="height" /></Label><Input placeholder="e.g. 5'10&quot;" value={b.height} onChange={(e) => upd({ height: e.target.value })} /></div>}
+              {field("bikeSize").visible && (
+                <div className="space-y-2">
+                  <Label><FieldLabel name="bikeSize" listKey="bikeSizes" /></Label>
+                  <Select value={b.bikeSize} onValueChange={(v) => upd({ bikeSize: v })}>
+                    <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                    <SelectContent>{list("bikeSizes").map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+              )}
+              {field("bikeType").visible && (
+                <div className="space-y-2">
+                  <Label><FieldLabel name="bikeType" listKey="bikeTypes" /></Label>
+                  <Select value={b.bikeType} onValueChange={(v) => upd({ bikeType: v })}>
+                    <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                    <SelectContent>{list("bikeTypes").map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+              )}
+              {field("pedals").visible && (
+                <div className="space-y-2">
+                  <Label><FieldLabel name="pedals" listKey="pedals" /></Label>
+                  <Select value={b.pedals} onValueChange={(v) => upd({ pedals: v })}>
+                    <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                    <SelectContent>{list("pedals").map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+              )}
+              {field("helmet").visible && (
+                <label className="sm:col-span-2 flex items-center gap-2 text-sm">
+                  <Checkbox checked={b.helmet} onCheckedChange={(v) => upd({ helmet: !!v })} /> <FieldLabel name="helmet" />
+                </label>
+              )}
+              {field("pickupDate").visible && <div className="space-y-2"><Label><FieldLabel name="pickupDate" /></Label><Input type="date" value={b.pickupDate} onChange={(e) => upd({ pickupDate: e.target.value })} /></div>}
+              {field("returnDate").visible && <div className="space-y-2"><Label><FieldLabel name="returnDate" /></Label><Input type="date" value={b.returnDate} onChange={(e) => upd({ returnDate: e.target.value })} /></div>}
             </CardContent>
           </Card>
-          <Button onClick={() => window.open("about:blank", "_blank")} className="w-full h-11 bg-[var(--brand-dark)] hover:bg-[var(--brand-dark)]/90 text-white">
-            <ExternalLink className="mr-2 h-4 w-4" /> Open Unlimited Biking <span className="ml-1 text-xs opacity-70">(demo)</span>
-          </Button>
-          <Card>
-            <CardHeader><CardTitle>Rental confirmation</CardTitle></CardHeader>
-            <CardContent className="space-y-2">
-              <Label>Confirmation number</Label>
-              <Input value={b.confirmation} onChange={(e) => upd({ confirmation: e.target.value })} />
-            </CardContent>
-          </Card>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button onClick={() => window.open(link("bikeRental").url, "_blank")} className="h-11 flex-1 bg-[var(--brand-dark)] hover:bg-[var(--brand-dark)]/90 text-white">
+              <ExternalLink className="mr-2 h-4 w-4" /> {link("bikeRental").label}
+            </Button>
+            <LinkSettings linkKey="bikeRental" />
+          </div>
+          {field("bikeConfirmation").visible && (
+            <Card>
+              <CardHeader><CardTitle><Copy k="D.rentalConfTitle" /></CardTitle></CardHeader>
+              <CardContent className="space-y-2">
+                <Label><FieldLabel name="bikeConfirmation" /></Label>
+                <Input value={b.confirmation} onChange={(e) => upd({ confirmation: e.target.value })} />
+              </CardContent>
+            </Card>
+          )}
         </>
       )}
-      <Button onClick={save} variant="outline" className="w-full">Save bike info</Button>
+      <Button onClick={save} variant="outline" className="w-full">{t("D.saveBtn")}</Button>
     </>
   );
 }
@@ -440,6 +637,7 @@ function StepBike() {
 /* ---------- STEP E ---------- */
 function StepApparel() {
   const { registration, setRegistration } = useStore();
+  const { t, field, list } = useRegisterContent();
   const a = registration.apparel;
   const addr = registration.address;
   // When participation isn't a definite rider/volunteer choice (null or "unsure"),
@@ -451,12 +649,35 @@ function StepApparel() {
   const updA = (patch: Partial<typeof addr>) => setRegistration((prev) => ({ ...prev, address: { ...prev.address, ...patch } }));
 
   const save = () => {
-    const okRider = !isRider || (a.jerseySize && a.jerseyStyle && a.shirtSize && a.cut);
-    const okVol = !isVol || (a.volunteerShirtSize && a.volunteerCut);
-    const okAddr = addr.name && addr.street && addr.city && addr.state && addr.zip && addr.confirmed;
+    const riderMissing = isRider
+      ? missingRequired(field, [
+          ["jerseySize", a.jerseySize],
+          ["jerseyStyle", a.jerseyStyle],
+          ["shirtSize", a.shirtSize],
+          ["cut", a.cut],
+        ])
+      : [];
+    const volMissing = isVol
+      ? missingRequired(field, [
+          ["volunteerShirtSize", a.volunteerShirtSize],
+          ["volunteerCut", a.volunteerCut],
+        ])
+      : [];
+    const addrMissing = missingRequired(field, [
+      ["addrName", addr.name],
+      ["street", addr.street],
+      ["unit", addr.unit],
+      ["city", addr.city],
+      ["state", addr.state],
+      ["zip", addr.zip],
+      ["country", addr.country],
+      ["addrType", addr.type],
+    ]);
     // Undecided participants only need one apparel set filled in.
-    const okApparel = undecided ? !!(okRider || okVol) : !!(okRider && okVol);
-    const complete = !!(okApparel && okAddr);
+    const okApparel = undecided
+      ? riderMissing.length === 0 || volMissing.length === 0
+      : riderMissing.length === 0 && volMissing.length === 0;
+    const complete = okApparel && addrMissing.length === 0 && addr.confirmed;
     upd({ status: complete ? "complete" : "pending" });
     setRegistration((prev) => addAudit(prev, "Apparel & mailing updated"));
     toast.success("Apparel saved");
@@ -468,103 +689,117 @@ function StepApparel() {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Rider apparel</CardTitle>
-              <Dialog>
-                <DialogTrigger asChild><Button variant="ghost" size="sm"><Info className="mr-1 h-4 w-4" />Size guide</Button></DialogTrigger>
-                <DialogContent>
-                  <DialogHeader><DialogTitle>Size guide</DialogTitle></DialogHeader>
-                  <div className="text-sm space-y-2 text-muted-foreground">
-                    <p>Cycling jerseys run one size smaller than everyday shirts. When in doubt, size up.</p>
-                    <table className="w-full text-left mt-2 border-t">
-                      <thead className="text-xs uppercase text-muted-foreground"><tr><th className="py-2">Size</th><th>Chest (in)</th></tr></thead>
-                      <tbody>
-                        {[["XS","32-34"],["S","34-36"],["M","36-38"],["L","38-40"],["XL","40-42"],["XXL","42-44"],["3XL","44-46"],["4XL","46-48"]].map((r) => (
-                          <tr key={r[0]} className="border-t"><td className="py-1.5 font-mono">{r[0]}</td><td>{r[1]}</td></tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </DialogContent>
-              </Dialog>
+              <CardTitle><Copy k="E.riderTitle" /></CardTitle>
+              <div className="flex items-center gap-2">
+                <ListSettings listKey="sizeGuide" title="Size guide rows" withDesc />
+                <Dialog>
+                  <DialogTrigger asChild><Button variant="ghost" size="sm"><Info className="mr-1 h-4 w-4" />{t("E.sizeGuideBtn")}</Button></DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader><DialogTitle>{t("E.sizeGuideTitle")}</DialogTitle></DialogHeader>
+                    <div className="text-sm space-y-2 text-muted-foreground">
+                      <Copy k="E.sizeGuideNote" as="p" />
+                      <table className="w-full text-left mt-2 border-t">
+                        <thead className="text-xs uppercase text-muted-foreground"><tr><th className="py-2">{t("E.sizeGuideCol1")}</th><th>{t("E.sizeGuideCol2")}</th></tr></thead>
+                        <tbody>
+                          {list("sizeGuide").map((r) => (
+                            <tr key={r.value} className="border-t"><td className="py-1.5 font-mono">{r.label}</td><td>{r.desc}</td></tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
             </div>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="space-y-2"><Label>Jersey size</Label>
-              <Select value={a.jerseySize} onValueChange={(v) => upd({ jerseySize: v })}>
-                <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
-                <SelectContent>{SIZES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2"><Label>Jersey style</Label>
-              <Select value={a.jerseyStyle} onValueChange={(v) => upd({ jerseyStyle: v as "short-sleeve" | "sleeveless" })}>
-                <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="short-sleeve">Short sleeve</SelectItem>
-                  <SelectItem value="sleeveless">Sleeveless</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2"><Label>Shirt size</Label>
-              <Select value={a.shirtSize} onValueChange={(v) => upd({ shirtSize: v })}>
-                <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
-                <SelectContent>{SIZES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2"><Label>Cut</Label>
-              <Select value={a.cut} onValueChange={(v) => upd({ cut: v })}>
-                <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
-                <SelectContent><SelectItem value="mens">Men's</SelectItem><SelectItem value="womens">Women's</SelectItem><SelectItem value="unisex">Unisex</SelectItem></SelectContent>
-              </Select>
-            </div>
+            {field("jerseySize").visible && (
+              <div className="space-y-2"><Label><FieldLabel name="jerseySize" listKey="sizes" /></Label>
+                <Select value={a.jerseySize} onValueChange={(v) => upd({ jerseySize: v })}>
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>{list("sizes").map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+            )}
+            {field("jerseyStyle").visible && (
+              <div className="space-y-2"><Label><FieldLabel name="jerseyStyle" listKey="jerseyStyles" /></Label>
+                <Select value={a.jerseyStyle} onValueChange={(v) => upd({ jerseyStyle: v as "short-sleeve" | "sleeveless" })}>
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>{list("jerseyStyles").map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+            )}
+            {field("shirtSize").visible && (
+              <div className="space-y-2"><Label><FieldLabel name="shirtSize" listKey="sizes" /></Label>
+                <Select value={a.shirtSize} onValueChange={(v) => upd({ shirtSize: v })}>
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>{list("sizes").map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+            )}
+            {field("cut").visible && (
+              <div className="space-y-2"><Label><FieldLabel name="cut" listKey="cuts" /></Label>
+                <Select value={a.cut} onValueChange={(v) => upd({ cut: v })}>
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>{list("cuts").map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
 
       {isVol && (
         <Card>
-          <CardHeader><CardTitle>Volunteer apparel</CardTitle></CardHeader>
+          <CardHeader><CardTitle><Copy k="E.volTitle" /></CardTitle></CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2"><Label>Shirt size</Label>
-              <Select value={a.volunteerShirtSize} onValueChange={(v) => upd({ volunteerShirtSize: v })}>
-                <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
-                <SelectContent>{SIZES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2"><Label>Cut</Label>
-              <Select value={a.volunteerCut} onValueChange={(v) => upd({ volunteerCut: v })}>
-                <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
-                <SelectContent><SelectItem value="mens">Men's</SelectItem><SelectItem value="womens">Women's</SelectItem><SelectItem value="unisex">Unisex</SelectItem></SelectContent>
-              </Select>
-            </div>
+            {field("volunteerShirtSize").visible && (
+              <div className="space-y-2"><Label><FieldLabel name="volunteerShirtSize" listKey="sizes" /></Label>
+                <Select value={a.volunteerShirtSize} onValueChange={(v) => upd({ volunteerShirtSize: v })}>
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>{list("sizes").map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+            )}
+            {field("volunteerCut").visible && (
+              <div className="space-y-2"><Label><FieldLabel name="volunteerCut" listKey="cuts" /></Label>
+                <Select value={a.volunteerCut} onValueChange={(v) => upd({ volunteerCut: v })}>
+                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                  <SelectContent>{list("cuts").map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
 
       <Card>
-        <CardHeader><CardTitle>Mailing address</CardTitle></CardHeader>
+        <CardHeader><CardTitle><Copy k="E.mailTitle" /></CardTitle></CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2 sm:col-span-2"><Label>Name</Label><Input value={addr.name} onChange={(e) => updA({ name: e.target.value })} /></div>
-          <div className="space-y-2 sm:col-span-2"><Label>Street</Label><Input value={addr.street} onChange={(e) => updA({ street: e.target.value })} /></div>
-          <div className="space-y-2"><Label>Unit / Apt</Label><Input value={addr.unit} onChange={(e) => updA({ unit: e.target.value })} /></div>
-          <div className="space-y-2"><Label>City</Label><Input value={addr.city} onChange={(e) => updA({ city: e.target.value })} /></div>
-          <div className="space-y-2"><Label>State</Label><Input maxLength={2} value={addr.state} onChange={(e) => updA({ state: e.target.value.toUpperCase() })} /></div>
-          <div className="space-y-2"><Label>ZIP</Label><Input value={addr.zip} onChange={(e) => updA({ zip: e.target.value.replace(/\D/g, "").slice(0, 10) })} /></div>
-          <div className="space-y-2"><Label>Country</Label><Input value={addr.country} onChange={(e) => updA({ country: e.target.value })} /></div>
-          <div className="space-y-2">
-            <Label>Type</Label>
-            <Select value={addr.type} onValueChange={(v) => updA({ type: v as "residential" | "business" })}>
-              <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
-              <SelectContent><SelectItem value="residential">Residential</SelectItem><SelectItem value="business">Business</SelectItem></SelectContent>
-            </Select>
-          </div>
+          {field("addrName").visible && <div className="space-y-2 sm:col-span-2"><Label><FieldLabel name="addrName" /></Label><Input value={addr.name} onChange={(e) => updA({ name: e.target.value })} /></div>}
+          {field("street").visible && <div className="space-y-2 sm:col-span-2"><Label><FieldLabel name="street" /></Label><Input value={addr.street} onChange={(e) => updA({ street: e.target.value })} /></div>}
+          {field("unit").visible && <div className="space-y-2"><Label><FieldLabel name="unit" /></Label><Input value={addr.unit} onChange={(e) => updA({ unit: e.target.value })} /></div>}
+          {field("city").visible && <div className="space-y-2"><Label><FieldLabel name="city" /></Label><Input value={addr.city} onChange={(e) => updA({ city: e.target.value })} /></div>}
+          {field("state").visible && <div className="space-y-2"><Label><FieldLabel name="state" /></Label><Input maxLength={2} value={addr.state} onChange={(e) => updA({ state: e.target.value.toUpperCase() })} /></div>}
+          {field("zip").visible && <div className="space-y-2"><Label><FieldLabel name="zip" /></Label><Input value={addr.zip} onChange={(e) => updA({ zip: e.target.value.replace(/\D/g, "").slice(0, 10) })} /></div>}
+          {field("country").visible && <div className="space-y-2"><Label><FieldLabel name="country" /></Label><Input value={addr.country} onChange={(e) => updA({ country: e.target.value })} /></div>}
+          {field("addrType").visible && (
+            <div className="space-y-2">
+              <Label><FieldLabel name="addrType" listKey="addressTypes" /></Label>
+              <Select value={addr.type} onValueChange={(v) => updA({ type: v as "residential" | "business" })}>
+                <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                <SelectContent>{list("addressTypes").map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+          )}
           <label className="sm:col-span-2 flex items-center gap-2 text-sm">
             <Checkbox checked={addr.confirmed} onCheckedChange={(v) => updA({ confirmed: !!v })} />
-            I confirm this address is current.
+            <Copy k="E.addrConfirm" />
           </label>
         </CardContent>
       </Card>
 
-      <Button onClick={save} variant="outline" className="w-full">Save apparel & mailing</Button>
+      <Button onClick={save} variant="outline" className="w-full">{t("E.saveBtn")}</Button>
     </>
   );
 }
@@ -572,13 +807,14 @@ function StepApparel() {
 /* ---------- STEP F ---------- */
 function StepReview({ onEdit }: { onEdit: (n: number) => void }) {
   const { registration, user } = useStore();
+  const { t, field } = useRegisterContent();
   const missing: string[] = [];
-  if (!registration.participation) missing.push("Participation type");
-  if (registration.pelotonia.status !== "complete") missing.push("Pelotonia registration");
-  if (registration.travel.status !== "complete") missing.push("Travel");
+  if (!registration.participation) missing.push(t("step.A"));
+  if (registration.pelotonia.status !== "complete") missing.push(t("step.B"));
+  if (registration.travel.status !== "complete") missing.push(t("step.C"));
   const isRider = registration.participation === "rider" || registration.participation === "both";
-  if (isRider && registration.bike.status !== "complete") missing.push("Bike rental");
-  if (registration.apparel.status !== "complete") missing.push("Apparel & mailing");
+  if (isRider && registration.bike.status !== "complete") missing.push(t("step.D"));
+  if (registration.apparel.status !== "complete") missing.push(t("step.E"));
 
   const Row = ({ label, value, editStep }: { label: string; value: string; editStep: number }) => (
     <div className="flex items-start justify-between gap-4 py-2 border-b last:border-0">
@@ -595,14 +831,14 @@ function StepReview({ onEdit }: { onEdit: (n: number) => void }) {
       {missing.length > 0 && (
         <Card className="border-amber-300 bg-amber-50">
           <CardContent className="p-4 text-sm">
-            <p className="font-semibold text-amber-900">Missing required items:</p>
+            <p className="font-semibold text-amber-900">{t("F.missingTitle")}</p>
             <ul className="mt-1 list-disc pl-5 text-amber-900">{missing.map((m) => <li key={m}>{m}</li>)}</ul>
           </CardContent>
         </Card>
       )}
 
       <Card>
-        <CardHeader><CardTitle>Colleague</CardTitle></CardHeader>
+        <CardHeader><CardTitle><Copy k="F.colleagueTitle" /></CardTitle></CardHeader>
         <CardContent>
           <Row label="Name" value={user.name} editStep={1} />
           <Row label="Email" value={user.email} editStep={1} />
@@ -611,46 +847,45 @@ function StepReview({ onEdit }: { onEdit: (n: number) => void }) {
       </Card>
 
       <Card>
-        <CardHeader><CardTitle>Participation</CardTitle></CardHeader>
+        <CardHeader><CardTitle><Copy k="F.participationTitle" /></CardTitle></CardHeader>
         <CardContent>
           <Row label="Type" value={registration.participation ?? ""} editStep={1} />
         </CardContent>
       </Card>
 
       <Card>
-        <CardHeader><CardTitle>Pelotonia</CardTitle></CardHeader>
+        <CardHeader><CardTitle><Copy k="F.pelotoniaTitle" /></CardTitle></CardHeader>
         <CardContent>
-          <Row label="Discount code" value={registration.pelotonia.discountCode} editStep={2} />
-          <Row label="Public/Rider ID" value={registration.pelotonia.confirmation} editStep={2} />
-          <Row label="HB number" value={registration.pelotonia.hbNumber} editStep={2} />
-          <Row label="Salary / Hourly" value={registration.pelotonia.employmentType} editStep={2} />
-          <Row label="Pay grade 74 or below" value={registration.pelotonia.payGrade74Below} editStep={2} />
-
+          <Row label={t("B.discountLabel")} value={registration.pelotonia.discountCode} editStep={2} />
+          <Row label={field("confirmation").label} value={registration.pelotonia.confirmation} editStep={2} />
+          <Row label={field("hbNumber").label} value={registration.pelotonia.hbNumber} editStep={2} />
+          <Row label={field("employmentType").label} value={registration.pelotonia.employmentType} editStep={2} />
+          <Row label={field("payGrade74Below").label} value={registration.pelotonia.payGrade74Below} editStep={2} />
         </CardContent>
       </Card>
 
       <Card>
-        <CardHeader><CardTitle>Travel</CardTitle></CardHeader>
+        <CardHeader><CardTitle><Copy k="F.travelTitle" /></CardTitle></CardHeader>
         <CardContent>
           <Row label="Needs" value={registration.travel.needs} editStep={3} />
-          <Row label="Departure city" value={registration.travel.departureCity} editStep={3} />
-          <Row label="Hotel" value={registration.travel.hotelName} editStep={3} />
+          <Row label={field("departureCity").label} value={registration.travel.departureCity} editStep={3} />
+          <Row label={field("hotelName").label} value={registration.travel.hotelName} editStep={3} />
         </CardContent>
       </Card>
 
       {isRider && (
         <Card>
-          <CardHeader><CardTitle>Bike</CardTitle></CardHeader>
+          <CardHeader><CardTitle><Copy k="F.bikeTitle" /></CardTitle></CardHeader>
           <CardContent>
             <Row label="Rental" value={registration.bike.needs} editStep={4} />
-            <Row label="Size" value={registration.bike.bikeSize} editStep={4} />
-            <Row label="Confirmation" value={registration.bike.confirmation} editStep={4} />
+            <Row label={field("bikeSize").label} value={registration.bike.bikeSize} editStep={4} />
+            <Row label={field("bikeConfirmation").label} value={registration.bike.confirmation} editStep={4} />
           </CardContent>
         </Card>
       )}
 
       <Card>
-        <CardHeader><CardTitle>Apparel & mailing</CardTitle></CardHeader>
+        <CardHeader><CardTitle><Copy k="F.apparelTitle" /></CardTitle></CardHeader>
         <CardContent>
           {isRider && <Row label="Jersey" value={[registration.apparel.jerseySize, registration.apparel.jerseyStyle, registration.apparel.cut].filter(Boolean).join(" · ")} editStep={isRider ? 5 : 4} />}
           <Row label="Address" value={[registration.address.street, registration.address.city, registration.address.state, registration.address.zip].filter(Boolean).join(", ")} editStep={isRider ? 5 : 4} />
