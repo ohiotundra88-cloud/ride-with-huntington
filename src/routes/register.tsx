@@ -273,10 +273,10 @@ function StepParticipation() {
 /* ---------- STEP B ---------- */
 function StepPelotonia() {
   const { registration, setRegistration } = useStore();
-  const { t, field, list, link, editing, setLink } = useRegisterContent();
+  const { t, field, list, link, editing, setText } = useRegisterContent();
   const p = registration.pelotonia;
   const upd = (patch: Partial<typeof p>) => setRegistration((prev) => ({ ...prev, pelotonia: { ...prev.pelotonia, ...patch } }));
-  const code = link("discountCode")?.label ?? p.discountCode;
+  const code = t("B.discountCode") || p.discountCode;
 
   const markComplete = () => {
     const missing = missingRequired(field, [
