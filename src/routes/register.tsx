@@ -315,7 +315,7 @@ function StepPelotonia() {
               {editing ? (
                 <Input
                   value={code}
-                  onChange={(e) => setLink("discountCode", { label: e.target.value, url: "" })}
+                  onChange={(e) => setText("B.discountCode", e.target.value)}
                   className="font-mono font-bold text-[var(--brand-dark)]"
                 />
               ) : (
