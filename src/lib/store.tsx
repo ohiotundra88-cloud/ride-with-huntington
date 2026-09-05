@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type Context, type ReactNode } from "react";
 import { supabaseBrowser as supabase } from "@/integrations/supabase/proxy-client";
 import { upsertMyParticipant, getMyParticipant } from "@/lib/participants.functions";
+import { ensureMyProfile } from "@/lib/profile.functions";
 
 // ============ TYPES ============
 export type Participation = "rider" | "volunteer" | "both" | "unsure" | null;
@@ -404,11 +405,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (u.manager !== undefined) payload.manager = u.manager;
     if (u.consent !== undefined) payload.consent = u.consent;
     if (Object.keys(payload).length === 0) return;
-    const { error } = await supabase
+    const { error, count } = await supabase
       .from("profiles")
-      .update(payload)
+      .update(payload, { count: "exact" })
       .eq("id", id);
     if (error) throw new Error(error.message);
+    // No row matched: this colleague has no profile row yet. Create it through
+    // a trusted server action (personal fields only), then retry the update.
+    if ((count ?? 0) === 0) {
+      await ensureMyProfile({ data: { fields: payload } });
+      const retry = await supabase.from("profiles").update(payload).eq("id", id);
+      if (retry.error) throw new Error(retry.error.message);
+    }
   };
 
   const setRegistration = (r: Partial<Registration> | ((prev: Registration) => Registration)) =>

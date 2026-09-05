@@ -62,7 +62,8 @@ function ProfilePage() {
       toast.success("Profile saved");
       nav({ to: "/register" });
     } catch (err) {
-      toast.error((err as Error).message || "Could not save your profile");
+      console.error("Profile save failed", err);
+      toast.error("Couldn't save your details — please try again");
     } finally {
       setSaving(false);
     }
