@@ -1105,6 +1105,27 @@ export type Database = {
         }
         Relationships: []
       }
+      register_content: {
+        Row: {
+          content: Json
+          id: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          content?: Json
+          id?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          content?: Json
+          id?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       signin_attempts: {
         Row: {
           created_at: string
