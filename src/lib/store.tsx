@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type Context, type ReactNode } from "react";
 import { supabaseBrowser as supabase } from "@/integrations/supabase/proxy-client";
 import { upsertMyParticipant, getMyParticipant } from "@/lib/participants.functions";
+import { ensureMyProfile } from "@/lib/profile.functions";
 
 // ============ TYPES ============
 export type Participation = "rider" | "volunteer" | "both" | "unsure" | null;
