@@ -387,7 +387,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setUserState((prev) => ({ ...prev, ...u }));
     const id = user.userId;
     if (!id) return;
-    const payload: Record<string, unknown> = {};
+    const payload: {
+      email?: string;
+      full_name?: string;
+      mobile?: string;
+      segment?: string;
+      market?: string;
+      manager?: string;
+      consent?: boolean;
+    } = {};
     if (u.email !== undefined) payload.email = u.email;
     if (u.name !== undefined) payload.full_name = u.name;
     if (u.mobile !== undefined) payload.mobile = u.mobile;
