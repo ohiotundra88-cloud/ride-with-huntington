@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState, type C
 import { supabaseBrowser as supabase } from "@/integrations/supabase/proxy-client";
 import { upsertMyParticipant, getMyParticipant } from "@/lib/participants.functions";
 import { ensureMyProfile } from "@/lib/profile.functions";
+import { effectiveStatuses } from "@/lib/registration-progress";
+
 
 // ============ TYPES ============
 export type Participation = "rider" | "volunteer" | "both" | "unsure" | null;
@@ -239,9 +241,18 @@ const g = globalThis as unknown as { __appStoreCtx?: Context<StoreCtx | null> };
 const Ctx = (g.__appStoreCtx ??= createContext<StoreCtx | null>(null));
 const REG_KEY = "hh_reg_v2";
 
-function loadRegistrationFromStorage(): Registration | null {
+/** Cache key is namespaced per person so one colleague's answers can never
+ *  appear on another colleague's account on a shared device. */
+function regKeyFor(userId: string | null): string {
+  return userId ? `${REG_KEY}:${userId}` : `${REG_KEY}:guest`;
+}
+
+function loadRegistrationFromStorage(userId: string | null): Registration | null {
   if (typeof window === "undefined") return null;
-  try { const raw = localStorage.getItem(REG_KEY); return raw ? JSON.parse(raw) : null; } catch { return null; }
+  try {
+    const raw = localStorage.getItem(regKeyFor(userId));
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
 }
 
 export function StoreProvider({ children }: { children: ReactNode }) {
@@ -251,13 +262,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
   const [authReady, setAuthReady] = useState(false);
   const skipNextPersist = useRef(false);
+  /** Whose answers are currently in state (null = guest). */
+  const loadedFor = useRef<string | null>(null);
 
-  // Hydrate registration from localStorage (works offline / guest preview)
+  // Hydrate the guest cache from localStorage (works offline / guest preview).
+  // Signing in replaces this with the account's own record.
   useEffect(() => {
-    const s = loadRegistrationFromStorage();
+    const s = loadRegistrationFromStorage(null);
     if (s) setRegState({ ...emptyReg, ...s });
     setHydrated(true);
   }, []);
+
 
   // Sync auth session → user state; fetch roles + participant row on sign in
   useEffect(() => {
@@ -266,8 +281,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     async function applySession(sessionUser: { id: string; email?: string | null } | null) {
       if (!sessionUser) {
         setUserState(guestUser);
+        if (loadedFor.current !== null) {
+          loadedFor.current = null;
+          skipNextPersist.current = true;
+          setRegState(emptyReg);
+        }
         return;
       }
+
       const email = sessionUser.email ?? "";
       const nameGuess = email ? email.split("@")[0].replace(/[._-]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) : "Colleague";
       // Fetch role + profile in parallel
@@ -311,26 +332,37 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       });
 
 
-      // Load participant row from cloud (overrides local if present)
+      // Switching accounts on the same device: drop whatever answers are in
+      // state so a previous colleague's cached answers can't leak through.
+      if (loadedFor.current !== sessionUser.id) {
+        loadedFor.current = sessionUser.id;
+        const cached = loadRegistrationFromStorage(sessionUser.id);
+        skipNextPersist.current = true;
+        setRegState(cached ? { ...emptyReg, ...cached } : emptyReg);
+      }
+
+      // The account's own record from the cloud is the source of truth.
       try {
         const row = await getMyParticipant();
-        if (cancelled || !row) return;
+        if (cancelled) return;
         skipNextPersist.current = true;
-        setRegState((prev) => ({
-          ...prev,
-          id: row.reg_id ?? prev.id,
-          participation: (row.participation as Participation) ?? prev.participation,
-          pelotonia: { ...prev.pelotonia, ...(row.pelotonia as any) },
-          travel: { ...prev.travel, ...(row.travel as any) },
-          bike: { ...prev.bike, ...(row.bike as any) },
-          apparel: { ...prev.apparel, ...(row.apparel as any) },
-          address: { ...prev.address, ...(row.address as any) },
-          audit: Array.isArray(row.audit) ? (row.audit as unknown as AuditEvent[]) : prev.audit,
-          submittedAt: row.submitted_at ?? prev.submittedAt,
-        }));
+        if (!row) { setRegState(emptyReg); return; }
+        setRegState({
+          ...emptyReg,
+          id: row.reg_id ?? null,
+          participation: (row.participation as Participation) ?? null,
+          pelotonia: { ...emptyReg.pelotonia, ...((row.pelotonia as any) ?? {}) },
+          travel: { ...emptyReg.travel, ...((row.travel as any) ?? {}) },
+          bike: { ...emptyReg.bike, ...((row.bike as any) ?? {}) },
+          apparel: { ...emptyReg.apparel, ...((row.apparel as any) ?? {}) },
+          address: { ...emptyReg.address, ...((row.address as any) ?? {}) },
+          audit: Array.isArray(row.audit) ? (row.audit as unknown as AuditEvent[]) : [],
+          submittedAt: row.submitted_at ?? null,
+        });
       } catch {
         // ignore — server fn may be unavailable during SSR
       }
+
     }
 
     supabase.auth.getSession().then(({ data }) => {
@@ -350,17 +382,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  // Persist registration to localStorage (cache)
+  // Persist registration to localStorage (cache), namespaced per person
   useEffect(() => {
     if (!hydrated) return;
-    localStorage.setItem(REG_KEY, JSON.stringify(registration));
-  }, [registration, hydrated]);
+    localStorage.setItem(regKeyFor(user.userId), JSON.stringify(registration));
+  }, [registration, hydrated, user.userId]);
 
   // Debounced write-through to Lovable Cloud when signed in
   useEffect(() => {
     if (!hydrated) return;
     if (!user.signedIn || !user.userId) return;
+    // Don't write until this account's own record has loaded, so cached state
+    // can never be pushed onto a different account.
+    if (loadedFor.current !== user.userId) return;
     if (skipNextPersist.current) { skipNextPersist.current = false; return; }
+
     const t = setTimeout(() => {
       upsertMyParticipant({
         data: {
@@ -429,22 +465,23 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const reset = () => { setRegState(emptyReg); };
 
   const signOut = async () => {
+    const id = user.userId;
     await supabase.auth.signOut();
     setUserState(guestUser);
     setRegState(emptyReg);
+    loadedFor.current = null;
     localStorage.removeItem(REG_KEY);
+    localStorage.removeItem(regKeyFor(null));
+    if (id) localStorage.removeItem(regKeyFor(id));
   };
 
   /**
-   * Effective step statuses: opting out counts as done. "No hotel needed" and
-   * "using my own bike" are complete answers, and volunteers skip the bike step.
+   * Effective step statuses derived from the answers actually on file: opting
+   * out counts as done ("no hotel needed", "using my own bike"), volunteers
+   * skip the bike step, and a stored status never outranks missing fields.
    */
-  const effective = useMemo(() => {
-    const isRider = registration.participation === "rider" || registration.participation === "both";
-    const travel = registration.travel.needs === "none" ? "complete" : registration.travel.status;
-    const bike = !isRider || registration.bike.needs === "no" ? "complete" : registration.bike.status;
-    return { pelotonia: registration.pelotonia.status, travel, bike, apparel: registration.apparel.status };
-  }, [registration]);
+  const effective = useMemo(() => effectiveStatuses(registration), [registration]);
+
 
   /**
    * Percent of the steps that actually apply to this person. Choosing how you
