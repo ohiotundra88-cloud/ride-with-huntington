@@ -106,7 +106,10 @@ export function AppNav() {
   };
   // Signed-out visitors only see genuinely public destinations.
   const PUBLIC_TO = fundraiserPagesEnabled ? ["/family", "/fundraisers"] : ["/family"];
-  const visibleTop = ctx.signedIn ? topLinks : topLinks.filter((l) => l.to === "/");
+  const visibleTop = (ctx.signedIn ? topLinks : topLinks.filter((l) => l.to === "/")).filter(
+    (l) => !l.show || l.show(ctx),
+  );
+
   const visibleGroups = groups
     .map((g) => ({
       ...g,
