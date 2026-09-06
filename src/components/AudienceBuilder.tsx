@@ -15,6 +15,7 @@ import {
   type AudienceRules,
 } from "@/lib/messages.shared";
 import { getAudienceOptions, listRosterPeople } from "@/lib/messages.functions";
+import { REGIONS } from "@/lib/regions.shared";
 
 function ChipGroup({
   options,
