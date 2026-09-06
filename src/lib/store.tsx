@@ -446,10 +446,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return { pelotonia: registration.pelotonia.status, travel, bike, apparel: registration.apparel.status };
   }, [registration]);
 
+  /**
+   * Percent of the steps that actually apply to this person. Steps that do not
+   * apply (a volunteer's bike step) are excluded from the denominator rather
+   * than counted as done, and nothing counts until participation is chosen.
+   */
   const completion = useMemo(() => {
-    const s = [effective.pelotonia, effective.travel, effective.bike, effective.apparel];
-    return Math.round((s.filter((x) => x === "complete").length / 4) * 100);
-  }, [effective]);
+    if (!registration.participation) return 0;
+    const isRider = registration.participation === "rider" || registration.participation === "both";
+    const steps = [effective.pelotonia, effective.travel, effective.apparel];
+    if (isRider) steps.push(effective.bike);
+    const done = steps.filter((x) => x === "complete").length;
+    return Math.round((done / steps.length) * 100);
+  }, [effective, registration.participation]);
 
   const incompleteStep = useMemo(() => {
     if (!registration.participation) return 0;
