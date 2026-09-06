@@ -463,22 +463,23 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const reset = () => { setRegState(emptyReg); };
 
   const signOut = async () => {
+    const id = user.userId;
     await supabase.auth.signOut();
     setUserState(guestUser);
     setRegState(emptyReg);
+    loadedFor.current = null;
     localStorage.removeItem(REG_KEY);
+    localStorage.removeItem(regKeyFor(null));
+    if (id) localStorage.removeItem(regKeyFor(id));
   };
 
   /**
-   * Effective step statuses: opting out counts as done. "No hotel needed" and
-   * "using my own bike" are complete answers, and volunteers skip the bike step.
+   * Effective step statuses derived from the answers actually on file: opting
+   * out counts as done ("no hotel needed", "using my own bike"), volunteers
+   * skip the bike step, and a stored status never outranks missing fields.
    */
-  const effective = useMemo(() => {
-    const isRider = registration.participation === "rider" || registration.participation === "both";
-    const travel = registration.travel.needs === "none" ? "complete" : registration.travel.status;
-    const bike = !isRider || registration.bike.needs === "no" ? "complete" : registration.bike.status;
-    return { pelotonia: registration.pelotonia.status, travel, bike, apparel: registration.apparel.status };
-  }, [registration]);
+  const effective = useMemo(() => effectiveStatuses(registration), [registration]);
+
 
   /**
    * Percent of the steps that actually apply to this person. Choosing how you
