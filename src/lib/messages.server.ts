@@ -33,7 +33,7 @@ export async function buildAudienceRoster(): Promise<AudiencePerson[]> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
   const [{ data: profiles }, { data: participants }, { data: roleRows }] = await Promise.all([
-    supabaseAdmin.from("profiles").select("id, email, full_name, email_opt_out"),
+    supabaseAdmin.from("profiles").select("id, email, full_name, region, email_opt_out"),
     supabaseAdmin
       .from("participants")
       .select("user_id, participation, pelotonia, travel, bike, apparel, address"),
@@ -80,6 +80,7 @@ export async function buildAudienceRoster(): Promise<AudiencePerson[]> {
       name: profile.full_name ?? profile.email ?? "(unknown)",
       email: profile.email ?? "",
       roles: rolesByUser.get(profile.id) ?? [],
+      region: str((profile as { region?: string | null }).region),
       participation: (row["participation"] as string | null) ?? null,
       riderId,
       registered: p["completed"] === true || p["status"] === "complete",
@@ -156,7 +157,7 @@ export function resolveAudience(
   const everyone = audienceIsEveryone(rules);
   // Hand-picking people with no group rule means only those people.
   const individualsOnly = !everyone && included.size > 0 &&
-    !rules.roles.length && !rules.participation.length && !rules.tags.length &&
+    !rules.roles.length && !rules.regions.length && !rules.participation.length && !rules.tags.length &&
     !rules.subPelotons.length && !rules.routes.length && !rules.flags.length && !rules.gaps.length;
 
   const matched = roster.filter((person) => {
@@ -171,6 +172,9 @@ export function resolveAudience(
         r === "user" ? person.roles.length === 0 || person.roles.includes("user") : person.roles.includes(r),
       );
       if (!has) return false;
+    }
+    if (rules.regions.length && !(person.region && rules.regions.includes(person.region))) {
+      return false;
     }
     if (rules.participation.length && !rules.participation.includes(person.participation ?? "unsure")) {
       return false;
