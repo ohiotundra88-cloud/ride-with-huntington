@@ -110,6 +110,13 @@ function ProfilePage() {
             </Select>
           </div>
           <div className="space-y-2 sm:col-span-2">
+            <Label>Region</Label>
+            <Select value={form.region} onValueChange={(v) => update({ region: v })}>
+              <SelectTrigger><SelectValue placeholder="Select your region..." /></SelectTrigger>
+              <SelectContent>{REGIONS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2 sm:col-span-2">
             <Label>Manager</Label>
             <Input value={form.manager} onChange={(e) => update({ manager: e.target.value })} />
           </div>
