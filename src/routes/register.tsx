@@ -29,6 +29,7 @@ import {
   type RegisterContent,
 } from "@/lib/register-content.shared";
 import { getRegisterContent, saveRegisterContent } from "@/lib/register-content.functions";
+import { REGIONS } from "@/lib/regions.shared";
 import { toast } from "sonner";
 
 const STEP_KEYS = ["A", "B", "C", "D", "E", "F"] as const;
@@ -276,7 +277,7 @@ function StepParticipation() {
 
 /* ---------- STEP B ---------- */
 function StepPelotonia() {
-  const { registration, setRegistration } = useStore();
+  const { registration, setRegistration, user, saveProfile } = useStore();
   const { t, field, list, link, editing, setText } = useRegisterContent();
   const p = registration.pelotonia;
   const upd = (patch: Partial<typeof p>) => setRegistration((prev) => ({ ...prev, pelotonia: { ...prev.pelotonia, ...patch } }));
