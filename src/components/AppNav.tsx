@@ -27,7 +27,11 @@ type NavCtx = { signedIn: boolean; isReviewer: boolean; vendorAccess: boolean; r
 const topLinks: NavItem[] = [
   { to: "/", label: "Home" },
   { to: "/dashboard", label: "My Journey" },
+  // Vendor CRM is a top-level destination for the few people who can reach it,
+  // rather than buried inside the Fundraising dropdown.
+  { to: "/vendors", label: "Vendor CRM", show: (c) => c.vendorAccess },
 ];
+
 
 const groups: NavGroup[] = [
   {
