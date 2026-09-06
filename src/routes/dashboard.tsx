@@ -606,8 +606,19 @@ function mergeTimelineWithRegistration(
 ): EditableTimelineItem[] {
   const isRider = reg.participation === "rider" || reg.participation === "both";
   const bikeTitle = /bike/i;
+  const pelDone = pelotoniaStatus(reg) === "complete";
   return items.map((item) => {
+    // Never present a step as done when the answers aren't on file yet.
+    if (/pelotonia registration/i.test(item.title) && !pelDone) {
+      return {
+        ...item,
+        state: "current",
+        time: "Action needed",
+        instructions: "Register with Pelotonia, then add your Rider ID and HB number to your profile.",
+      };
+    }
     if (!bikeTitle.test(item.title)) return item;
+
     if (reg.participation && !isRider) {
       return {
         ...item,
