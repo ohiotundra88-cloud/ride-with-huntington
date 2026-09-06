@@ -239,9 +239,18 @@ const g = globalThis as unknown as { __appStoreCtx?: Context<StoreCtx | null> };
 const Ctx = (g.__appStoreCtx ??= createContext<StoreCtx | null>(null));
 const REG_KEY = "hh_reg_v2";
 
-function loadRegistrationFromStorage(): Registration | null {
+/** Cache key is namespaced per person so one colleague's answers can never
+ *  appear on another colleague's account on a shared device. */
+function regKeyFor(userId: string | null): string {
+  return userId ? `${REG_KEY}:${userId}` : `${REG_KEY}:guest`;
+}
+
+function loadRegistrationFromStorage(userId: string | null): Registration | null {
   if (typeof window === "undefined") return null;
-  try { const raw = localStorage.getItem(REG_KEY); return raw ? JSON.parse(raw) : null; } catch { return null; }
+  try {
+    const raw = localStorage.getItem(regKeyFor(userId));
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
 }
 
 export function StoreProvider({ children }: { children: ReactNode }) {
@@ -251,13 +260,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
   const [authReady, setAuthReady] = useState(false);
   const skipNextPersist = useRef(false);
+  /** Whose answers are currently in state (null = guest). */
+  const loadedFor = useRef<string | null>(null);
 
-  // Hydrate registration from localStorage (works offline / guest preview)
+  // Hydrate the guest cache from localStorage (works offline / guest preview).
+  // Signing in replaces this with the account's own record.
   useEffect(() => {
-    const s = loadRegistrationFromStorage();
+    const s = loadRegistrationFromStorage(null);
     if (s) setRegState({ ...emptyReg, ...s });
     setHydrated(true);
   }, []);
+
 
   // Sync auth session → user state; fetch roles + participant row on sign in
   useEffect(() => {
