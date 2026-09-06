@@ -8,6 +8,7 @@ export interface ColleagueRecord {
   user_id: string;
   email: string;
   full_name: string | null;
+  region: string | null;
   participation: string | null;
   reg_id: string | null;
   pelotonia: JsonLike;
@@ -53,9 +54,9 @@ export const listColleagues = createServerFn({ method: "GET" })
     const rows = data ?? [];
     const { data: profiles } = await supabaseAdmin
       .from("profiles")
-      .select("id, email, full_name")
+      .select("id, email, full_name, region")
       .in("id", rows.map((r: { user_id: string }) => r.user_id));
-    const map = new Map((profiles ?? []).map((p: { id: string; email: string | null; full_name: string | null }) => [p.id, p] as const));
+    const map = new Map((profiles ?? []).map((p: { id: string; email: string | null; full_name: string | null; region?: string | null }) => [p.id, p] as const));
 
     // Last sign-in comes from the auth directory (not mirrored into profiles).
     const signIns = new Map<string, string | null>();
@@ -70,6 +71,7 @@ export const listColleagues = createServerFn({ method: "GET" })
       user_id: r.user_id,
       email: map.get(r.user_id)?.email ?? "(unknown)",
       full_name: map.get(r.user_id)?.full_name ?? null,
+      region: map.get(r.user_id)?.region ?? null,
       participation: r.participation,
       reg_id: r.reg_id,
       pelotonia: (r.pelotonia ?? {}) as JsonLike,
