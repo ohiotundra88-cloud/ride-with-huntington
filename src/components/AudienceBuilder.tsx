@@ -122,6 +122,15 @@ export function AudienceBuilder({
       </div>
 
       <div className="space-y-2">
+        <Label className="text-xs uppercase tracking-wide text-muted-foreground">Regions</Label>
+        <ChipGroup
+          options={REGIONS.map((r) => ({ key: r, label: r }))}
+          selected={value.regions}
+          onToggle={(k) => toggle("regions", k)}
+        />
+      </div>
+
+      <div className="space-y-2">
         <Label className="text-xs uppercase tracking-wide text-muted-foreground">Participation</Label>
         <ChipGroup
           options={PARTICIPATION_OPTIONS.map((p) => ({ key: p, label: p }))}
