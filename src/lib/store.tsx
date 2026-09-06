@@ -279,8 +279,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     async function applySession(sessionUser: { id: string; email?: string | null } | null) {
       if (!sessionUser) {
         setUserState(guestUser);
+        if (loadedFor.current !== null) {
+          loadedFor.current = null;
+          skipNextPersist.current = true;
+          setRegState(emptyReg);
+        }
         return;
       }
+
       const email = sessionUser.email ?? "";
       const nameGuess = email ? email.split("@")[0].replace(/[._-]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) : "Colleague";
       // Fetch role + profile in parallel
