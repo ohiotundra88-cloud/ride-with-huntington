@@ -380,17 +380,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  // Persist registration to localStorage (cache)
+  // Persist registration to localStorage (cache), namespaced per person
   useEffect(() => {
     if (!hydrated) return;
-    localStorage.setItem(REG_KEY, JSON.stringify(registration));
-  }, [registration, hydrated]);
+    localStorage.setItem(regKeyFor(user.userId), JSON.stringify(registration));
+  }, [registration, hydrated, user.userId]);
 
   // Debounced write-through to Lovable Cloud when signed in
   useEffect(() => {
     if (!hydrated) return;
     if (!user.signedIn || !user.userId) return;
+    // Don't write until this account's own record has loaded, so cached state
+    // can never be pushed onto a different account.
+    if (loadedFor.current !== user.userId) return;
     if (skipNextPersist.current) { skipNextPersist.current = false; return; }
+
     const t = setTimeout(() => {
       upsertMyParticipant({
         data: {
