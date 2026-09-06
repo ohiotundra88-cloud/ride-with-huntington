@@ -176,11 +176,12 @@ function RegisterWizard() {
   // Deep link: /register?step=D opens that step directly. Only react to the
   // param itself — re-running when `steps` is rebuilt would snap the wizard
   // back to the linked step every time answers change.
+  const stepsRef = useRef(steps);
+  stepsRef.current = steps;
   useEffect(() => {
     if (!stepKeyParam) return;
-    const idx = STEP_KEYS.indexOf(stepKeyParam);
+    const idx = stepsRef.current.findIndex((s) => s.key === stepKeyParam);
     if (idx >= 0) setStep(idx + 1);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stepKeyParam]);
 
   const total = steps.length;
