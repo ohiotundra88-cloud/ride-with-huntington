@@ -248,6 +248,7 @@ function ParticipantsAdmin() {
                     <div className="min-w-0">
                       <p className="truncate font-semibold text-[var(--brand-dark)]">{r.full_name ?? "(no name)"}</p>
                       <p className="truncate text-xs text-muted-foreground">{r.email}</p>
+                      {r.region && <p className="truncate text-xs text-muted-foreground">{r.region}</p>}
                       {r.season_locked && (
                         <Badge variant="outline" className="mt-1 text-[9px]"><LockIcon className="mr-1 h-2.5 w-2.5" /> Season-locked</Badge>
                       )}
