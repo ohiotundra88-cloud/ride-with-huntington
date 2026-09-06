@@ -678,10 +678,19 @@ export function readinessScore(items: EditableReadinessItem[]): number {
   if (totalWeight === 0) return 0;
   const earned = active.reduce((n, i) => {
     const done = i.status === "complete" || i.status === "reserved" || i.status === "ordered";
-    return n + (done ? i.weight : 0);
+    if (done) return n + i.weight;
+    // Steps that track a running total (fundraising) earn partial credit for
+    // progress instead of counting as zero until the goal is reached.
+    const goal = i.progressGoal ?? 0;
+    const current = i.progressCurrent ?? 0;
+    if (goal > 0 && current > 0) {
+      return n + i.weight * Math.min(1, current / goal);
+    }
+    return n;
   }, 0);
   return Math.round((earned / totalWeight) * 100);
 }
+
 
 
 export function announcementIsActive(a: Announcement): boolean {

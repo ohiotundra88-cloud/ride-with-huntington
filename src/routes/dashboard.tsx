@@ -193,7 +193,11 @@ function mergeReadinessWithRegistration(
       case "fundraising": {
         // Score against the live Pelotonia commitment, not seeded demo values.
         if (participation && !isRider) return over("not_applicable", "You're registered as a Volunteer — no fundraising commitment.", item.ctaLabel);
-        if (!fundraising) return item;
+        if (!fundraising) {
+          // No live fundraising total yet — don't let seeded demo numbers drag
+          // the readiness percentage down.
+          return { ...item, weight: 0 };
+        }
         const target = fundraising.committed || fundraising.goal;
         const next: EditableReadinessItem = {
           ...item,
@@ -205,6 +209,7 @@ function mergeReadinessWithRegistration(
         }
         return { ...next, status: "in_progress" };
       }
+
       default:
         return item;
     }
