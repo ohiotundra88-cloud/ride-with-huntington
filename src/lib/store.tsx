@@ -324,26 +324,37 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       });
 
 
-      // Load participant row from cloud (overrides local if present)
+      // Switching accounts on the same device: drop whatever answers are in
+      // state so a previous colleague's cached answers can't leak through.
+      if (loadedFor.current !== sessionUser.id) {
+        loadedFor.current = sessionUser.id;
+        const cached = loadRegistrationFromStorage(sessionUser.id);
+        skipNextPersist.current = true;
+        setRegState(cached ? { ...emptyReg, ...cached } : emptyReg);
+      }
+
+      // The account's own record from the cloud is the source of truth.
       try {
         const row = await getMyParticipant();
-        if (cancelled || !row) return;
+        if (cancelled) return;
         skipNextPersist.current = true;
-        setRegState((prev) => ({
-          ...prev,
-          id: row.reg_id ?? prev.id,
-          participation: (row.participation as Participation) ?? prev.participation,
-          pelotonia: { ...prev.pelotonia, ...(row.pelotonia as any) },
-          travel: { ...prev.travel, ...(row.travel as any) },
-          bike: { ...prev.bike, ...(row.bike as any) },
-          apparel: { ...prev.apparel, ...(row.apparel as any) },
-          address: { ...prev.address, ...(row.address as any) },
-          audit: Array.isArray(row.audit) ? (row.audit as unknown as AuditEvent[]) : prev.audit,
-          submittedAt: row.submitted_at ?? prev.submittedAt,
-        }));
+        if (!row) { setRegState(emptyReg); return; }
+        setRegState({
+          ...emptyReg,
+          id: row.reg_id ?? null,
+          participation: (row.participation as Participation) ?? null,
+          pelotonia: { ...emptyReg.pelotonia, ...((row.pelotonia as any) ?? {}) },
+          travel: { ...emptyReg.travel, ...((row.travel as any) ?? {}) },
+          bike: { ...emptyReg.bike, ...((row.bike as any) ?? {}) },
+          apparel: { ...emptyReg.apparel, ...((row.apparel as any) ?? {}) },
+          address: { ...emptyReg.address, ...((row.address as any) ?? {}) },
+          audit: Array.isArray(row.audit) ? (row.audit as unknown as AuditEvent[]) : [],
+          submittedAt: row.submitted_at ?? null,
+        });
       } catch {
         // ignore — server fn may be unavailable during SSR
       }
+
     }
 
     supabase.auth.getSession().then(({ data }) => {
