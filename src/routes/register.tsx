@@ -29,6 +29,7 @@ import {
   type RegisterContent,
 } from "@/lib/register-content.shared";
 import { getRegisterContent, saveRegisterContent } from "@/lib/register-content.functions";
+import { REGIONS } from "@/lib/regions.shared";
 import { toast } from "sonner";
 
 const STEP_KEYS = ["A", "B", "C", "D", "E", "F"] as const;
@@ -276,7 +277,7 @@ function StepParticipation() {
 
 /* ---------- STEP B ---------- */
 function StepPelotonia() {
-  const { registration, setRegistration } = useStore();
+  const { registration, setRegistration, user, saveProfile } = useStore();
   const { t, field, list, link, editing, setText } = useRegisterContent();
   const p = registration.pelotonia;
   const upd = (patch: Partial<typeof p>) => setRegistration((prev) => ({ ...prev, pelotonia: { ...prev.pelotonia, ...patch } }));
@@ -416,6 +417,21 @@ function StepPelotonia() {
                   </Select>
                 </div>
               )}
+              <div>
+                <Label>Region</Label>
+                <Select
+                  value={user.region || undefined}
+                  onValueChange={(v) => {
+                    void saveProfile({ region: v });
+                    toast.success("Region saved to your profile");
+                  }}
+                >
+                  <SelectTrigger className="mt-1.5"><SelectValue placeholder="Select your region..." /></SelectTrigger>
+                  <SelectContent>
+                    {REGIONS.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           )}
 
