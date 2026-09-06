@@ -27,7 +27,11 @@ type NavCtx = { signedIn: boolean; isReviewer: boolean; vendorAccess: boolean; r
 const topLinks: NavItem[] = [
   { to: "/", label: "Home" },
   { to: "/dashboard", label: "My Journey" },
+  // Vendor CRM is a top-level destination for the few people who can reach it,
+  // rather than buried inside the Fundraising dropdown.
+  { to: "/vendors", label: "Vendor CRM", show: (c) => c.vendorAccess },
 ];
+
 
 const groups: NavGroup[] = [
   {
@@ -52,7 +56,6 @@ const groups: NavGroup[] = [
       { to: "/fundraiser-request", label: "Fundraiser Request" },
       { to: "/my-fundraisers", label: "My Fundraisers", show: (c) => c.signedIn && c.fundraiserPages },
       { to: "/captains-lounge", label: "Captains Lounge", show: (c) => c.signedIn && c.isReviewer },
-      { to: "/vendors", label: "Vendor CRM", show: (c) => c.vendorAccess },
     ],
   },
   {
@@ -103,7 +106,10 @@ export function AppNav() {
   };
   // Signed-out visitors only see genuinely public destinations.
   const PUBLIC_TO = fundraiserPagesEnabled ? ["/family", "/fundraisers"] : ["/family"];
-  const visibleTop = ctx.signedIn ? topLinks : topLinks.filter((l) => l.to === "/");
+  const visibleTop = (ctx.signedIn ? topLinks : topLinks.filter((l) => l.to === "/")).filter(
+    (l) => !l.show || l.show(ctx),
+  );
+
   const visibleGroups = groups
     .map((g) => ({
       ...g,
