@@ -143,53 +143,56 @@ function mergeReadinessWithRegistration(
     switch (item.id) {
       case "pelotonia": {
         const p = reg.pelotonia;
-        if (p.status === "complete") {
+        const st = pelotoniaStatus(reg);
+        if (st === "complete") {
           return over("complete", p.confirmation ? `Registered · Rider ID ${p.confirmation}` : "Pelotonia registration confirmed.", "View registration");
         }
-        if (p.status === "pending") return over("in_progress", "Pelotonia registration started — add your Rider ID and HB number.", "Finish registration");
-        return item;
+        if (st === "pending") return over("in_progress", "Pelotonia registration started — add your Rider ID and HB number.", "Finish registration");
+        return over("action_needed", "Register with Pelotonia and add your Rider ID and HB number.", "Start registration");
       }
       case "hotel": {
         const t = reg.travel;
         if (t.needs === "none") return over("not_applicable", "No travel or hotel needed.", "Update travel");
-        if (t.status === "complete") {
+        const st = travelStatus(reg);
+        if (st === "complete") {
           const detail = t.hotelName
             ? `${t.hotelName}${t.hotelCheckIn ? ` · ${t.hotelCheckIn} – ${t.hotelCheckOut}` : ""}`
             : "Travel and hotel details confirmed.";
           return over("reserved", detail, "View travel");
         }
-        if (t.status === "pending") return over("in_progress", "Travel details started — confirm your dates.", "Finish travel");
-        if (participation) return over("action_needed", "Add your travel and hotel plans before Jul 22.", "Add travel");
-        return item;
+        if (st === "pending") return over("in_progress", "Travel details started — confirm your dates.", "Finish travel");
+        return over("action_needed", "Add your travel and hotel plans before Jul 22.", "Add travel");
       }
       case "bike": {
         const b = reg.bike;
         if (participation && !isRider) return over("not_applicable", "You're registered as a Volunteer — no bike needed.", "View bike step");
         if (b.needs === "no") return over("complete", "Bringing your own bike — no rental needed.", "Update bike plan");
         if (b.needs === "yes") {
-          if (b.status === "complete") {
+          if (bikeStatus(reg) === "complete") {
             const specs = [b.bikeType, b.bikeSize && `Size ${b.bikeSize}`, b.pedals].filter(Boolean).join(" · ");
             return over("reserved", specs ? `Rental requested · ${specs}` : "Rental requested.", "View bike details");
           }
           return over("action_needed", "Finish your rental details — size, type, pedals and dates.", "Finish bike rental");
         }
         if (b.needs === "unsure") return over("in_progress", "Still deciding — confirm your bike plan before Jul 22.", "Decide bike plan");
-        return item;
+        return over("action_needed", "Tell us whether you need a bike rental.", "Choose bike plan");
       }
       case "volunteer": {
-        if (!participation) return item;
+        if (!participation) return over("action_needed", "Choose how you're taking part to see your next steps.", item.ctaLabel);
         if (!isVolunteer) return over("not_applicable", "You're registered as a Rider — no shift needed.", item.ctaLabel);
         return over("in_progress", "Volunteer shift assignments open closer to Ride Weekend.", "Volunteer info");
       }
       case "apparel": {
         const a = reg.apparel;
-        if (a.status === "complete") {
+        const st = apparelStatus(reg);
+        if (st === "complete") {
           const bits = [a.jerseyStyle && a.jerseyStyle.replace("-", " "), a.jerseySize && `jersey (${a.jerseySize})`].filter(Boolean).join(" ");
           return over("ordered", bits ? `${bits.charAt(0).toUpperCase() + bits.slice(1)} · confirmed` : "Apparel selections confirmed.", "View apparel");
         }
-        if (a.status === "pending") return over("in_progress", "Apparel started — confirm sizes and mailing address.", "Finish apparel");
-        return item;
+        if (st === "pending") return over("in_progress", "Apparel started — confirm sizes and mailing address.", "Finish apparel");
+        return over("action_needed", "Choose your sizes and confirm your mailing address.", "Choose apparel");
       }
+
       case "fundraising": {
         // Score against the live Pelotonia commitment, not seeded demo values.
         if (participation && !isRider) return over("not_applicable", "You're registered as a Volunteer — no fundraising commitment.", item.ctaLabel);
