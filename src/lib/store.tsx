@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState, type C
 import { supabaseBrowser as supabase } from "@/integrations/supabase/proxy-client";
 import { upsertMyParticipant, getMyParticipant } from "@/lib/participants.functions";
 import { ensureMyProfile } from "@/lib/profile.functions";
+import { effectiveStatuses } from "@/lib/registration-progress";
+
 
 // ============ TYPES ============
 export type Participation = "rider" | "volunteer" | "both" | "unsure" | null;
