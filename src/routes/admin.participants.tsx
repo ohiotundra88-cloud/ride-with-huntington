@@ -145,13 +145,14 @@ function ParticipantsAdmin() {
     const s = q.toLowerCase();
     return (r.full_name ?? "").toLowerCase().includes(s)
       || r.email.toLowerCase().includes(s)
+      || (r.region ?? "").toLowerCase().includes(s)
       || String(r.pelotonia.confirmation ?? "").toLowerCase().includes(s)
       || String(r.pelotonia.hbNumber ?? "").toLowerCase().includes(s);
   }), [rows, q, participationFilter]);
 
   const exportCsv = () => {
     const headers = [
-      "email", "name", "participation", "completion", "riderId", "hbNumber", "employmentType",
+      "email", "name", "region", "participation", "completion", "riderId", "hbNumber", "employmentType",
       "payGrade74Below", "highRoller", "survivor", "arrivalDate", "hotelName", "bikeType",
       "jerseySize", "jerseyStyle", "shirtSize",
       "shipToName", "street", "unit", "city", "state", "zip", "country", "addressType",
@@ -164,7 +165,7 @@ function ParticipantsAdmin() {
       const cityState = [a.city, [a.state, a.zip].filter(Boolean).join(" ")].filter(Boolean).join(", ");
       const fullAddress = [line1, cityState, a.country].filter(Boolean).join(", ");
       return [
-        r.email, r.full_name ?? "", r.participation ?? "", `${completionOf(r)}%`,
+        r.email, r.full_name ?? "", r.region ?? "", r.participation ?? "", `${completionOf(r)}%`,
         r.pelotonia.confirmation ?? "", r.pelotonia.hbNumber ?? "", r.pelotonia.employmentType ?? "",
         r.pelotonia.payGrade74Below ?? "", r.pelotonia.highRoller ?? "", r.pelotonia.survivor ?? "",
         r.travel.arrivalDate ?? "", r.travel.hotelName ?? "", r.bike.bikeType ?? "",
@@ -206,7 +207,7 @@ function ParticipantsAdmin() {
         <CardContent className="grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_auto]">
           <div className="relative min-w-0">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, email, Rider ID or HB number" className="pl-8" />
+            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, email, region, Rider ID or HB number" className="pl-8" />
           </div>
           <Select value={participationFilter} onValueChange={setParticipationFilter}>
             <SelectTrigger className="w-full sm:w-44"><SelectValue /></SelectTrigger>
@@ -247,6 +248,7 @@ function ParticipantsAdmin() {
                     <div className="min-w-0">
                       <p className="truncate font-semibold text-[var(--brand-dark)]">{r.full_name ?? "(no name)"}</p>
                       <p className="truncate text-xs text-muted-foreground">{r.email}</p>
+                      {r.region && <p className="truncate text-xs text-muted-foreground">{r.region}</p>}
                       {r.season_locked && (
                         <Badge variant="outline" className="mt-1 text-[9px]"><LockIcon className="mr-1 h-2.5 w-2.5" /> Season-locked</Badge>
                       )}

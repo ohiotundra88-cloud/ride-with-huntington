@@ -15,6 +15,7 @@ import {
   type AudienceRules,
 } from "@/lib/messages.shared";
 import { getAudienceOptions, listRosterPeople } from "@/lib/messages.functions";
+import { REGIONS } from "@/lib/regions.shared";
 
 function ChipGroup({
   options,
@@ -119,6 +120,15 @@ export function AudienceBuilder({
             Leadership roles can only be targeted by co-chairs and super users.
           </p>
         )}
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-xs uppercase tracking-wide text-muted-foreground">Regions</Label>
+        <ChipGroup
+          options={REGIONS.map((r) => ({ key: r, label: r }))}
+          selected={value.regions}
+          onToggle={(k) => toggle("regions", k)}
+        />
       </div>
 
       <div className="space-y-2">

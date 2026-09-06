@@ -72,6 +72,8 @@ export const READINESS_GAPS = [
 
 export interface AudienceRules {
   roles: string[];
+  /** Huntington regions from colleague profiles. */
+  regions: string[];
   participation: string[];
   tags: string[];
   subPelotons: string[];
@@ -86,6 +88,7 @@ export interface AudienceRules {
 
 export const emptyAudience = (): AudienceRules => ({
   roles: [],
+  regions: [],
   participation: [],
   tags: [],
   subPelotons: [],
@@ -105,6 +108,7 @@ export function normalizeAudience(raw: unknown): AudienceRules {
   const n = o["raisedBelow"];
   return {
     roles: list(o["roles"]),
+    regions: list(o["regions"]),
     participation: list(o["participation"]),
     tags: list(o["tags"]),
     subPelotons: list(o["subPelotons"]),
@@ -125,6 +129,7 @@ export function audienceIsEveryone(a: AudienceRules): boolean {
   return (
     a.includeUserIds.length === 0 &&
     a.roles.length === 0 &&
+    a.regions.length === 0 &&
     a.participation.length === 0 &&
     a.tags.length === 0 &&
     a.subPelotons.length === 0 &&
@@ -139,6 +144,7 @@ export function audienceIsEveryone(a: AudienceRules): boolean {
 export function describeAudience(a: AudienceRules): string {
   const parts: string[] = [];
   if (a.roles.length) parts.push(a.roles.map((r) => ROLE_LABELS[r] ?? r).join(", "));
+  if (a.regions.length) parts.push(`region: ${a.regions.join(", ")}`);
   if (a.participation.length) parts.push(a.participation.join(", "));
   if (a.tags.length) parts.push(`tags: ${a.tags.join(", ")}`);
   if (a.subPelotons.length) parts.push(`sub-peloton: ${a.subPelotons.join(", ")}`);
@@ -172,6 +178,7 @@ export interface AudiencePerson {
   name: string;
   email: string;
   roles: string[];
+  region: string | null;
   participation: string | null;
   riderId: string | null;
   registered: boolean;

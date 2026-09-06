@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useStore } from "@/lib/store";
+import { REGIONS } from "@/lib/regions.shared";
 import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Camera, Trash2 } from "lucide-react";
@@ -107,6 +108,13 @@ function ProfilePage() {
             <Select value={form.market} onValueChange={(v) => update({ market: v })}>
               <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
               <SelectContent>{markets.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2 sm:col-span-2">
+            <Label>Region</Label>
+            <Select value={form.region} onValueChange={(v) => update({ region: v })}>
+              <SelectTrigger><SelectValue placeholder="Select your region..." /></SelectTrigger>
+              <SelectContent>{REGIONS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
             </Select>
           </div>
           <div className="space-y-2 sm:col-span-2">
