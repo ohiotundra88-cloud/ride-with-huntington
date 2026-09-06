@@ -26,6 +26,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getRiderFundraising } from "@/lib/pelotonia.functions";
 import { pelotoniaStatus, travelStatus, bikeStatus, apparelStatus } from "@/lib/registration-progress";
+import { useJourneyReadiness } from "@/lib/journey-readiness";
 
 
 
@@ -132,7 +133,7 @@ function DashboardPage() {
 
   const { merged, score, riderFundraising } = useJourneyReadiness();
   const readiness = useMemo(
-    () => merged.filter((r) => r.active && r.publish === "published"),
+    () => merged.filter((r: EditableReadinessItem) => r.active && r.publish === "published"),
     [merged]
   );
 
