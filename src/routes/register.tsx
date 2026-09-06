@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ChevronLeft, ChevronRight, Copy as CopyIcon, ExternalLink, Bike, Shirt, Plane, ClipboardCheck, CheckCircle2, Info, Pencil, RotateCcw, Save, X } from "lucide-react";
@@ -173,12 +173,16 @@ function RegisterWizard() {
     return base;
   }, [isRider, t]);
 
-  // Deep link: /register?step=D opens that step directly.
+  // Deep link: /register?step=D opens that step directly. Only react to the
+  // param itself — re-running when `steps` is rebuilt would snap the wizard
+  // back to the linked step every time answers change.
+  const stepsRef = useRef(steps);
+  stepsRef.current = steps;
   useEffect(() => {
     if (!stepKeyParam) return;
-    const idx = steps.findIndex((s) => s.key === stepKeyParam);
+    const idx = stepsRef.current.findIndex((s) => s.key === stepKeyParam);
     if (idx >= 0) setStep(idx + 1);
-  }, [stepKeyParam, steps]);
+  }, [stepKeyParam]);
 
   const total = steps.length;
   const progress = Math.round(((step - 1) / (total - 1)) * 100);
