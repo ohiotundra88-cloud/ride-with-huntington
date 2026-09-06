@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ChevronLeft, ChevronRight, Copy as CopyIcon, ExternalLink, Bike, Shirt, Plane, ClipboardCheck, CheckCircle2, Info, Pencil, RotateCcw, Save, X } from "lucide-react";
