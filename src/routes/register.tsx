@@ -173,12 +173,15 @@ function RegisterWizard() {
     return base;
   }, [isRider, t]);
 
-  // Deep link: /register?step=D opens that step directly.
+  // Deep link: /register?step=D opens that step directly. Only react to the
+  // param itself — re-running when `steps` is rebuilt would snap the wizard
+  // back to the linked step every time answers change.
   useEffect(() => {
     if (!stepKeyParam) return;
-    const idx = steps.findIndex((s) => s.key === stepKeyParam);
+    const idx = STEP_KEYS.indexOf(stepKeyParam);
     if (idx >= 0) setStep(idx + 1);
-  }, [stepKeyParam, steps]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stepKeyParam]);
 
   const total = steps.length;
   const progress = Math.round(((step - 1) / (total - 1)) * 100);
