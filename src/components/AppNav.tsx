@@ -56,7 +56,6 @@ const groups: NavGroup[] = [
       { to: "/fundraiser-request", label: "Fundraiser Request" },
       { to: "/my-fundraisers", label: "My Fundraisers", show: (c) => c.signedIn && c.fundraiserPages },
       { to: "/captains-lounge", label: "Captains Lounge", show: (c) => c.signedIn && c.isReviewer },
-      { to: "/vendors", label: "Vendor CRM", show: (c) => c.vendorAccess },
     ],
   },
   {
