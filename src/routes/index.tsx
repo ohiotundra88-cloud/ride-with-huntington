@@ -10,6 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { ArrowMotif } from "@/components/AppNav";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { useStore } from "@/lib/store";
+import { useJourneyReadiness } from "@/lib/journey-readiness";
 import { recordSiteVisit } from "@/lib/analytics.functions";
 import { useBranding } from "@/lib/useBranding";
 import type { SiteBranding } from "@/lib/branding.shared";
@@ -248,7 +249,9 @@ function VisitCounter() {
 
 
 function SignedInHero() {
-  const { user, completion, incompleteStep } = useStore();
+  const { user, incompleteStep } = useStore();
+  // Same number the dashboard ring shows, so the two can never disagree.
+  const { score: completion } = useJourneyReadiness();
   const firstName = user.name.split(" ")[0] || "Rider";
   const nextKeys = ["A", "B", "C", "D", "E", "F"] as const;
   const nextStepKey = nextKeys[incompleteStep] ?? "F";
