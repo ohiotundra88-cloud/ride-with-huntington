@@ -416,6 +416,21 @@ function StepPelotonia() {
                   </Select>
                 </div>
               )}
+              <div>
+                <Label>Region</Label>
+                <Select
+                  value={user.region || undefined}
+                  onValueChange={(v) => {
+                    void saveProfile({ region: v });
+                    toast.success("Region saved to your profile");
+                  }}
+                >
+                  <SelectTrigger className="mt-1.5"><SelectValue placeholder="Select your region..." /></SelectTrigger>
+                  <SelectContent>
+                    {REGIONS.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           )}
 
