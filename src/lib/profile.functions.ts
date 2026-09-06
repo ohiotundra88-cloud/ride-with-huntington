@@ -13,6 +13,7 @@ const profileFieldsSchema = z.object({
   mobile: z.string().max(40).optional(),
   segment: z.string().max(120).optional(),
   market: z.string().max(120).optional(),
+  region: z.string().max(120).optional(),
   manager: z.string().max(200).optional(),
   consent: z.boolean().optional(),
 });

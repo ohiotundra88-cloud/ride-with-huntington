@@ -15,6 +15,7 @@ export interface User {
   mobile: string;
   segment: string;
   market: string;
+  region: string;
   manager: string;
   consent: boolean;
   signedIn: boolean;
@@ -159,6 +160,7 @@ const guestUser: User = {
   mobile: "",
   segment: "",
   market: "",
+  region: "",
   manager: "",
   consent: false,
   signedIn: false,
@@ -296,7 +298,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         supabase.from("user_roles").select("role").eq("user_id", sessionUser.id),
         supabase
           .from("profiles")
-          .select("full_name, email, mobile, segment, market, manager, consent, activated_at")
+          .select("full_name, email, mobile, segment, market, region, manager, consent, activated_at")
           .eq("id", sessionUser.id)
           .maybeSingle(),
       ]);
@@ -306,7 +308,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const isCaptain = isAdmin || isSuperUser || myRoles.includes("captain");
       const isReviewer = isCaptain || ["legal", "risk", "compliance", "marketing", "cochair"].some((r) => myRoles.includes(r));
       const prof = profileRes.data as
-        | { full_name?: string | null; mobile?: string | null; segment?: string | null; market?: string | null; manager?: string | null; consent?: boolean | null; activated_at?: string | null }
+        | { full_name?: string | null; mobile?: string | null; segment?: string | null; market?: string | null; region?: string | null; manager?: string | null; consent?: boolean | null; activated_at?: string | null }
         | null;
 
       const fullName = prof?.full_name || nameGuess;
@@ -319,6 +321,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         mobile: prof?.mobile ?? "",
         segment: prof?.segment ?? "",
         market: prof?.market ?? "",
+        region: prof?.region ?? "",
         manager: prof?.manager ?? "",
         consent: !!prof?.consent,
         signedIn: true,
@@ -430,6 +433,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       mobile?: string;
       segment?: string;
       market?: string;
+      region?: string;
       manager?: string;
       consent?: boolean;
     } = {};
@@ -438,6 +442,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (u.mobile !== undefined) payload.mobile = u.mobile;
     if (u.segment !== undefined) payload.segment = u.segment;
     if (u.market !== undefined) payload.market = u.market;
+    if (u.region !== undefined) payload.region = u.region;
     if (u.manager !== undefined) payload.manager = u.manager;
     if (u.consent !== undefined) payload.consent = u.consent;
     if (Object.keys(payload).length === 0) return;
