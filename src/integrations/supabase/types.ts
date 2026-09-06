@@ -1062,6 +1062,7 @@ export type Database = {
           market: string | null
           mobile: string | null
           password_set_at: string | null
+          region: string
           segment: string | null
           updated_at: string
         }
@@ -1081,6 +1082,7 @@ export type Database = {
           market?: string | null
           mobile?: string | null
           password_set_at?: string | null
+          region?: string
           segment?: string | null
           updated_at?: string
         }
@@ -1100,6 +1102,7 @@ export type Database = {
           market?: string | null
           mobile?: string | null
           password_set_at?: string | null
+          region?: string
           segment?: string | null
           updated_at?: string
         }
