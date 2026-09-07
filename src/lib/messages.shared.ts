@@ -71,6 +71,8 @@ export const READINESS_GAPS = [
 ] as const;
 
 export interface AudienceRules {
+  /** Invite every Team Huntington participant (respects explicit excludes). */
+  allParticipants: boolean;
   roles: string[];
   /** Huntington regions from colleague profiles. */
   regions: string[];
@@ -87,6 +89,7 @@ export interface AudienceRules {
 }
 
 export const emptyAudience = (): AudienceRules => ({
+  allParticipants: false,
   roles: [],
   regions: [],
   participation: [],
@@ -107,6 +110,7 @@ export function normalizeAudience(raw: unknown): AudienceRules {
     Array.isArray(v) ? v.map((x) => String(x)).filter(Boolean) : [];
   const n = o["raisedBelow"];
   return {
+    allParticipants: o["allParticipants"] === true,
     roles: list(o["roles"]),
     regions: list(o["regions"]),
     participation: list(o["participation"]),
@@ -122,10 +126,12 @@ export function normalizeAudience(raw: unknown): AudienceRules {
 }
 
 /**
- * True when no group rule is set and no individuals were hand-picked (i.e. the
- * whole roster matches). Picking specific people means only those people.
+ * True when the audience is explicitly set to all participants, or when no group
+ * rule is set and no individuals were hand-picked (i.e. the whole roster
+ * matches). Picking specific people means only those people.
  */
 export function audienceIsEveryone(a: AudienceRules): boolean {
+  if (a.allParticipants) return true;
   return (
     a.includeUserIds.length === 0 &&
     a.roles.length === 0 &&
@@ -143,6 +149,7 @@ export function audienceIsEveryone(a: AudienceRules): boolean {
 /** Short human summary of the audience rules, for lists and history. */
 export function describeAudience(a: AudienceRules): string {
   const parts: string[] = [];
+  if (a.allParticipants) parts.push("All Team Huntington Participants");
   if (a.roles.length) parts.push(a.roles.map((r) => ROLE_LABELS[r] ?? r).join(", "));
   if (a.regions.length) parts.push(`region: ${a.regions.join(", ")}`);
   if (a.participation.length) parts.push(a.participation.join(", "));
