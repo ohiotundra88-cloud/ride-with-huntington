@@ -303,6 +303,17 @@ function RiderProgressPage() {
                   <SelectItem value="unsure">Unsure</SelectItem>
                 </SelectContent>
               </Select>
+              {regionOptions.length > 0 && (
+                <Select value={region} onValueChange={setRegion}>
+                  <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All regions</SelectItem>
+                    {regionOptions.map((reg) => (
+                      <SelectItem key={reg} value={reg}>{reg}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
               <Select value={status} onValueChange={setStatus}>
                 <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
                 <SelectContent>
