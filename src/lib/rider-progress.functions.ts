@@ -6,6 +6,7 @@ export interface RiderProgressRow {
   name: string;
   email: string;
   participation: string | null;
+  region: string | null;
   riderId: string | null;
   registeredWithPelotonia: boolean;
   pelotoniaStatus: string;
@@ -109,10 +110,10 @@ export const listRiderProgress = createServerFn({ method: "GET" })
 
     const { data: profiles } = await supabaseAdmin
       .from("profiles")
-      .select("id, email, full_name")
+      .select("id, email, full_name, region")
       .in("id", rows.map((r: { user_id: string }) => r.user_id));
     const people = new Map(
-      (profiles ?? []).map((p: { id: string; email: string | null; full_name: string | null }) => [p.id, p] as const),
+      (profiles ?? []).map((p: { id: string; email: string | null; full_name: string | null; region?: string | null }) => [p.id, p] as const),
     );
 
     // Live fundraising totals, keyed by Pelotonia public/rider ID.
@@ -148,6 +149,7 @@ export const listRiderProgress = createServerFn({ method: "GET" })
         name: profile?.full_name ?? str(profile?.email) ?? "(unknown)",
         email: profile?.email ?? "(unknown)",
         participation: r.participation,
+        region: profile?.region ?? null,
         riderId,
         registeredWithPelotonia: p["completed"] === true || p["status"] === "complete",
         pelotoniaStatus: String(p["status"] ?? "not_started"),

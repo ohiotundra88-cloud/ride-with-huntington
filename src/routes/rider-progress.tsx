@@ -144,10 +144,15 @@ function RiderProgressPage() {
   const [q, setQ] = useState("");
   const [participation, setParticipation] = useState("all");
   const [status, setStatus] = useState("all");
+  const [region, setRegion] = useState("all");
   const [peloton, setPeloton] = useState("all");
   const [route, setRoute] = useState("all");
   const [sort, setSort] = useState<SortKey>("name");
 
+  const regionOptions = useMemo(
+    () => Array.from(new Set(rows.map((r) => r.region).filter((v): v is string => !!v))).sort(),
+    [rows],
+  );
   const pelotonOptions = useMemo(
     () => Array.from(new Set(rows.map((r) => r.subPeloton).filter((v): v is string => !!v))).sort(),
     [rows],
@@ -160,9 +165,10 @@ function RiderProgressPage() {
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
     const out = rows.filter((r) => {
-      const haystack = [r.name, r.email, r.riderId ?? "", r.subPeloton ?? "", r.rideRoute ?? "", ...(r.tags ?? [])];
+      const haystack = [r.name, r.email, r.region ?? "", r.riderId ?? "", r.subPeloton ?? "", r.rideRoute ?? "", ...(r.tags ?? [])];
       if (needle && !haystack.some((v) => v.toLowerCase().includes(needle))) return false;
       if (participation !== "all" && r.participation !== participation) return false;
+      if (region !== "all" && r.region !== region) return false;
       if (peloton !== "all" && r.subPeloton !== peloton) return false;
       if (route !== "all" && r.rideRoute !== route) return false;
       if (status === "registered" && !r.registeredWithPelotonia) return false;
@@ -178,7 +184,7 @@ function RiderProgressPage() {
       if (sort === "subPeloton") return (a.subPeloton ?? "zzz").localeCompare(b.subPeloton ?? "zzz");
       return a.name.localeCompare(b.name);
     });
-  }, [rows, q, participation, status, peloton, route, sort]);
+  }, [rows, q, participation, status, region, peloton, route, sort]);
 
   const totals = useMemo(
     () => ({
@@ -193,7 +199,7 @@ function RiderProgressPage() {
 
   const exportCsv = () => {
     const headers = [
-      "Name", "Email", "Participation", "Rider ID", "Pelotonia name", "Sub-peloton / team",
+      "Name", "Email", "Region", "Participation", "Rider ID", "Pelotonia name", "Sub-peloton / team",
       "Route", "Ride type", "Registration types", "Tags", "Captain", "Challenger",
       "Rider (Pelotonia)", "Volunteer (Pelotonia)", "Survivor", "High roller",
       "Registered with Pelotonia", "Registration step",
@@ -206,7 +212,7 @@ function RiderProgressPage() {
     const yn = (v: boolean) => (v ? "Yes" : "No");
     const lines = filtered.map((r) =>
       [
-        r.name, r.email, r.participation ?? "", r.riderId ?? "", r.pelotoniaName ?? "", r.subPeloton ?? "",
+        r.name, r.email, r.region ?? "", r.participation ?? "", r.riderId ?? "", r.pelotoniaName ?? "", r.subPeloton ?? "",
         r.rideRoute ?? "", r.rideType ?? "", (r.registrationTypes ?? []).join("; "), (r.tags ?? []).join("; "),
         yn(r.isCaptain), yn(r.isChallenger), yn(r.isRiderOnPelotonia), yn(r.isVolunteerOnPelotonia),
         yn(r.isSurvivor), yn(r.highRoller),
@@ -282,7 +288,7 @@ function RiderProgressPage() {
                 <Input
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
-                  placeholder="Search name, email or rider ID"
+                  placeholder="Search name, email, region or rider ID"
                   className="w-56 pl-8"
                   aria-label="Search riders"
                 />
@@ -297,6 +303,17 @@ function RiderProgressPage() {
                   <SelectItem value="unsure">Unsure</SelectItem>
                 </SelectContent>
               </Select>
+              {regionOptions.length > 0 && (
+                <Select value={region} onValueChange={setRegion}>
+                  <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All regions</SelectItem>
+                    {regionOptions.map((reg) => (
+                      <SelectItem key={reg} value={reg}>{reg}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
               <Select value={status} onValueChange={setStatus}>
                 <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -360,6 +377,7 @@ function RiderProgressPage() {
                     <TableRow>
                       <TableHead>Name</TableHead>
                       <TableHead>Role</TableHead>
+                      <TableHead>Region</TableHead>
                       <TableHead>Sub-peloton</TableHead>
                       <TableHead>Ride</TableHead>
                       <TableHead>Tags</TableHead>
@@ -381,6 +399,9 @@ function RiderProgressPage() {
                           <RiderIdCell row={r} canEdit={canEditRiderId} />
                         </TableCell>
                         <TableCell className="capitalize">{r.participation ?? "—"}</TableCell>
+                        <TableCell className="max-w-[12rem]">
+                          <span className="text-xs text-muted-foreground">{r.region ?? "—"}</span>
+                        </TableCell>
                         <TableCell className="max-w-[14rem]">
                           <span className="text-xs text-muted-foreground">{r.subPeloton ?? "—"}</span>
                         </TableCell>
