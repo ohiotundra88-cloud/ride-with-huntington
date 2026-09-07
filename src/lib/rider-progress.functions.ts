@@ -110,10 +110,10 @@ export const listRiderProgress = createServerFn({ method: "GET" })
 
     const { data: profiles } = await supabaseAdmin
       .from("profiles")
-      .select("id, email, full_name")
+      .select("id, email, full_name, region")
       .in("id", rows.map((r: { user_id: string }) => r.user_id));
     const people = new Map(
-      (profiles ?? []).map((p: { id: string; email: string | null; full_name: string | null }) => [p.id, p] as const),
+      (profiles ?? []).map((p: { id: string; email: string | null; full_name: string | null; region?: string | null }) => [p.id, p] as const),
     );
 
     // Live fundraising totals, keyed by Pelotonia public/rider ID.
