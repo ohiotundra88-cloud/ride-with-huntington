@@ -9,6 +9,7 @@ import { CalendarDays, MapPin, ArrowRight, Check, X } from "lucide-react";
 import { formatEventDate, formatTimeRange } from "@/lib/events.shared";
 import { isUpcoming, type MyTeamEvent, type Rsvp } from "@/lib/team-events.shared";
 import { listMyTeamEvents, setMyRsvp } from "@/lib/team-events.functions";
+import { AddToCalendar } from "@/components/AddToCalendar";
 
 /** Compact RSVP control shared by the journey card and the full events page. */
 export function RsvpButtons({ event, size = "sm" }: { event: MyTeamEvent; size?: "sm" | "default" }) {
@@ -86,8 +87,9 @@ export function MyEventsCard() {
                   </Badge>
                 )}
               </div>
-              <div className="mt-3">
+              <div className="mt-3 flex flex-wrap items-center gap-2">
                 <RsvpButtons event={e} />
+                <AddToCalendar event={e} />
               </div>
             </div>
           ))

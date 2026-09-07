@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDays, MapPin, Mail, Loader2 } from "lucide-react";
 import { RsvpButtons } from "@/components/MyEventsCard";
+import { AddToCalendar } from "@/components/AddToCalendar";
 import { formatEventDate, formatTimeRange } from "@/lib/events.shared";
 import { isUpcoming, type MyTeamEvent } from "@/lib/team-events.shared";
 import { listMyTeamEvents } from "@/lib/team-events.functions";
@@ -67,7 +68,12 @@ function EventRow({ event, past }: { event: MyTeamEvent; past?: boolean }) {
           </p>
         )}
 
-        {!past && event.status !== "cancelled" && <RsvpButtons event={event} />}
+        {!past && event.status !== "cancelled" && (
+          <div className="flex flex-wrap items-center gap-2">
+            <RsvpButtons event={event} />
+            <AddToCalendar event={event} />
+          </div>
+        )}
       </CardContent>
     </Card>
   );
