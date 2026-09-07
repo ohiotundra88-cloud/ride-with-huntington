@@ -344,6 +344,8 @@ function StepPelotonia() {
         </CardContent>
       </Card>
 
+      <RegistrationHelp />
+
       <Card>
         <CardHeader><CardTitle><Copy k="B.card2Title" /></CardTitle></CardHeader>
         <CardContent className="space-y-3">
@@ -439,7 +441,6 @@ function StepPelotonia() {
           <Button onClick={markComplete} variant="outline" className="w-full">{t("B.saveBtn")}</Button>
         </CardContent>
       </Card>
-      <RegistrationHelp />
     </>
   );
 }
