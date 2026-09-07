@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type Context, type ReactNode } from "react";
 import { supabaseBrowser as supabase } from "@/integrations/supabase/proxy-client";
+import { useQueryClient } from "@tanstack/react-query";
 import { upsertMyParticipant, getMyParticipant } from "@/lib/participants.functions";
 import { ensureMyProfile } from "@/lib/profile.functions";
 import { effectiveStatuses } from "@/lib/registration-progress";
