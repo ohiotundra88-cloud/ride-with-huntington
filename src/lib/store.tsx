@@ -259,6 +259,7 @@ function loadRegistrationFromStorage(userId: string | null): Registration | null
 }
 
 export function StoreProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient();
   const [user, setUserState] = useState<User>(guestUser);
   const [registration, setRegState] = useState<Registration>(emptyReg);
   const [participants, setParticipants] = useState<AdminParticipant[]>(seedParticipants);
