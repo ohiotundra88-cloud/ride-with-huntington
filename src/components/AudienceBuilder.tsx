@@ -158,88 +158,88 @@ export function AudienceBuilder({
             </p>
           )}
         </div>
-      </div>
 
-      <div className="space-y-2">
-        <Label className="text-xs uppercase tracking-wide text-muted-foreground">Regions</Label>
-        <ChipGroup
-          options={REGIONS.map((r) => ({ key: r, label: r }))}
-          selected={value.regions}
-          onToggle={(k) => toggle("regions", k)}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-xs uppercase tracking-wide text-muted-foreground">Participation</Label>
-        <ChipGroup
-          options={PARTICIPATION_OPTIONS.map((p) => ({ key: p, label: p }))}
-          selected={value.participation}
-          onToggle={(k) => toggle("participation", k)}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-xs uppercase tracking-wide text-muted-foreground">Pelotonia status</Label>
-        <ChipGroup
-          options={PELOTONIA_FLAGS.map((f) => ({ key: f.key, label: f.label }))}
-          selected={value.flags}
-          onToggle={(k) => toggle("flags", k)}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-xs uppercase tracking-wide text-muted-foreground">Rider tags</Label>
-        <ChipGroup
-          options={(options.data?.tags ?? []).map((t) => ({ key: t, label: t }))}
-          selected={value.tags}
-          onToggle={(k) => toggle("tags", k)}
-        />
-      </div>
-
-      <div className="grid gap-5 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label className="text-xs uppercase tracking-wide text-muted-foreground">Sub-peloton</Label>
+          <Label className="text-xs uppercase tracking-wide text-muted-foreground">Regions</Label>
           <ChipGroup
-            options={(options.data?.subPelotons ?? []).map((t) => ({ key: t, label: t }))}
-            selected={value.subPelotons}
-            onToggle={(k) => toggle("subPelotons", k)}
+            options={REGIONS.map((r) => ({ key: r, label: r }))}
+            selected={value.regions}
+            onToggle={(k) => toggle("regions", k)}
           />
         </div>
+
         <div className="space-y-2">
-          <Label className="text-xs uppercase tracking-wide text-muted-foreground">Ride route</Label>
+          <Label className="text-xs uppercase tracking-wide text-muted-foreground">Participation</Label>
           <ChipGroup
-            options={(options.data?.routes ?? []).map((t) => ({ key: t, label: t }))}
-            selected={value.routes}
-            onToggle={(k) => toggle("routes", k)}
+            options={PARTICIPATION_OPTIONS.map((p) => ({ key: p, label: p }))}
+            selected={value.participation}
+            onToggle={(k) => toggle("participation", k)}
           />
         </div>
-      </div>
 
-      <div className="space-y-2">
-        <Label className="text-xs uppercase tracking-wide text-muted-foreground">Readiness gaps</Label>
-        <ChipGroup
-          options={READINESS_GAPS.map((g) => ({ key: g.key, label: g.label }))}
-          selected={value.gaps}
-          onToggle={(k) => toggle("gaps", k)}
-        />
-        {value.gaps.includes("below_goal") && (
-          <div className="flex items-center gap-2 pt-1">
-            <Label htmlFor="a-below" className="text-xs">Raised less than</Label>
-            <Input
-              id="a-below"
-              type="number"
-              min={0}
-              className="h-8 w-32"
-              value={value.raisedBelow ?? ""}
-              onChange={(e) =>
-                onChange({
-                  ...value,
-                  raisedBelow: e.target.value === "" ? null : Math.max(0, Number(e.target.value)),
-                })
-              }
+        <div className="space-y-2">
+          <Label className="text-xs uppercase tracking-wide text-muted-foreground">Pelotonia status</Label>
+          <ChipGroup
+            options={PELOTONIA_FLAGS.map((f) => ({ key: f.key, label: f.label }))}
+            selected={value.flags}
+            onToggle={(k) => toggle("flags", k)}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-xs uppercase tracking-wide text-muted-foreground">Rider tags</Label>
+          <ChipGroup
+            options={(options.data?.tags ?? []).map((t) => ({ key: t, label: t }))}
+            selected={value.tags}
+            onToggle={(k) => toggle("tags", k)}
+          />
+        </div>
+
+        <div className="grid gap-5 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label className="text-xs uppercase tracking-wide text-muted-foreground">Sub-peloton</Label>
+            <ChipGroup
+              options={(options.data?.subPelotons ?? []).map((t) => ({ key: t, label: t }))}
+              selected={value.subPelotons}
+              onToggle={(k) => toggle("subPelotons", k)}
             />
           </div>
-        )}
+          <div className="space-y-2">
+            <Label className="text-xs uppercase tracking-wide text-muted-foreground">Ride route</Label>
+            <ChipGroup
+              options={(options.data?.routes ?? []).map((t) => ({ key: t, label: t }))}
+              selected={value.routes}
+              onToggle={(k) => toggle("routes", k)}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-xs uppercase tracking-wide text-muted-foreground">Readiness gaps</Label>
+          <ChipGroup
+            options={READINESS_GAPS.map((g) => ({ key: g.key, label: g.label }))}
+            selected={value.gaps}
+            onToggle={(k) => toggle("gaps", k)}
+          />
+          {value.gaps.includes("below_goal") && (
+            <div className="flex items-center gap-2 pt-1">
+              <Label htmlFor="a-below" className="text-xs">Raised less than</Label>
+              <Input
+                id="a-below"
+                type="number"
+                min={0}
+                className="h-8 w-32"
+                value={value.raisedBelow ?? ""}
+                onChange={(e) =>
+                  onChange({
+                    ...value,
+                    raisedBelow: e.target.value === "" ? null : Math.max(0, Number(e.target.value)),
+                  })
+                }
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="space-y-2 border-t pt-4">
