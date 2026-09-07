@@ -378,6 +378,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED") {
         applySession(session?.user ? { id: session.user.id, email: session.user.email } : null);
+        // Menu entries (Vendor CRM, Rider Progress, Team Messages) come from
+        // access checks cached per session — refetch them straight away so the
+        // nav is right without a page refresh.
+        queryClient.invalidateQueries({ queryKey: ["vendor-access"] });
+        queryClient.invalidateQueries({ queryKey: ["rider-progress-access"] });
+        queryClient.invalidateQueries({ queryKey: ["messaging-access"] });
       }
     });
 
