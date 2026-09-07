@@ -199,7 +199,7 @@ function RiderProgressPage() {
 
   const exportCsv = () => {
     const headers = [
-      "Name", "Email", "Participation", "Rider ID", "Pelotonia name", "Sub-peloton / team",
+      "Name", "Email", "Region", "Participation", "Rider ID", "Pelotonia name", "Sub-peloton / team",
       "Route", "Ride type", "Registration types", "Tags", "Captain", "Challenger",
       "Rider (Pelotonia)", "Volunteer (Pelotonia)", "Survivor", "High roller",
       "Registered with Pelotonia", "Registration step",
@@ -212,7 +212,7 @@ function RiderProgressPage() {
     const yn = (v: boolean) => (v ? "Yes" : "No");
     const lines = filtered.map((r) =>
       [
-        r.name, r.email, r.participation ?? "", r.riderId ?? "", r.pelotoniaName ?? "", r.subPeloton ?? "",
+        r.name, r.email, r.region ?? "", r.participation ?? "", r.riderId ?? "", r.pelotoniaName ?? "", r.subPeloton ?? "",
         r.rideRoute ?? "", r.rideType ?? "", (r.registrationTypes ?? []).join("; "), (r.tags ?? []).join("; "),
         yn(r.isCaptain), yn(r.isChallenger), yn(r.isRiderOnPelotonia), yn(r.isVolunteerOnPelotonia),
         yn(r.isSurvivor), yn(r.highRoller),
