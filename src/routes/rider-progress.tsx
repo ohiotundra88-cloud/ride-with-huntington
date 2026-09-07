@@ -377,6 +377,7 @@ function RiderProgressPage() {
                     <TableRow>
                       <TableHead>Name</TableHead>
                       <TableHead>Role</TableHead>
+                      <TableHead>Region</TableHead>
                       <TableHead>Sub-peloton</TableHead>
                       <TableHead>Ride</TableHead>
                       <TableHead>Tags</TableHead>
