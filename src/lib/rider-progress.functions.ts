@@ -149,6 +149,7 @@ export const listRiderProgress = createServerFn({ method: "GET" })
         name: profile?.full_name ?? str(profile?.email) ?? "(unknown)",
         email: profile?.email ?? "(unknown)",
         participation: r.participation,
+        region: profile?.region ?? null,
         riderId,
         registeredWithPelotonia: p["completed"] === true || p["status"] === "complete",
         pelotoniaStatus: String(p["status"] ?? "not_started"),
