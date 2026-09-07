@@ -439,6 +439,7 @@ function StepPelotonia() {
           <Button onClick={markComplete} variant="outline" className="w-full">{t("B.saveBtn")}</Button>
         </CardContent>
       </Card>
+      <RegistrationHelp />
     </>
   );
 }
