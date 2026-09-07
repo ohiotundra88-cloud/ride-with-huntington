@@ -443,6 +443,63 @@ function StepPelotonia() {
   );
 }
 
+/* ---------- REGISTRATION HELP ---------- */
+const REGISTRATION_STEPS = [
+  { title: "Go to Pelotonia registration", body: "Visit pelotonia.org/register and select Register when registration is open. Check that you are registering for the year you intend to ride." },
+  { title: "Sign in or create an account", body: "Returning participant? Sign in with your existing account. First time? Create an account and enter your contact information. Keep your sign-in details handy." },
+  { title: "Select Rider for Ride Weekend", body: "Choose the Rider option for the traditional road cycling event, Ride Weekend. Follow the wording shown on the registration screen." },
+  { title: "Choose your route", body: "Review the available distances and choose a route that fits your experience and training plans. Check the minimum fundraising commitment for that route before selecting it." },
+  { title: "Use the Huntington discount code", body: "Use the discount code HUNTINGTON to waive your registration fee. Confirm that the code has been applied before submitting your registration." },
+  { title: "Card payment information", body: "Enter the required card payment information. Any amount a rider is under commitment, after the Huntington Grant and Match Dollars are applied, the individual participant is responsible for paying." },
+  { title: "Request to join Team Huntington", body: "A Peloton is your Pelotonia team. When asked to join a Peloton, search for and select TEAM HUNTINGTON BANK - (Your Business Segment). Your request needs the Peloton Captain's approval, which typically takes a day or two. If you miss this step, please email pelotonia@huntington.com." },
+  { title: "Complete your participant information", body: "Fill in the requested details, such as contact and emergency contact information, apparel size, employer, Rider information, and personal fundraising goal. Double-check your Peloton selection." },
+  { title: "Review your fundraising commitment", body: "Read the minimum commitment, deadline, and payment terms for your selected route and year. The individual participant is responsible for any remaining shortfall after the Huntington Grant and Match Dollars are applied. Review how any remaining balance may be charged under the registration terms." },
+  { title: "Review and submit your registration", body: "Review your selections and complete the required acknowledgments. Confirm that the HUNTINGTON discount code has waived your registration fee. The registration fee is separate from your fundraising commitment and does not count toward your fundraising total. Submit and look for confirmation." },
+  { title: "Personalize your fundraising profile", body: "Add a photo, your \"Why I Participate\" story, and a personal fundraising goal. Save your profile link so you can share it with family, friends, and colleagues." },
+  { title: "Confirm your Team Huntington membership", body: "After the Captain approves your request, check that Team Huntington appears as your Peloton on your profile. If it is missing, check your request or contact your Team Huntington Captain for help." },
+  { title: "Find your Rider / Participant ID", body: "When on your profile page just below your picture you will find a \"Public ID\". This would be your first initial, last name initial and several numbers. Please note this ID and log it when asked on your site dashboard." },
+];
+
+function RegistrationHelp() {
+  const [open, setOpen] = useState(false);
+  return (
+    <Collapsible open={open} onOpenChange={setOpen}>
+      <Card className="border-dashed">
+        <CollapsibleTrigger asChild>
+          <button className="flex w-full items-center justify-between p-4 text-left">
+            <div className="flex items-center gap-2">
+              <HelpCircle className="h-5 w-5 text-[var(--brand)]" />
+              <span className="font-semibold text-[var(--brand-dark)]">Need more help?</span>
+            </div>
+            <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
+          </button>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <CardContent className="space-y-4 pt-0">
+            <p className="text-sm text-muted-foreground">
+              Use this guide when registration opens for your Ride Weekend year. For 2027, review the routes, fees, fundraising minimums, and deadlines shown during registration before you commit.
+            </p>
+            <ol className="space-y-3 text-sm">
+              {REGISTRATION_STEPS.map((s, i) => (
+                <li key={i} className="rounded-lg bg-muted/40 p-3">
+                  <p className="font-semibold text-[var(--brand-dark)]">{i + 1}. {s.title}</p>
+                  <p className="mt-1 text-muted-foreground">{s.body}</p>
+                </li>
+              ))}
+            </ol>
+            <div className="rounded-lg bg-[var(--brand)]/10 p-3 text-sm">
+              <p className="font-semibold text-[var(--brand-dark)]">Next steps</p>
+              <p className="mt-1 text-muted-foreground">
+                Once your registration is confirmed, you are registered to ride. When your Peloton request is approved, you are also officially part of Team Huntington. Get your bike ready and begin training. Share your fundraising page and track your progress toward the deadline. Watch for Team Huntington messages about jerseys, training rides, Ride Weekend logistics, and team activities.
+              </p>
+            </div>
+          </CardContent>
+        </CollapsibleContent>
+      </Card>
+    </Collapsible>
+  );
+}
+
 /* ---------- STEP C ---------- */
 function StepTravel() {
   const { registration, setRegistration } = useStore();
