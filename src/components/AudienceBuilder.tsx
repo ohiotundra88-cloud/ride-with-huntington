@@ -143,7 +143,7 @@ export function AudienceBuilder({
         />
       </div>
 
-      <div className={allOn ? "pointer-events-none opacity-50" : ""}>
+      <div className={`space-y-5 ${allOn ? "pointer-events-none opacity-50" : ""}`}>
         <div className="space-y-2">
           <Label className="text-xs uppercase tracking-wide text-muted-foreground">App roles</Label>
           <ChipGroup
