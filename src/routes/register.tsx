@@ -202,7 +202,9 @@ function RegisterWizard() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
+      <h1 className="sr-only">Register for Pelotonia with Team Huntington</h1>
       {/* PROGRESS */}
+
       <div className="sticky top-14 z-30 -mx-4 bg-background/95 backdrop-blur px-4 py-4 border-b">
         <div className="flex items-center justify-between gap-3">
           <div>

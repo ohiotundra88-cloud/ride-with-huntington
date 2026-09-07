@@ -61,11 +61,22 @@ const ROLE_LABELS: Record<string, string> = {
 };
 
 function CaptainsLoungePage() {
-  const { user } = useStore();
+  const { user, authReady } = useStore();
   const allowed = user.signedIn && user.isReviewer;
+
+  // Wait for the sign-in to resolve before deciding — otherwise a genuine
+  // leader briefly sees a "no access" screen on a page refresh.
+  if (!authReady) {
+    return (
+      <div className="mx-auto max-w-lg px-4 py-24 text-center text-sm text-muted-foreground">
+        Checking your access…
+      </div>
+    );
+  }
 
   if (!user.signedIn) return <Gate title="Sign in required" body="The Captains Lounge is a private space for Team Huntington leadership. Sign in with your Huntington email to continue." cta />;
   if (!allowed) return <Gate title="Leadership access only" body="This space is limited to colleagues with a Team Captain, Admin, Super User, Legal, Risk, Compliance, Marketing or Co-Chair role. If you should have access, ask an admin to add your role." />;
+
 
   return <Lounge />;
 }

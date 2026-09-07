@@ -245,6 +245,8 @@ function SignIn() {
     <div className="relative">
       <div className="text-[var(--brand-dark)]"><ArrowMotif /></div>
       <div className="mx-auto max-w-md px-4 py-14">
+        <h1 className="sr-only">Sign in to the Team Huntington Hub</h1>
+
         <Card>
           <CardHeader>
             <div className="grid h-12 w-12 place-items-center rounded-xl bg-[var(--brand)] text-[var(--brand-foreground)]">

@@ -47,15 +47,8 @@ function PackingPage() {
 
   const categories = state.packing.categories[preset];
 
-  if (!state.flags.packingList) {
-    return (
-      <div className="mx-auto max-w-lg px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold">Packing list is turned off</h1>
-        <p className="mt-2 text-sm text-muted-foreground">A Super User has hidden this section.</p>
-        <Button asChild className="mt-6"><Link to="/">Go home</Link></Button>
-      </div>
-    );
-  }
+
+
 
   const toggle = (id: string) => setItems((prev) => prev.map((i) => (i.id === id ? { ...i, checked: !i.checked } : i)));
   const remove = (id: string) => setItems((prev) => prev.filter((i) => i.id !== id));
@@ -83,6 +76,17 @@ function PackingPage() {
     visible.forEach((i) => { (g[i.category] ||= []).push(i); });
     return g;
   }, [visible]);
+
+  if (!state.flags.packingList) {
+    return (
+      <div className="mx-auto max-w-lg px-4 py-16 text-center">
+        <h1 className="text-2xl font-bold">Packing list is turned off</h1>
+        <p className="mt-2 text-sm text-muted-foreground">A Super User has hidden this section.</p>
+        <Button asChild className="mt-6"><Link to="/">Go home</Link></Button>
+      </div>
+    );
+  }
+
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
