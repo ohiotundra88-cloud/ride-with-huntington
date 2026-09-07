@@ -288,7 +288,7 @@ function RiderProgressPage() {
                 <Input
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
-                  placeholder="Search name, email or rider ID"
+                  placeholder="Search name, email, region or rider ID"
                   className="w-56 pl-8"
                   aria-label="Search riders"
                 />
