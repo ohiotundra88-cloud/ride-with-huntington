@@ -132,11 +132,22 @@ export function AdminShell({ title, description, actions, children }: {
   actions?: React.ReactNode;
   children: React.ReactNode;
 }) {
-  const { user } = useStore();
+  const { user, authReady } = useStore();
   const { state } = useAdmin();
   const pathname = useRouterState({ select: (r) => r.location.pathname });
 
+  // Roles arrive a moment after the page loads. Deciding before then would
+  // show a genuine Super User the "access required" screen on every refresh.
+  if (!authReady) {
+    return (
+      <div className="mx-auto max-w-lg px-4 py-24 text-center text-sm text-muted-foreground">
+        Checking your access…
+      </div>
+    );
+  }
+
   if (!user.isAdmin || !state.superUser.active) {
+
     return (
       <div className="mx-auto max-w-lg px-4 py-16 text-center">
         <ShieldCheck className="mx-auto h-10 w-10 text-[var(--brand-dark)]" />
