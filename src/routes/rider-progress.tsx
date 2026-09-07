@@ -165,9 +165,10 @@ function RiderProgressPage() {
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
     const out = rows.filter((r) => {
-      const haystack = [r.name, r.email, r.riderId ?? "", r.subPeloton ?? "", r.rideRoute ?? "", ...(r.tags ?? [])];
+      const haystack = [r.name, r.email, r.region ?? "", r.riderId ?? "", r.subPeloton ?? "", r.rideRoute ?? "", ...(r.tags ?? [])];
       if (needle && !haystack.some((v) => v.toLowerCase().includes(needle))) return false;
       if (participation !== "all" && r.participation !== participation) return false;
+      if (region !== "all" && r.region !== region) return false;
       if (peloton !== "all" && r.subPeloton !== peloton) return false;
       if (route !== "all" && r.rideRoute !== route) return false;
       if (status === "registered" && !r.registeredWithPelotonia) return false;
@@ -183,7 +184,7 @@ function RiderProgressPage() {
       if (sort === "subPeloton") return (a.subPeloton ?? "zzz").localeCompare(b.subPeloton ?? "zzz");
       return a.name.localeCompare(b.name);
     });
-  }, [rows, q, participation, status, peloton, route, sort]);
+  }, [rows, q, participation, status, region, peloton, route, sort]);
 
   const totals = useMemo(
     () => ({
