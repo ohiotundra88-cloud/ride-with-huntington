@@ -399,6 +399,9 @@ function RiderProgressPage() {
                           <RiderIdCell row={r} canEdit={canEditRiderId} />
                         </TableCell>
                         <TableCell className="capitalize">{r.participation ?? "—"}</TableCell>
+                        <TableCell className="max-w-[12rem]">
+                          <span className="text-xs text-muted-foreground">{r.region ?? "—"}</span>
+                        </TableCell>
                         <TableCell className="max-w-[14rem]">
                           <span className="text-xs text-muted-foreground">{r.subPeloton ?? "—"}</span>
                         </TableCell>
