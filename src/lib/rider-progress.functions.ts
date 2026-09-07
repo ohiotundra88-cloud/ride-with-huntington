@@ -6,6 +6,7 @@ export interface RiderProgressRow {
   name: string;
   email: string;
   participation: string | null;
+  region: string | null;
   riderId: string | null;
   registeredWithPelotonia: boolean;
   pelotoniaStatus: string;
