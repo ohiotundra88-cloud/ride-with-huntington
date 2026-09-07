@@ -144,6 +144,7 @@ function RiderProgressPage() {
   const [q, setQ] = useState("");
   const [participation, setParticipation] = useState("all");
   const [status, setStatus] = useState("all");
+  const [region, setRegion] = useState("all");
   const [peloton, setPeloton] = useState("all");
   const [route, setRoute] = useState("all");
   const [sort, setSort] = useState<SortKey>("name");
