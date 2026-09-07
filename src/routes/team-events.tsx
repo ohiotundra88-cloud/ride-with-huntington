@@ -83,7 +83,10 @@ function TeamEventsPage() {
   const [location, setLocation] = useState("");
   const [organizerName, setOrganizerName] = useState("");
   const [organizerEmail, setOrganizerEmail] = useState("");
-  const [audience, setAudience] = useState<AudienceRules>(emptyAudience());
+  const [audience, setAudience] = useState<AudienceRules>({
+    ...emptyAudience(),
+    allParticipants: true,
+  });
   const [inviteesFor, setInviteesFor] = useState<TeamEventSummary | null>(null);
 
   const preview = useServerFn(previewAudience);
@@ -106,7 +109,7 @@ function TeamEventsPage() {
     setLocation("");
     setOrganizerName("");
     setOrganizerEmail("");
-    setAudience(emptyAudience());
+    setAudience({ ...emptyAudience(), allParticipants: true });
   };
 
   const save = useServerFn(saveTeamEvent);
