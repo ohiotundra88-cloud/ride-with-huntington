@@ -86,8 +86,9 @@ export function MyEventsCard() {
                   </Badge>
                 )}
               </div>
-              <div className="mt-3">
+              <div className="mt-3 flex flex-wrap items-center gap-2">
                 <RsvpButtons event={e} />
+                <AddToCalendar event={e} />
               </div>
             </div>
           ))

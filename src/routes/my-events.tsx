@@ -67,7 +67,12 @@ function EventRow({ event, past }: { event: MyTeamEvent; past?: boolean }) {
           </p>
         )}
 
-        {!past && event.status !== "cancelled" && <RsvpButtons event={event} />}
+        {!past && event.status !== "cancelled" && (
+          <div className="flex flex-wrap items-center gap-2">
+            <RsvpButtons event={event} />
+            <AddToCalendar event={event} />
+          </div>
+        )}
       </CardContent>
     </Card>
   );
