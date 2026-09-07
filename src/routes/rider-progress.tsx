@@ -149,6 +149,10 @@ function RiderProgressPage() {
   const [route, setRoute] = useState("all");
   const [sort, setSort] = useState<SortKey>("name");
 
+  const regionOptions = useMemo(
+    () => Array.from(new Set(rows.map((r) => r.region).filter((v): v is string => !!v))).sort(),
+    [rows],
+  );
   const pelotonOptions = useMemo(
     () => Array.from(new Set(rows.map((r) => r.subPeloton).filter((v): v is string => !!v))).sort(),
     [rows],
