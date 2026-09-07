@@ -344,6 +344,8 @@ function StepPelotonia() {
         </CardContent>
       </Card>
 
+      <RegistrationHelp />
+
       <Card>
         <CardHeader><CardTitle><Copy k="B.card2Title" /></CardTitle></CardHeader>
         <CardContent className="space-y-3">
