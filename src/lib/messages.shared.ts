@@ -71,6 +71,8 @@ export const READINESS_GAPS = [
 ] as const;
 
 export interface AudienceRules {
+  /** Invite every Team Huntington participant (respects explicit excludes). */
+  allParticipants: boolean;
   roles: string[];
   /** Huntington regions from colleague profiles. */
   regions: string[];
@@ -87,6 +89,7 @@ export interface AudienceRules {
 }
 
 export const emptyAudience = (): AudienceRules => ({
+  allParticipants: false,
   roles: [],
   regions: [],
   participation: [],
@@ -107,6 +110,7 @@ export function normalizeAudience(raw: unknown): AudienceRules {
     Array.isArray(v) ? v.map((x) => String(x)).filter(Boolean) : [];
   const n = o["raisedBelow"];
   return {
+    allParticipants: o["allParticipants"] === true,
     roles: list(o["roles"]),
     regions: list(o["regions"]),
     participation: list(o["participation"]),
