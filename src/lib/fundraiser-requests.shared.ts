@@ -83,9 +83,14 @@ export function statusLabel(status: RequestStatus) {
     case "submitted": return "Awaiting captain";
     case "in_review": return "In review";
     case "changes_requested": return "Changes requested";
-    case "declined": return "Declined";
+    case "declined": return "Denied — needs attention";
     case "approved": return "Approved";
   }
+}
+
+/** The submitter can still edit and resubmit these. */
+export function needsSubmitterAttention(r: FundraiserRequest) {
+  return r.status === "declined" || r.status === "changes_requested";
 }
 
 export function canActOnStage(roles: string[], stage: StageKey) {
@@ -112,12 +117,22 @@ export const requestInputSchema = z.object({
 
 export type RequestInput = z.input<typeof requestInputSchema>;
 
-export const decisionSchema = z.object({
-  id: z.string().uuid(),
-  stage: z.enum(["captain", "legal", "risk", "compliance", "marketing", "cochair"]),
-  decision: z.enum(["approved", "changes_requested", "declined"]),
-  note: z.string().trim().max(1000).optional().nullable().transform((v) => v || null),
-});
+export const decisionSchema = z
+  .object({
+    id: z.string().uuid(),
+    stage: z.enum(["captain", "legal", "risk", "compliance", "marketing", "cochair"]),
+    decision: z.enum(["approved", "changes_requested", "declined"]),
+    note: z.string().trim().max(1000).optional().nullable().transform((v) => v || null),
+  })
+  .superRefine((v, ctx) => {
+    if (v.decision !== "approved" && (!v.note || v.note.length < 5)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["note"],
+        message: "Add a comment explaining what the submitter needs to change.",
+      });
+    }
+  });
 
 export const ALLOWED_FLIER_TYPES = ["image/png", "image/jpeg", "image/webp", "application/pdf"] as const;
 export const MAX_FLIER_BYTES = 5 * 1024 * 1024;
