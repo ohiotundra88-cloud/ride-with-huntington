@@ -222,7 +222,7 @@ export function trackerPhases(r: FundraiserRequest): {
   let message: string;
   if (declined) {
     const who = refused[0]?.label ?? (captain === "declined" ? "Your peloton captain" : cochair === "declined" ? "A co-chair" : "A reviewer");
-    message = `${who} declined this request. Check the approval trail for their note.`;
+    message = `${who} denied this request and left a comment below — update the details and resubmit.`;
   } else if (approved) {
     message = r.event_id
       ? "Fully approved — your fundraiser is live on the Team Huntington calendar."
