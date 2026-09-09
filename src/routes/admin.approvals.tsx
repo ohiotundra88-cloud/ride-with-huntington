@@ -172,7 +172,17 @@ function ReviewCard({ request, roles }: { request: FundraiserRequest; roles: str
                 <Badge key={s} variant="secondary">{STAGES.find((x) => x.key === s)!.label}</Badge>
               ))}
             </div>
-            <Textarea rows={2} placeholder="Optional note for the submitter" value={note} onChange={(e) => setNote(e.target.value)} />
+            <Textarea
+              rows={2}
+              placeholder="Comment for the submitter (required to deny or request changes)"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+            />
+            {note.trim().length < 5 && (
+              <p className="text-xs text-muted-foreground">
+                Add a comment above to deny or request changes — the submitter sees it and can update and resubmit.
+              </p>
+            )}
             <div className="flex flex-wrap gap-2">
               {openStages.map((stage) => (
                 <div key={stage} className="flex flex-wrap gap-2">
@@ -184,11 +194,11 @@ function ReviewCard({ request, roles }: { request: FundraiserRequest; roles: str
                   >
                     Approve as {STAGES.find((x) => x.key === stage)!.label}
                   </Button>
-                  <Button size="sm" variant="outline" disabled={decide.isPending} onClick={() => decide.mutate({ stage, decision: "changes_requested" })}>
+                  <Button size="sm" variant="outline" disabled={decide.isPending || note.trim().length < 5} onClick={() => decide.mutate({ stage, decision: "changes_requested" })}>
                     Request changes
                   </Button>
-                  <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10" disabled={decide.isPending} onClick={() => decide.mutate({ stage, decision: "declined" })}>
-                    Decline
+                  <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10" disabled={decide.isPending || note.trim().length < 5} onClick={() => decide.mutate({ stage, decision: "declined" })}>
+                    Deny
                   </Button>
                 </div>
               ))}
