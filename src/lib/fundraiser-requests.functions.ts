@@ -72,7 +72,16 @@ export const saveMyRequest = createServerFn({ method: "POST" })
     if (id) {
       const { data: row, error } = await context.supabase
         .from("fundraiser_requests")
-        .update({ ...fields, status: "submitted", captain_status: "pending" })
+        .update({
+          ...fields,
+          status: "submitted",
+          captain_status: "pending",
+          legal_status: "pending",
+          risk_status: "pending",
+          compliance_status: "pending",
+          marketing_status: "pending",
+          cochair_status: "pending",
+        })
         .eq("id", id)
         .eq("submitted_by", context.userId)
         .select(REQUEST_COLUMNS)

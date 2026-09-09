@@ -12,13 +12,13 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ClipboardList, Paperclip, Upload, CheckCircle2, Clock, XCircle, AlertCircle, CalendarDays } from "lucide-react";
+import { ClipboardList, Paperclip, Upload, CheckCircle2, Clock, XCircle, AlertCircle, CalendarDays, MessageSquareWarning } from "lucide-react";
 import {
-  listMyRequests, saveMyRequest, uploadRequestFlier, getRequestFlier,
+  listMyRequests, saveMyRequest, uploadRequestFlier, getRequestFlier, listRequestApprovals,
 } from "@/lib/fundraiser-requests.functions";
 import {
-  ALLOWED_FLIER_TYPES, MAX_FLIER_BYTES, statusLabel,
-  type FundraiserRequest, type RequestInput,
+  ALLOWED_FLIER_TYPES, MAX_FLIER_BYTES, statusLabel, needsSubmitterAttention, STAGES,
+  type ApprovalEntry, type FundraiserRequest, type RequestInput,
 } from "@/lib/fundraiser-requests.shared";
 import { ApprovalTracker } from "@/components/ApprovalTracker";
 import { formatEventDate } from "@/lib/events.shared";
@@ -244,6 +244,38 @@ function FundraiserRequestPage() {
   );
 }
 
+function ReviewerFeedback({ request }: { request: FundraiserRequest }) {
+  const { data: trail = [] } = useQuery<ApprovalEntry[]>({
+    queryKey: ["approval-trail", request.id],
+    queryFn: () => listRequestApprovals({ data: { id: request.id } }),
+    enabled: needsSubmitterAttention(request),
+  });
+  const notes = trail.filter(
+    (t) => (t.decision === "declined" || t.decision === "changes_requested") && t.note,
+  );
+  if (notes.length === 0) return null;
+  const latest = notes.slice(-3).reverse();
+  return (
+    <div className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-3">
+      <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-amber-900">
+        <MessageSquareWarning className="h-3.5 w-3.5" /> What the reviewer asked for
+      </div>
+      <ul className="mt-2 space-y-2 text-sm text-amber-900">
+        {latest.map((t) => (
+          <li key={t.id}>
+            <span className="font-medium">
+              {STAGES.find((s) => s.key === t.stage)?.label ?? t.stage}
+            </span>{" "}
+            · {t.decision === "declined" ? "denied" : "changes requested"}
+            {t.actor_email ? ` by ${t.actor_email}` : ""}
+            <div className="text-amber-800">“{t.note}”</div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function RequestCard({ request, onEdit }: { request: FundraiserRequest; onEdit: () => void }) {
   const [flier, setFlier] = useState<string | null>(null);
   return (
@@ -264,9 +296,13 @@ function RequestCard({ request, onEdit }: { request: FundraiserRequest; onEdit: 
           <ApprovalTracker request={request} />
         </div>
 
+        <ReviewerFeedback request={request} />
+
         <div className="mt-4 flex flex-wrap gap-2">
-          {(request.status === "changes_requested" || request.status === "submitted") && (
-            <Button size="sm" variant="outline" onClick={onEdit}>Edit &amp; resubmit</Button>
+          {(needsSubmitterAttention(request) || request.status === "submitted") && (
+            <Button size="sm" variant={request.status === "declined" ? "default" : "outline"} onClick={onEdit}>
+              Edit &amp; resubmit
+            </Button>
           )}
           {request.flier_name && (
             <Button
