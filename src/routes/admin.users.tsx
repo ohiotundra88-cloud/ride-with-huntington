@@ -66,16 +66,24 @@ function AdminUsersPage() {
           <CardTitle className="text-base flex items-center gap-2"><UserPlus className="h-4 w-4" /> Grant admin access</CardTitle>
         </CardHeader>
         <CardContent>
-          <UserSearchPicker
-            id="grant-email"
-            label="Add a colleague"
-            placeholder="Search by name or email…"
-            disabled={grant.isPending}
-            onSelect={(u) => grant.mutate(u.email)}
-          />
-          <p className="mt-2 text-xs text-muted-foreground">
-            Start typing to search registered colleagues, then click their name to grant admin. New admins can enter Super User Mode from their profile menu.
-          </p>
+          {canManageAdmins ? (
+            <>
+              <UserSearchPicker
+                id="grant-email"
+                label="Add a colleague"
+                placeholder="Search by name or email…"
+                disabled={grant.isPending}
+                onSelect={(u) => grant.mutate(u.email)}
+              />
+              <p className="mt-2 text-xs text-muted-foreground">
+                Start typing to search registered colleagues, then click their name to grant admin. New admins can enter Super User Mode from their profile menu.
+              </p>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Only a Super User can add or remove admins. You can review the current list below.
+            </p>
+          )}
         </CardContent>
       </Card>
 
