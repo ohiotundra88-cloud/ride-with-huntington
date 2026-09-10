@@ -10,13 +10,18 @@ export interface AdminUserRow {
   is_self: boolean;
 }
 
-async function assertCallerIsAdmin(context: { supabase: any; userId: string }) {
-  const { data, error } = await context.supabase.rpc("has_role", {
-    _user_id: context.userId,
-    _role: "admin",
-  });
-  if (error) throw new Error(error.message);
-  if (!data) throw new Error("Forbidden: admin role required");
+type Ctx = { supabase: any; userId: string };
+
+/** Viewing the admin list is fine for admins and super users. */
+async function assertCallerIsAdmin(context: Ctx) {
+  const { assertAdminOrSuperUser } = await import("@/lib/roles-admin.server");
+  await assertAdminOrSuperUser(context);
+}
+
+/** Changing who is an admin is super-user only. */
+async function assertCallerIsSuperUser(context: Ctx) {
+  const { assertSuperUser } = await import("@/lib/roles-admin.server");
+  await assertSuperUser(context);
 }
 
 export const listAdmins = createServerFn({ method: "GET" })
