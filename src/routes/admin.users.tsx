@@ -109,6 +109,7 @@ function AdminUsersPage() {
                       {a.is_self && <span className="ml-2 rounded bg-[var(--brand)]/20 px-1.5 py-0.5 text-[10px] font-semibold text-[var(--brand-dark)]">YOU</span>}
                     </div>
                   </div>
+                  {canManageAdmins && (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button
@@ -136,6 +137,7 @@ function AdminUsersPage() {
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
+                  )}
                 </li>
               ))}
             </ul>
