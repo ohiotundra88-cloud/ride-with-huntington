@@ -137,7 +137,7 @@ function MessagesPage() {
   const [category, setCategory] = useState<string>("general");
   const [scheduledAt, setScheduledAt] = useState("");
   const [audience, setAudience] = useState<AudienceRules>(emptyAudience());
-  const [emailNotify, setEmailNotify] = useState(false);
+  const [emailNotify, setEmailNotify] = useState(true);
   const [emailExclude, setEmailExclude] = useState<string[]>([]);
   const [emailQuery, setEmailQuery] = useState("");
   const [optOutQuery, setOptOutQuery] = useState("");
@@ -164,7 +164,7 @@ function MessagesPage() {
     setTitle(""); setBody(""); setCtaLabel(""); setCtaHref("");
     setPriority("info"); setCategory("general"); setScheduledAt("");
     setAudience(emptyAudience());
-    setEmailNotify(false); setEmailExclude([]); setEmailQuery("");
+    setEmailNotify(true); setEmailExclude([]); setEmailQuery("");
   };
 
   const save = useServerFn(saveMessage);

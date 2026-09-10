@@ -244,6 +244,37 @@ export const decideOnRequest = createServerFn({ method: "POST" })
       await supabaseAdmin.from("fundraiser_requests").update({ event_id: null }).eq("id", data.id);
     }
 
+    // Email the submitter about the decision. Never let a mail failure undo
+    // the decision that was already recorded.
+    try {
+      const { data: submitter } = await supabaseAdmin
+        .from("profiles")
+        .select("email, full_name, email_opt_out")
+        .eq("id", fresh.submitted_by)
+        .maybeSingle();
+      const to = (submitter as { email?: string } | null)?.email ?? "";
+      const optOut = (submitter as { email_opt_out?: boolean } | null)?.email_opt_out === true;
+      if (to.includes("@") && !optOut) {
+        const stageLabel = STAGES.find((s) => s.key === data.stage)?.label ?? "A reviewer";
+        const kind = fresh.status === "approved" ? "fully_approved" : data.decision;
+        const { sendTemplateEmail } = await import("@/lib/email-templates/send-email");
+        await sendTemplateEmail("fundraiser-decision", to, {
+          templateData: {
+            requestTitle: fresh.title,
+            decision: kind,
+            stageLabel,
+            comment: data.note ?? "",
+            recipientName:
+              ((submitter as { full_name?: string } | null)?.full_name ?? "").split(" ")[0] ?? "",
+            reviewerEmail: String((context.claims as { email?: string } | null)?.email ?? ""),
+          },
+          idempotencyKey: `fr-decision-${data.id}-${data.stage}-${kind}`,
+        });
+      }
+    } catch (error) {
+      console.error("Fundraiser decision email failed", error);
+    }
+
     return { ok: true };
 
   });
