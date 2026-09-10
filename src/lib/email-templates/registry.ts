@@ -1,5 +1,8 @@
 import type { ComponentType } from 'react'
 import { template as teamAnnouncementTemplate } from './team-announcement'
+import { template as eventInvitationTemplate } from './event-invitation'
+import { template as eventCancelledTemplate } from './event-cancelled'
+import { template as fundraiserDecisionTemplate } from './fundraiser-decision'
 
 
 export interface TemplateEntry {
