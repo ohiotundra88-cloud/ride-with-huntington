@@ -42,8 +42,8 @@ export const searchRegisteredUsers = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => z.object({ query: z.string().trim().min(2).max(120) }).parse(d))
   .handler(async ({ data, context }): Promise<RegisteredUserRow[]> => {
-    const { assertAdmin } = await import("@/lib/roles-admin.server");
-    await assertAdmin(context);
+    const { assertAdminOrSuperUser } = await import("@/lib/roles-admin.server");
+    await assertAdminOrSuperUser(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const q = data.query.replace(/[%,]/g, "");
     const { data: profiles, error } = await supabaseAdmin
