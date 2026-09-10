@@ -17,6 +17,7 @@ import { UserSearchPicker } from "@/components/UserSearchPicker";
 import { VendorAccessCard } from "@/components/VendorAccessCard";
 import { ActivationCard } from "@/components/ActivationCard";
 import { AuthEmailTimeline } from "@/components/AuthEmailTimeline";
+import { useStore } from "@/lib/store";
 
 
 
@@ -32,6 +33,8 @@ export const Route = createFileRoute("/admin/users")({
 
 function AdminUsersPage() {
   const qc = useQueryClient();
+  const { user } = useStore();
+  const canManageAdmins = user.isSuperUser;
 
   const { data: admins = [], isLoading, error } = useQuery<AdminUserRow[]>({
     queryKey: ["admins"],
