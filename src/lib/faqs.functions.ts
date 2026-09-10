@@ -48,11 +48,8 @@ export const listFaqsPublic = createServerFn({ method: "GET" }).handler(async ()
 export const listFaqsAdmin = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data: isAdmin } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "admin",
-    });
-    if (!isAdmin) throw new Error("Forbidden");
+    const { assertAdminOrSuperUser } = await import("@/lib/roles-admin.server");
+    await assertAdminOrSuperUser(context);
     const { data, error } = await context.supabase
       .from("faqs")
       .select("*")
@@ -75,11 +72,8 @@ export const upsertFaqAdmin = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => upsertSchema.parse(i))
   .middleware([requireSupabaseAuth])
   .handler(async ({ data, context }) => {
-    const { data: isAdmin } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "admin",
-    });
-    if (!isAdmin) throw new Error("Forbidden");
+    const { assertAdminOrSuperUser } = await import("@/lib/roles-admin.server");
+    await assertAdminOrSuperUser(context);
     if (data.id) {
       const { error, data: row } = await context.supabase
         .from("faqs")

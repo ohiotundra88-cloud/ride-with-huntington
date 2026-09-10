@@ -60,11 +60,8 @@ export const upsertMyParticipant = createServerFn({ method: "POST" })
 export const listParticipantsAdmin = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data: isAdmin } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "admin",
-    });
-    if (!isAdmin) throw new Error("Forbidden");
+    const { assertAdminOrSuperUser } = await import("@/lib/roles-admin.server");
+    await assertAdminOrSuperUser(context);
     const { data, error } = await context.supabase
       .from("participants")
       .select("*, profiles(email, full_name)")
