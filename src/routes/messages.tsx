@@ -164,7 +164,7 @@ function MessagesPage() {
     setTitle(""); setBody(""); setCtaLabel(""); setCtaHref("");
     setPriority("info"); setCategory("general"); setScheduledAt("");
     setAudience(emptyAudience());
-    setEmailNotify(false); setEmailExclude([]); setEmailQuery("");
+    setEmailNotify(true); setEmailExclude([]); setEmailQuery("");
   };
 
   const save = useServerFn(saveMessage);
