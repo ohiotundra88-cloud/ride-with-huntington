@@ -23,6 +23,8 @@ export interface SendTemplateEmailOptions {
   /** Dedupes retries of the same logical send; defaults to a random UUID (no dedupe). */
   idempotencyKey?: string
   replyTo?: string
+  /** Prepended to the rendered subject (e.g. "[TEST] " for sample sends). */
+  subjectPrefix?: string
 }
 
 /**
