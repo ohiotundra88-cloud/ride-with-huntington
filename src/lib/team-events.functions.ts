@@ -166,8 +166,9 @@ export const publishTeamEvent = createServerFn({ method: "POST" })
 
     if (fresh.length) {
       const email = String((context.claims as { email?: string } | null)?.email ?? "");
+      const invitees = fresh.map((p) => ({ userId: p.userId, email: p.email, name: p.name }));
       await notifyPeople(context.supabase, {
-        people: fresh.map((p) => ({ userId: p.userId, email: p.email, name: p.name })),
+        people: invitees,
         title: `You're invited: ${row.title}`,
         body: `${eventWhenWhere(row)}\n\n${row.description ?? ""}\n\nPlease let us know if you can make it.`,
         ctaLabel: "RSVP now",
@@ -176,6 +177,19 @@ export const publishTeamEvent = createServerFn({ method: "POST" })
         actorId: context.userId,
         actorEmail: email,
         audience: row.audience as never,
+      });
+      const { emailPeople } = await import("@/lib/team-events.server");
+      await emailPeople(context.supabase, {
+        people: invitees,
+        template: "event-invitation",
+        keyPrefix: `event-invite-${data.id}`,
+        templateData: {
+          eventTitle: row.title,
+          whenWhere: eventWhenWhere(row),
+          description: row.description ?? "",
+          organizerName: row.organizer_name ?? email,
+          ctaHref: "/my-events",
+        },
       });
     }
 
@@ -232,6 +246,17 @@ export const cancelTeamEvent = createServerFn({ method: "POST" })
         actorId: context.userId,
         actorEmail: email,
         audience: { ...emptyAudience(), includeUserIds: people.map((p) => p.userId) },
+      });
+      const { emailPeople } = await import("@/lib/team-events.server");
+      await emailPeople(context.supabase, {
+        people,
+        template: "event-cancelled",
+        keyPrefix: `event-cancel-${data.id}`,
+        templateData: {
+          eventTitle: row.title,
+          whenWhere: eventWhenWhere(row),
+          organizerName: row.organizer_name ?? email,
+        },
       });
     }
 
