@@ -62,10 +62,11 @@ export async function sendTemplateEmail(
   const element = React.createElement(template.component, templateData)
   const html = await render(element)
   const text = await render(element, { plainText: true })
-  const subject =
+  const baseSubject =
     typeof template.subject === 'function'
       ? template.subject(templateData)
       : template.subject
+  const subject = `${options.subjectPrefix ?? ''}${baseSubject}`
 
   try {
     await sendLovableEmail(
