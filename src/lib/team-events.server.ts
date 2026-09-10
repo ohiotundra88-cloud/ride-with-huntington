@@ -80,6 +80,67 @@ export async function notifyPeople(
   });
 }
 
+/**
+ * Emails the same event notice to each invitee, skipping colleagues who turned
+ * email off in their profile. Sends run in small batches so a big roster
+ * doesn't trip the provider's rate limit; one failure never blocks the rest.
+ */
+export async function emailPeople(
+  supabase: AnySupabase,
+  {
+    people,
+    template,
+    templateData,
+    keyPrefix,
+  }: {
+    people: InviteePerson[];
+    template: "event-invitation" | "event-cancelled";
+    templateData: Record<string, unknown>;
+    keyPrefix: string;
+  },
+): Promise<{ sent: number; skipped: number }> {
+  if (!people.length) return { sent: 0, skipped: 0 };
+
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, email_opt_out")
+    .in(
+      "id",
+      people.map((p) => p.userId),
+    );
+  const optedOut = new Set(
+    ((profiles ?? []) as { id: string; email_opt_out?: boolean }[])
+      .filter((p) => p.email_opt_out === true)
+      .map((p) => p.id),
+  );
+
+  const targets = people.filter((p) => p.email?.includes("@") && !optedOut.has(p.userId));
+  let sent = 0;
+  let skipped = people.length - targets.length;
+
+  const { sendTemplateEmail } = await import("@/lib/email-templates/send-email");
+  const BATCH = 5;
+  for (let i = 0; i < targets.length; i += BATCH) {
+    await Promise.all(
+      targets.slice(i, i + BATCH).map(async (person) => {
+        try {
+          const result = await sendTemplateEmail(template, person.email, {
+            templateData: { ...templateData, recipientName: person.name.split(" ")[0] ?? "" },
+            idempotencyKey: `${keyPrefix}-${person.userId}`,
+          });
+          if (result.sent) sent += 1;
+          else skipped += 1;
+        } catch (error) {
+          skipped += 1;
+          console.error("Event email failed", person.email, error);
+        }
+      }),
+    );
+  }
+
+  return { sent, skipped };
+}
+
 /** Human-readable when/where line used in invitation and cancellation notices. */
 export function eventWhenWhere(row: {
   event_date: string;
