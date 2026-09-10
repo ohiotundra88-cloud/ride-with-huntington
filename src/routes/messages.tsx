@@ -137,7 +137,7 @@ function MessagesPage() {
   const [category, setCategory] = useState<string>("general");
   const [scheduledAt, setScheduledAt] = useState("");
   const [audience, setAudience] = useState<AudienceRules>(emptyAudience());
-  const [emailNotify, setEmailNotify] = useState(false);
+  const [emailNotify, setEmailNotify] = useState(true);
   const [emailExclude, setEmailExclude] = useState<string[]>([]);
   const [emailQuery, setEmailQuery] = useState("");
   const [optOutQuery, setOptOutQuery] = useState("");
