@@ -40,6 +40,7 @@ import { Route as VendorsIdRouteImport } from './routes/vendors.$id'
 import { Route as ResourcesIdRouteImport } from './routes/resources.$id'
 import { Route as MyFundraisersIdRouteImport } from './routes/my-fundraisers.$id'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminTestEmailsRouteImport } from './routes/admin.test-emails'
 import { Route as AdminRosterRouteImport } from './routes/admin.roster'
 import { Route as AdminReadinessRouteImport } from './routes/admin.readiness'
 import { Route as AdminParticipantsRouteImport } from './routes/admin.participants'
@@ -224,6 +225,11 @@ const MyFundraisersIdRoute = MyFundraisersIdRouteImport.update({
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/admin/users',
   path: '/admin/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminTestEmailsRoute = AdminTestEmailsRouteImport.update({
+  id: '/admin/test-emails',
+  path: '/admin/test-emails',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRosterRoute = AdminRosterRouteImport.update({
@@ -424,6 +430,7 @@ export interface FileRoutesByFullPath {
   '/admin/participants': typeof AdminParticipantsRoute
   '/admin/readiness': typeof AdminReadinessRoute
   '/admin/roster': typeof AdminRosterRoute
+  '/admin/test-emails': typeof AdminTestEmailsRoute
   '/admin/users': typeof AdminUsersRoute
   '/my-fundraisers/$id': typeof MyFundraisersIdRoute
   '/resources/$id': typeof ResourcesIdRoute
@@ -487,6 +494,7 @@ export interface FileRoutesByTo {
   '/admin/participants': typeof AdminParticipantsRoute
   '/admin/readiness': typeof AdminReadinessRoute
   '/admin/roster': typeof AdminRosterRoute
+  '/admin/test-emails': typeof AdminTestEmailsRoute
   '/admin/users': typeof AdminUsersRoute
   '/my-fundraisers/$id': typeof MyFundraisersIdRoute
   '/resources/$id': typeof ResourcesIdRoute
@@ -551,6 +559,7 @@ export interface FileRoutesById {
   '/admin/participants': typeof AdminParticipantsRoute
   '/admin/readiness': typeof AdminReadinessRoute
   '/admin/roster': typeof AdminRosterRoute
+  '/admin/test-emails': typeof AdminTestEmailsRoute
   '/admin/users': typeof AdminUsersRoute
   '/my-fundraisers/$id': typeof MyFundraisersIdRoute
   '/resources/$id': typeof ResourcesIdRoute
@@ -616,6 +625,7 @@ export interface FileRouteTypes {
     | '/admin/participants'
     | '/admin/readiness'
     | '/admin/roster'
+    | '/admin/test-emails'
     | '/admin/users'
     | '/my-fundraisers/$id'
     | '/resources/$id'
@@ -679,6 +689,7 @@ export interface FileRouteTypes {
     | '/admin/participants'
     | '/admin/readiness'
     | '/admin/roster'
+    | '/admin/test-emails'
     | '/admin/users'
     | '/my-fundraisers/$id'
     | '/resources/$id'
@@ -742,6 +753,7 @@ export interface FileRouteTypes {
     | '/admin/participants'
     | '/admin/readiness'
     | '/admin/roster'
+    | '/admin/test-emails'
     | '/admin/users'
     | '/my-fundraisers/$id'
     | '/resources/$id'
@@ -806,6 +818,7 @@ export interface RootRouteChildren {
   AdminParticipantsRoute: typeof AdminParticipantsRoute
   AdminReadinessRoute: typeof AdminReadinessRoute
   AdminRosterRoute: typeof AdminRosterRoute
+  AdminTestEmailsRoute: typeof AdminTestEmailsRoute
   AdminUsersRoute: typeof AdminUsersRoute
   MyFundraisersIdRoute: typeof MyFundraisersIdRoute
   VendorsIdRoute: typeof VendorsIdRoute
@@ -1045,6 +1058,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/users'
       fullPath: '/admin/users'
       preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/test-emails': {
+      id: '/admin/test-emails'
+      path: '/admin/test-emails'
+      fullPath: '/admin/test-emails'
+      preLoaderRoute: typeof AdminTestEmailsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/roster': {
@@ -1314,6 +1334,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminParticipantsRoute: AdminParticipantsRoute,
   AdminReadinessRoute: AdminReadinessRoute,
   AdminRosterRoute: AdminRosterRoute,
+  AdminTestEmailsRoute: AdminTestEmailsRoute,
   AdminUsersRoute: AdminUsersRoute,
   MyFundraisersIdRoute: MyFundraisersIdRoute,
   VendorsIdRoute: VendorsIdRoute,

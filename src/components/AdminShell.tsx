@@ -25,6 +25,7 @@ import {
   ClipboardList,
   FileText,
   Settings,
+  Mail,
   Contact as ContactIcon,
   Home,
   Lock,
@@ -51,6 +52,7 @@ const links = [
   { to: "/admin/users", label: "Admins & Super Users", icon: ShieldCheck },
   { to: "/admin/branding", label: "Site Branding", icon: ImageIcon },
   { to: "/admin/flags", label: "Config & Audit", icon: Settings },
+  { to: "/admin/test-emails", label: "Test Emails", icon: Mail },
 ] as const;
 
 export function SuperUserBar() {

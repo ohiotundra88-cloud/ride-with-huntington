@@ -10,7 +10,7 @@ import { useAdmin, announcementIsActive, formatCurrencyUSD } from "@/lib/admin-s
 import {
   Plus, Megaphone, Bell, Target, FileText, ListChecks,
   MessageSquare, CalendarDays, ArrowRight, ClipboardList, History,
-  BarChart3, Users, ShieldCheck, Settings,
+  BarChart3, Users, ShieldCheck, Settings, Mail,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin/")({
@@ -70,6 +70,7 @@ function SuperUserDashboard() {
     { icon: Users, label: "Preview Participant Experience", to: "/dashboard" },
     { icon: ShieldCheck, label: "Roles & permissions", to: "/admin/flags" },
     { icon: Settings, label: "Feature flags & audit", to: "/admin/flags" },
+    { icon: Mail, label: "Send test emails", to: "/admin/test-emails" },
   ];
 
   return (

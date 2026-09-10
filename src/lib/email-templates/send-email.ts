@@ -23,6 +23,8 @@ export interface SendTemplateEmailOptions {
   /** Dedupes retries of the same logical send; defaults to a random UUID (no dedupe). */
   idempotencyKey?: string
   replyTo?: string
+  /** Prepended to the rendered subject (e.g. "[TEST] " for sample sends). */
+  subjectPrefix?: string
 }
 
 /**
@@ -60,10 +62,11 @@ export async function sendTemplateEmail(
   const element = React.createElement(template.component, templateData)
   const html = await render(element)
   const text = await render(element, { plainText: true })
-  const subject =
+  const baseSubject =
     typeof template.subject === 'function'
       ? template.subject(templateData)
       : template.subject
+  const subject = `${options.subjectPrefix ?? ''}${baseSubject}`
 
   try {
     await sendLovableEmail(
