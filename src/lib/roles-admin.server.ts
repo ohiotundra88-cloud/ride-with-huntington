@@ -17,8 +17,19 @@ export async function assertAdmin(context: Ctx) {
   if (!data) throw new Error("Forbidden: admin role required");
 }
 
+/** Admin OR super user: super user is intended as a superset of admin. */
+export async function assertAdminOrSuperUser(context: Ctx) {
+  const [adminRes, superRes] = await Promise.all([
+    context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" }),
+    context.supabase.rpc("is_superuser", { _user_id: context.userId }),
+  ]);
+  if (adminRes.error) throw new Error(adminRes.error.message);
+  if (superRes.error) throw new Error(superRes.error.message);
+  if (!adminRes.data && !superRes.data) throw new Error("Forbidden: admin role required");
+}
+
 export async function listMembersOfRole(context: Ctx, role: string): Promise<RoleMemberRow[]> {
-  await assertAdmin(context);
+  await assertAdminOrSuperUser(context);
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data: roles, error } = await supabaseAdmin
     .from("user_roles")
@@ -47,7 +58,7 @@ export async function listMembersOfRole(context: Ctx, role: string): Promise<Rol
 }
 
 export async function grantRole(context: Ctx, email: string, role: string) {
-  await assertAdmin(context);
+  await assertAdminOrSuperUser(context);
   const normalized = email.trim().toLowerCase();
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data: profile, error } = await supabaseAdmin
@@ -69,7 +80,7 @@ export async function grantRole(context: Ctx, email: string, role: string) {
 }
 
 export async function revokeRole(context: Ctx, userId: string, role: string) {
-  await assertAdmin(context);
+  await assertAdminOrSuperUser(context);
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { error } = await supabaseAdmin
     .from("user_roles")

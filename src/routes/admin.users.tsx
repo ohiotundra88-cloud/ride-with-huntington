@@ -17,6 +17,7 @@ import { UserSearchPicker } from "@/components/UserSearchPicker";
 import { VendorAccessCard } from "@/components/VendorAccessCard";
 import { ActivationCard } from "@/components/ActivationCard";
 import { AuthEmailTimeline } from "@/components/AuthEmailTimeline";
+import { useStore } from "@/lib/store";
 
 
 
@@ -32,6 +33,8 @@ export const Route = createFileRoute("/admin/users")({
 
 function AdminUsersPage() {
   const qc = useQueryClient();
+  const { user } = useStore();
+  const canManageAdmins = user.isSuperUser;
 
   const { data: admins = [], isLoading, error } = useQuery<AdminUserRow[]>({
     queryKey: ["admins"],
@@ -63,16 +66,24 @@ function AdminUsersPage() {
           <CardTitle className="text-base flex items-center gap-2"><UserPlus className="h-4 w-4" /> Grant admin access</CardTitle>
         </CardHeader>
         <CardContent>
-          <UserSearchPicker
-            id="grant-email"
-            label="Add a colleague"
-            placeholder="Search by name or email…"
-            disabled={grant.isPending}
-            onSelect={(u) => grant.mutate(u.email)}
-          />
-          <p className="mt-2 text-xs text-muted-foreground">
-            Start typing to search registered colleagues, then click their name to grant admin. New admins can enter Super User Mode from their profile menu.
-          </p>
+          {canManageAdmins ? (
+            <>
+              <UserSearchPicker
+                id="grant-email"
+                label="Add a colleague"
+                placeholder="Search by name or email…"
+                disabled={grant.isPending}
+                onSelect={(u) => grant.mutate(u.email)}
+              />
+              <p className="mt-2 text-xs text-muted-foreground">
+                Start typing to search registered colleagues, then click their name to grant admin. New admins can enter Super User Mode from their profile menu.
+              </p>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Only a Super User can add or remove admins. You can review the current list below.
+            </p>
+          )}
         </CardContent>
       </Card>
 
@@ -98,6 +109,7 @@ function AdminUsersPage() {
                       {a.is_self && <span className="ml-2 rounded bg-[var(--brand)]/20 px-1.5 py-0.5 text-[10px] font-semibold text-[var(--brand-dark)]">YOU</span>}
                     </div>
                   </div>
+                  {canManageAdmins && (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button
@@ -125,6 +137,7 @@ function AdminUsersPage() {
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
+                  )}
                 </li>
               ))}
             </ul>

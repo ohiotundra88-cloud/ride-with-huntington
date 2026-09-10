@@ -10,13 +10,18 @@ export interface AdminUserRow {
   is_self: boolean;
 }
 
-async function assertCallerIsAdmin(context: { supabase: any; userId: string }) {
-  const { data, error } = await context.supabase.rpc("has_role", {
-    _user_id: context.userId,
-    _role: "admin",
-  });
-  if (error) throw new Error(error.message);
-  if (!data) throw new Error("Forbidden: admin role required");
+type Ctx = { supabase: any; userId: string };
+
+/** Viewing the admin list is fine for admins and super users. */
+async function assertCallerIsAdmin(context: Ctx) {
+  const { assertAdminOrSuperUser } = await import("@/lib/roles-admin.server");
+  await assertAdminOrSuperUser(context);
+}
+
+/** Changing who is an admin is super-user only. */
+async function assertCallerIsSuperUser(context: Ctx) {
+  const { assertSuperUser } = await import("@/lib/roles-admin.server");
+  await assertSuperUser(context);
 }
 
 export const listAdmins = createServerFn({ method: "GET" })
@@ -54,7 +59,7 @@ export const grantAdminByEmail = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => z.object({ email: z.string().email() }).parse(d))
   .handler(async ({ data, context }) => {
-    await assertCallerIsAdmin(context);
+    await assertCallerIsSuperUser(context);
     const normalized = data.email.trim().toLowerCase();
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: profile, error: pErr } = await supabaseAdmin
@@ -77,9 +82,9 @@ export const revokeAdmin = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => z.object({ user_id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    await assertCallerIsAdmin(context);
+    await assertCallerIsSuperUser(context);
     if (data.user_id === context.userId) {
-      throw new Error("You cannot revoke your own admin role. Ask another admin to do it.");
+      throw new Error("You cannot revoke your own admin role. Ask another super user to do it.");
     }
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
