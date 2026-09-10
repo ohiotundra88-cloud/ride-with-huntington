@@ -24,4 +24,7 @@ export interface TemplateEntry {
  */
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'team-announcement': teamAnnouncementTemplate,
+  'event-invitation': eventInvitationTemplate,
+  'event-cancelled': eventCancelledTemplate,
+  'fundraiser-decision': fundraiserDecisionTemplate,
 }
