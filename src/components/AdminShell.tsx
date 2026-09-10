@@ -25,6 +25,7 @@ import {
   ClipboardList,
   FileText,
   Settings,
+  Mail,
   Contact as ContactIcon,
   Home,
   Lock,
