@@ -34,6 +34,8 @@ export const Route = createFileRoute("/admin/approvals")({
 });
 
 function ApprovalsPage() {
+  const { user } = useStore();
+  const userId = user.userId ?? "";
   const { data: roleData } = useQuery({ queryKey: ["my-review-roles"], queryFn: () => getMyReviewRoles() });
   const roles = roleData?.roles ?? [];
   const { data: requests = [], isLoading, error } = useQuery<FundraiserRequest[]>({
