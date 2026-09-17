@@ -217,7 +217,12 @@ export function trackerPhases(r: FundraiserRequest): {
 
   const phases: TrackerPhase[] = [
     { key: "submitted", label: "Submitted", detail: new Date(r.created_at).toLocaleDateString(), state: "done" },
-    { key: "captain", label: "Peloton Captain", state: captainState },
+    {
+      key: "captain",
+      label: "Peloton Captain",
+      detail: r.captain_name || r.captain_email || undefined,
+      state: captainState,
+    },
     {
       key: "departments",
       label: "Department review",
