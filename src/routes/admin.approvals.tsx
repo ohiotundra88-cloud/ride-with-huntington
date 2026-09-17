@@ -122,6 +122,9 @@ function ReviewCard({ request, roles, userId }: { request: FundraiserRequest; ro
               {formatEventDate(request.event_date)} · {request.event_type === "virtual" ? "Virtual" : "In person"}
               {request.location ? ` · ${request.location}` : ""} · Submitted by {request.submitter_name || request.submitter_email || "colleague"}
             </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Captain: {request.captain_name || request.captain_email || "not assigned"}
+            </p>
           </div>
           <StatusBadge status={request.status} />
         </div>
