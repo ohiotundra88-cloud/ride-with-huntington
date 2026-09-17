@@ -1774,6 +1774,10 @@ export type Database = {
       is_fundraiser_reviewer: { Args: { _user_id: string }; Returns: boolean }
       is_leadership: { Args: { _user_id: string }; Returns: boolean }
       is_superuser: { Args: { _user_id: string }; Returns: boolean }
+      profile_privileged_unchanged: {
+        Args: { _id: string; _vendor_access: boolean }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role:
