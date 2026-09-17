@@ -316,6 +316,9 @@ function RequestCard({ request, onEdit }: { request: FundraiserRequest; onEdit: 
             <div className="text-xs text-muted-foreground">
               {formatEventDate(request.event_date)} · {request.event_type === "virtual" ? "Virtual" : "In person"}
               {request.location ? ` · ${request.location}` : ""}
+              {request.captain_name || request.captain_email
+                ? ` · Captain: ${request.captain_name || request.captain_email}`
+                : ""}
             </div>
           </div>
           <StatusBadge status={request.status} />
