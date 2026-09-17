@@ -15,6 +15,13 @@
       "when": 1789649090088,
       "tag": "0001_restrict_profile_privileged_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789683853803,
+      "tag": "0002_scope_public_config_select_policies",
+      "breakpoints": true
     }
   ]
 }
