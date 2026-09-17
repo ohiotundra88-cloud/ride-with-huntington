@@ -96,14 +96,28 @@ export function needsSubmitterAttention(r: FundraiserRequest) {
   return r.status === "declined" || r.status === "changes_requested";
 }
 
-export function canActOnStage(roles: string[], stage: StageKey) {
+/**
+ * Can this person act on the stage? Admins and super users always can. The
+ * captain stage is limited to the captain the submitter picked (when one is
+ * recorded), so other captains don't see requests that aren't theirs.
+ */
+export function canActOnStage(
+  roles: string[],
+  stage: StageKey,
+  ctx?: { request?: FundraiserRequest; userId?: string | null },
+) {
   if (roles.includes("admin") || roles.includes("superuser")) return true;
   const meta = STAGES.find((s) => s.key === stage)!;
-  return roles.includes(meta.role);
+  if (!roles.includes(meta.role)) return false;
+  if (stage === "captain" && ctx?.request?.captain_id) {
+    return ctx.request.captain_id === ctx.userId;
+  }
+  return true;
 }
 
 export const requestInputSchema = z.object({
   id: z.string().uuid().optional(),
+  captain_id: z.string().uuid({ message: "Choose the captain who should approve this" }),
   title: z.string().trim().min(3).max(140),
   description: z.string().trim().min(10).max(4000),
   event_type: z.enum(["in_person", "virtual"]),
