@@ -580,6 +580,7 @@ export type Database = {
       }
       fundraiser_requests: {
         Row: {
+          captain_id: string | null
           captain_status: string
           cochair_status: string
           compliance_status: string
@@ -609,6 +610,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          captain_id?: string | null
           captain_status?: string
           cochair_status?: string
           compliance_status?: string
@@ -638,6 +640,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          captain_id?: string | null
           captain_status?: string
           cochair_status?: string
           compliance_status?: string
