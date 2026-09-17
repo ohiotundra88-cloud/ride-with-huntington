@@ -489,7 +489,7 @@ async function notifyStageReviewers(request: FundraiserRequest, stages: string[]
               recipientName: (person.full_name ?? "").split(" ")[0] ?? "",
               finalStage: meta.key === "cochair",
             },
-            idempotencyKey: `fr-review-${request.id}-${meta.key}-${person.id}`,
+            idempotencyKey: `fr-review-${request.id}-${meta.key}-${person.id}-${request.updated_at}`,
           });
         } catch (error) {
           console.error("Fundraiser review email failed", meta.key, error);
