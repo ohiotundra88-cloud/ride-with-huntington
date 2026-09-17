@@ -139,6 +139,7 @@ export const saveMyRequest = createServerFn({ method: "POST" })
         .single();
       if (error) throw new Error(error.message);
       await logDecision(id, "submitted", "submitted", "Resubmitted after updates", context.userId);
+      await notifyAssignedCaptain(row as unknown as FundraiserRequest, false);
       return row as unknown as FundraiserRequest;
     }
     const { data: row, error } = await context.supabase
@@ -148,7 +149,107 @@ export const saveMyRequest = createServerFn({ method: "POST" })
       .single();
     if (error) throw new Error(error.message);
     await logDecision(row.id as string, "submitted", "submitted", null, context.userId);
+    await notifyAssignedCaptain(row as unknown as FundraiserRequest, false);
     return row as unknown as FundraiserRequest;
+  });
+
+/**
+ * Tell the assigned captain a request is waiting on them. Mail failures are
+ * logged and swallowed — the request itself is already saved.
+ */
+async function notifyAssignedCaptain(request: FundraiserRequest, reassigned: boolean) {
+  try {
+    if (!request.captain_id) return;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const [{ data: captain }, { data: submitter }] = await Promise.all([
+      supabaseAdmin
+        .from("profiles")
+        .select("email, full_name, email_opt_out")
+        .eq("id", request.captain_id)
+        .maybeSingle(),
+      supabaseAdmin
+        .from("profiles")
+        .select("email, full_name")
+        .eq("id", request.submitted_by)
+        .maybeSingle(),
+    ]);
+    const to = captain?.email ?? "";
+    if (!to.includes("@") || captain?.email_opt_out === true) return;
+    const { sendTemplateEmail } = await import("@/lib/email-templates/send-email");
+    await sendTemplateEmail("fundraiser-request-assigned", to, {
+      templateData: {
+        requestTitle: request.title,
+        submitterName: submitter?.full_name ?? "",
+        submitterEmail: submitter?.email ?? "",
+        eventDate: request.event_date,
+        recipientName: (captain?.full_name ?? "").split(" ")[0] ?? "",
+        reassigned,
+      },
+      idempotencyKey: `fr-assigned-${request.id}-${request.captain_id}-${request.updated_at}`,
+    });
+  } catch (error) {
+    console.error("Fundraiser captain assignment email failed", error);
+  }
+}
+
+/** Admins and super users can move a request to a different captain. */
+export const reassignRequestCaptain = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z.object({ id: z.string().uuid(), captain_id: z.string().uuid() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { assertAdminOrSuperUser } = await import("@/lib/roles-admin.server");
+    await assertAdminOrSuperUser(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: isCaptain, error: rErr } = await supabaseAdmin
+      .from("user_roles")
+      .select("user_id")
+      .eq("user_id", data.captain_id)
+      .eq("role", "captain")
+      .maybeSingle();
+    if (rErr) throw new Error(rErr.message);
+    if (!isCaptain) throw new Error("That colleague doesn't hold the Captain designation.");
+
+    const { data: current, error: cErr } = await supabaseAdmin
+      .from("fundraiser_requests")
+      .select(REQUEST_COLUMNS)
+      .eq("id", data.id)
+      .maybeSingle();
+    if (cErr) throw new Error(cErr.message);
+    if (!current) throw new Error("Request not found");
+    const request = current as unknown as FundraiserRequest;
+    if (request.captain_id === data.captain_id) return { ok: true };
+
+    const patch: Record<string, unknown> = { captain_id: data.captain_id };
+    if (request.captain_status === "pending") patch.status = request.status;
+
+    const { data: updated, error: uErr } = await supabaseAdmin
+      .from("fundraiser_requests")
+      .update(patch as never)
+      .eq("id", data.id)
+      .select(REQUEST_COLUMNS)
+      .single();
+    if (uErr) throw new Error(uErr.message);
+
+    const { data: people } = await supabaseAdmin
+      .from("profiles")
+      .select("id, email, full_name")
+      .in("id", [data.captain_id, request.captain_id].filter((v): v is string => !!v));
+    const label = (id: string | null) => {
+      const p = (people ?? []).find((x) => x.id === id);
+      return p?.full_name || p?.email || "unassigned";
+    };
+    await logDecision(
+      data.id,
+      "captain",
+      "reassigned",
+      `Reassigned from ${label(request.captain_id)} to ${label(data.captain_id)}`,
+      context.userId,
+    );
+    await notifyAssignedCaptain(updated as unknown as FundraiserRequest, true);
+    return { ok: true };
   });
 
 export const deleteMyRequest = createServerFn({ method: "POST" })
