@@ -226,7 +226,65 @@ function ReviewCard({ request, roles, userId }: { request: FundraiserRequest; ro
               : "Waiting on another reviewer."}
           </p>
         )}
+
+        {canReassign && !decided && <ReassignCaptain request={request} />}
       </CardContent>
     </Card>
+  );
+}
+
+/** Admins and super users can move a pending request to a different captain. */
+function ReassignCaptain({ request }: { request: FundraiserRequest }) {
+  const qc = useQueryClient();
+  const [choice, setChoice] = useState("");
+  const { data: captains = [] } = useQuery<CaptainOption[]>({
+    queryKey: ["captain-options"],
+    queryFn: () => listCaptainOptions(),
+  });
+
+  const reassign = useMutation({
+    mutationFn: (captainId: string) =>
+      reassignRequestCaptain({ data: { id: request.id, captain_id: captainId } }),
+    onSuccess: () => {
+      toast.success("Moved to the new captain — they've been emailed.");
+      setChoice("");
+      qc.invalidateQueries({ queryKey: ["review-requests"] });
+      qc.invalidateQueries({ queryKey: ["approval-trail", request.id] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <div className="space-y-2 rounded-lg border bg-muted/40 p-3">
+      <p className="text-sm font-medium">Reassign captain</p>
+      <p className="text-xs text-muted-foreground">
+        Use this if the assigned captain is on vacation or leave. Later stages and decisions already
+        made stay exactly as they are.
+      </p>
+      <div className="flex flex-wrap items-center gap-2">
+        <Select value={choice} onValueChange={setChoice}>
+          <SelectTrigger className="w-full sm:w-80">
+            <SelectValue placeholder="Choose a different captain" />
+          </SelectTrigger>
+          <SelectContent>
+            {captains
+              .filter((c) => c.user_id !== request.captain_id)
+              .map((c) => (
+                <SelectItem key={c.user_id} value={c.user_id}>
+                  {c.full_name ? `${c.full_name} — ${c.email}` : c.email}
+                </SelectItem>
+              ))}
+          </SelectContent>
+        </Select>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={!choice || reassign.isPending}
+          onClick={() => reassign.mutate(choice)}
+        >
+          {reassign.isPending ? "Moving…" : "Reassign"}
+        </Button>
+      </div>
+    </div>
   );
 }
