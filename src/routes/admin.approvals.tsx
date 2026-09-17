@@ -44,8 +44,11 @@ function ApprovalsPage() {
   });
 
   const waitingOnMe = useMemo(
-    () => requests.filter((r) => actionableStages(r).some((s) => canActOnStage(roles, s))),
-    [requests, roles],
+    () =>
+      requests.filter((r) =>
+        actionableStages(r).some((s) => canActOnStage(roles, s, { request: r, userId })),
+      ),
+    [requests, roles, userId],
   );
   const open = requests.filter((r) => r.status !== "approved" && r.status !== "declined");
   const closed = requests.filter((r) => r.status === "approved" || r.status === "declined");
