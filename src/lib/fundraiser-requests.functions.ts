@@ -431,9 +431,75 @@ export const decideOnRequest = createServerFn({ method: "POST" })
       console.error("Fundraiser decision email failed", error);
     }
 
+    // Email whoever the request now waits on, so each stage hears about it
+    // rather than having to watch the queue.
+    const opened = actionableStages(fresh).filter((s) => !actionableStages(request).includes(s));
+    await notifyStageReviewers(fresh, opened);
+
     return { ok: true };
 
   });
+
+/**
+ * Email everyone holding the role for each stage that just opened. Mail
+ * failures are logged only — approvals already recorded must stand.
+ */
+async function notifyStageReviewers(request: FundraiserRequest, stages: string[]) {
+  if (stages.length === 0) return;
+  try {
+    const { STAGES } = await import("@/lib/fundraiser-requests.shared");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { sendTemplateEmail } = await import("@/lib/email-templates/send-email");
+
+    const { data: submitter } = await supabaseAdmin
+      .from("profiles")
+      .select("email, full_name")
+      .eq("id", request.submitted_by)
+      .maybeSingle();
+
+    for (const key of stages) {
+      const meta = STAGES.find((s) => s.key === key);
+      if (!meta) continue;
+      // The captain stage is a single named person, handled on submit/reassign.
+      if (meta.key === "captain") continue;
+
+      const { data: holders } = await supabaseAdmin
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", meta.role as never);
+      const ids = (holders ?? []).map((h) => h.user_id as string);
+      if (ids.length === 0) continue;
+
+      const { data: people } = await supabaseAdmin
+        .from("profiles")
+        .select("id, email, full_name, email_opt_out")
+        .in("id", ids);
+
+      for (const person of people ?? []) {
+        const to = person.email ?? "";
+        if (!to.includes("@") || person.email_opt_out === true) continue;
+        try {
+          await sendTemplateEmail("fundraiser-review-needed", to, {
+            templateData: {
+              requestTitle: request.title,
+              stageLabel: meta.label,
+              submitterName: submitter?.full_name ?? "",
+              submitterEmail: submitter?.email ?? "",
+              eventDate: request.event_date,
+              recipientName: (person.full_name ?? "").split(" ")[0] ?? "",
+              finalStage: meta.key === "cochair",
+            },
+            idempotencyKey: `fr-review-${request.id}-${meta.key}-${person.id}`,
+          });
+        } catch (error) {
+          console.error("Fundraiser review email failed", meta.key, error);
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Fundraiser stage reviewer notification failed", error);
+  }
+}
 
 export const uploadRequestFlier = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
