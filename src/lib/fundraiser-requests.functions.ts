@@ -316,6 +316,14 @@ export const decideOnRequest = createServerFn({ method: "POST" })
     if (!current) throw new Error("Request not found");
     const request = current as unknown as FundraiserRequest;
 
+    if (!canActOnStage(roles, data.stage, { request, userId: context.userId })) {
+      throw new Error(
+        data.stage === "captain"
+          ? "This request was routed to a different captain. Ask an admin to reassign it."
+          : "You don't hold the designation required for this approval stage.",
+      );
+    }
+
     if (!actionableStages(request).includes(data.stage)) {
       throw new Error("This stage isn't open yet — an earlier approval is still outstanding.");
     }
