@@ -306,10 +306,6 @@ export const decideOnRequest = createServerFn({ method: "POST" })
     const { STAGES, actionableStages, canActOnStage, isFullyApproved } = await import(
       "@/lib/fundraiser-requests.shared"
     );
-    if (!canActOnStage(roles, data.stage)) {
-      throw new Error("You don't hold the designation required for this approval stage.");
-    }
-
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: current, error: cErr } = await supabaseAdmin
       .from("fundraiser_requests")
