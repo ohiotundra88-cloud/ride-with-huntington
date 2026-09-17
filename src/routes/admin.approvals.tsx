@@ -74,7 +74,7 @@ function ApprovalsPage() {
               {list.length === 0 ? (
                 <p className="text-sm text-muted-foreground">Nothing here right now.</p>
               ) : (
-                list.map((r) => <ReviewCard key={r.id} request={r} roles={roles} />)
+                list.map((r) => <ReviewCard key={r.id} request={r} roles={roles} userId={userId} />)
               )}
             </TabsContent>
           ))}
@@ -84,11 +84,15 @@ function ApprovalsPage() {
   );
 }
 
-function ReviewCard({ request, roles }: { request: FundraiserRequest; roles: string[] }) {
+function ReviewCard({ request, roles, userId }: { request: FundraiserRequest; roles: string[]; userId: string }) {
   const qc = useQueryClient();
   const [note, setNote] = useState("");
   const [showTrail, setShowTrail] = useState(false);
-  const openStages = actionableStages(request).filter((s) => canActOnStage(roles, s));
+  const openStages = actionableStages(request).filter((s) =>
+    canActOnStage(roles, s, { request, userId }),
+  );
+  const canReassign = roles.includes("admin") || roles.includes("superuser");
+  const decided = request.status === "approved" || request.status === "declined";
 
   const decide = useMutation({
     mutationFn: (input: { stage: StageKey; decision: "approved" | "changes_requested" | "declined" }) =>
