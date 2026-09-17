@@ -65,6 +65,10 @@ Submitted -> Chosen Captain -> [ Legal | Risk | Compliance | Marketing ] -> Co-C
   name/email alongside the existing submitter hydration.
 - RLS: extend the existing reviewer SELECT policy so an assigned captain can read their own
   requests; department and co-chair policies unchanged.
+- New server function `reassignRequestCaptain` (`{ id, captain_id }`): asserts the caller holds
+  `admin` or `superuser` via `assertAdminOrSuperUser`, verifies the target holds `captain`,
+  updates `captain_id`, resets `captain_status` to `pending` only when it was still `pending`,
+  logs a `reassigned` approval-trail entry with both names, and emails the new captain.
 - UI: dropdown (shadcn `Select`) in `src/routes/fundraiser-request.tsx` above the flier field,
   captain name surfaced on request cards and in `src/routes/admin.approvals.tsx`; tracker
   message in `trackerPhases` uses the captain's name when available.
