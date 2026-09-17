@@ -39,6 +39,7 @@ export const Route = createFileRoute("/fundraiser-request")({
 });
 
 const emptyForm: RequestInput = {
+  captain_id: "",
   title: "",
   description: "",
   event_type: "in_person",
@@ -222,6 +223,7 @@ function FundraiserRequestPage() {
               onEdit={() => {
                 setEditingId(r.id);
                 setForm({
+                  captain_id: r.captain_id ?? "",
                   title: r.title,
                   description: r.description,
                   event_type: r.event_type,
