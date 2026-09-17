@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { ClipboardList, Paperclip, Upload, CheckCircle2, Clock, XCircle, AlertCircle, CalendarDays, MessageSquareWarning } from "lucide-react";
 import {
   listMyRequests, saveMyRequest, uploadRequestFlier, getRequestFlier, listRequestApprovals,
+  listCaptainOptions, type CaptainOption,
 } from "@/lib/fundraiser-requests.functions";
 import {
   ALLOWED_FLIER_TYPES, MAX_FLIER_BYTES, statusLabel, needsSubmitterAttention, STAGES,
