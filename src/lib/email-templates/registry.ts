@@ -4,6 +4,7 @@ import { template as eventInvitationTemplate } from './event-invitation'
 import { template as eventCancelledTemplate } from './event-cancelled'
 import { template as fundraiserDecisionTemplate } from './fundraiser-decision'
 import { template as fundraiserRequestAssignedTemplate } from './fundraiser-request-assigned'
+import { template as fundraiserReviewNeededTemplate } from './fundraiser-review-needed'
 
 
 export interface TemplateEntry {
@@ -29,4 +30,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'event-cancelled': eventCancelledTemplate,
   'fundraiser-decision': fundraiserDecisionTemplate,
   'fundraiser-request-assigned': fundraiserRequestAssignedTemplate,
+  'fundraiser-review-needed': fundraiserReviewNeededTemplate,
 }
