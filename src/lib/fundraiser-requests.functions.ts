@@ -27,6 +27,58 @@ export const getMyReviewRoles = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => ({ roles: await myRoles(context) }));
 
+/** Adds submitter + assigned captain names/emails for display. */
+async function hydratePeople(rows: FundraiserRequest[]): Promise<FundraiserRequest[]> {
+  if (rows.length === 0) return rows;
+  const ids = Array.from(
+    new Set([
+      ...rows.map((r) => r.submitted_by),
+      ...rows.map((r) => r.captain_id).filter((v): v is string => !!v),
+    ]),
+  );
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: profiles } = await supabaseAdmin
+    .from("profiles")
+    .select("id, email, full_name")
+    .in("id", ids);
+  const map = new Map((profiles ?? []).map((p) => [p.id, p]));
+  return rows.map((r) => ({
+    ...r,
+    submitter_email: map.get(r.submitted_by)?.email ?? null,
+    submitter_name: map.get(r.submitted_by)?.full_name ?? null,
+    captain_email: r.captain_id ? map.get(r.captain_id)?.email ?? null : null,
+    captain_name: r.captain_id ? map.get(r.captain_id)?.full_name ?? null : null,
+  }));
+}
+
+export interface CaptainOption {
+  user_id: string;
+  full_name: string | null;
+  email: string;
+}
+
+/** Captains a submitter can route their request to. Any signed-in colleague may read this. */
+export const listCaptainOptions = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async (): Promise<CaptainOption[]> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: roles, error } = await supabaseAdmin
+      .from("user_roles")
+      .select("user_id")
+      .eq("role", "captain");
+    if (error) throw new Error(error.message);
+    const ids = Array.from(new Set((roles ?? []).map((r) => r.user_id)));
+    if (ids.length === 0) return [];
+    const { data: profiles, error: pErr } = await supabaseAdmin
+      .from("profiles")
+      .select("id, email, full_name")
+      .in("id", ids);
+    if (pErr) throw new Error(pErr.message);
+    return (profiles ?? [])
+      .map((p) => ({ user_id: p.id, full_name: p.full_name, email: p.email ?? "" }))
+      .sort((a, b) => (a.full_name || a.email).localeCompare(b.full_name || b.email));
+  });
+
 export const listMyRequests = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<FundraiserRequest[]> => {
@@ -36,7 +88,7 @@ export const listMyRequests = createServerFn({ method: "GET" })
       .eq("submitted_by", context.userId)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
-    return (data ?? []) as unknown as FundraiserRequest[];
+    return hydratePeople((data ?? []) as unknown as FundraiserRequest[]);
   });
 
 /** Every request, for anyone holding a reviewer/admin designation. */
@@ -48,20 +100,19 @@ export const listReviewRequests = createServerFn({ method: "GET" })
       .select(REQUEST_COLUMNS)
       .order("event_date", { ascending: true });
     if (error) throw new Error(error.message);
-    const rows = (data ?? []) as unknown as FundraiserRequest[];
-    if (rows.length === 0) return rows;
+    let rows = (data ?? []) as unknown as FundraiserRequest[];
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: profiles } = await supabaseAdmin
-      .from("profiles")
-      .select("id, email, full_name")
-      .in("id", Array.from(new Set(rows.map((r) => r.submitted_by))));
-    const map = new Map((profiles ?? []).map((p) => [p.id, p]));
-    return rows.map((r) => ({
-      ...r,
-      submitter_email: map.get(r.submitted_by)?.email ?? null,
-      submitter_name: map.get(r.submitted_by)?.full_name ?? null,
-    }));
+    // A plain captain only sees the requests routed to them (plus their own).
+    const roles = await myRoles(context);
+    const seesEverything = roles.some((r) =>
+      ["admin", "superuser", "legal", "risk", "compliance", "marketing", "cochair"].includes(r),
+    );
+    if (!seesEverything && roles.includes("captain")) {
+      rows = rows.filter(
+        (r) => r.captain_id === context.userId || !r.captain_id || r.submitted_by === context.userId,
+      );
+    }
+    return hydratePeople(rows);
   });
 
 export const saveMyRequest = createServerFn({ method: "POST" })
