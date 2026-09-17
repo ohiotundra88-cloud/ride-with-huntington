@@ -67,6 +67,12 @@ function FundraiserRequestPage() {
     enabled: user.signedIn,
   });
 
+  const { data: captains = [], isLoading: captainsLoading } = useQuery<CaptainOption[]>({
+    queryKey: ["captain-options"],
+    queryFn: () => listCaptainOptions(),
+    enabled: user.signedIn,
+  });
+
   const save = useMutation({
     mutationFn: async (input: RequestInput) => {
       const row = await saveMyRequest({ data: input });
@@ -188,6 +194,26 @@ function FundraiserRequestPage() {
                 <Label htmlFor="fr-cphone">Contact phone</Label>
                 <Input id="fr-cphone" value={form.contact_phone ?? ""} onChange={(e) => set("contact_phone", e.target.value)} />
               </div>
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label htmlFor="fr-captain">Which captain should approve this?</Label>
+                <Select value={form.captain_id} onValueChange={(v) => set("captain_id", v)}>
+                  <SelectTrigger id="fr-captain">
+                    <SelectValue placeholder={captainsLoading ? "Loading captains…" : "Choose your peloton captain"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {captains.map((c) => (
+                      <SelectItem key={c.user_id} value={c.user_id}>
+                        {c.full_name ? `${c.full_name} — ${c.email}` : c.email}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  {captains.length === 0 && !captainsLoading
+                    ? "No captains have been designated yet — ask an admin to add one."
+                    : "They review first. After that it goes to Legal, Risk, Compliance and Marketing, then the co-chairs."}
+                </p>
+              </div>
               <div className="space-y-1.5">
                 <Label htmlFor="fr-flier">Flier attachment (PNG, JPG, WEBP or PDF)</Label>
                 <Input id="fr-flier" type="file" ref={fileRef} accept=".png,.jpg,.jpeg,.webp,.pdf" />
@@ -195,7 +221,7 @@ function FundraiserRequestPage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <Button type="submit" disabled={save.isPending} className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90">
+              <Button type="submit" disabled={save.isPending || !form.captain_id} className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90">
                 <Upload className="mr-1.5 h-4 w-4" />
                 {save.isPending ? "Submitting…" : editingId ? "Resubmit for approval" : "Submit for approval"}
               </Button>
