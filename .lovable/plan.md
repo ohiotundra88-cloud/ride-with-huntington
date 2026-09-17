@@ -25,6 +25,16 @@ should review it first. Everything after that keeps working exactly as it does t
   request still drops to "Denied — needs attention" or "Changes requested", the submitter can
   still edit and resubmit, and resubmission still resets the later stages.
 
+## Reassigning to a different captain
+
+- Admins and super users see a **Reassign captain** control on each request in the approvals
+  queue, with the same dropdown of captains — useful when the chosen captain is on vacation
+  or leave.
+- Reassigning moves the request to the new captain's queue, resets the captain stage to
+  pending if it hadn't been decided yet, records the change in the approval trail
+  ("Reassigned from Jane Smith to John Doe"), and emails the new captain.
+- Later stages and any prior decisions are left alone.
+
 ## Order of approvals (unchanged)
 
 ```text
