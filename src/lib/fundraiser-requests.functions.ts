@@ -27,6 +27,58 @@ export const getMyReviewRoles = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => ({ roles: await myRoles(context) }));
 
+/** Adds submitter + assigned captain names/emails for display. */
+async function hydratePeople(rows: FundraiserRequest[]): Promise<FundraiserRequest[]> {
+  if (rows.length === 0) return rows;
+  const ids = Array.from(
+    new Set([
+      ...rows.map((r) => r.submitted_by),
+      ...rows.map((r) => r.captain_id).filter((v): v is string => !!v),
+    ]),
+  );
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: profiles } = await supabaseAdmin
+    .from("profiles")
+    .select("id, email, full_name")
+    .in("id", ids);
+  const map = new Map((profiles ?? []).map((p) => [p.id, p]));
+  return rows.map((r) => ({
+    ...r,
+    submitter_email: map.get(r.submitted_by)?.email ?? null,
+    submitter_name: map.get(r.submitted_by)?.full_name ?? null,
+    captain_email: r.captain_id ? map.get(r.captain_id)?.email ?? null : null,
+    captain_name: r.captain_id ? map.get(r.captain_id)?.full_name ?? null : null,
+  }));
+}
+
+export interface CaptainOption {
+  user_id: string;
+  full_name: string | null;
+  email: string;
+}
+
+/** Captains a submitter can route their request to. Any signed-in colleague may read this. */
+export const listCaptainOptions = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async (): Promise<CaptainOption[]> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: roles, error } = await supabaseAdmin
+      .from("user_roles")
+      .select("user_id")
+      .eq("role", "captain");
+    if (error) throw new Error(error.message);
+    const ids = Array.from(new Set((roles ?? []).map((r) => r.user_id)));
+    if (ids.length === 0) return [];
+    const { data: profiles, error: pErr } = await supabaseAdmin
+      .from("profiles")
+      .select("id, email, full_name")
+      .in("id", ids);
+    if (pErr) throw new Error(pErr.message);
+    return (profiles ?? [])
+      .map((p) => ({ user_id: p.id, full_name: p.full_name, email: p.email ?? "" }))
+      .sort((a, b) => (a.full_name || a.email).localeCompare(b.full_name || b.email));
+  });
+
 export const listMyRequests = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<FundraiserRequest[]> => {
@@ -36,7 +88,7 @@ export const listMyRequests = createServerFn({ method: "GET" })
       .eq("submitted_by", context.userId)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
-    return (data ?? []) as unknown as FundraiserRequest[];
+    return hydratePeople((data ?? []) as unknown as FundraiserRequest[]);
   });
 
 /** Every request, for anyone holding a reviewer/admin designation. */
@@ -48,20 +100,19 @@ export const listReviewRequests = createServerFn({ method: "GET" })
       .select(REQUEST_COLUMNS)
       .order("event_date", { ascending: true });
     if (error) throw new Error(error.message);
-    const rows = (data ?? []) as unknown as FundraiserRequest[];
-    if (rows.length === 0) return rows;
+    let rows = (data ?? []) as unknown as FundraiserRequest[];
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: profiles } = await supabaseAdmin
-      .from("profiles")
-      .select("id, email, full_name")
-      .in("id", Array.from(new Set(rows.map((r) => r.submitted_by))));
-    const map = new Map((profiles ?? []).map((p) => [p.id, p]));
-    return rows.map((r) => ({
-      ...r,
-      submitter_email: map.get(r.submitted_by)?.email ?? null,
-      submitter_name: map.get(r.submitted_by)?.full_name ?? null,
-    }));
+    // A plain captain only sees the requests routed to them (plus their own).
+    const roles = await myRoles(context);
+    const seesEverything = roles.some((r) =>
+      ["admin", "superuser", "legal", "risk", "compliance", "marketing", "cochair"].includes(r),
+    );
+    if (!seesEverything && roles.includes("captain")) {
+      rows = rows.filter(
+        (r) => r.captain_id === context.userId || !r.captain_id || r.submitted_by === context.userId,
+      );
+    }
+    return hydratePeople(rows);
   });
 
 export const saveMyRequest = createServerFn({ method: "POST" })
@@ -88,6 +139,7 @@ export const saveMyRequest = createServerFn({ method: "POST" })
         .single();
       if (error) throw new Error(error.message);
       await logDecision(id, "submitted", "submitted", "Resubmitted after updates", context.userId);
+      await notifyAssignedCaptain(row as unknown as FundraiserRequest, false);
       return row as unknown as FundraiserRequest;
     }
     const { data: row, error } = await context.supabase
@@ -97,7 +149,107 @@ export const saveMyRequest = createServerFn({ method: "POST" })
       .single();
     if (error) throw new Error(error.message);
     await logDecision(row.id as string, "submitted", "submitted", null, context.userId);
+    await notifyAssignedCaptain(row as unknown as FundraiserRequest, false);
     return row as unknown as FundraiserRequest;
+  });
+
+/**
+ * Tell the assigned captain a request is waiting on them. Mail failures are
+ * logged and swallowed — the request itself is already saved.
+ */
+async function notifyAssignedCaptain(request: FundraiserRequest, reassigned: boolean) {
+  try {
+    if (!request.captain_id) return;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const [{ data: captain }, { data: submitter }] = await Promise.all([
+      supabaseAdmin
+        .from("profiles")
+        .select("email, full_name, email_opt_out")
+        .eq("id", request.captain_id)
+        .maybeSingle(),
+      supabaseAdmin
+        .from("profiles")
+        .select("email, full_name")
+        .eq("id", request.submitted_by)
+        .maybeSingle(),
+    ]);
+    const to = captain?.email ?? "";
+    if (!to.includes("@") || captain?.email_opt_out === true) return;
+    const { sendTemplateEmail } = await import("@/lib/email-templates/send-email");
+    await sendTemplateEmail("fundraiser-request-assigned", to, {
+      templateData: {
+        requestTitle: request.title,
+        submitterName: submitter?.full_name ?? "",
+        submitterEmail: submitter?.email ?? "",
+        eventDate: request.event_date,
+        recipientName: (captain?.full_name ?? "").split(" ")[0] ?? "",
+        reassigned,
+      },
+      idempotencyKey: `fr-assigned-${request.id}-${request.captain_id}-${request.updated_at}`,
+    });
+  } catch (error) {
+    console.error("Fundraiser captain assignment email failed", error);
+  }
+}
+
+/** Admins and super users can move a request to a different captain. */
+export const reassignRequestCaptain = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z.object({ id: z.string().uuid(), captain_id: z.string().uuid() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { assertAdminOrSuperUser } = await import("@/lib/roles-admin.server");
+    await assertAdminOrSuperUser(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: isCaptain, error: rErr } = await supabaseAdmin
+      .from("user_roles")
+      .select("user_id")
+      .eq("user_id", data.captain_id)
+      .eq("role", "captain")
+      .maybeSingle();
+    if (rErr) throw new Error(rErr.message);
+    if (!isCaptain) throw new Error("That colleague doesn't hold the Captain designation.");
+
+    const { data: current, error: cErr } = await supabaseAdmin
+      .from("fundraiser_requests")
+      .select(REQUEST_COLUMNS)
+      .eq("id", data.id)
+      .maybeSingle();
+    if (cErr) throw new Error(cErr.message);
+    if (!current) throw new Error("Request not found");
+    const request = current as unknown as FundraiserRequest;
+    if (request.captain_id === data.captain_id) return { ok: true };
+
+    const patch: Record<string, unknown> = { captain_id: data.captain_id };
+    if (request.captain_status === "pending") patch.status = request.status;
+
+    const { data: updated, error: uErr } = await supabaseAdmin
+      .from("fundraiser_requests")
+      .update(patch as never)
+      .eq("id", data.id)
+      .select(REQUEST_COLUMNS)
+      .single();
+    if (uErr) throw new Error(uErr.message);
+
+    const { data: people } = await supabaseAdmin
+      .from("profiles")
+      .select("id, email, full_name")
+      .in("id", [data.captain_id, request.captain_id].filter((v): v is string => !!v));
+    const label = (id: string | null) => {
+      const p = (people ?? []).find((x) => x.id === id);
+      return p?.full_name || p?.email || "unassigned";
+    };
+    await logDecision(
+      data.id,
+      "captain",
+      "reassigned",
+      `Reassigned from ${label(request.captain_id)} to ${label(data.captain_id)}`,
+      context.userId,
+    );
+    await notifyAssignedCaptain(updated as unknown as FundraiserRequest, true);
+    return { ok: true };
   });
 
 export const deleteMyRequest = createServerFn({ method: "POST" })
@@ -154,10 +306,6 @@ export const decideOnRequest = createServerFn({ method: "POST" })
     const { STAGES, actionableStages, canActOnStage, isFullyApproved } = await import(
       "@/lib/fundraiser-requests.shared"
     );
-    if (!canActOnStage(roles, data.stage)) {
-      throw new Error("You don't hold the designation required for this approval stage.");
-    }
-
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: current, error: cErr } = await supabaseAdmin
       .from("fundraiser_requests")
@@ -167,6 +315,14 @@ export const decideOnRequest = createServerFn({ method: "POST" })
     if (cErr) throw new Error(cErr.message);
     if (!current) throw new Error("Request not found");
     const request = current as unknown as FundraiserRequest;
+
+    if (!canActOnStage(roles, data.stage, { request, userId: context.userId })) {
+      throw new Error(
+        data.stage === "captain"
+          ? "This request was routed to a different captain. Ask an admin to reassign it."
+          : "You don't hold the designation required for this approval stage.",
+      );
+    }
 
     if (!actionableStages(request).includes(data.stage)) {
       throw new Error("This stage isn't open yet — an earlier approval is still outstanding.");

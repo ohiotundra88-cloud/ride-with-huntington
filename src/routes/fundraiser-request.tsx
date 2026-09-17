@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { ClipboardList, Paperclip, Upload, CheckCircle2, Clock, XCircle, AlertCircle, CalendarDays, MessageSquareWarning } from "lucide-react";
 import {
   listMyRequests, saveMyRequest, uploadRequestFlier, getRequestFlier, listRequestApprovals,
+  listCaptainOptions, type CaptainOption,
 } from "@/lib/fundraiser-requests.functions";
 import {
   ALLOWED_FLIER_TYPES, MAX_FLIER_BYTES, statusLabel, needsSubmitterAttention, STAGES,
@@ -38,6 +39,7 @@ export const Route = createFileRoute("/fundraiser-request")({
 });
 
 const emptyForm: RequestInput = {
+  captain_id: "",
   title: "",
   description: "",
   event_type: "in_person",
@@ -62,6 +64,12 @@ function FundraiserRequestPage() {
   const { data: requests = [], isLoading } = useQuery<FundraiserRequest[]>({
     queryKey: ["my-fundraiser-requests"],
     queryFn: () => listMyRequests(),
+    enabled: user.signedIn,
+  });
+
+  const { data: captains = [], isLoading: captainsLoading } = useQuery<CaptainOption[]>({
+    queryKey: ["captain-options"],
+    queryFn: () => listCaptainOptions(),
     enabled: user.signedIn,
   });
 
@@ -186,6 +194,26 @@ function FundraiserRequestPage() {
                 <Label htmlFor="fr-cphone">Contact phone</Label>
                 <Input id="fr-cphone" value={form.contact_phone ?? ""} onChange={(e) => set("contact_phone", e.target.value)} />
               </div>
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label htmlFor="fr-captain">Which captain should approve this?</Label>
+                <Select value={form.captain_id} onValueChange={(v) => set("captain_id", v)}>
+                  <SelectTrigger id="fr-captain">
+                    <SelectValue placeholder={captainsLoading ? "Loading captains…" : "Choose your peloton captain"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {captains.map((c) => (
+                      <SelectItem key={c.user_id} value={c.user_id}>
+                        {c.full_name ? `${c.full_name} — ${c.email}` : c.email}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  {captains.length === 0 && !captainsLoading
+                    ? "No captains have been designated yet — ask an admin to add one."
+                    : "They review first. After that it goes to Legal, Risk, Compliance and Marketing, then the co-chairs."}
+                </p>
+              </div>
               <div className="space-y-1.5">
                 <Label htmlFor="fr-flier">Flier attachment (PNG, JPG, WEBP or PDF)</Label>
                 <Input id="fr-flier" type="file" ref={fileRef} accept=".png,.jpg,.jpeg,.webp,.pdf" />
@@ -193,7 +221,7 @@ function FundraiserRequestPage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <Button type="submit" disabled={save.isPending} className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90">
+              <Button type="submit" disabled={save.isPending || !form.captain_id} className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90">
                 <Upload className="mr-1.5 h-4 w-4" />
                 {save.isPending ? "Submitting…" : editingId ? "Resubmit for approval" : "Submit for approval"}
               </Button>
@@ -221,6 +249,7 @@ function FundraiserRequestPage() {
               onEdit={() => {
                 setEditingId(r.id);
                 setForm({
+                  captain_id: r.captain_id ?? "",
                   title: r.title,
                   description: r.description,
                   event_type: r.event_type,
@@ -287,6 +316,9 @@ function RequestCard({ request, onEdit }: { request: FundraiserRequest; onEdit: 
             <div className="text-xs text-muted-foreground">
               {formatEventDate(request.event_date)} · {request.event_type === "virtual" ? "Virtual" : "In person"}
               {request.location ? ` · ${request.location}` : ""}
+              {request.captain_name || request.captain_email
+                ? ` · Captain: ${request.captain_name || request.captain_email}`
+                : ""}
             </div>
           </div>
           <StatusBadge status={request.status} />

@@ -11,7 +11,10 @@ import { toast } from "sonner";
 import { Paperclip, ShieldCheck, History } from "lucide-react";
 import {
   listReviewRequests, decideOnRequest, getMyReviewRoles, listRequestApprovals, getRequestFlier,
+  listCaptainOptions, reassignRequestCaptain, type CaptainOption,
 } from "@/lib/fundraiser-requests.functions";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useStore } from "@/lib/store";
 import {
   STAGES, actionableStages, canActOnStage, statusLabel,
   type ApprovalEntry, type FundraiserRequest, type StageKey,
@@ -31,6 +34,8 @@ export const Route = createFileRoute("/admin/approvals")({
 });
 
 function ApprovalsPage() {
+  const { user } = useStore();
+  const userId = user.userId ?? "";
   const { data: roleData } = useQuery({ queryKey: ["my-review-roles"], queryFn: () => getMyReviewRoles() });
   const roles = roleData?.roles ?? [];
   const { data: requests = [], isLoading, error } = useQuery<FundraiserRequest[]>({
@@ -39,8 +44,11 @@ function ApprovalsPage() {
   });
 
   const waitingOnMe = useMemo(
-    () => requests.filter((r) => actionableStages(r).some((s) => canActOnStage(roles, s))),
-    [requests, roles],
+    () =>
+      requests.filter((r) =>
+        actionableStages(r).some((s) => canActOnStage(roles, s, { request: r, userId })),
+      ),
+    [requests, roles, userId],
   );
   const open = requests.filter((r) => r.status !== "approved" && r.status !== "declined");
   const closed = requests.filter((r) => r.status === "approved" || r.status === "declined");
@@ -66,7 +74,7 @@ function ApprovalsPage() {
               {list.length === 0 ? (
                 <p className="text-sm text-muted-foreground">Nothing here right now.</p>
               ) : (
-                list.map((r) => <ReviewCard key={r.id} request={r} roles={roles} />)
+                list.map((r) => <ReviewCard key={r.id} request={r} roles={roles} userId={userId} />)
               )}
             </TabsContent>
           ))}
@@ -76,11 +84,15 @@ function ApprovalsPage() {
   );
 }
 
-function ReviewCard({ request, roles }: { request: FundraiserRequest; roles: string[] }) {
+function ReviewCard({ request, roles, userId }: { request: FundraiserRequest; roles: string[]; userId: string }) {
   const qc = useQueryClient();
   const [note, setNote] = useState("");
   const [showTrail, setShowTrail] = useState(false);
-  const openStages = actionableStages(request).filter((s) => canActOnStage(roles, s));
+  const openStages = actionableStages(request).filter((s) =>
+    canActOnStage(roles, s, { request, userId }),
+  );
+  const canReassign = roles.includes("admin") || roles.includes("superuser");
+  const decided = request.status === "approved" || request.status === "declined";
 
   const decide = useMutation({
     mutationFn: (input: { stage: StageKey; decision: "approved" | "changes_requested" | "declined" }) =>
@@ -109,6 +121,9 @@ function ReviewCard({ request, roles }: { request: FundraiserRequest; roles: str
             <p className="mt-1 text-xs text-muted-foreground">
               {formatEventDate(request.event_date)} · {request.event_type === "virtual" ? "Virtual" : "In person"}
               {request.location ? ` · ${request.location}` : ""} · Submitted by {request.submitter_name || request.submitter_email || "colleague"}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Captain: {request.captain_name || request.captain_email || "not assigned"}
             </p>
           </div>
           <StatusBadge status={request.status} />
@@ -211,7 +226,65 @@ function ReviewCard({ request, roles }: { request: FundraiserRequest; roles: str
               : "Waiting on another reviewer."}
           </p>
         )}
+
+        {canReassign && !decided && <ReassignCaptain request={request} />}
       </CardContent>
     </Card>
+  );
+}
+
+/** Admins and super users can move a pending request to a different captain. */
+function ReassignCaptain({ request }: { request: FundraiserRequest }) {
+  const qc = useQueryClient();
+  const [choice, setChoice] = useState("");
+  const { data: captains = [] } = useQuery<CaptainOption[]>({
+    queryKey: ["captain-options"],
+    queryFn: () => listCaptainOptions(),
+  });
+
+  const reassign = useMutation({
+    mutationFn: (captainId: string) =>
+      reassignRequestCaptain({ data: { id: request.id, captain_id: captainId } }),
+    onSuccess: () => {
+      toast.success("Moved to the new captain — they've been emailed.");
+      setChoice("");
+      qc.invalidateQueries({ queryKey: ["review-requests"] });
+      qc.invalidateQueries({ queryKey: ["approval-trail", request.id] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <div className="space-y-2 rounded-lg border bg-muted/40 p-3">
+      <p className="text-sm font-medium">Reassign captain</p>
+      <p className="text-xs text-muted-foreground">
+        Use this if the assigned captain is on vacation or leave. Later stages and decisions already
+        made stay exactly as they are.
+      </p>
+      <div className="flex flex-wrap items-center gap-2">
+        <Select value={choice} onValueChange={setChoice}>
+          <SelectTrigger className="w-full sm:w-80">
+            <SelectValue placeholder="Choose a different captain" />
+          </SelectTrigger>
+          <SelectContent>
+            {captains
+              .filter((c) => c.user_id !== request.captain_id)
+              .map((c) => (
+                <SelectItem key={c.user_id} value={c.user_id}>
+                  {c.full_name ? `${c.full_name} — ${c.email}` : c.email}
+                </SelectItem>
+              ))}
+          </SelectContent>
+        </Select>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={!choice || reassign.isPending}
+          onClick={() => reassign.mutate(choice)}
+        >
+          {reassign.isPending ? "Moving…" : "Reassign"}
+        </Button>
+      </div>
+    </div>
   );
 }

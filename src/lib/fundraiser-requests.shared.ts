@@ -30,10 +30,13 @@ export interface FundraiserRequest {
   cochair_status: StageStatus;
   event_id: string | null;
   submitted_by: string;
+  captain_id: string | null;
   created_at: string;
   updated_at: string;
   submitter_email?: string | null;
   submitter_name?: string | null;
+  captain_name?: string | null;
+  captain_email?: string | null;
 }
 
 export interface ApprovalEntry {
@@ -47,7 +50,7 @@ export interface ApprovalEntry {
 }
 
 export const REQUEST_COLUMNS =
-  "id, title, description, event_type, event_date, start_time, end_time, location, expected_attendance, fundraising_method, contact_name, contact_email, contact_phone, flier_path, flier_name, status, captain_status, legal_status, risk_status, compliance_status, marketing_status, cochair_status, event_id, submitted_by, created_at, updated_at";
+  "id, title, description, event_type, event_date, start_time, end_time, location, expected_attendance, fundraising_method, contact_name, contact_email, contact_phone, flier_path, flier_name, status, captain_status, legal_status, risk_status, compliance_status, marketing_status, cochair_status, event_id, submitted_by, captain_id, created_at, updated_at";
 
 export const STAGES: { key: StageKey; label: string; role: string; tier: 1 | 2 | 3 }[] = [
   { key: "captain", label: "Peloton Captain", role: "captain", tier: 1 },
@@ -93,14 +96,28 @@ export function needsSubmitterAttention(r: FundraiserRequest) {
   return r.status === "declined" || r.status === "changes_requested";
 }
 
-export function canActOnStage(roles: string[], stage: StageKey) {
+/**
+ * Can this person act on the stage? Admins and super users always can. The
+ * captain stage is limited to the captain the submitter picked (when one is
+ * recorded), so other captains don't see requests that aren't theirs.
+ */
+export function canActOnStage(
+  roles: string[],
+  stage: StageKey,
+  ctx?: { request?: FundraiserRequest; userId?: string | null },
+) {
   if (roles.includes("admin") || roles.includes("superuser")) return true;
   const meta = STAGES.find((s) => s.key === stage)!;
-  return roles.includes(meta.role);
+  if (!roles.includes(meta.role)) return false;
+  if (stage === "captain" && ctx?.request?.captain_id) {
+    return ctx.request.captain_id === ctx.userId;
+  }
+  return true;
 }
 
 export const requestInputSchema = z.object({
   id: z.string().uuid().optional(),
+  captain_id: z.string().uuid({ message: "Choose the captain who should approve this" }),
   title: z.string().trim().min(3).max(140),
   description: z.string().trim().min(10).max(4000),
   event_type: z.enum(["in_person", "virtual"]),
@@ -200,7 +217,12 @@ export function trackerPhases(r: FundraiserRequest): {
 
   const phases: TrackerPhase[] = [
     { key: "submitted", label: "Submitted", detail: new Date(r.created_at).toLocaleDateString(), state: "done" },
-    { key: "captain", label: "Peloton Captain", state: captainState },
+    {
+      key: "captain",
+      label: "Peloton Captain",
+      detail: r.captain_name || r.captain_email || undefined,
+      state: captainState,
+    },
     {
       key: "departments",
       label: "Department review",
