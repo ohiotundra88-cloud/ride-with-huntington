@@ -30,10 +30,13 @@ export interface FundraiserRequest {
   cochair_status: StageStatus;
   event_id: string | null;
   submitted_by: string;
+  captain_id: string | null;
   created_at: string;
   updated_at: string;
   submitter_email?: string | null;
   submitter_name?: string | null;
+  captain_name?: string | null;
+  captain_email?: string | null;
 }
 
 export interface ApprovalEntry {
@@ -47,7 +50,7 @@ export interface ApprovalEntry {
 }
 
 export const REQUEST_COLUMNS =
-  "id, title, description, event_type, event_date, start_time, end_time, location, expected_attendance, fundraising_method, contact_name, contact_email, contact_phone, flier_path, flier_name, status, captain_status, legal_status, risk_status, compliance_status, marketing_status, cochair_status, event_id, submitted_by, created_at, updated_at";
+  "id, title, description, event_type, event_date, start_time, end_time, location, expected_attendance, fundraising_method, contact_name, contact_email, contact_phone, flier_path, flier_name, status, captain_status, legal_status, risk_status, compliance_status, marketing_status, cochair_status, event_id, submitted_by, captain_id, created_at, updated_at";
 
 export const STAGES: { key: StageKey; label: string; role: string; tier: 1 | 2 | 3 }[] = [
   { key: "captain", label: "Peloton Captain", role: "captain", tier: 1 },
