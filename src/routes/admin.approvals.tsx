@@ -11,7 +11,10 @@ import { toast } from "sonner";
 import { Paperclip, ShieldCheck, History } from "lucide-react";
 import {
   listReviewRequests, decideOnRequest, getMyReviewRoles, listRequestApprovals, getRequestFlier,
+  listCaptainOptions, reassignRequestCaptain, type CaptainOption,
 } from "@/lib/fundraiser-requests.functions";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useStore } from "@/lib/store";
 import {
   STAGES, actionableStages, canActOnStage, statusLabel,
   type ApprovalEntry, type FundraiserRequest, type StageKey,
