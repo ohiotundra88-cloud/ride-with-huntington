@@ -19,6 +19,7 @@ import {
   startSignIn,
 } from "@/lib/activation.functions";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { isHuntingtonEmail } from "@/lib/huntington-email";
 
 export const Route = createFileRoute("/signin")({
   head: () => ({
@@ -30,7 +31,6 @@ export const Route = createFileRoute("/signin")({
   component: SignIn,
 });
 
-const HUNTINGTON_DOMAINS = ["huntington.com"];
 const MIN_PASSWORD = 10;
 
 type Step = "email" | "password" | "code" | "choose";
@@ -64,10 +64,7 @@ function SignIn() {
 
   const cleanEmail = () => email.trim().toLowerCase();
 
-  const validDomain = (e: string) => {
-    const parts = e.trim().toLowerCase().split("@");
-    return parts.length === 2 && HUNTINGTON_DOMAINS.includes(parts[1]);
-  };
+  const validDomain = isHuntingtonEmail;
 
   const clearGuestCache = () => {
     try { localStorage.removeItem("hh_reg_v2"); } catch { /* noop */ }

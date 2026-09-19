@@ -2,14 +2,14 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
-const HUNTINGTON_DOMAIN = "huntington.com";
+import { isHuntingtonEmail, requireConfirmedHuntingtonUser } from "@/lib/huntington-email";
 
 const MAX_FAILURES = 6;
 const LOCK_MINUTES = 15;
 
 function normalizeEmail(email: string) {
   const clean = email.trim().toLowerCase();
-  if (!clean.endsWith(`@${HUNTINGTON_DOMAIN}`)) {
+  if (!isHuntingtonEmail(clean)) {
     throw new Error("Only @huntington.com addresses are accepted.");
   }
   return clean;
@@ -171,14 +171,10 @@ export const completeActivation = createServerFn({ method: "POST" })
 
     const { data: authUser, error: authErr } = await supabaseAdmin.auth.admin.getUserById(userId);
     if (authErr) throw new Error(authErr.message);
-    const email = (authUser.user?.email ?? "").toLowerCase();
-    if (!email.endsWith(`@${HUNTINGTON_DOMAIN}`)) {
-      throw new Error("Only @huntington.com addresses are accepted.");
-    }
+    const email = requireConfirmedHuntingtonUser(authUser.user);
 
     const { error: pwErr } = await supabaseAdmin.auth.admin.updateUserById(userId, {
       password: data.password,
-      email_confirm: true,
     });
     if (pwErr) throw new Error(pwErr.message);
 
@@ -205,14 +201,10 @@ export const setMyPassword = createServerFn({ method: "POST" })
 
     const { data: authUser, error: authErr } = await supabaseAdmin.auth.admin.getUserById(userId);
     if (authErr) throw new Error(authErr.message);
-    const email = (authUser.user?.email ?? "").toLowerCase();
-    if (!email.endsWith(`@${HUNTINGTON_DOMAIN}`)) {
-      throw new Error("Only @huntington.com addresses are accepted.");
-    }
+    const email = requireConfirmedHuntingtonUser(authUser.user);
 
     const { error: pwErr } = await supabaseAdmin.auth.admin.updateUserById(userId, {
       password: data.password,
-      email_confirm: true,
     });
     if (pwErr) throw new Error(pwErr.message);
 
