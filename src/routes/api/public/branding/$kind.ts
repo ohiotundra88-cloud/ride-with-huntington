@@ -7,7 +7,12 @@ export const Route = createFileRoute("/api/public/branding/$kind")({
         const kind = params.kind;
         if (kind !== "hero" && kind !== "logo") return new Response("Not found", { status: 404 });
 
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        let supabaseAdmin;
+        try {
+          ({ supabaseAdmin } = await import("@/integrations/supabase/client.server"));
+        } catch {
+          return new Response("Not found", { status: 404 });
+        }
         const { data: row, error } = await supabaseAdmin
           .from("site_branding")
           .select("hero_path, hero_content_type, logo_path, logo_content_type")
