@@ -1756,6 +1756,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      before_huntington_user_created: { Args: { event: Json }; Returns: Json }
       can_archive_vendors: { Args: { _user_id: string }; Returns: boolean }
       can_manage_events: { Args: { _user_id: string }; Returns: boolean }
       can_manage_team_events: { Args: { _user_id: string }; Returns: boolean }
