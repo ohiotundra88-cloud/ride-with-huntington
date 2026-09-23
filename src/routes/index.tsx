@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { queryOptions } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
+import { getMyProfilePhoto } from "@/lib/profile-photo.functions";
+import { avatarUrl } from "@/lib/profile-photo.shared";
 import type { CSSProperties, ReactNode } from "react";
 
 import { ArrowRight, Plane, Bike, Shirt, CheckCircle2, LifeBuoy, FileText, ClipboardCheck, HelpCircle, Calendar, User, Target, BarChart3 } from "lucide-react";
@@ -248,6 +250,28 @@ function VisitCounter() {
 
 
 
+function HeroAvatar() {
+  const photo = useQuery({
+    queryKey: ["my-profile-photo"],
+    queryFn: () => getMyProfilePhoto(),
+    retry: false,
+  });
+  if (photo.data?.hasPhoto && photo.data.userId) {
+    return (
+      <img
+        src={avatarUrl(photo.data.userId, photo.data.version)}
+        alt="Your profile photo"
+        className="h-11 w-11 rounded-full object-cover ring-1 ring-white/30 shrink-0"
+      />
+    );
+  }
+  return (
+    <div className="grid h-11 w-11 place-items-center rounded-full bg-[var(--brand)] text-[var(--brand-foreground)] shrink-0">
+      <User className="h-5 w-5" />
+    </div>
+  );
+}
+
 function SignedInHero() {
   const { user, incompleteStep } = useStore();
   // Same number the dashboard ring shows, so the two can never disagree.
@@ -298,9 +322,8 @@ function SignedInHero() {
           <Card className="w-full lg:w-80 bg-white/10 border-white/10 text-white backdrop-blur">
             <CardContent className="p-5">
               <div className="flex items-center gap-3">
-                <div className="grid h-11 w-11 place-items-center rounded-full bg-[var(--brand)] text-[var(--brand-foreground)] shrink-0">
-                  <User className="h-5 w-5" />
-                </div>
+                <HeroAvatar />
+
                 <div>
                   <p className="text-sm font-semibold">{user.name}</p>
                   <p className="text-xs text-white/70">{user.email}</p>
