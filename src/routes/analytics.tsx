@@ -122,10 +122,17 @@ function AnalyticsPage() {
         </div>
         <div className="flex items-center gap-2">
           <Tabs value={filter} onValueChange={(v) => setFilter(v as RoleFilter)}>
+            {/* A filter switch with no tab panels, so no aria-controls. */}
             <TabsList>
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="riders">Riders</TabsTrigger>
-              <TabsTrigger value="volunteers">Volunteers</TabsTrigger>
+              <TabsTrigger value="all" aria-controls={undefined}>
+                All
+              </TabsTrigger>
+              <TabsTrigger value="riders" aria-controls={undefined}>
+                Riders
+              </TabsTrigger>
+              <TabsTrigger value="volunteers" aria-controls={undefined}>
+                Volunteers
+              </TabsTrigger>
             </TabsList>
           </Tabs>
           <Button asChild variant="outline">

@@ -138,9 +138,14 @@ function PackingPage() {
           </p>
         </div>
         <Tabs value={preset} onValueChange={(v) => setPreset(v as "rider" | "volunteer")}>
+          {/* A filter switch with no tab panels, so no aria-controls. */}
           <TabsList>
-            <TabsTrigger value="rider">Rider</TabsTrigger>
-            <TabsTrigger value="volunteer">Volunteer</TabsTrigger>
+            <TabsTrigger value="rider" aria-controls={undefined}>
+              Rider
+            </TabsTrigger>
+            <TabsTrigger value="volunteer" aria-controls={undefined}>
+              Volunteer
+            </TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
