@@ -15,7 +15,6 @@ import {
   Plus,
   Save,
   Send,
-  Sparkles,
   Trash2,
   Upload,
   Users,
@@ -44,7 +43,6 @@ import {
   removeFundraiserFlier,
   saveFundraiserPage,
   deleteFundraiserPage,
-  seedFundraiserDemoSupporters,
   setFundraiserPublicVisibility,
   setFundraiserStatus,
   submitFundraiserForApproval,
@@ -209,15 +207,6 @@ function ManageFundraiser() {
       invalidate();
     },
     onError: (e: any) => toast.error(e?.message ?? "Couldn't run the drawing."),
-  });
-
-  const seed = useMutation({
-    mutationFn: () => seedFundraiserDemoSupporters({ data: { id, count: 8 } }),
-    onSuccess: () => {
-      toast.success("Demo supporters added");
-      invalidate();
-    },
-    onError: (e: any) => toast.error(e?.message ?? "Couldn't add demo supporters."),
   });
 
   if (isPending || !form) {
@@ -686,11 +675,6 @@ function ManageFundraiser() {
               )}
               Save changes
             </Button>
-            {f.status === "live" && (
-              <Button variant="outline" onClick={() => seed.mutate()} disabled={seed.isPending}>
-                <Sparkles className="mr-1.5 h-4 w-4" /> Add demo supporters
-              </Button>
-            )}
           </div>
         </TabsContent>
 

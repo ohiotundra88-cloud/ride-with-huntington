@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useAdmin, type ConciergeIntent } from "@/lib/admin-store";
+import { useAdmin } from "@/lib/admin-store";
+import { type ConciergeIntent } from "@/lib/admin-content";
 
 interface ChatMsg {
   id: string;
@@ -38,7 +39,7 @@ export function Concierge({
     {
       id: "welcome",
       role: "assistant",
-      text: "Hi — I'm the Team Huntington Demo Concierge. Ask me about parking, packet pickup, the Team tent, expenses, or anything Ride Weekend. This is a demonstration and not a live AI service.",
+      text: "Hi, I'm the Team Huntington Concierge. Ask me about packet pickup, parking, packing, expenses or anything Ride Weekend. I match on keywords and I'm not a live AI service.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -83,10 +84,10 @@ export function Concierge({
       <SheetContent side="right" className="w-full sm:max-w-md p-0 flex flex-col">
         <SheetHeader className="border-b bg-[var(--brand-dark)] text-white p-4">
           <SheetTitle className="text-white flex items-center gap-2">
-            <SparkIcon className="h-4 w-4 text-[var(--brand)]" /> Demo Concierge
+            <SparkIcon className="h-4 w-4 text-[var(--brand)]" /> Concierge
           </SheetTitle>
           <SheetDescription className="text-white/70 text-xs">
-            Demonstration only — keyword-matched responses, no live AI. Content is admin-managed.
+            Keyword-matched answers written by the Team Huntington admins. Not a live AI service.
           </SheetDescription>
         </SheetHeader>
 
@@ -182,7 +183,7 @@ export function ConciergeLauncher() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label="Open Demo Concierge"
+        aria-label="Open the Concierge"
         className="fixed bottom-4 right-4 z-40 inline-flex items-center gap-2 rounded-full bg-[var(--brand-dark)] px-4 py-3 text-sm font-semibold text-white shadow-lg ring-1 ring-black/10 hover:bg-[var(--brand-dark)]/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]"
       >
         {open ? <X className="h-4 w-4" /> : <MessageSquare className="h-4 w-4" />}

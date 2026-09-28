@@ -12,8 +12,7 @@ import { supabaseBrowser as supabase } from "@/integrations/supabase/proxy-clien
 import { useQueryClient } from "@tanstack/react-query";
 import { upsertMyParticipant, getMyParticipant } from "@/lib/participants.functions";
 import { ensureMyProfile } from "@/lib/profile.functions";
-import { effectiveStatuses } from "@/lib/registration-progress";
-import { isRiderParticipation } from "@/lib/registration-progress";
+import { effectiveStatuses, registrationCompletion } from "@/lib/registration-progress";
 
 // ============ TYPES ============
 /** "both" is a legacy choice kept readable; new registrations can't pick it. */
@@ -123,26 +122,6 @@ export interface Registration {
   audit: AuditEvent[];
 }
 
-export interface AdminParticipant {
-  id: string;
-  name: string;
-  email: string;
-  role: "Rider" | "Volunteer" | "Both";
-  market: string;
-  segment: string;
-  pelotoniaStatus: StepStatus;
-  travelStatus: StepStatus;
-  bikeStatus: StepStatus;
-  apparelStatus: StepStatus;
-  completion: number;
-  hotelNights: number;
-  arrivalDate: string;
-  bikeRental: boolean;
-  jerseySize?: string;
-  shirtSize?: string;
-  notes: string[];
-}
-
 // ============ DEFAULTS ============
 const emptyReg: Registration = {
   id: null,
@@ -230,86 +209,6 @@ const guestUser: User = {
   userId: null,
 };
 
-// ============ SEED ADMIN DATA (mock table for admin dashboard fallback) ============
-const markets = [
-  "Columbus, OH",
-  "Cleveland, OH",
-  "Cincinnati, OH",
-  "Detroit, MI",
-  "Pittsburgh, PA",
-  "Indianapolis, IN",
-  "Chicago, IL",
-];
-const segments = [
-  "Consumer & Business Banking",
-  "Commercial Banking",
-  "Wealth Management",
-  "Technology",
-  "Risk",
-  "Marketing",
-];
-const roles: AdminParticipant["role"][] = ["Rider", "Volunteer", "Both"];
-const names = [
-  "Jordan Blake",
-  "Sam Rivera",
-  "Taylor Chen",
-  "Morgan Patel",
-  "Casey Kim",
-  "Riley Nguyen",
-  "Avery Johnson",
-  "Quinn O'Brien",
-  "Rowan Diaz",
-  "Skyler Reed",
-  "Drew Sullivan",
-  "Parker Hayes",
-  "Reese Martinez",
-  "Emerson Lee",
-  "Sage Thompson",
-  "Kendall Brooks",
-  "Blair Foster",
-  "Hayden Cole",
-  "Micah Bennett",
-  "Peyton Grant",
-];
-const statuses: StepStatus[] = ["not_started", "pending", "complete"];
-function pick<T>(a: T[], i: number): T {
-  return a[i % a.length];
-}
-function rand(seed: number) {
-  let x = seed;
-  return () => (x = (x * 9301 + 49297) % 233280) / 233280;
-}
-
-export const seedParticipants: AdminParticipant[] = names.map((name, i) => {
-  const r = rand(i + 7);
-  const role = pick(roles, i);
-  const pel = pick(statuses, Math.floor(r() * 3));
-  const trv = pick(statuses, Math.floor(r() * 3));
-  const bk = role === "Volunteer" ? "not_started" : pick(statuses, Math.floor(r() * 3));
-  const ap = pick(statuses, Math.floor(r() * 3));
-  const arr = [pel, trv, bk, ap];
-  const completion = Math.round((arr.filter((s) => s === "complete").length / 4) * 100);
-  return {
-    id: `HH-${1000 + i}`,
-    name,
-    email: name.toLowerCase().replace(/[^a-z]+/g, ".") + "@huntington.com",
-    role,
-    market: pick(markets, i * 3),
-    segment: pick(segments, i * 2),
-    pelotoniaStatus: pel,
-    travelStatus: trv,
-    bikeStatus: bk,
-    apparelStatus: ap,
-    completion,
-    hotelNights: trv === "complete" ? 2 : trv === "pending" ? 1 : 0,
-    arrivalDate: trv !== "not_started" ? "2027-08-07" : "",
-    bikeRental: bk === "complete",
-    jerseySize: role !== "Volunteer" ? pick(["S", "M", "L", "XL", "XXL"], i) : undefined,
-    shirtSize: pick(["S", "M", "L", "XL", "XXL"], i + 1),
-    notes: [],
-  };
-});
-
 // ============ CONTEXT ============
 interface StoreCtx {
   /** False until the Supabase session has been resolved once. */
@@ -318,8 +217,6 @@ interface StoreCtx {
   setUser: (u: Partial<User>) => void;
   registration: Registration;
   setRegistration: (r: Partial<Registration> | ((prev: Registration) => Registration)) => void;
-  participants: AdminParticipant[];
-  addNote: (id: string, note: string) => void;
   reset: () => void;
   completion: number;
   incompleteStep: number;
@@ -354,7 +251,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const [user, setUserState] = useState<User>(guestUser);
   const [registration, setRegState] = useState<Registration>(emptyReg);
-  const [participants, setParticipants] = useState<AdminParticipant[]>(seedParticipants);
   const [hydrated, setHydrated] = useState(false);
   const [authReady, setAuthReady] = useState(false);
   const skipNextPersist = useRef(false);
@@ -580,12 +476,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const setRegistration = (r: Partial<Registration> | ((prev: Registration) => Registration)) =>
     setRegState((prev) => (typeof r === "function" ? r(prev) : { ...prev, ...r }));
 
-  const addNote = (id: string, note: string) => {
-    setParticipants((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, notes: [...p.notes, note] } : p)),
-    );
-  };
-
   const reset = () => {
     setRegState(emptyReg);
   };
@@ -609,23 +499,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
    */
   const effective = useMemo(() => effectiveStatuses(registration), [registration]);
 
-  /**
-   * Percent of the steps that actually apply to this person. Choosing how you
-   * take part is itself a step, and steps that do not apply (a volunteer's bike
-   * step) are excluded from the denominator rather than counted as done.
-   */
-  const completion = useMemo(() => {
-    const isRider = isRiderParticipation(registration.participation);
-    const steps: string[] = [
-      registration.participation ? "complete" : "not_started",
-      effective.pelotonia,
-      effective.travel,
-      effective.apparel,
-    ];
-    if (isRider) steps.push(effective.bike);
-    const done = steps.filter((x) => x === "complete").length;
-    return Math.round((done / steps.length) * 100);
-  }, [effective, registration.participation]);
+  /** Percent of the steps that actually apply to this person. */
+  const completion = useMemo(() => registrationCompletion(registration), [registration]);
 
   const incompleteStep = useMemo(() => {
     if (!registration.participation) return 0;
@@ -645,8 +520,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         saveProfile,
         registration,
         setRegistration,
-        participants,
-        addNote,
         reset,
         completion,
         incompleteStep,

@@ -6,7 +6,8 @@ import { AdminShell } from "@/components/AdminShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useAdmin, announcementIsActive, formatCurrencyUSD } from "@/lib/admin-store";
+import { useAdmin } from "@/lib/admin-store";
+import { announcementIsActive, formatCurrencyUSD } from "@/lib/admin-content";
 import {
   Plus,
   Megaphone,
@@ -32,7 +33,7 @@ export const Route = createFileRoute("/admin/")({
       { title: "Super User — Team Huntington Hub" },
       {
         name: "description",
-        content: "Super User administration dashboard for Team Huntington Hub demo.",
+        content: "Super User administration dashboard for the Team Huntington Hub.",
       },
     ],
   }),
@@ -47,8 +48,8 @@ function SuperUserDashboard() {
     queryFn: () => fetchLive(),
     staleTime: 5 * 60 * 1000,
   });
-  const goalCurrent = live?.raised ?? state.team.goalCurrent;
-  const goalTarget = live?.goal || state.team.goalTarget;
+  const goalCurrent = live?.raised ?? 0;
+  const goalTarget = live?.goal ?? 0;
 
   const activeAnnouncements = state.announcements.filter(announcementIsActive);
   const drafts = [
@@ -126,8 +127,9 @@ function SuperUserDashboard() {
 
   return (
     <AdminShell
+      browserOnly
       title="Super User dashboard"
-      description="Centralized control for Team Huntington Hub content, goals, notifications, and configuration. Every change here applies to everyone and is recorded in the audit log."
+      description="Centralized control for Team Huntington Hub content, goals, notifications, and configuration. Changes are recorded in the audit log."
     >
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Active announcements" value={activeAnnouncements.length} />
@@ -135,8 +137,12 @@ function SuperUserDashboard() {
         <StatCard label="Draft items" value={drafts.length} />
         <StatCard
           label="Team goal"
-          value={`${formatCurrencyUSD(goalCurrent)} / ${formatCurrencyUSD(goalTarget)}`}
-          sub={`${teamPct}% of goal${live ? " · live" : ""}`}
+          value={
+            live
+              ? `${formatCurrencyUSD(goalCurrent)} / ${formatCurrencyUSD(goalTarget)}`
+              : "Unavailable"
+          }
+          sub={live ? `${teamPct}% of goal · live` : "Live total unavailable right now"}
         />
       </div>
 

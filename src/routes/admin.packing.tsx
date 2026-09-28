@@ -33,7 +33,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { useAdmin, type PackingDefault } from "@/lib/admin-store";
+import { useAdmin } from "@/lib/admin-store";
+import { type PackingDefault } from "@/lib/admin-content";
 import { Plus, Pencil, Trash2, RotateCcw, ArrowUp, ArrowDown } from "lucide-react";
 import { toast } from "sonner";
 
@@ -47,7 +48,7 @@ export const Route = createFileRoute("/admin/packing")({
   component: PackingAdmin,
 });
 
-const blank = (preset: "rider" | "volunteer"): PackingDefault => ({
+const blank = (preset: "rider" | "volunteer", editor: string): PackingDefault => ({
   id: `p-${crypto.randomUUID().slice(0, 8)}`,
   label: "",
   category: "",
@@ -57,7 +58,7 @@ const blank = (preset: "rider" | "volunteer"): PackingDefault => ({
   order: 999,
   active: true,
   updatedAt: new Date().toISOString(),
-  updatedBy: "Demo Admin",
+  updatedBy: editor,
 });
 
 function PackingAdmin() {
@@ -185,6 +186,7 @@ function PackingAdmin() {
 
   return (
     <AdminShell
+      browserOnly
       title="Default packing lists"
       description="Rider and volunteer starter items. Participants can add their own on top."
       actions={
@@ -201,7 +203,7 @@ function PackingAdmin() {
           </Button>
           <Button
             onClick={() => {
-              setEditing(blank(tab));
+              setEditing(blank(tab, state.superUser.currentEditor));
               setIsNew(true);
             }}
             className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90"

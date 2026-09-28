@@ -14,7 +14,8 @@ import {
   DollarSign,
   RefreshCw,
 } from "lucide-react";
-import { useAdmin, formatCurrencyUSD } from "@/lib/admin-store";
+import { useAdmin } from "@/lib/admin-store";
+import { formatCurrencyUSD } from "@/lib/admin-content";
 import { ApiManagedField } from "@/components/ApiManagedField";
 import { getPelotoniaTeamData } from "@/lib/pelotonia.functions";
 
@@ -39,7 +40,7 @@ export const Route = createFileRoute("/team")({
 
 function TeamHub() {
   const { state } = useAdmin();
-  const { team, flags } = state;
+  const { flags } = state;
   const fetchLive = useServerFn(getPelotoniaTeamData);
   const {
     data: live,
@@ -53,9 +54,10 @@ function TeamHub() {
     refetchInterval: 15 * 60 * 1000,
   });
 
-  const raised = live?.raised ?? team.goalCurrent;
-  const goal = live?.goal || team.goalTarget;
+  const raised = live?.raised ?? 0;
+  const goal = live?.goal ?? 0;
   const pct = goal > 0 ? Math.round((raised / goal) * 100) : 0;
+  const unavailable = !live && !isLoading;
 
   // Pelotonia's public data doesn't break out every count; show only what it has.
   const metric = (id: string, label: string, value: number | null) =>
@@ -94,7 +96,7 @@ function TeamHub() {
         </p>
         <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-white/70">
           <Badge className="bg-[var(--brand)] text-[var(--brand-foreground)]">
-            {live ? "Live data" : isLoading ? "Loading…" : "Cached sample data"}
+            {live ? "Live data" : isLoading ? "Loading…" : "Live data unavailable"}
           </Badge>
           {updatedLabel && <span>Source updated {updatedLabel}</span>}
           <Button
@@ -109,9 +111,17 @@ function TeamHub() {
         </div>
       </div>
 
-      {flags.teamMetrics && (
+      {unavailable && (
+        <Card className="mt-6">
+          <CardContent className="p-5 text-sm text-muted-foreground">
+            Live team figures from Pelotonia are unavailable right now. Use Refresh to try again.
+          </CardContent>
+        </Card>
+      )}
+
+      {flags.teamMetrics && liveMetrics && liveMetrics.length > 0 && (
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {(liveMetrics ?? team.metrics).map((m) => (
+          {liveMetrics.map((m) => (
             <Card key={m.id}>
               <CardContent className="p-5">
                 <p className="text-xs text-muted-foreground">{m.label}</p>
@@ -129,7 +139,7 @@ function TeamHub() {
         </div>
       )}
 
-      {flags.fundraisingProgress && (
+      {flags.fundraisingProgress && live && (
         <Card className="mt-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -140,6 +150,7 @@ function TeamHub() {
             <ApiManagedField
               fieldKey="team.goal.current"
               label="Cumulative team raised"
+              updatedAt={live.lastUpdated}
               value={
                 <div className="flex flex-wrap items-end justify-between gap-3">
                   <div>
@@ -151,19 +162,17 @@ function TeamHub() {
                       </span>
                     </p>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      {live
-                        ? [
-                            live.donationsCount !== null &&
-                              `${live.donationsCount.toLocaleString()} donations`,
-                            live.kidsRaised !== null &&
-                              `incl. ${formatCurrencyUSD(live.kidsRaised)} Pelotonia Kids`,
-                            live.totalCommitted !== null &&
-                              `${formatCurrencyUSD(live.totalCommitted)} committed`,
-                            `${formatCurrencyUSD(live.allTimeRaised)} all-time`,
-                          ]
-                            .filter(Boolean)
-                            .join(" · ")
-                        : "Sample data — live totals unavailable right now."}
+                      {[
+                        live.donationsCount !== null &&
+                          `${live.donationsCount.toLocaleString()} donations`,
+                        live.kidsRaised !== null &&
+                          `incl. ${formatCurrencyUSD(live.kidsRaised)} Pelotonia Kids`,
+                        live.totalCommitted !== null &&
+                          `${formatCurrencyUSD(live.totalCommitted)} committed`,
+                        `${formatCurrencyUSD(live.allTimeRaised)} all-time`,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
                     </p>
                   </div>
                   <div className="text-right">
@@ -242,18 +251,11 @@ function TeamHub() {
                     <p className="text-sm font-bold tabular-nums">{formatCurrencyUSD(d.amount)}</p>
                   </div>
                 ))
-              : team.activity.map((a) => (
-                  <div key={a.id} className="flex gap-3 rounded-lg border p-3">
-                    <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[var(--brand)]" />
-                    <div className="flex-1">
-                      <p className="text-sm font-semibold text-[var(--brand-dark)]">{a.title}</p>
-                      <p className="text-sm text-muted-foreground">{a.body}</p>
-                      <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">
-                        {a.time} · sample
-                      </p>
-                    </div>
-                  </div>
-                ))}
+              : !isLoading && (
+                  <p className="text-sm text-muted-foreground">
+                    No recent team activity to show yet.
+                  </p>
+                )}
           </CardContent>
         </Card>
 

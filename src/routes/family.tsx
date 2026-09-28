@@ -91,52 +91,6 @@ function FamilyGuide() {
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Ride Day venue map (demo)</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="relative aspect-[16/8] w-full overflow-hidden rounded-lg border bg-gradient-to-br from-[var(--brand)]/10 via-muted to-[var(--brand-dark)]/10">
-            <svg viewBox="0 0 800 400" className="absolute inset-0 h-full w-full">
-              <path
-                d="M40 320 C 180 260, 260 340, 400 260 S 640 220, 760 300"
-                fill="none"
-                stroke="var(--brand-dark)"
-                strokeWidth="6"
-                strokeDasharray="6 6"
-                opacity="0.7"
-              />
-              <g fontFamily="Inter,system-ui" fontSize="12" fill="oklch(0.24 0.04 170)">
-                <circle cx="80" cy="310" r="10" fill="var(--brand)" />
-                <text x="98" y="313">
-                  Staging · McFerson
-                </text>
-                <circle cx="260" cy="290" r="8" fill="var(--brand-dark)" />
-                <text x="276" y="293">
-                  Mile 12 · Family cheer zone
-                </text>
-                <circle cx="450" cy="255" r="8" fill="var(--brand-dark)" />
-                <text x="466" y="258">
-                  Mile 34 · Pickerington
-                </text>
-                <circle cx="620" cy="240" r="8" fill="var(--brand-dark)" />
-                <text x="636" y="243">
-                  Mile 68 · Granville
-                </text>
-                <rect x="720" y="285" width="20" height="20" fill="var(--brand)" />
-                <text x="700" y="322">
-                  Finish · Hilton Columbus
-                </text>
-                <text x="40" y="40" fontWeight="700" fontSize="14">
-                  Route overview (illustrative)
-                </text>
-              </g>
-            </svg>
-          </div>
-          <p className="mt-2 text-xs text-muted-foreground">Illustrative diagram — not to scale.</p>
-        </CardContent>
-      </Card>
-
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {sections.map((s) => (
           <Card key={s.id} id={s.id} className="scroll-mt-20">
@@ -163,6 +117,11 @@ function FamilyGuide() {
           <CardTitle>Ride Weekend schedule</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-3">
+          {schedule.length === 0 && (
+            <p className="text-sm text-muted-foreground sm:col-span-3">
+              The Ride Weekend schedule will be posted here once it's announced.
+            </p>
+          )}
           {schedule.map((s) => (
             <div key={s.id}>
               <p className="text-xs font-bold uppercase tracking-wider text-[var(--brand-dark)]/70">

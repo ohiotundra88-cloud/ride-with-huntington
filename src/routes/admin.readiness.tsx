@@ -33,12 +33,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  useAdmin,
-  readinessScore,
-  type EditableReadinessItem,
-  type Audience,
-} from "@/lib/admin-store";
+import { useAdmin } from "@/lib/admin-store";
+import { readinessScore, type EditableReadinessItem, type Audience } from "@/lib/admin-content";
 import { iconOptions } from "@/components/AdminIcon";
 import { Plus, Pencil, Trash2, RotateCcw, Scale } from "lucide-react";
 import { toast } from "sonner";
@@ -53,7 +49,7 @@ export const Route = createFileRoute("/admin/readiness")({
   component: ReadinessAdmin,
 });
 
-const blank = (): EditableReadinessItem => ({
+const blank = (editor: string): EditableReadinessItem => ({
   id: `r-${crypto.randomUUID().slice(0, 8)}`,
   title: "",
   status: "action_needed",
@@ -67,12 +63,11 @@ const blank = (): EditableReadinessItem => ({
   active: true,
   publish: "draft",
   updatedAt: new Date().toISOString(),
-  updatedBy: "Demo Admin",
+  updatedBy: editor,
 });
 
+/** Readiness steps whose values come from an integration rather than admins. */
 const API_KEYS: Record<string, string> = {
-  pelotonia: "readiness.pelotonia.status",
-  hotel: "readiness.hotel.status",
   fundraising: "readiness.fundraising.current",
 };
 
@@ -153,6 +148,7 @@ function ReadinessAdmin() {
 
   return (
     <AdminShell
+      browserOnly
       title="Readiness scoring"
       description="Weighted items drive the dashboard readiness ring. Weights must sum to a value > 0 for scoring to work."
       actions={
@@ -172,7 +168,7 @@ function ReadinessAdmin() {
           </Button>
           <Button
             onClick={() => {
-              setEditing(blank());
+              setEditing(blank(state.superUser.currentEditor));
               setIsNew(true);
             }}
             className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90"
@@ -185,7 +181,7 @@ function ReadinessAdmin() {
       <Card className="mb-4">
         <CardContent className="p-4 flex flex-wrap items-center gap-6">
           <div>
-            <p className="text-xs uppercase text-muted-foreground">Sample score</p>
+            <p className="text-xs uppercase text-muted-foreground">Score at default statuses</p>
             <p className="text-3xl font-black text-[var(--brand-dark)]">{score}%</p>
           </div>
           <div>

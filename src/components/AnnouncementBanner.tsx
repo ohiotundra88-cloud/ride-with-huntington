@@ -1,7 +1,8 @@
 import { useMemo, useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { X, Megaphone } from "lucide-react";
-import { useAdmin, announcementIsActive, type Audience } from "@/lib/admin-store";
+import { useAdmin } from "@/lib/admin-store";
+import { announcementIsActive, type Audience } from "@/lib/admin-content";
 import { useStore } from "@/lib/store";
 import { AdminIcon } from "@/components/AdminIcon";
 import { Button } from "@/components/ui/button";

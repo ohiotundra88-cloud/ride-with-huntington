@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, CheckCircle2, ExternalLink, Printer, FileText } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Printer, FileText } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -25,15 +25,15 @@ export const Route = createFileRoute("/expenses")({
 const sections = [
   {
     title: "Before You Start",
-    body: "Gather receipts (PDF/photo). Confirm your cost center: Team Huntington Pelotonia. Note your Pelotonia registration ID.",
+    body: "Gather receipts (PDF or photo). Confirm your cost center with your manager or Team Huntington lead. Note your Pelotonia registration ID.",
   },
   {
     title: "Open Concur Expense",
-    body: "Log into Concur → New Expense Report. Select the 'Pelotonia — Team Huntington' policy template.",
+    body: "Log into Concur and start a new expense report using the policy your manager or Team Huntington lead tells you to use.",
   },
   {
     title: "Create Report",
-    body: "Name the report 'Pelotonia 2027 — [Your Last Name]'. Set the date range to your travel window.",
+    body: "Give the report a clear name, such as 'Pelotonia Ride Weekend' and your last name. Set the date range to your travel window.",
   },
   {
     title: "Select Expense Type",
@@ -41,11 +41,11 @@ const sections = [
   },
   {
     title: "Enter Cost Center",
-    body: "Use cost center 'HH-PELO-2027'. Enter your business segment as the sub-allocation.",
+    body: "Enter the cost center you confirmed before you started.",
   },
   {
     title: "Attach Receipts",
-    body: "All expenses over $25 require an itemized receipt. Combine multi-page receipts into a single PDF where possible.",
+    body: "Attach itemized receipts as Huntington's expense policy requires. Combine multi-page receipts into a single PDF where possible.",
   },
   {
     title: "Add Business Purpose",
@@ -53,11 +53,11 @@ const sections = [
   },
   {
     title: "Submit for Approval",
-    body: "Route to your direct manager. Copy pelotonia@huntington.com for coordination visibility.",
+    body: "Submit the report to your direct manager for approval.",
   },
   {
     title: "Track Status",
-    body: "Monitor status in Concur → Report Library. Approvals typically complete in 5-7 business days.",
+    body: "Track the report's status in Concur until it's approved.",
   },
 ];
 
@@ -75,13 +75,6 @@ function Expenses() {
       </p>
 
       <div className="mt-6 flex flex-wrap gap-2">
-        <Button
-          className="bg-[var(--brand-dark)] hover:bg-[var(--brand-dark)]/90 text-white"
-          onClick={() => window.open("about:blank", "_blank")}
-        >
-          <ExternalLink className="mr-1 h-4 w-4" /> Open Concur Expense{" "}
-          <span className="ml-1 text-xs opacity-70">(demo)</span>
-        </Button>
         <Button variant="outline" onClick={() => window.print()}>
           <Printer className="mr-1 h-4 w-4" /> Printable checklist
         </Button>
@@ -120,7 +113,7 @@ function Expenses() {
             <FileText className="h-5 w-5 text-[var(--brand-dark)]" />
             <h4 className="mt-2 font-bold text-[var(--brand-dark)]">Receipt rules</h4>
             <ul className="mt-2 text-xs list-disc pl-4 space-y-1">
-              <li>Required for all items {">"} $25</li>
+              <li>Required as set by Huntington expense policy</li>
               <li>Itemized (not just totals)</li>
               <li>PDF or clear photo</li>
             </ul>
@@ -131,8 +124,8 @@ function Expenses() {
             <CheckCircle2 className="h-5 w-5 text-[var(--brand-dark)]" />
             <h4 className="mt-2 font-bold text-[var(--brand-dark)]">Deadlines</h4>
             <ul className="mt-2 text-xs list-disc pl-4 space-y-1">
-              <li>Submit within 30 days of return</li>
-              <li>Fiscal year cutoff: Dec 15</li>
+              <li>Submit promptly after you return</li>
+              <li>Check Huntington expense policy for submission deadlines</li>
             </ul>
           </CardContent>
         </Card>

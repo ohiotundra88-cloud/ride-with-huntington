@@ -1,9 +1,13 @@
-import { isRiderParticipation } from "@/lib/registration-progress";
+import {
+  effectiveStatuses,
+  isRiderParticipation,
+  needsTravelAndApparel,
+} from "@/lib/registration-progress";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/lib/store";
-import { CheckCircle2, Mail, ArrowRight, Shield } from "lucide-react";
+import { CheckCircle2, ClipboardList, ArrowRight } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
 
 export const Route = createFileRoute("/confirmation")({
@@ -12,7 +16,7 @@ export const Route = createFileRoute("/confirmation")({
       { title: "Confirmation — Team Huntington Hub" },
       {
         name: "description",
-        content: "Team Huntington registration confirmation and mock email preview.",
+        content: "Your Team Huntington registration confirmation and summary.",
       },
     ],
   }),
@@ -20,14 +24,17 @@ export const Route = createFileRoute("/confirmation")({
 });
 
 function Confirmation() {
-  const { user, registration, completion } = useStore();
+  const { registration, completion } = useStore();
+  // Statuses derived from the answers on file, so a stale stored status can't
+  // mark a step done.
+  const status = effectiveStatuses(registration);
+  const isRider = isRiderParticipation(registration.participation);
+  const travelAndApparel = needsTravelAndApparel(registration.participation);
   const outstanding: string[] = [];
-  if (registration.pelotonia.status !== "complete")
-    outstanding.push("Confirm Pelotonia registration");
-  if (registration.travel.status !== "complete") outstanding.push("Complete travel & hotel");
-  if (isRiderParticipation(registration.participation) && registration.bike.status !== "complete")
-    outstanding.push("Finalize bike rental");
-  if (registration.apparel.status !== "complete")
+  if (status.pelotonia !== "complete") outstanding.push("Confirm Pelotonia registration");
+  if (travelAndApparel && status.travel !== "complete") outstanding.push("Complete travel & hotel");
+  if (isRider && status.bike !== "complete") outstanding.push("Finalize bike rental");
+  if (travelAndApparel && status.apparel !== "complete")
     outstanding.push("Confirm apparel & mailing address");
 
   return (
@@ -61,31 +68,12 @@ function Confirmation() {
         </CardContent>
       </Card>
 
-      {/* Mock email */}
       <h2 className="mt-10 text-lg font-bold text-[var(--brand-dark)] flex items-center gap-2">
-        <Mail className="h-4 w-4" /> Confirmation email preview
+        <ClipboardList className="h-4 w-4" /> Registration summary
       </h2>
       <Card className="mt-3">
         <CardContent className="p-6 text-sm">
-          <div className="border-b pb-3 mb-3">
-            <p>
-              <span className="text-muted-foreground">From:</span> Team Huntington
-              &lt;pelotonia@huntington.com&gt;
-            </p>
-            <p>
-              <span className="text-muted-foreground">To:</span> {user.email}
-            </p>
-            <p>
-              <span className="text-muted-foreground">Subject:</span> Your Team Huntington Pelotonia
-              registration
-            </p>
-          </div>
-          <p>Hi {user.name.split(" ")[0]},</p>
-          <p className="mt-3">
-            Thanks for joining Team Huntington for Pelotonia 2027! Here's your snapshot.
-          </p>
-
-          <div className="mt-4 rounded-lg bg-muted/50 p-4 space-y-1">
+          <div className="rounded-lg bg-muted/50 p-4 space-y-1">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Registration ID</span>
               <span className="font-mono font-bold">{registration.id ?? "—"}</span>
@@ -112,20 +100,26 @@ function Confirmation() {
             </div>
             <div className="flex justify-between items-center">
               <span className="text-muted-foreground">Pelotonia</span>
-              <StatusBadge status={registration.pelotonia.status} />
+              <StatusBadge status={status.pelotonia} />
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Travel</span>
-              <StatusBadge status={registration.travel.status} />
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Bike</span>
-              <StatusBadge status={registration.bike.status} />
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Apparel</span>
-              <StatusBadge status={registration.apparel.status} />
-            </div>
+            {travelAndApparel && (
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Travel</span>
+                <StatusBadge status={status.travel} />
+              </div>
+            )}
+            {isRider && (
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Bike</span>
+                <StatusBadge status={status.bike} />
+              </div>
+            )}
+            {travelAndApparel && (
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Apparel</span>
+                <StatusBadge status={status.apparel} />
+              </div>
+            )}
           </div>
 
           {outstanding.length > 0 && (
@@ -138,42 +132,8 @@ function Confirmation() {
               </ul>
             </>
           )}
-
-          <p className="mt-4 text-muted-foreground">
-            Deadlines: Apparel Jul 10 · Travel Jul 22 · Pelotonia Jul 15
-          </p>
-
-          <div className="mt-6 flex items-center gap-3">
-            <Button
-              asChild
-              className="bg-[var(--brand)] text-[var(--brand-foreground)] hover:bg-[var(--brand)]/90"
-            >
-              <Link to="/dashboard">
-                <Shield className="mr-1 h-4 w-4" /> Secure return to Hub
-              </Link>
-            </Button>
-            <span className="text-xs text-muted-foreground">
-              This email updates automatically as you make changes.
-            </span>
-          </div>
         </CardContent>
       </Card>
-
-      {/* README / integrations */}
-      <details className="mt-10 rounded-lg border p-4 text-sm">
-        <summary className="cursor-pointer font-semibold text-[var(--brand-dark)]">
-          Future enterprise integrations
-        </summary>
-        <ul className="mt-3 list-disc pl-5 text-muted-foreground space-y-1">
-          <li>Microsoft Entra ID (SSO)</li>
-          <li>Pelotonia API / deep link registration</li>
-          <li>Concur / ATG travel & expense</li>
-          <li>Unlimited Biking rentals</li>
-          <li>Microsoft email service for confirmations & reminders</li>
-          <li>Approved Huntington colleague database</li>
-          <li>Power BI reporting for admins</li>
-        </ul>
-      </details>
     </div>
   );
 }

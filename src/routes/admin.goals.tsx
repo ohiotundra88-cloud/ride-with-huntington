@@ -36,7 +36,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAdmin, formatGoalValue, type Goal, type GoalUnit } from "@/lib/admin-store";
+import { useAdmin } from "@/lib/admin-store";
+import { formatGoalValue, type Goal, type GoalUnit } from "@/lib/admin-content";
 import { ApiManagedField } from "@/components/ApiManagedField";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -51,7 +52,7 @@ export const Route = createFileRoute("/admin/goals")({
   component: GoalsAdmin,
 });
 
-const blank = (): Goal => ({
+const blank = (editor: string): Goal => ({
   id: `g-${crypto.randomUUID().slice(0, 8)}`,
   name: "",
   current: 0,
@@ -64,10 +65,11 @@ const blank = (): Goal => ({
   visibleToParticipants: true,
   publish: "draft",
   updatedAt: new Date().toISOString(),
-  updatedBy: "Demo Admin",
+  updatedBy: editor,
 });
 
-const API_MANAGED_GOALS = new Set(["g-1"]); // team fundraising synced from Pelotonia CRM
+// Goals whose values mirror the live Pelotonia team dashboard.
+const API_MANAGED_GOALS = new Set(["g-1"]);
 
 function GoalsAdmin() {
   const { state, setState, audit, isApiManaged } = useAdmin();
@@ -105,8 +107,6 @@ function GoalsAdmin() {
       const idx = s.goals.findIndex((g) => g.id === next.id);
       const list =
         idx >= 0 ? s.goals.map((g) => (g.id === next.id ? next : g)) : [...s.goals, next];
-      if (next.id === "g-1")
-        return { ...s, goals: list, team: { ...s.team, goalTarget: next.target } };
       return { ...s, goals: list };
     });
     audit({
@@ -127,12 +127,13 @@ function GoalsAdmin() {
 
   return (
     <AdminShell
+      browserOnly
       title="Goals"
       description="Team, participant, and readiness targets. Some totals are synced from the source API and cannot be edited."
       actions={
         <Button
           onClick={() => {
-            setEditing(blank());
+            setEditing(blank(state.superUser.currentEditor));
             setIsNew(true);
           }}
           className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90"

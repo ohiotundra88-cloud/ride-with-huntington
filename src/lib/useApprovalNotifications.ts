@@ -2,7 +2,8 @@ import { useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useStore } from "@/lib/store";
-import { useAdmin, type EditableNotification } from "@/lib/admin-store";
+import { useAdmin } from "@/lib/admin-store";
+import { type EditableNotification } from "@/lib/admin-content";
 import { listMyRequests } from "@/lib/fundraiser-requests.functions";
 import {
   STAGES,

@@ -33,12 +33,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { useAdmin } from "@/lib/admin-store";
 import {
-  useAdmin,
   type EditableTimelineItem,
   type Audience,
   type FamilyScheduleDay,
-} from "@/lib/admin-store";
+} from "@/lib/admin-content";
 import { Plus, Pencil, Trash2, ArrowUp, ArrowDown, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 
@@ -62,7 +62,7 @@ const phases: EditableTimelineItem["phase"][] = [
   "sunday",
 ];
 
-const blankItem = (): EditableTimelineItem => ({
+const blankItem = (editor: string): EditableTimelineItem => ({
   id: `t-${crypto.randomUUID().slice(0, 8)}`,
   phase: "today",
   title: "",
@@ -72,7 +72,7 @@ const blankItem = (): EditableTimelineItem => ({
   order: 999,
   publish: "draft",
   updatedAt: new Date().toISOString(),
-  updatedBy: "Demo Admin",
+  updatedBy: editor,
 });
 
 function JourneyAdmin() {
@@ -152,6 +152,7 @@ function JourneyAdmin() {
 
   return (
     <AdminShell
+      browserOnly
       title="Journey & Schedule"
       description="Timeline drives the dashboard journey. Schedule drives the family day-by-day view."
       actions={
@@ -177,7 +178,7 @@ function JourneyAdmin() {
           <div className="flex justify-end">
             <Button
               onClick={() => {
-                setEditing(blankItem());
+                setEditing(blankItem(state.superUser.currentEditor));
                 setIsNew(true);
               }}
               className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90"

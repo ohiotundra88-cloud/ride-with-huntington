@@ -33,7 +33,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { useAdmin, type Announcement, type Audience } from "@/lib/admin-store";
+import { useAdmin } from "@/lib/admin-store";
+import { type Announcement, type Audience } from "@/lib/admin-content";
 import { AdminIcon, iconOptions } from "@/components/AdminIcon";
 import { Plus, Pencil, Trash2, Eye, Send, FileText, Pin, Copy } from "lucide-react";
 import { toast } from "sonner";
@@ -48,7 +49,7 @@ export const Route = createFileRoute("/admin/announcements")({
   component: AnnouncementsAdmin,
 });
 
-const blank = (): Announcement => ({
+const blank = (editor: string): Announcement => ({
   id: `a-${crypto.randomUUID().slice(0, 8)}`,
   headline: "",
   body: "",
@@ -62,7 +63,7 @@ const blank = (): Announcement => ({
   dismissible: true,
   publish: "draft",
   updatedAt: new Date().toISOString(),
-  updatedBy: "Demo Admin",
+  updatedBy: editor,
 });
 
 function AnnouncementsAdmin() {
@@ -147,12 +148,13 @@ function AnnouncementsAdmin() {
 
   return (
     <AdminShell
+      browserOnly
       title="Announcements"
       description="Homepage and dashboard announcements. Draft content is hidden from participants."
       actions={
         <Button
           onClick={() => {
-            setEditing(blank());
+            setEditing(blank(state.superUser.currentEditor));
             setIsNew(true);
           }}
           className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90"
@@ -247,8 +249,8 @@ function AnnouncementsAdmin() {
                       <AlertDialogHeader>
                         <AlertDialogTitle>Delete this announcement?</AlertDialogTitle>
                         <AlertDialogDescription>
-                          This removes it from all participant views. This cannot be undone in the
-                          demo.
+                          This removes it from the Hub content saved in this browser. This cannot be
+                          undone.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>

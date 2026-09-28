@@ -32,7 +32,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAdmin, type FamilySection, type PublishState } from "@/lib/admin-store";
+import { useAdmin } from "@/lib/admin-store";
+import { type FamilySection, type PublishState } from "@/lib/admin-content";
 import { AdminIcon, iconOptions } from "@/components/AdminIcon";
 import { Plus, Pencil, Trash2, ArrowUp, ArrowDown, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
@@ -47,7 +48,7 @@ export const Route = createFileRoute("/admin/family")({
   component: FamilyAdmin,
 });
 
-const blank = (): FamilySection => ({
+const blank = (editor: string): FamilySection => ({
   id: `f-${crypto.randomUUID().slice(0, 8)}`,
   icon: "map",
   title: "",
@@ -56,7 +57,7 @@ const blank = (): FamilySection => ({
   active: true,
   publish: "draft",
   updatedAt: new Date().toISOString(),
-  updatedBy: "Demo Admin",
+  updatedBy: editor,
 });
 
 function FamilyAdmin() {
@@ -131,6 +132,7 @@ function FamilyAdmin() {
 
   return (
     <AdminShell
+      browserOnly
       title="Family Guide"
       description="Sections shown on the participant Family & Spectator Guide. Drafts and hidden sections are not visible to families."
       actions={
@@ -147,7 +149,7 @@ function FamilyAdmin() {
           </Button>
           <Button
             onClick={() => {
-              setEditing(blank());
+              setEditing(blank(state.superUser.currentEditor));
               setIsNew(true);
             }}
             className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90"

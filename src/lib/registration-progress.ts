@@ -123,3 +123,21 @@ export function effectiveStatuses(reg: Registration) {
     apparel: apparelStatus(reg),
   };
 }
+
+/**
+ * Percent of the steps that actually apply to this person. Choosing how you
+ * take part is itself a step, and steps that do not apply (a volunteer's bike
+ * step) are excluded from the denominator rather than counted as done.
+ */
+export function registrationCompletion(reg: Registration): number {
+  const effective = effectiveStatuses(reg);
+  const steps: StepStatus[] = [
+    reg.participation ? "complete" : "not_started",
+    effective.pelotonia,
+    effective.travel,
+    effective.apparel,
+  ];
+  if (isRiderParticipation(reg.participation)) steps.push(effective.bike);
+  const done = steps.filter((x) => x === "complete").length;
+  return Math.round((done / steps.length) * 100);
+}

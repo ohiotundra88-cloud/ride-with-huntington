@@ -15,7 +15,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useAdmin, type FeatureFlags } from "@/lib/admin-store";
+import { useAdmin } from "@/lib/admin-store";
+import { type FeatureFlags } from "@/lib/admin-content";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -76,6 +77,7 @@ function FlagsAdmin() {
 
   return (
     <AdminShell
+      browserOnly
       title="Feature flags · API-managed · Audit"
       description="Toggle features, review API-owned fields, and audit content changes."
     >
@@ -134,7 +136,6 @@ function FlagsAdmin() {
                     <TableHead>Key</TableHead>
                     <TableHead>Label</TableHead>
                     <TableHead>Source</TableHead>
-                    <TableHead>Last sync</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -145,7 +146,6 @@ function FlagsAdmin() {
                       <TableCell>
                         <Badge variant="outline">{f.source}</Badge>
                       </TableCell>
-                      <TableCell className="text-xs text-muted-foreground">{f.lastSync}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -219,7 +219,7 @@ function FlagsAdmin() {
                 <div>
                   <p className="font-semibold">Reset all admin content</p>
                   <p className="text-xs text-muted-foreground">
-                    Restores every content section to seed defaults. Feature flags reset too.
+                    Restores every content section to the default content. Feature flags reset too.
                   </p>
                 </div>
                 <AlertDialog>

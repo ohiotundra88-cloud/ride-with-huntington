@@ -180,19 +180,6 @@ export const drawFundraiserWinner = createServerFn({ method: "POST" })
     return drawRaffleWinner(context as any, data.id);
   });
 
-export const seedFundraiserDemoSupporters = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .validator((d) =>
-    z
-      .object({ id: z.string().uuid(), count: z.coerce.number().int().min(1).max(25).default(8) })
-      .parse(d),
-  )
-  .handler(async ({ data, context }) => {
-    await guardPages();
-    const { seedDemoSupporters } = await import("@/lib/fundraising-pages.server");
-    return seedDemoSupporters(context as any, data.id, data.count);
-  });
-
 // ------------------------------------------------------------------ flier attachment
 
 export const uploadFundraiserFlier = createServerFn({ method: "POST" })

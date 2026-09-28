@@ -30,6 +30,7 @@ import {
   Home,
   Lock,
   Image as ImageIcon,
+  HardDrive,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -147,11 +148,14 @@ export function AdminShell({
   title,
   description,
   actions,
+  browserOnly = false,
   children,
 }: {
   title: string;
   description?: string;
   actions?: React.ReactNode;
+  /** The page edits content kept in this browser only (src/lib/admin-store.tsx). */
+  browserOnly?: boolean;
   children: React.ReactNode;
 }) {
   const { user, authReady } = useStore();
@@ -223,6 +227,18 @@ export function AdminShell({
         <div className="mt-6 lg:hidden">
           <MobileNav pathname={pathname} />
         </div>
+        {browserOnly && (
+          <p
+            role="note"
+            className="mt-4 flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900"
+          >
+            <HardDrive className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+            <span>
+              Saved in this browser only. Changes here are not shared with other colleagues yet, who
+              see the default content.
+            </span>
+          </p>
+        )}
         <div className="mt-6">{children}</div>
       </div>
     </div>

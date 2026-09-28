@@ -26,7 +26,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { useAdmin, type ConciergeIntent } from "@/lib/admin-store";
+import { useAdmin } from "@/lib/admin-store";
+import { type ConciergeIntent } from "@/lib/admin-content";
 import { Plus, Pencil, Trash2, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 
@@ -40,7 +41,7 @@ export const Route = createFileRoute("/admin/concierge")({
   component: ConciergeAdmin,
 });
 
-const blank = (): ConciergeIntent => ({
+const blank = (editor: string): ConciergeIntent => ({
   id: `i-${crypto.randomUUID().slice(0, 8)}`,
   title: "",
   keywords: [],
@@ -49,7 +50,7 @@ const blank = (): ConciergeIntent => ({
   order: 999,
   active: true,
   updatedAt: new Date().toISOString(),
-  updatedBy: "Demo Admin",
+  updatedBy: editor,
 });
 
 function ConciergeAdmin() {
@@ -66,7 +67,7 @@ function ConciergeAdmin() {
     setIsNew(false);
   };
   const openNew = () => {
-    const b = blank();
+    const b = blank(state.superUser.currentEditor);
     setEditing(b);
     setKwInput("");
     setLinksInput("");
@@ -125,6 +126,7 @@ function ConciergeAdmin() {
 
   return (
     <AdminShell
+      browserOnly
       title="Concierge"
       description="Keyword-matched intents shown in the floating concierge drawer."
       actions={

@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { useStore, type Registration } from "@/lib/store";
+import { useStore } from "@/lib/store";
 import {
   ArrowRight,
   CalendarClock,
@@ -25,31 +25,24 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { openConcierge } from "@/components/Concierge";
-import { RIDE_WEEKEND_DATE, timelineSections, type ReadinessStatus } from "@/lib/mock-data";
+import { RIDE_WEEKEND_DATE, timelineSections } from "@/lib/ride-weekend";
+import { mergeTimelineWithRegistration } from "@/lib/journey-merge";
+import { useAdmin } from "@/lib/admin-store";
 import {
-  useAdmin,
-  readinessScore,
   journeyCopyDefaults,
   type EditableReadinessItem,
   type EditableTimelineItem,
-} from "@/lib/admin-store";
+  type ReadinessStatus,
+} from "@/lib/admin-content";
 import { AdminIcon } from "@/components/AdminIcon";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { MyEventsCard } from "@/components/MyEventsCard";
 
-import { ApiManagedField } from "@/components/ApiManagedField";
 import { InlineEditText } from "@/components/InlineEditText";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getRiderFundraising } from "@/lib/pelotonia.functions";
-import {
-  pelotoniaStatus,
-  travelStatus,
-  bikeStatus,
-  apparelStatus,
-  isRiderParticipation,
-} from "@/lib/registration-progress";
 import { useJourneyReadiness } from "@/lib/journey-readiness";
 
 /** True when the signed-in Super User has switched on inline text editing. */
@@ -725,57 +718,6 @@ function QuickAction({
       {inner}
     </Link>
   );
-}
-
-/**
- * Presentation-only overlay: reflect the participant's registration answers on
- * timeline steps so they aren't told to do things they opted out of.
- */
-function mergeTimelineWithRegistration(
-  items: EditableTimelineItem[],
-  reg: Registration,
-): EditableTimelineItem[] {
-  const isRider = isRiderParticipation(reg.participation);
-  const bikeTitle = /bike/i;
-  const pelDone = pelotoniaStatus(reg) === "complete";
-  return items.map((item) => {
-    // Never present a step as done when the answers aren't on file yet.
-    if (/pelotonia registration/i.test(item.title) && !pelDone) {
-      return {
-        ...item,
-        state: "current",
-        time: "Action needed",
-        instructions:
-          "Register with Pelotonia, then add your Rider ID and HB number to your profile.",
-      };
-    }
-    if (!bikeTitle.test(item.title)) return item;
-
-    if (reg.participation && !isRider) {
-      return {
-        ...item,
-        state: "completed",
-        time: "Not applicable",
-        instructions: "You're registered as a Volunteer — no bike needed.",
-        note: undefined,
-        location: undefined,
-      };
-    }
-    if (reg.bike.needs === "no") {
-      return {
-        ...item,
-        title: "Bring your own bike",
-        state: "completed",
-        time: "Confirmed",
-        instructions:
-          "You're using your own bike — no rental to reserve. Optional free inspections run Friday at packet pickup.",
-        note: undefined,
-        location: undefined,
-        ctaLabel: "Update bike plan",
-      };
-    }
-    return item;
-  });
 }
 
 function Timeline() {
