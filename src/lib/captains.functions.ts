@@ -14,7 +14,7 @@ export const listCaptains = createServerFn({ method: "GET" })
 
 export const grantCaptainByEmail = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ email: z.string().email() }).parse(d))
+  .validator((d) => z.object({ email: z.string().email() }).parse(d))
   .handler(async ({ data, context }) => {
     const { grantRole } = await import("@/lib/roles-admin.server");
     return grantRole(context, data.email, "captain");
@@ -22,7 +22,7 @@ export const grantCaptainByEmail = createServerFn({ method: "POST" })
 
 export const revokeCaptain = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ user_id: z.string().uuid() }).parse(d))
+  .validator((d) => z.object({ user_id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { revokeRole } = await import("@/lib/roles-admin.server");
     return revokeRole(context, data.user_id, "captain");

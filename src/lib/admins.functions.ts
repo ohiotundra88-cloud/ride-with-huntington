@@ -58,7 +58,7 @@ export const listAdmins = createServerFn({ method: "GET" })
 
 export const grantAdminByEmail = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ email: z.string().email() }).parse(d))
+  .validator((d) => z.object({ email: z.string().email() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertCallerIsSuperUser(context);
     const normalized = data.email.trim().toLowerCase();
@@ -83,7 +83,7 @@ export const grantAdminByEmail = createServerFn({ method: "POST" })
 
 export const revokeAdmin = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ user_id: z.string().uuid() }).parse(d))
+  .validator((d) => z.object({ user_id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertCallerIsSuperUser(context);
     if (data.user_id === context.userId) {

@@ -36,7 +36,7 @@ async function assertBrandingManager(context: { supabase: any; userId: string })
 
 export const saveBrandingSettings = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => brandingSettingsSchema.parse(d))
+  .validator((d) => brandingSettingsSchema.parse(d))
   .handler(async ({ data, context }): Promise<SiteBranding> => {
     await assertBrandingManager(context as any);
     const { data: row, error } = await context.supabase
@@ -60,7 +60,7 @@ export const saveBrandingSettings = createServerFn({ method: "POST" })
 
 export const uploadBrandingImage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => brandingUploadSchema.parse(d))
+  .validator((d) => brandingUploadSchema.parse(d))
   .handler(async ({ data, context }): Promise<SiteBranding> => {
     await assertBrandingManager(context as any);
     if (!data.contentType.startsWith("image/")) throw new Error("Please choose an image file.");
@@ -103,7 +103,7 @@ export const uploadBrandingImage = createServerFn({ method: "POST" })
 
 export const removeBrandingImage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => brandingRemoveSchema.parse(d))
+  .validator((d) => brandingRemoveSchema.parse(d))
   .handler(async ({ data, context }): Promise<SiteBranding> => {
     await assertBrandingManager(context as any);
     const { data: prev } = await context.supabase

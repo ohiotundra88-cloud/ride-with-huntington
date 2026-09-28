@@ -30,7 +30,7 @@ export const getRegisterContent = createServerFn({ method: "GET" }).handler(
 
 export const saveRegisterContent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => registerContentSchema.parse((d as { content: unknown })?.content ?? d))
+  .validator((d) => registerContentSchema.parse((d as { content: unknown })?.content ?? d))
   .handler(async ({ data, context }): Promise<RegisterContent> => {
     const [{ data: isAdmin }, { data: isSuper }] = await Promise.all([
       context.supabase.rpc("is_admin_text", { _user_id: context.userId }),

@@ -40,7 +40,7 @@ export const listManageableAssets = createServerFn({ method: "GET" })
 
 export const saveAsset = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => assetInputSchema.parse(d))
+  .validator((d) => assetInputSchema.parse(d))
   .handler(async ({ data, context }): Promise<FundraisingAsset> => {
     const { data: allowed, error: rErr } = await context.supabase.rpc("can_manage_events", {
       _user_id: context.userId,
@@ -80,7 +80,7 @@ export const saveAsset = createServerFn({ method: "POST" })
 
 export const deleteAsset = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => assetIdSchema.parse(d))
+  .validator((d) => assetIdSchema.parse(d))
   .handler(async ({ data, context }) => {
     const { data: row } = await context.supabase
       .from("fundraising_assets")
@@ -99,7 +99,7 @@ export const deleteAsset = createServerFn({ method: "POST" })
 /** Upload (or replace) the downloadable file on an asset. */
 export const uploadAssetFile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => assetFileSchema.parse(d))
+  .validator((d) => assetFileSchema.parse(d))
   .handler(async ({ data, context }) => {
     const { data: row, error: sErr } = await context.supabase
       .from("fundraising_assets")
@@ -134,7 +134,7 @@ export const uploadAssetFile = createServerFn({ method: "POST" })
 
 export const removeAssetFile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => assetIdSchema.parse(d))
+  .validator((d) => assetIdSchema.parse(d))
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
       .from("fundraising_assets")

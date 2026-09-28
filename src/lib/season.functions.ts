@@ -46,7 +46,7 @@ export const listManualParticipants = createServerFn({ method: "GET" })
 
 export const createManualParticipant = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
+  .validator((d) =>
     z
       .object({
         email: z.string().trim().toLowerCase().email(),
@@ -115,7 +115,7 @@ export const createManualParticipant = createServerFn({ method: "POST" })
 
 export const removeManualParticipant = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ user_id: z.string().uuid() }).parse(d))
+  .validator((d) => z.object({ user_id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertSuper(context);
     if (data.user_id === context.userId) throw new Error("You can't remove your own record.");
@@ -128,7 +128,7 @@ export const removeManualParticipant = createServerFn({ method: "POST" })
 /** End-of-season cleanup: clears season registrations, keeps roles + manual records. */
 export const resetSeason = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ confirm: z.literal("RESET SEASON") }).parse(d))
+  .validator((d) => z.object({ confirm: z.literal("RESET SEASON") }).parse(d))
   .handler(async ({ context }) => {
     await assertSuper(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

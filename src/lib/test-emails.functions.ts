@@ -48,7 +48,7 @@ async function sendOne(
 
 export const sendTestEmail = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) => z.object({ template: z.string().min(1) }).parse(input))
+  .validator((input) => z.object({ template: z.string().min(1) }).parse(input))
   .handler(async ({ data, context }) => sendOne(context, data.template));
 
 export const sendAllTestEmails = createServerFn({ method: "POST" })

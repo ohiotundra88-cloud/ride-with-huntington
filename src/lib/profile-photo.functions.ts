@@ -34,7 +34,7 @@ export const getMyProfilePhoto = createServerFn({ method: "GET" })
 
 export const uploadProfilePhoto = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => avatarUploadSchema.parse(d))
+  .validator((d) => avatarUploadSchema.parse(d))
   .handler(async ({ data, context }) => {
     const bytes = Buffer.from(data.base64, "base64");
     if (bytes.byteLength > MAX_AVATAR_BYTES) throw new Error("Photo must be 5 MB or smaller.");

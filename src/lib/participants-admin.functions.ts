@@ -110,7 +110,7 @@ export const listColleagues = createServerFn({ method: "GET" })
 
 export const saveColleague = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => saveSchema.parse(d))
+  .validator((d) => saveSchema.parse(d))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin, assertManager, appendAudit } =
       await import("@/lib/participants-admin.server");
@@ -145,7 +145,7 @@ export const saveColleague = createServerFn({ method: "POST" })
 
 export const createColleague = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
+  .validator((d) =>
     z
       .object({
         email: z.string().trim().toLowerCase().email(),
@@ -201,7 +201,7 @@ export const createColleague = createServerFn({ method: "POST" })
 
 export const deleteColleague = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
+  .validator((d) =>
     z
       .object({
         user_id: z.string().uuid(),

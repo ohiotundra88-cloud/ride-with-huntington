@@ -56,7 +56,7 @@ export const listManageableEvents = createServerFn({ method: "GET" })
 
 export const saveEvent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => eventInputSchema.parse(d))
+  .validator((d) => eventInputSchema.parse(d))
   .handler(async ({ data, context }): Promise<FundraisingEvent> => {
     const { data: allowed, error: rErr } = await context.supabase.rpc("can_manage_events", {
       _user_id: context.userId,
@@ -95,7 +95,7 @@ export const saveEvent = createServerFn({ method: "POST" })
 
 export const deleteEvent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => idSchema.parse(d))
+  .validator((d) => idSchema.parse(d))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("events").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -112,7 +112,7 @@ const FLIER_EXTENSIONS: Record<string, string> = {
 /** Upload (or replace) the flier attachment on an event the caller can edit. */
 export const uploadEventFlier = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => flierInputSchema.parse(d))
+  .validator((d) => flierInputSchema.parse(d))
   .handler(async ({ data, context }) => {
     const { data: row, error: sErr } = await context.supabase
       .from("events")
@@ -153,7 +153,7 @@ export const uploadEventFlier = createServerFn({ method: "POST" })
 
 export const removeEventFlier = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => idSchema.parse(d))
+  .validator((d) => idSchema.parse(d))
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
       .from("events")

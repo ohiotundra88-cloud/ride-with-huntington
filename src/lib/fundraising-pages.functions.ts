@@ -50,7 +50,7 @@ export const listPublicFundraisers = createServerFn({ method: "GET" }).handler(
 );
 
 export const getPublicFundraiser = createServerFn({ method: "POST" })
-  .inputValidator((d) => z.object({ slug: z.string().trim().min(1).max(80) }).parse(d))
+  .validator((d) => z.object({ slug: z.string().trim().min(1).max(80) }).parse(d))
   .handler(async ({ data }): Promise<PublicFundraiser> => {
     await guardPages();
     const { getPublic } = await import("@/lib/fundraising-pages.server");
@@ -58,7 +58,7 @@ export const getPublicFundraiser = createServerFn({ method: "POST" })
   });
 
 export const startCheckout = createServerFn({ method: "POST" })
-  .inputValidator((d) => checkoutSchema.parse(d))
+  .validator((d) => checkoutSchema.parse(d))
   .handler(async ({ data }) => {
     const { getRequestUrl } = await import("@tanstack/react-start/server");
     const origin = new URL(getRequestUrl()).origin;
@@ -68,7 +68,7 @@ export const startCheckout = createServerFn({ method: "POST" })
   });
 
 export const getOrderReceipt = createServerFn({ method: "POST" })
-  .inputValidator((d) => z.object({ order_id: z.string().uuid() }).parse(d))
+  .validator((d) => z.object({ order_id: z.string().uuid() }).parse(d))
   .handler(async ({ data }) => {
     await guardPages();
     const { getReceipt } = await import("@/lib/fundraising-pages.server");
@@ -79,7 +79,7 @@ export const getOrderReceipt = createServerFn({ method: "POST" })
 
 export const listMyFundraisers = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ all: z.boolean().default(false) }).parse(d))
+  .validator((d) => z.object({ all: z.boolean().default(false) }).parse(d))
   .handler(async ({ data, context }): Promise<FundraiserListRow[]> => {
     await guardPages();
     const { listMine } = await import("@/lib/fundraising-pages.server");
@@ -88,7 +88,7 @@ export const listMyFundraisers = createServerFn({ method: "POST" })
 
 export const getFundraiserDetail = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => idSchema.parse(d))
+  .validator((d) => idSchema.parse(d))
   .handler(async ({ data, context }): Promise<FundraiserDetail> => {
     await guardPages();
     const { getDetail } = await import("@/lib/fundraising-pages.server");
@@ -97,7 +97,7 @@ export const getFundraiserDetail = createServerFn({ method: "POST" })
 
 export const getFundraiserApproval = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ request_id: z.string().uuid().nullable() }).parse(d))
+  .validator((d) => z.object({ request_id: z.string().uuid().nullable() }).parse(d))
   .handler(async ({ data, context }) => {
     const { approvalState } = await import("@/lib/fundraising-pages.server");
     return approvalState(context as any, data.request_id);
@@ -105,7 +105,7 @@ export const getFundraiserApproval = createServerFn({ method: "POST" })
 
 export const saveFundraiserPage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => fundraiserInputSchema.parse(d))
+  .validator((d) => fundraiserInputSchema.parse(d))
   .handler(async ({ data, context }) => {
     await guardPages();
     const { saveFundraiser } = await import("@/lib/fundraising-pages.server");
@@ -114,7 +114,7 @@ export const saveFundraiserPage = createServerFn({ method: "POST" })
 
 export const submitFundraiserForApproval = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => idSchema.parse(d))
+  .validator((d) => idSchema.parse(d))
   .handler(async ({ data, context }) => {
     const { submitForApproval } = await import("@/lib/fundraising-pages.server");
     return submitForApproval(context as any, data.id);
@@ -122,7 +122,7 @@ export const submitFundraiserForApproval = createServerFn({ method: "POST" })
 
 export const setFundraiserStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
+  .validator((d) =>
     z.object({ id: z.string().uuid(), status: z.enum(FUNDRAISER_STATUSES) }).parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -132,7 +132,7 @@ export const setFundraiserStatus = createServerFn({ method: "POST" })
 
 export const deleteFundraiserPage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { deleteFundraiser } = await import("@/lib/fundraising-pages.server");
     return deleteFundraiser(context as any, data.id);
@@ -140,7 +140,7 @@ export const deleteFundraiserPage = createServerFn({ method: "POST" })
 
 export const setFundraiserPublicVisibility = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ id: z.string().uuid(), hidden: z.boolean() }).parse(d))
+  .validator((d) => z.object({ id: z.string().uuid(), hidden: z.boolean() }).parse(d))
   .handler(async ({ data, context }) => {
     const { setPublicVisibility } = await import("@/lib/fundraising-pages.server");
     return setPublicVisibility(context as any, data.id, data.hidden);
@@ -155,7 +155,7 @@ export const getFundraiserYearSummary = createServerFn({ method: "GET" })
 
 export const refundFundraiserOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ order_id: z.string().uuid() }).parse(d))
+  .validator((d) => z.object({ order_id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await guardPages();
     const { refundOrder } = await import("@/lib/fundraising-pages.server");
@@ -164,7 +164,7 @@ export const refundFundraiserOrder = createServerFn({ method: "POST" })
 
 export const recordFundraiserPayout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => payoutSchema.parse(d))
+  .validator((d) => payoutSchema.parse(d))
   .handler(async ({ data, context }) => {
     await guardPages();
     const { recordPayout } = await import("@/lib/fundraising-pages.server");
@@ -173,7 +173,7 @@ export const recordFundraiserPayout = createServerFn({ method: "POST" })
 
 export const drawFundraiserWinner = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => idSchema.parse(d))
+  .validator((d) => idSchema.parse(d))
   .handler(async ({ data, context }) => {
     await guardPages();
     const { drawRaffleWinner } = await import("@/lib/fundraising-pages.server");
@@ -182,7 +182,7 @@ export const drawFundraiserWinner = createServerFn({ method: "POST" })
 
 export const seedFundraiserDemoSupporters = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
+  .validator((d) =>
     z
       .object({ id: z.string().uuid(), count: z.coerce.number().int().min(1).max(25).default(8) })
       .parse(d),
@@ -197,7 +197,7 @@ export const seedFundraiserDemoSupporters = createServerFn({ method: "POST" })
 
 export const uploadFundraiserFlier = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => fundraiserFlierSchema.parse(d))
+  .validator((d) => fundraiserFlierSchema.parse(d))
   .handler(async ({ data, context }) => {
     await guardPages();
     const { setFlier } = await import("@/lib/fundraising-pages.server");
@@ -206,7 +206,7 @@ export const uploadFundraiserFlier = createServerFn({ method: "POST" })
 
 export const removeFundraiserFlier = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => idSchema.parse(d))
+  .validator((d) => idSchema.parse(d))
   .handler(async ({ data, context }) => {
     await guardPages();
     const { clearFlier } = await import("@/lib/fundraising-pages.server");

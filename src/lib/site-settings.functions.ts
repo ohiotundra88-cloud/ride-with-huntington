@@ -15,7 +15,7 @@ export const getSiteSettings = createServerFn({ method: "GET" }).handler(
 
 export const setFundraiserPagesEnabled = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ enabled: z.boolean() }).parse(d))
+  .validator((d) => z.object({ enabled: z.boolean() }).parse(d))
   .handler(async ({ data, context }): Promise<SiteSettings> => {
     const { data: allowed, error: rErr } = await context.supabase.rpc("is_superuser", {
       _user_id: context.userId,
@@ -35,7 +35,7 @@ export const setFundraiserPagesEnabled = createServerFn({ method: "POST" })
 
 export const setVendorCrmEnabled = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ enabled: z.boolean() }).parse(d))
+  .validator((d) => z.object({ enabled: z.boolean() }).parse(d))
   .handler(async ({ data, context }): Promise<SiteSettings> => {
     const { data: allowed, error: rErr } = await context.supabase.rpc("is_superuser", {
       _user_id: context.userId,

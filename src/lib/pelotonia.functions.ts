@@ -66,7 +66,7 @@ export interface RiderFundraising {
  * Pelotonia public/rider ID (the value captured during registration).
  */
 export const getRiderFundraising = createServerFn({ method: "GET" })
-  .inputValidator((data: { publicId: string }) => ({
+  .validator((data: { publicId: string }) => ({
     publicId: String(data?.publicId ?? "").trim(),
   }))
   .handler(async ({ data }): Promise<RiderFundraising | null> => {

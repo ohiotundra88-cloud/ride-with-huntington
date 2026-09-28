@@ -119,7 +119,7 @@ export const listReviewRequests = createServerFn({ method: "GET" })
 
 export const saveMyRequest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => requestInputSchema.parse(d))
+  .validator((d) => requestInputSchema.parse(d))
   .handler(async ({ data, context }): Promise<FundraiserRequest> => {
     const { id, ...fields } = data;
     if (id) {
@@ -201,7 +201,7 @@ async function notifyAssignedCaptain(request: FundraiserRequest, reassigned: boo
 /** Admins and super users can move a request to a different captain. */
 export const reassignRequestCaptain = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
+  .validator((d) =>
     z.object({ id: z.string().uuid(), captain_id: z.string().uuid() }).parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -268,7 +268,7 @@ export const reassignRequestCaptain = createServerFn({ method: "POST" })
  */
 export const deleteMyRequest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => idSchema.parse(d))
+  .validator((d) => idSchema.parse(d))
   .handler(async ({ data, context }) => {
     const { data: row, error: rErr } = await context.supabase
       .from("fundraiser_requests")
@@ -294,7 +294,7 @@ export const deleteMyRequest = createServerFn({ method: "POST" })
 
 export const listRequestApprovals = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => idSchema.parse(d))
+  .validator((d) => idSchema.parse(d))
   .handler(async ({ data, context }): Promise<ApprovalEntry[]> => {
     const { data: rows, error } = await context.supabase
       .from("fundraiser_approvals")
@@ -331,7 +331,7 @@ async function logDecision(
 /** Record a stage decision. Stage gating and role checks are enforced here. */
 export const decideOnRequest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => decisionSchema.parse(d))
+  .validator((d) => decisionSchema.parse(d))
   .handler(async ({ data, context }) => {
     const roles = await myRoles(context);
     const { STAGES, actionableStages, canActOnStage, isFullyApproved } =
@@ -541,7 +541,7 @@ async function notifyStageReviewers(request: FundraiserRequest, stages: string[]
 
 export const uploadRequestFlier = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => requestFlierSchema.parse(d))
+  .validator((d) => requestFlierSchema.parse(d))
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
       .from("fundraiser_requests")
@@ -574,7 +574,7 @@ export const uploadRequestFlier = createServerFn({ method: "POST" })
 /** Returns the flier as a data URL for anyone allowed to read the request. */
 export const getRequestFlier = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => idSchema.parse(d))
+  .validator((d) => idSchema.parse(d))
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
       .from("fundraiser_requests")

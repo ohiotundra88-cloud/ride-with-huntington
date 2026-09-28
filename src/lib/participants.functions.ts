@@ -42,7 +42,7 @@ const upsertSchema = z.object({
 });
 
 export const upsertMyParticipant = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => upsertSchema.parse(input))
+  .validator((input: unknown) => upsertSchema.parse(input))
   .middleware([requireSupabaseAuth])
   .handler(async ({ data, context }) => {
     const { error, data: row } = await context.supabase

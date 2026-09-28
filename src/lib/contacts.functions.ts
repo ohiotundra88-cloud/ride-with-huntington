@@ -31,7 +31,7 @@ async function assertContactManager(context: { supabase: any; userId: string }) 
 
 export const saveContact = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => contactSaveSchema.parse(d))
+  .validator((d) => contactSaveSchema.parse(d))
   .handler(async ({ data, context }): Promise<DirectoryContact> => {
     await assertContactManager(context as any);
 
@@ -63,7 +63,7 @@ export const saveContact = createServerFn({ method: "POST" })
 
 export const deleteContact = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => contactDeleteSchema.parse(d))
+  .validator((d) => contactDeleteSchema.parse(d))
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
     await assertContactManager(context as any);
     const { error } = await context.supabase.from("contacts").delete().eq("id", data.id);

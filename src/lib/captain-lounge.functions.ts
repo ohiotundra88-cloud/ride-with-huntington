@@ -73,7 +73,7 @@ export const listLoungePosts = createServerFn({ method: "GET" })
 
 export const saveLoungePost = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => postInputSchema.parse(d))
+  .validator((d) => postInputSchema.parse(d))
   .handler(async ({ data, context }): Promise<CaptainPost> => {
     await assertLeader(context as any);
     const payload = {
@@ -104,7 +104,7 @@ export const saveLoungePost = createServerFn({ method: "POST" })
 
 export const deleteLoungePost = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => postIdSchema.parse(d))
+  .validator((d) => postIdSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertLeader(context as any);
     const { data: row } = await context.supabase
@@ -123,7 +123,7 @@ export const deleteLoungePost = createServerFn({ method: "POST" })
 
 export const uploadLoungeFile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => postFileSchema.parse(d))
+  .validator((d) => postFileSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertLeader(context as any);
     const { data: row, error } = await context.supabase
@@ -158,7 +158,7 @@ export const uploadLoungeFile = createServerFn({ method: "POST" })
 
 export const removeLoungeFile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => postIdSchema.parse(d))
+  .validator((d) => postIdSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertLeader(context as any);
     const { data: row, error } = await context.supabase
@@ -183,7 +183,7 @@ export const removeLoungeFile = createServerFn({ method: "POST" })
 /** Role-gated, same-origin document fetch (VPN friendly — no external storage host). */
 export const getLoungeFile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => postIdSchema.parse(d))
+  .validator((d) => postIdSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertLeader(context as any);
     const { data: row, error } = await context.supabase

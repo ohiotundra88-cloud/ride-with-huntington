@@ -55,7 +55,7 @@ const upsertSchema = z.object({
 });
 
 export const upsertFaqAdmin = createServerFn({ method: "POST" })
-  .inputValidator((i: unknown) => upsertSchema.parse(i))
+  .validator((i: unknown) => upsertSchema.parse(i))
   .middleware([requireSupabaseAuth])
   .handler(async ({ data, context }) => {
     const { assertAdminOrSuperUser } = await import("@/lib/roles-admin.server");
@@ -92,7 +92,7 @@ export const upsertFaqAdmin = createServerFn({ method: "POST" })
   });
 
 export const toggleFaqHiddenAdmin = createServerFn({ method: "POST" })
-  .inputValidator((i: unknown) => z.object({ id: z.string().uuid(), hidden: z.boolean() }).parse(i))
+  .validator((i: unknown) => z.object({ id: z.string().uuid(), hidden: z.boolean() }).parse(i))
   .middleware([requireSupabaseAuth])
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
@@ -104,7 +104,7 @@ export const toggleFaqHiddenAdmin = createServerFn({ method: "POST" })
   });
 
 export const deleteFaqAdmin = createServerFn({ method: "POST" })
-  .inputValidator((i: unknown) => z.object({ id: z.string().uuid() }).parse(i))
+  .validator((i: unknown) => z.object({ id: z.string().uuid() }).parse(i))
   .middleware([requireSupabaseAuth])
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("faqs").delete().eq("id", data.id);

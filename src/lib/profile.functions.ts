@@ -27,7 +27,7 @@ export type ProfileFields = z.infer<typeof profileFieldsSchema>;
  */
 export const ensureMyProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data) =>
+  .validator((data) =>
     profileFieldsSchema.parse((data as { fields?: unknown })?.fields ?? data ?? {}),
   )
   .handler(async ({ data, context }) => {

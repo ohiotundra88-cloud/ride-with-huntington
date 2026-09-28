@@ -201,7 +201,7 @@ export const listRiderProgress = createServerFn({ method: "GET" })
  */
 export const updateRiderId = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { userId: string; riderId: string }) => {
+  .validator((input: { userId: string; riderId: string }) => {
     const userId = String(input?.userId ?? "").trim();
     const riderId = String(input?.riderId ?? "").trim();
     if (!userId) throw new Error("A participant is required.");
