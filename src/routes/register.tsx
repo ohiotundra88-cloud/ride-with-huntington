@@ -417,18 +417,20 @@ function StepPelotonia() {
             </ol>
           </div>
           <div>
-            <Label>
+            <Label htmlFor="register-discount-code">
               <Copy k="B.discountLabel" />
             </Label>
             <div className="mt-1.5 flex gap-2">
               {editing ? (
                 <Input
+                  id="register-discount-code"
                   value={code}
                   onChange={(e) => setText("B.discountCode", e.target.value)}
                   className="font-mono font-bold text-[var(--brand-dark)]"
                 />
               ) : (
                 <Input
+                  id="register-discount-code"
                   readOnly
                   value={code}
                   className="font-mono font-bold text-[var(--brand-dark)]"
@@ -436,6 +438,7 @@ function StepPelotonia() {
               )}
               <Button
                 variant="outline"
+                aria-label="Copy discount code"
                 onClick={() => {
                   navigator.clipboard.writeText(code);
                   toast.success("Copied");
@@ -557,14 +560,14 @@ function StepPelotonia() {
               />
               {field("employmentType").visible && (
                 <div>
-                  <Label>
+                  <Label htmlFor="register-employment-type">
                     <FieldLabel name="employmentType" listKey="employmentTypes" />
                   </Label>
                   <Select
                     value={p.employmentType}
                     onValueChange={(v) => upd({ employmentType: v as "salary" | "hourly" })}
                   >
-                    <SelectTrigger className="mt-1.5">
+                    <SelectTrigger id="register-employment-type" className="mt-1.5">
                       <SelectValue placeholder="Select..." />
                     </SelectTrigger>
                     <SelectContent>
@@ -579,14 +582,14 @@ function StepPelotonia() {
               )}
               {field("payGrade74Below").visible && (
                 <div>
-                  <Label>
+                  <Label htmlFor="register-pay-grade">
                     <FieldLabel name="payGrade74Below" listKey="payGrades" />
                   </Label>
                   <Select
                     value={p.payGrade74Below}
                     onValueChange={(v) => upd({ payGrade74Below: v as "yes" | "no" })}
                   >
-                    <SelectTrigger className="mt-1.5">
+                    <SelectTrigger id="register-pay-grade" className="mt-1.5">
                       <SelectValue placeholder="Select..." />
                     </SelectTrigger>
                     <SelectContent>
@@ -814,10 +817,11 @@ function StepTravel() {
             <CardContent className="grid gap-4 sm:grid-cols-2">
               {field("departureCity").visible && (
                 <div className="space-y-2">
-                  <Label>
+                  <Label htmlFor="register-departure-city">
                     <FieldLabel name="departureCity" />
                   </Label>
                   <Input
+                    id="register-departure-city"
                     value={tr.departureCity}
                     onChange={(e) => upd({ departureCity: e.target.value })}
                   />
@@ -825,10 +829,11 @@ function StepTravel() {
               )}
               {field("arrivalDate").visible && (
                 <div className="space-y-2">
-                  <Label>
+                  <Label htmlFor="register-arrival-date">
                     <FieldLabel name="arrivalDate" />
                   </Label>
                   <Input
+                    id="register-arrival-date"
                     type="date"
                     value={tr.arrivalDate}
                     onChange={(e) => upd({ arrivalDate: e.target.value })}
@@ -837,10 +842,11 @@ function StepTravel() {
               )}
               {field("departureDate").visible && (
                 <div className="space-y-2">
-                  <Label>
+                  <Label htmlFor="register-departure-date">
                     <FieldLabel name="departureDate" />
                   </Label>
                   <Input
+                    id="register-departure-date"
                     type="date"
                     value={tr.departureDate}
                     onChange={(e) => upd({ departureDate: e.target.value })}
@@ -849,10 +855,11 @@ function StepTravel() {
               )}
               {field("hotelCheckIn").visible && (
                 <div className="space-y-2">
-                  <Label>
+                  <Label htmlFor="register-hotel-check-in">
                     <FieldLabel name="hotelCheckIn" />
                   </Label>
                   <Input
+                    id="register-hotel-check-in"
                     type="date"
                     value={tr.hotelCheckIn}
                     onChange={(e) => upd({ hotelCheckIn: e.target.value })}
@@ -861,10 +868,11 @@ function StepTravel() {
               )}
               {field("hotelCheckOut").visible && (
                 <div className="space-y-2">
-                  <Label>
+                  <Label htmlFor="register-hotel-check-out">
                     <FieldLabel name="hotelCheckOut" />
                   </Label>
                   <Input
+                    id="register-hotel-check-out"
                     type="date"
                     value={tr.hotelCheckOut}
                     onChange={(e) => upd({ hotelCheckOut: e.target.value })}
@@ -873,10 +881,14 @@ function StepTravel() {
               )}
               {field("travelNotes").visible && (
                 <div className="space-y-2 sm:col-span-2">
-                  <Label>
+                  <Label htmlFor="register-travel-notes">
                     <FieldLabel name="travelNotes" />
                   </Label>
-                  <Textarea value={tr.notes} onChange={(e) => upd({ notes: e.target.value })} />
+                  <Textarea
+                    id="register-travel-notes"
+                    value={tr.notes}
+                    onChange={(e) => upd({ notes: e.target.value })}
+                  />
                 </div>
               )}
             </CardContent>
@@ -900,10 +912,11 @@ function StepTravel() {
             <CardContent className="grid gap-4 sm:grid-cols-2">
               {field("travelConfirmation").visible && (
                 <div className="space-y-2">
-                  <Label>
+                  <Label htmlFor="register-travel-confirmation">
                     <FieldLabel name="travelConfirmation" />
                   </Label>
                   <Input
+                    id="register-travel-confirmation"
                     value={tr.travelConfirmation}
                     onChange={(e) => upd({ travelConfirmation: e.target.value })}
                   />
@@ -911,10 +924,11 @@ function StepTravel() {
               )}
               {field("hotelConfirmation").visible && (
                 <div className="space-y-2">
-                  <Label>
+                  <Label htmlFor="register-hotel-confirmation">
                     <FieldLabel name="hotelConfirmation" />
                   </Label>
                   <Input
+                    id="register-hotel-confirmation"
                     value={tr.hotelConfirmation}
                     onChange={(e) => upd({ hotelConfirmation: e.target.value })}
                   />
@@ -922,10 +936,11 @@ function StepTravel() {
               )}
               {field("hotelName").visible && (
                 <div className="space-y-2">
-                  <Label>
+                  <Label htmlFor="register-hotel-name">
                     <FieldLabel name="hotelName" />
                   </Label>
                   <Input
+                    id="register-hotel-name"
                     value={tr.hotelName}
                     onChange={(e) => upd({ hotelName: e.target.value })}
                   />
@@ -933,10 +948,11 @@ function StepTravel() {
               )}
               {field("arrivalTime").visible && (
                 <div className="space-y-2">
-                  <Label>
+                  <Label htmlFor="register-arrival-time">
                     <FieldLabel name="arrivalTime" />
                   </Label>
                   <Input
+                    id="register-arrival-time"
                     type="time"
                     value={tr.arrivalTime}
                     onChange={(e) => upd({ arrivalTime: e.target.value })}
@@ -945,10 +961,11 @@ function StepTravel() {
               )}
               {field("departureTime").visible && (
                 <div className="space-y-2">
-                  <Label>
+                  <Label htmlFor="register-departure-time">
                     <FieldLabel name="departureTime" />
                   </Label>
                   <Input
+                    id="register-departure-time"
                     type="time"
                     value={tr.departureTime}
                     onChange={(e) => upd({ departureTime: e.target.value })}
@@ -1059,11 +1076,11 @@ function StepBike() {
               )}
               {field("bikeSize").visible && (
                 <div className="space-y-2">
-                  <Label>
+                  <Label htmlFor="register-bike-size">
                     <FieldLabel name="bikeSize" listKey="bikeSizes" />
                   </Label>
                   <Select value={b.bikeSize} onValueChange={(v) => upd({ bikeSize: v })}>
-                    <SelectTrigger>
+                    <SelectTrigger id="register-bike-size">
                       <SelectValue placeholder="Select..." />
                     </SelectTrigger>
                     <SelectContent>
@@ -1078,11 +1095,11 @@ function StepBike() {
               )}
               {field("bikeType").visible && (
                 <div className="space-y-2">
-                  <Label>
+                  <Label htmlFor="register-bike-type">
                     <FieldLabel name="bikeType" listKey="bikeTypes" />
                   </Label>
                   <Select value={b.bikeType} onValueChange={(v) => upd({ bikeType: v })}>
-                    <SelectTrigger>
+                    <SelectTrigger id="register-bike-type">
                       <SelectValue placeholder="Select..." />
                     </SelectTrigger>
                     <SelectContent>
@@ -1097,11 +1114,11 @@ function StepBike() {
               )}
               {field("pedals").visible && (
                 <div className="space-y-2">
-                  <Label>
+                  <Label htmlFor="register-pedals">
                     <FieldLabel name="pedals" listKey="pedals" />
                   </Label>
                   <Select value={b.pedals} onValueChange={(v) => upd({ pedals: v })}>
-                    <SelectTrigger>
+                    <SelectTrigger id="register-pedals">
                       <SelectValue placeholder="Select..." />
                     </SelectTrigger>
                     <SelectContent>
@@ -1122,10 +1139,11 @@ function StepBike() {
               )}
               {field("pickupDate").visible && (
                 <div className="space-y-2">
-                  <Label>
+                  <Label htmlFor="register-pickup-date">
                     <FieldLabel name="pickupDate" />
                   </Label>
                   <Input
+                    id="register-pickup-date"
                     type="date"
                     value={b.pickupDate}
                     onChange={(e) => upd({ pickupDate: e.target.value })}
@@ -1134,10 +1152,11 @@ function StepBike() {
               )}
               {field("returnDate").visible && (
                 <div className="space-y-2">
-                  <Label>
+                  <Label htmlFor="register-return-date">
                     <FieldLabel name="returnDate" />
                   </Label>
                   <Input
+                    id="register-return-date"
                     type="date"
                     value={b.returnDate}
                     onChange={(e) => upd({ returnDate: e.target.value })}
@@ -1163,10 +1182,11 @@ function StepBike() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Label>
+                <Label htmlFor="register-bike-confirmation">
                   <FieldLabel name="bikeConfirmation" />
                 </Label>
                 <Input
+                  id="register-bike-confirmation"
                   value={b.confirmation}
                   onChange={(e) => upd({ confirmation: e.target.value })}
                 />
@@ -1282,11 +1302,11 @@ function StepApparel() {
           <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {field("jerseySize").visible && (
               <div className="space-y-2">
-                <Label>
+                <Label htmlFor="register-jersey-size">
                   <FieldLabel name="jerseySize" listKey="sizes" />
                 </Label>
                 <Select value={a.jerseySize} onValueChange={(v) => upd({ jerseySize: v })}>
-                  <SelectTrigger>
+                  <SelectTrigger id="register-jersey-size">
                     <SelectValue placeholder="Select..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -1301,14 +1321,14 @@ function StepApparel() {
             )}
             {field("jerseyStyle").visible && (
               <div className="space-y-2">
-                <Label>
+                <Label htmlFor="register-jersey-style">
                   <FieldLabel name="jerseyStyle" listKey="jerseyStyles" />
                 </Label>
                 <Select
                   value={a.jerseyStyle}
                   onValueChange={(v) => upd({ jerseyStyle: v as "short-sleeve" | "sleeveless" })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="register-jersey-style">
                     <SelectValue placeholder="Select..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -1323,11 +1343,11 @@ function StepApparel() {
             )}
             {field("shirtSize").visible && (
               <div className="space-y-2">
-                <Label>
+                <Label htmlFor="register-shirt-size">
                   <FieldLabel name="shirtSize" listKey="sizes" />
                 </Label>
                 <Select value={a.shirtSize} onValueChange={(v) => upd({ shirtSize: v })}>
-                  <SelectTrigger>
+                  <SelectTrigger id="register-shirt-size">
                     <SelectValue placeholder="Select..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -1342,11 +1362,11 @@ function StepApparel() {
             )}
             {field("cut").visible && (
               <div className="space-y-2">
-                <Label>
+                <Label htmlFor="register-cut">
                   <FieldLabel name="cut" listKey="cuts" />
                 </Label>
                 <Select value={a.cut} onValueChange={(v) => upd({ cut: v })}>
-                  <SelectTrigger>
+                  <SelectTrigger id="register-cut">
                     <SelectValue placeholder="Select..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -1373,14 +1393,14 @@ function StepApparel() {
           <CardContent className="grid gap-4 sm:grid-cols-2">
             {field("volunteerShirtSize").visible && (
               <div className="space-y-2">
-                <Label>
+                <Label htmlFor="register-volunteer-shirt-size">
                   <FieldLabel name="volunteerShirtSize" listKey="sizes" />
                 </Label>
                 <Select
                   value={a.volunteerShirtSize}
                   onValueChange={(v) => upd({ volunteerShirtSize: v })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="register-volunteer-shirt-size">
                     <SelectValue placeholder="Select..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -1395,11 +1415,11 @@ function StepApparel() {
             )}
             {field("volunteerCut").visible && (
               <div className="space-y-2">
-                <Label>
+                <Label htmlFor="register-volunteer-cut">
                   <FieldLabel name="volunteerCut" listKey="cuts" />
                 </Label>
                 <Select value={a.volunteerCut} onValueChange={(v) => upd({ volunteerCut: v })}>
-                  <SelectTrigger>
+                  <SelectTrigger id="register-volunteer-cut">
                     <SelectValue placeholder="Select..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -1425,42 +1445,59 @@ function StepApparel() {
         <CardContent className="grid gap-4 sm:grid-cols-2">
           {field("addrName").visible && (
             <div className="space-y-2 sm:col-span-2">
-              <Label>
+              <Label htmlFor="register-addr-name">
                 <FieldLabel name="addrName" />
               </Label>
-              <Input value={addr.name} onChange={(e) => updA({ name: e.target.value })} />
+              <Input
+                id="register-addr-name"
+                value={addr.name}
+                onChange={(e) => updA({ name: e.target.value })}
+              />
             </div>
           )}
           {field("street").visible && (
             <div className="space-y-2 sm:col-span-2">
-              <Label>
+              <Label htmlFor="register-street">
                 <FieldLabel name="street" />
               </Label>
-              <Input value={addr.street} onChange={(e) => updA({ street: e.target.value })} />
+              <Input
+                id="register-street"
+                value={addr.street}
+                onChange={(e) => updA({ street: e.target.value })}
+              />
             </div>
           )}
           {field("unit").visible && (
             <div className="space-y-2">
-              <Label>
+              <Label htmlFor="register-unit">
                 <FieldLabel name="unit" />
               </Label>
-              <Input value={addr.unit} onChange={(e) => updA({ unit: e.target.value })} />
+              <Input
+                id="register-unit"
+                value={addr.unit}
+                onChange={(e) => updA({ unit: e.target.value })}
+              />
             </div>
           )}
           {field("city").visible && (
             <div className="space-y-2">
-              <Label>
+              <Label htmlFor="register-city">
                 <FieldLabel name="city" />
               </Label>
-              <Input value={addr.city} onChange={(e) => updA({ city: e.target.value })} />
+              <Input
+                id="register-city"
+                value={addr.city}
+                onChange={(e) => updA({ city: e.target.value })}
+              />
             </div>
           )}
           {field("state").visible && (
             <div className="space-y-2">
-              <Label>
+              <Label htmlFor="register-state">
                 <FieldLabel name="state" />
               </Label>
               <Input
+                id="register-state"
                 maxLength={2}
                 value={addr.state}
                 onChange={(e) => updA({ state: e.target.value.toUpperCase() })}
@@ -1469,10 +1506,11 @@ function StepApparel() {
           )}
           {field("zip").visible && (
             <div className="space-y-2">
-              <Label>
+              <Label htmlFor="register-zip">
                 <FieldLabel name="zip" />
               </Label>
               <Input
+                id="register-zip"
                 value={addr.zip}
                 onChange={(e) => updA({ zip: e.target.value.replace(/\D/g, "").slice(0, 10) })}
               />
@@ -1480,22 +1518,26 @@ function StepApparel() {
           )}
           {field("country").visible && (
             <div className="space-y-2">
-              <Label>
+              <Label htmlFor="register-country">
                 <FieldLabel name="country" />
               </Label>
-              <Input value={addr.country} onChange={(e) => updA({ country: e.target.value })} />
+              <Input
+                id="register-country"
+                value={addr.country}
+                onChange={(e) => updA({ country: e.target.value })}
+              />
             </div>
           )}
           {field("addrType").visible && (
             <div className="space-y-2">
-              <Label>
+              <Label htmlFor="register-addr-type">
                 <FieldLabel name="addrType" listKey="addressTypes" />
               </Label>
               <Select
                 value={addr.type}
                 onValueChange={(v) => updA({ type: v as "residential" | "business" })}
               >
-                <SelectTrigger>
+                <SelectTrigger id="register-addr-type">
                   <SelectValue placeholder="Select..." />
                 </SelectTrigger>
                 <SelectContent>

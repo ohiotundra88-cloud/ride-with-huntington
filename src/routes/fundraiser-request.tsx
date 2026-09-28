@@ -245,12 +245,12 @@ function FundraiserRequestPage() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Event type</Label>
+                <Label htmlFor="fundraiser-request-event-type">Event type</Label>
                 <Select
                   value={form.event_type}
                   onValueChange={(v) => set("event_type", v as RequestInput["event_type"])}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="fundraiser-request-event-type">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

@@ -298,9 +298,9 @@ function ContactsAdmin() {
                 />
               </div>
               <div className="space-y-1">
-                <Label>Region</Label>
+                <Label htmlFor="admin-contacts-region">Region</Label>
                 <Select value={form.region} onValueChange={(v) => setForm({ ...form, region: v })}>
-                  <SelectTrigger>
+                  <SelectTrigger id="admin-contacts-region">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -313,12 +313,12 @@ function ContactsAdmin() {
                 </Select>
               </div>
               <div className="space-y-1">
-                <Label>Category</Label>
+                <Label htmlFor="admin-contacts-category">Category</Label>
                 <Select
                   value={form.category}
                   onValueChange={(v) => setForm({ ...form, category: v })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="admin-contacts-category">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

@@ -246,19 +246,20 @@ function GoalsAdmin() {
           {editing && (
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="sm:col-span-2 space-y-1">
-                <Label>Name</Label>
+                <Label htmlFor="admin-goals-name">Name</Label>
                 <Input
+                  id="admin-goals-name"
                   value={editing.name}
                   onChange={(e) => setEditing({ ...editing, name: e.target.value })}
                 />
               </div>
               <div className="space-y-1">
-                <Label>Unit</Label>
+                <Label htmlFor="admin-goals-unit">Unit</Label>
                 <Select
                   value={editing.unit}
                   onValueChange={(v) => setEditing({ ...editing, unit: v as GoalUnit })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="admin-goals-unit">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -273,12 +274,12 @@ function GoalsAdmin() {
                 </Select>
               </div>
               <div className="space-y-1">
-                <Label>Status</Label>
+                <Label htmlFor="admin-goals-status">Status</Label>
                 <Select
                   value={editing.status}
                   onValueChange={(v) => setEditing({ ...editing, status: v as Goal["status"] })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="admin-goals-status">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -291,11 +292,12 @@ function GoalsAdmin() {
                 </Select>
               </div>
               <div className="space-y-1">
-                <Label>Current</Label>
+                <Label htmlFor="admin-goals-current">Current</Label>
                 {API_MANAGED_GOALS.has(editing.id) ? (
-                  <Input value={editing.current} disabled />
+                  <Input id="admin-goals-current" value={editing.current} disabled />
                 ) : (
                   <Input
+                    id="admin-goals-current"
                     type="number"
                     min={0}
                     value={editing.current}
@@ -311,8 +313,9 @@ function GoalsAdmin() {
                 )}
               </div>
               <div className="space-y-1">
-                <Label>Target</Label>
+                <Label htmlFor="admin-goals-target">Target</Label>
                 <Input
+                  id="admin-goals-target"
                   type="number"
                   min={0}
                   value={editing.target}
@@ -322,24 +325,27 @@ function GoalsAdmin() {
                 />
               </div>
               <div className="space-y-1">
-                <Label>Start date</Label>
+                <Label htmlFor="admin-goals-start-date">Start date</Label>
                 <Input
+                  id="admin-goals-start-date"
                   type="date"
                   value={editing.startDate}
                   onChange={(e) => setEditing({ ...editing, startDate: e.target.value })}
                 />
               </div>
               <div className="space-y-1">
-                <Label>End date</Label>
+                <Label htmlFor="admin-goals-end-date">End date</Label>
                 <Input
+                  id="admin-goals-end-date"
                   type="date"
                   value={editing.endDate}
                   onChange={(e) => setEditing({ ...editing, endDate: e.target.value })}
                 />
               </div>
               <div className="space-y-1 sm:col-span-2">
-                <Label>Display location</Label>
+                <Label htmlFor="admin-goals-display-location">Display location</Label>
                 <Input
+                  id="admin-goals-display-location"
                   value={editing.location}
                   onChange={(e) => setEditing({ ...editing, location: e.target.value })}
                 />

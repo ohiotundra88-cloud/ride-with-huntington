@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useId, useMemo, useState, type ReactNode } from "react";
 import {
   RegisterContentCtx,
   useRegisterContent,
@@ -72,6 +72,7 @@ export function FieldLabel({
         <InlineEditText
           value={f.label}
           editing
+          label="Field label"
           onCommit={(next) => setField(name, { label: next })}
         />
       ) : (
@@ -87,6 +88,8 @@ function FieldSettings({ name, listKey }: { name: string; listKey?: string }) {
   const { field, setField, list, setList } = useRegisterContent();
   const f = field(name);
   const options = listKey ? list(listKey) : [];
+  const visibleId = useId();
+  const requiredId = useId();
 
   const move = (i: number, dir: -1 | 1) => {
     const next = [...options];
@@ -119,21 +122,32 @@ function FieldSettings({ name, listKey }: { name: string; listKey?: string }) {
           size="icon"
           className="h-6 w-6 text-[var(--brand-dark)]"
           title="Field settings"
+          aria-label={`Field settings for ${f.label}`}
         >
           <Settings2 className="h-3.5 w-3.5" />
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-80 space-y-3">
         <div className="flex items-center justify-between">
-          <Label className="flex items-center gap-2 text-xs">
+          <Label htmlFor={visibleId} className="flex items-center gap-2 text-xs">
             {f.visible ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}{" "}
             Visible
           </Label>
-          <Switch checked={f.visible} onCheckedChange={(v) => setField(name, { visible: v })} />
+          <Switch
+            id={visibleId}
+            checked={f.visible}
+            onCheckedChange={(v) => setField(name, { visible: v })}
+          />
         </div>
         <div className="flex items-center justify-between">
-          <Label className="text-xs">Required</Label>
-          <Switch checked={f.required} onCheckedChange={(v) => setField(name, { required: v })} />
+          <Label htmlFor={requiredId} className="text-xs">
+            Required
+          </Label>
+          <Switch
+            id={requiredId}
+            checked={f.required}
+            onCheckedChange={(v) => setField(name, { required: v })}
+          />
         </div>
         {listKey && (
           <div className="space-y-2 border-t pt-2">
@@ -143,6 +157,7 @@ function FieldSettings({ name, listKey }: { name: string; listKey?: string }) {
             {options.map((o, i) => (
               <div key={o.value} className="flex items-center gap-1">
                 <Input
+                  aria-label={`Choice ${i + 1} name`}
                   value={o.label}
                   onChange={(e) => rename(i, e.target.value)}
                   className="h-8 text-xs"
@@ -153,6 +168,7 @@ function FieldSettings({ name, listKey }: { name: string; listKey?: string }) {
                   className="h-7 w-7"
                   onClick={() => move(i, -1)}
                   title="Move up"
+                  aria-label={`Move ${o.label} up`}
                 >
                   <ArrowUp className="h-3.5 w-3.5" />
                 </Button>
@@ -162,6 +178,7 @@ function FieldSettings({ name, listKey }: { name: string; listKey?: string }) {
                   className="h-7 w-7"
                   onClick={() => move(i, 1)}
                   title="Move down"
+                  aria-label={`Move ${o.label} down`}
                 >
                   <ArrowDown className="h-3.5 w-3.5" />
                 </Button>
@@ -171,6 +188,7 @@ function FieldSettings({ name, listKey }: { name: string; listKey?: string }) {
                   className="h-7 w-7 text-red-500"
                   onClick={() => remove(i)}
                   title="Remove"
+                  aria-label={`Remove ${o.label}`}
                   disabled={options.length <= 1}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
@@ -227,12 +245,14 @@ export function ListSettings({
         {options.map((o, i) => (
           <div key={o.value} className="flex items-center gap-1">
             <Input
+              aria-label={`Choice ${i + 1} name`}
               value={o.label}
               onChange={(e) => patch(i, { label: e.target.value })}
               className="h-8 text-xs"
             />
             {withDesc && (
               <Input
+                aria-label={`Choice ${i + 1} description`}
                 value={o.desc ?? ""}
                 onChange={(e) => patch(i, { desc: e.target.value })}
                 className="h-8 text-xs"
@@ -245,6 +265,7 @@ export function ListSettings({
               className="h-7 w-7"
               onClick={() => move(i, -1)}
               title="Move up"
+              aria-label={`Move ${o.label} up`}
             >
               <ArrowUp className="h-3.5 w-3.5" />
             </Button>
@@ -254,6 +275,7 @@ export function ListSettings({
               className="h-7 w-7"
               onClick={() => move(i, 1)}
               title="Move down"
+              aria-label={`Move ${o.label} down`}
             >
               <ArrowDown className="h-3.5 w-3.5" />
             </Button>
@@ -269,6 +291,7 @@ export function ListSettings({
                 )
               }
               title="Remove"
+              aria-label={`Remove ${o.label}`}
               disabled={options.length <= 1}
             >
               <Trash2 className="h-3.5 w-3.5" />
@@ -297,6 +320,8 @@ export function ListSettings({
 export function LinkSettings({ linkKey }: { linkKey: string }) {
   const { editing, link, setLink } = useRegisterContent();
   const [draft, setDraft] = useState<string | null>(null);
+  const labelId = useId();
+  const urlId = useId();
   if (!editing) return null;
   const l = link(linkKey);
   return (
@@ -307,14 +332,20 @@ export function LinkSettings({ linkKey }: { linkKey: string }) {
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-80 space-y-2">
-        <Label className="text-xs">Button label</Label>
+        <Label htmlFor={labelId} className="text-xs">
+          Button label
+        </Label>
         <Input
+          id={labelId}
           value={l.label}
           onChange={(e) => setLink(linkKey, { label: e.target.value })}
           className="h-8 text-xs"
         />
-        <Label className="text-xs">Web address</Label>
+        <Label htmlFor={urlId} className="text-xs">
+          Web address
+        </Label>
         <Input
+          id={urlId}
           value={draft ?? l.url}
           onChange={(e) => setDraft(e.target.value)}
           onBlur={() => draft !== null && setLink(linkKey, { url: draft.trim() })}

@@ -492,17 +492,28 @@ function TeamEventsPage() {
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex flex-wrap justify-end gap-1">
-                              <Button size="sm" variant="ghost" onClick={() => setInviteesFor(e)}>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                aria-label={`View RSVPs for ${e.title}`}
+                                onClick={() => setInviteesFor(e)}
+                              >
                                 <Users className="h-3.5 w-3.5" />
                               </Button>
                               {e.status !== "cancelled" && (
                                 <>
-                                  <Button size="sm" variant="ghost" onClick={() => loadForEdit(e)}>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    aria-label={`Edit ${e.title}`}
+                                    onClick={() => loadForEdit(e)}
+                                  >
                                     <Pencil className="h-3.5 w-3.5" />
                                   </Button>
                                   <Button
                                     size="sm"
                                     variant="ghost"
+                                    aria-label={`Send invitations for ${e.title}`}
                                     onClick={() => publishExisting.mutate(e.id)}
                                     disabled={publishExisting.isPending}
                                   >
@@ -511,6 +522,7 @@ function TeamEventsPage() {
                                   <Button
                                     size="sm"
                                     variant="ghost"
+                                    aria-label={`Cancel ${e.title}`}
                                     onClick={() => cancel.mutate(e.id)}
                                   >
                                     <Ban className="h-3.5 w-3.5" />
@@ -522,6 +534,7 @@ function TeamEventsPage() {
                                   size="sm"
                                   variant="ghost"
                                   className="text-destructive"
+                                  aria-label={`Delete ${e.title}`}
                                   onClick={() => remove.mutate(e.id)}
                                 >
                                   <Trash2 className="h-3.5 w-3.5" />

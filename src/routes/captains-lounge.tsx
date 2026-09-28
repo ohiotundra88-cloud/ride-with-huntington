@@ -679,22 +679,28 @@ function PostDialog({ post, onSaved }: { post?: CaptainPost; onSaved: () => void
           </div>
           <div className="flex items-center justify-between rounded-lg border p-3">
             <div>
-              <div className="text-sm font-medium">Pin to top</div>
+              <div id="lp-pinned-label" className="text-sm font-medium">
+                Pin to top
+              </div>
               <div className="text-xs text-muted-foreground">Keep this above other posts.</div>
             </div>
             <Switch
+              aria-labelledby="lp-pinned-label"
               checked={form.pinned}
               onCheckedChange={(v) => setForm({ ...form, pinned: v })}
             />
           </div>
           <div className="flex items-center justify-between rounded-lg border p-3">
             <div>
-              <div className="text-sm font-medium">Published</div>
+              <div id="lp-published-label" className="text-sm font-medium">
+                Published
+              </div>
               <div className="text-xs text-muted-foreground">
                 Off keeps it a draft only managers see.
               </div>
             </div>
             <Switch
+              aria-labelledby="lp-published-label"
               checked={form.published}
               onCheckedChange={(v) => setForm({ ...form, published: v })}
             />

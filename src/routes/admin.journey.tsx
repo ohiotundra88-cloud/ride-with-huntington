@@ -365,21 +365,22 @@ function JourneyAdmin() {
           {editing && (
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="sm:col-span-2 space-y-1">
-                <Label>Title</Label>
+                <Label htmlFor="admin-journey-title">Title</Label>
                 <Input
+                  id="admin-journey-title"
                   value={editing.title}
                   onChange={(e) => setEditing({ ...editing, title: e.target.value })}
                 />
               </div>
               <div className="space-y-1">
-                <Label>Phase</Label>
+                <Label htmlFor="admin-journey-phase">Phase</Label>
                 <Select
                   value={editing.phase}
                   onValueChange={(v) =>
                     setEditing({ ...editing, phase: v as EditableTimelineItem["phase"] })
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="admin-journey-phase">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -392,14 +393,14 @@ function JourneyAdmin() {
                 </Select>
               </div>
               <div className="space-y-1">
-                <Label>State</Label>
+                <Label htmlFor="admin-journey-state">State</Label>
                 <Select
                   value={editing.state}
                   onValueChange={(v) =>
                     setEditing({ ...editing, state: v as EditableTimelineItem["state"] })
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="admin-journey-state">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -420,55 +421,61 @@ function JourneyAdmin() {
                 />
               </div>
               <div className="space-y-1">
-                <Label>Location</Label>
+                <Label htmlFor="admin-journey-location">Location</Label>
                 <Input
+                  id="admin-journey-location"
                   value={editing.location ?? ""}
                   onChange={(e) => setEditing({ ...editing, location: e.target.value })}
                 />
               </div>
               <div className="sm:col-span-2 space-y-1">
-                <Label>Instructions</Label>
+                <Label htmlFor="admin-journey-instructions">Instructions</Label>
                 <Textarea
+                  id="admin-journey-instructions"
                   rows={2}
                   value={editing.instructions ?? ""}
                   onChange={(e) => setEditing({ ...editing, instructions: e.target.value })}
                 />
               </div>
               <div className="sm:col-span-2 space-y-1">
-                <Label>Note</Label>
+                <Label htmlFor="admin-journey-note">Note</Label>
                 <Input
+                  id="admin-journey-note"
                   value={editing.note ?? ""}
                   onChange={(e) => setEditing({ ...editing, note: e.target.value })}
                 />
               </div>
               <div className="space-y-1">
-                <Label>CTA label</Label>
+                <Label htmlFor="admin-journey-cta-label">CTA label</Label>
                 <Input
+                  id="admin-journey-cta-label"
                   value={editing.ctaLabel ?? ""}
                   onChange={(e) => setEditing({ ...editing, ctaLabel: e.target.value })}
                 />
               </div>
               <div className="space-y-1">
-                <Label>CTA link</Label>
+                <Label htmlFor="admin-journey-cta-link">CTA link</Label>
                 <Input
+                  id="admin-journey-cta-link"
                   value={editing.href ?? ""}
                   onChange={(e) => setEditing({ ...editing, href: e.target.value })}
                 />
               </div>
               <div className="space-y-1">
-                <Label>Contact</Label>
+                <Label htmlFor="admin-journey-contact">Contact</Label>
                 <Input
+                  id="admin-journey-contact"
                   value={editing.contact ?? ""}
                   onChange={(e) => setEditing({ ...editing, contact: e.target.value })}
                 />
               </div>
               <div className="space-y-1">
-                <Label>Audience</Label>
+                <Label htmlFor="admin-journey-audience">Audience</Label>
                 <Select
                   value={editing.audience}
                   onValueChange={(v) => setEditing({ ...editing, audience: v as Audience })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="admin-journey-audience">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -525,8 +532,9 @@ function JourneyAdmin() {
                 />
               </div>
               <div className="space-y-1">
-                <Label>Items (one per line)</Label>
+                <Label htmlFor="admin-journey-items-one-per-line">Items (one per line)</Label>
                 <Textarea
+                  id="admin-journey-items-one-per-line"
                   rows={6}
                   value={dayEdit.items.join("\n")}
                   onChange={(e) =>

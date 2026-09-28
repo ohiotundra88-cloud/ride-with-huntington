@@ -363,7 +363,7 @@ function ReassignCaptain({ request }: { request: FundraiserRequest }) {
       </p>
       <div className="flex flex-wrap items-center gap-2">
         <Select value={choice} onValueChange={setChoice}>
-          <SelectTrigger className="w-full sm:w-80">
+          <SelectTrigger className="w-full sm:w-80" aria-label="Choose a different captain">
             <SelectValue placeholder="Choose a different captain" />
           </SelectTrigger>
           <SelectContent>

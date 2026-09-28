@@ -582,8 +582,9 @@ function ActivityCard({
           className="grid gap-3 rounded-lg border p-3 sm:grid-cols-2"
         >
           <div className="space-y-1.5">
-            <Label>Last contact date</Label>
+            <Label htmlFor="vendors-detail-last-contact-date">Last contact date</Label>
             <Input
+              id="vendors-detail-last-contact-date"
               type="date"
               value={form.contact_date}
               onChange={(e) => setForm((f) => ({ ...f, contact_date: e.target.value }))}
@@ -591,19 +592,20 @@ function ActivityCard({
             />
           </div>
           <div className="space-y-1.5">
-            <Label>Contacted by</Label>
+            <Label htmlFor="vendors-detail-contacted-by">Contacted by</Label>
             <Input
+              id="vendors-detail-contacted-by"
               value={form.contacted_by}
               onChange={(e) => setForm((f) => ({ ...f, contacted_by: e.target.value }))}
             />
           </div>
           <div className="space-y-1.5">
-            <Label>Contact method</Label>
+            <Label htmlFor="vendors-detail-contact-method">Contact method</Label>
             <Select
               value={form.contact_method}
               onValueChange={(v) => setForm((f) => ({ ...f, contact_method: v }))}
             >
-              <SelectTrigger>
+              <SelectTrigger id="vendors-detail-contact-method">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -616,15 +618,17 @@ function ActivityCard({
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label>Next step</Label>
+            <Label htmlFor="vendors-detail-next-step">Next step</Label>
             <Input
+              id="vendors-detail-next-step"
               value={form.next_step}
               onChange={(e) => setForm((f) => ({ ...f, next_step: e.target.value }))}
             />
           </div>
           <div className="space-y-1.5 sm:col-span-2">
-            <Label>Interaction notes</Label>
+            <Label htmlFor="vendors-detail-interaction-notes">Interaction notes</Label>
             <Textarea
+              id="vendors-detail-interaction-notes"
               rows={3}
               value={form.interaction_notes}
               onChange={(e) => setForm((f) => ({ ...f, interaction_notes: e.target.value }))}

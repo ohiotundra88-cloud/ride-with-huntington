@@ -280,27 +280,29 @@ function AnnouncementsAdmin() {
           {editing && (
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="sm:col-span-2 space-y-1">
-                <Label>Headline</Label>
+                <Label htmlFor="admin-announcements-headline">Headline</Label>
                 <Input
+                  id="admin-announcements-headline"
                   value={editing.headline}
                   onChange={(e) => setEditing({ ...editing, headline: e.target.value })}
                 />
               </div>
               <div className="sm:col-span-2 space-y-1">
-                <Label>Body</Label>
+                <Label htmlFor="admin-announcements-body">Body</Label>
                 <Textarea
+                  id="admin-announcements-body"
                   value={editing.body}
                   onChange={(e) => setEditing({ ...editing, body: e.target.value })}
                   rows={3}
                 />
               </div>
               <div className="space-y-1">
-                <Label>Icon</Label>
+                <Label htmlFor="admin-announcements-icon">Icon</Label>
                 <Select
                   value={editing.icon}
                   onValueChange={(v) => setEditing({ ...editing, icon: v })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="admin-announcements-icon">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -313,12 +315,12 @@ function AnnouncementsAdmin() {
                 </Select>
               </div>
               <div className="space-y-1">
-                <Label>Audience</Label>
+                <Label htmlFor="admin-announcements-audience">Audience</Label>
                 <Select
                   value={editing.audience}
                   onValueChange={(v) => setEditing({ ...editing, audience: v as Audience })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="admin-announcements-audience">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -333,19 +335,20 @@ function AnnouncementsAdmin() {
                 </Select>
               </div>
               <div className="space-y-1">
-                <Label>CTA label</Label>
+                <Label htmlFor="admin-announcements-cta-label">CTA label</Label>
                 <Input
+                  id="admin-announcements-cta-label"
                   value={editing.ctaLabel ?? ""}
                   onChange={(e) => setEditing({ ...editing, ctaLabel: e.target.value })}
                 />
               </div>
               <div className="space-y-1">
-                <Label>CTA link</Label>
+                <Label htmlFor="admin-announcements-cta-link">CTA link</Label>
                 <Select
                   value={editing.ctaHref || "none"}
                   onValueChange={(v) => setEditing({ ...editing, ctaHref: v === "none" ? "" : v })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="admin-announcements-cta-link">
                     <SelectValue placeholder="No link" />
                   </SelectTrigger>
                   <SelectContent>
@@ -368,8 +371,9 @@ function AnnouncementsAdmin() {
                 </Select>
               </div>
               <div className="space-y-1">
-                <Label>Publish at</Label>
+                <Label htmlFor="admin-announcements-publish-at">Publish at</Label>
                 <Input
+                  id="admin-announcements-publish-at"
                   type="datetime-local"
                   value={editing.publishAt ? editing.publishAt.slice(0, 16) : ""}
                   onChange={(e) =>
@@ -381,8 +385,9 @@ function AnnouncementsAdmin() {
                 />
               </div>
               <div className="space-y-1">
-                <Label>Expires at</Label>
+                <Label htmlFor="admin-announcements-expires-at">Expires at</Label>
                 <Input
+                  id="admin-announcements-expires-at"
                   type="datetime-local"
                   value={editing.expireAt?.slice(0, 16) ?? ""}
                   onChange={(e) =>

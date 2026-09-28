@@ -225,6 +225,7 @@ function BrandingAdmin() {
             <div className="space-y-2">
               <Label>Darkening overlay — {overlay}%</Label>
               <Slider
+                aria-label="Darkening overlay"
                 value={[overlay]}
                 min={0}
                 max={95}
@@ -281,9 +282,9 @@ function BrandingAdmin() {
             </div>
 
             <div className="space-y-2">
-              <Label>Image focus</Label>
+              <Label htmlFor="admin-branding-image-focus">Image focus</Label>
               <Select value={position} onValueChange={setPosition}>
-                <SelectTrigger>
+                <SelectTrigger id="admin-branding-image-focus">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
