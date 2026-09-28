@@ -521,9 +521,9 @@ function MessagesPage() {
                     </div>
                     <div className="grid gap-4 sm:grid-cols-3">
                       <div className="space-y-1.5">
-                        <Label>Priority</Label>
+                        <Label htmlFor="messages-priority">Priority</Label>
                         <Select value={priority} onValueChange={setPriority}>
-                          <SelectTrigger>
+                          <SelectTrigger id="messages-priority">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -536,9 +536,9 @@ function MessagesPage() {
                         </Select>
                       </div>
                       <div className="space-y-1.5">
-                        <Label>Category</Label>
+                        <Label htmlFor="messages-category">Category</Label>
                         <Select value={category} onValueChange={setCategory}>
-                          <SelectTrigger>
+                          <SelectTrigger id="messages-category">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -1105,6 +1105,7 @@ function MessagesPage() {
                                       size="sm"
                                       variant="ghost"
                                       className="h-7 px-2"
+                                      aria-label={`Edit ${m.title}`}
                                       onClick={() => loadForEdit(m)}
                                     >
                                       <Pencil className="h-3.5 w-3.5" />
@@ -1124,6 +1125,7 @@ function MessagesPage() {
                                   size="sm"
                                   variant="ghost"
                                   className="h-7 px-2"
+                                  aria-label={`Duplicate ${m.title}`}
                                   onClick={() => duplicate(m)}
                                 >
                                   <Copy className="h-3.5 w-3.5" />
@@ -1133,6 +1135,7 @@ function MessagesPage() {
                                     size="sm"
                                     variant="ghost"
                                     className="h-7 px-2 text-destructive"
+                                    aria-label={`Delete ${m.title}`}
                                     onClick={() => remove.mutate(m.id)}
                                   >
                                     <Trash2 className="h-3.5 w-3.5" />

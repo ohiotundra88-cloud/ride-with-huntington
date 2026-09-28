@@ -244,7 +244,11 @@ function ReadinessAdmin() {
                 </div>
                 <div className="flex flex-wrap gap-1 items-center">
                   <div className="flex items-center gap-1 text-xs">
-                    <Switch checked={r.active} onCheckedChange={(v) => toggle(r, { active: v })} />{" "}
+                    <Switch
+                      aria-label={`${r.title} active`}
+                      checked={r.active}
+                      onCheckedChange={(v) => toggle(r, { active: v })}
+                    />{" "}
                     Active
                   </div>
                   <Button
@@ -296,27 +300,29 @@ function ReadinessAdmin() {
           {editing && (
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="sm:col-span-2 space-y-1">
-                <Label>Title</Label>
+                <Label htmlFor="admin-readiness-title">Title</Label>
                 <Input
+                  id="admin-readiness-title"
                   value={editing.title}
                   onChange={(e) => setEditing({ ...editing, title: e.target.value })}
                 />
               </div>
               <div className="sm:col-span-2 space-y-1">
-                <Label>Detail / helper</Label>
+                <Label htmlFor="admin-readiness-detail-helper">Detail / helper</Label>
                 <Textarea
+                  id="admin-readiness-detail-helper"
                   rows={2}
                   value={editing.detail}
                   onChange={(e) => setEditing({ ...editing, detail: e.target.value })}
                 />
               </div>
               <div className="space-y-1">
-                <Label>Icon</Label>
+                <Label htmlFor="admin-readiness-icon">Icon</Label>
                 <Select
                   value={editing.icon}
                   onValueChange={(v) => setEditing({ ...editing, icon: v })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="admin-readiness-icon">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -329,14 +335,14 @@ function ReadinessAdmin() {
                 </Select>
               </div>
               <div className="space-y-1">
-                <Label>Status</Label>
+                <Label htmlFor="admin-readiness-status">Status</Label>
                 <Select
                   value={editing.status}
                   onValueChange={(v) =>
                     setEditing({ ...editing, status: v as EditableReadinessItem["status"] })
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="admin-readiness-status">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -356,8 +362,9 @@ function ReadinessAdmin() {
                 </Select>
               </div>
               <div className="space-y-1">
-                <Label>Weight</Label>
+                <Label htmlFor="admin-readiness-weight">Weight</Label>
                 <Input
+                  id="admin-readiness-weight"
                   type="number"
                   min={0}
                   max={100}
@@ -366,12 +373,12 @@ function ReadinessAdmin() {
                 />
               </div>
               <div className="space-y-1">
-                <Label>Audience</Label>
+                <Label htmlFor="admin-readiness-audience">Audience</Label>
                 <Select
                   value={editing.audience}
                   onValueChange={(v) => setEditing({ ...editing, audience: v as Audience })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="admin-readiness-audience">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -386,22 +393,25 @@ function ReadinessAdmin() {
                 </Select>
               </div>
               <div className="space-y-1">
-                <Label>CTA label</Label>
+                <Label htmlFor="admin-readiness-cta-label">CTA label</Label>
                 <Input
+                  id="admin-readiness-cta-label"
                   value={editing.ctaLabel}
                   onChange={(e) => setEditing({ ...editing, ctaLabel: e.target.value })}
                 />
               </div>
               <div className="space-y-1">
-                <Label>CTA link</Label>
+                <Label htmlFor="admin-readiness-cta-link">CTA link</Label>
                 <Input
+                  id="admin-readiness-cta-link"
                   value={editing.href ?? ""}
                   onChange={(e) => setEditing({ ...editing, href: e.target.value })}
                 />
               </div>
               <div className="space-y-1">
-                <Label>Deadline</Label>
+                <Label htmlFor="admin-readiness-deadline">Deadline</Label>
                 <Input
+                  id="admin-readiness-deadline"
                   type="date"
                   value={editing.deadline ?? ""}
                   onChange={(e) => setEditing({ ...editing, deadline: e.target.value })}

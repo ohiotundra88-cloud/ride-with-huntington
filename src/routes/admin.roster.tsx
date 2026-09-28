@@ -155,12 +155,12 @@ function RosterPage() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Participation</Label>
+                  <Label htmlFor="admin-roster-participation">Participation</Label>
                   <Select
                     value={participation}
                     onValueChange={(v) => setParticipation(v as typeof participation)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger id="admin-roster-participation">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>

@@ -180,6 +180,7 @@ function ConciergeAdmin() {
                   <div className="flex gap-1">
                     <div className="flex items-center gap-1 text-xs mr-2">
                       <Switch
+                        aria-label={`${i.title} active`}
                         checked={i.active}
                         onCheckedChange={(v) => {
                           setState((s) => ({
@@ -205,7 +206,12 @@ function ConciergeAdmin() {
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button size="sm" variant="ghost" className="text-red-600">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-red-600"
+                          aria-label={`Delete ${i.title}`}
+                        >
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       </AlertDialogTrigger>
@@ -233,8 +239,11 @@ function ConciergeAdmin() {
         <TabsContent value="starters" className="mt-4">
           <Card>
             <CardContent className="p-4 space-y-2">
-              <Label>Suggested starter questions (one per line)</Label>
+              <Label htmlFor="admin-concierge-starter-questions">
+                Suggested starter questions (one per line)
+              </Label>
               <Textarea
+                id="admin-concierge-starter-questions"
                 rows={8}
                 value={state.concierge.starters.join("\n")}
                 onChange={(e) =>
@@ -267,8 +276,9 @@ function ConciergeAdmin() {
           <Card>
             <CardContent className="p-4 grid gap-3">
               <div className="space-y-1">
-                <Label>Fallback title</Label>
+                <Label htmlFor="admin-concierge-fallback-title">Fallback title</Label>
                 <Input
+                  id="admin-concierge-fallback-title"
                   value={state.concierge.fallbackTitle}
                   onChange={(e) =>
                     setState((s) => ({
@@ -279,8 +289,9 @@ function ConciergeAdmin() {
                 />
               </div>
               <div className="space-y-1">
-                <Label>Fallback body</Label>
+                <Label htmlFor="admin-concierge-fallback-body">Fallback body</Label>
                 <Textarea
+                  id="admin-concierge-fallback-body"
                   rows={4}
                   value={state.concierge.fallbackBody}
                   onChange={(e) =>
@@ -313,8 +324,9 @@ function ConciergeAdmin() {
           {editing && (
             <div className="grid gap-3">
               <div className="space-y-1">
-                <Label>Title</Label>
+                <Label htmlFor="admin-concierge-title">Title</Label>
                 <Input
+                  id="admin-concierge-title"
                   value={editing.title}
                   onChange={(e) => setEditing({ ...editing, title: e.target.value })}
                 />
@@ -328,18 +340,20 @@ function ConciergeAdmin() {
                 />
               </div>
               <div className="space-y-1">
-                <Label>Response body</Label>
+                <Label htmlFor="admin-concierge-response-body">Response body</Label>
                 <Textarea
+                  id="admin-concierge-response-body"
                   rows={5}
                   value={editing.body}
                   onChange={(e) => setEditing({ ...editing, body: e.target.value })}
                 />
               </div>
               <div className="space-y-1">
-                <Label>
+                <Label htmlFor="admin-concierge-related-links">
                   Related links (one per line: <code>Label|/path</code>)
                 </Label>
                 <Textarea
+                  id="admin-concierge-related-links"
                   rows={3}
                   value={linksInput}
                   onChange={(e) => setLinksInput(e.target.value)}

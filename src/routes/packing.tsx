@@ -167,7 +167,7 @@ function PackingPage() {
                 Incomplete only
               </label>
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-44">
+                <SelectTrigger className="w-44" aria-label="Filter by category">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

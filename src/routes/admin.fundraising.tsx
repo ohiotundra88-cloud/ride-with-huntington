@@ -288,9 +288,9 @@ function AssetDialog({ asset, onClose }: { asset: FundraisingAsset | null; onClo
           </div>
 
           <div>
-            <Label>Category</Label>
+            <Label htmlFor="admin-fundraising-category">Category</Label>
             <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger>
+              <SelectTrigger id="admin-fundraising-category">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -346,7 +346,12 @@ function AssetDialog({ asset, onClose }: { asset: FundraisingAsset | null; onClo
             {asset?.file_name && !file && (
               <div className="mt-2 flex items-center justify-between gap-2 rounded-md bg-muted/60 px-3 py-2 text-xs">
                 <span className="truncate">{asset.file_name}</span>
-                <Button variant="ghost" size="sm" onClick={dropFile}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  aria-label={`Remove attachment ${asset.file_name}`}
+                  onClick={dropFile}
+                >
                   <X className="h-3.5 w-3.5" />
                 </Button>
               </div>

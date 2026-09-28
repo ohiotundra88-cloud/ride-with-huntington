@@ -259,7 +259,7 @@ function VendorDashboard() {
               />
             </div>
             <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger>
+              <SelectTrigger aria-label="Filter by status">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -272,7 +272,7 @@ function VendorDashboard() {
               </SelectContent>
             </Select>
             <Select value={segment} onValueChange={setSegment}>
-              <SelectTrigger>
+              <SelectTrigger aria-label="Filter by segment">
                 <SelectValue placeholder="Segment" />
               </SelectTrigger>
               <SelectContent>
@@ -285,7 +285,7 @@ function VendorDashboard() {
               </SelectContent>
             </Select>
             <Select value={year} onValueChange={setYear}>
-              <SelectTrigger>
+              <SelectTrigger aria-label="Filter by year">
                 <SelectValue placeholder="Year" />
               </SelectTrigger>
               <SelectContent>
@@ -301,7 +301,7 @@ function VendorDashboard() {
 
           <div className="flex flex-wrap items-center gap-3">
             <Select value={sort} onValueChange={(v) => setSort(v as SortKey)}>
-              <SelectTrigger className="w-56">
+              <SelectTrigger className="w-56" aria-label="Sort vendors">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -453,7 +453,7 @@ function ExecutiveSummary({
           <BarChart3 className="h-4 w-4 text-[var(--brand)]" /> Executive summary
         </CardTitle>
         <Select value={year} onValueChange={setYear}>
-          <SelectTrigger className="w-36">
+          <SelectTrigger className="w-36" aria-label="Summary year">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

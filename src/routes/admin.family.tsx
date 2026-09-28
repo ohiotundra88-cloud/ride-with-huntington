@@ -260,27 +260,29 @@ function FamilyAdmin() {
           {editing && (
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="sm:col-span-2 space-y-1">
-                <Label>Title</Label>
+                <Label htmlFor="admin-family-title">Title</Label>
                 <Input
+                  id="admin-family-title"
                   value={editing.title}
                   onChange={(e) => setEditing({ ...editing, title: e.target.value })}
                 />
               </div>
               <div className="sm:col-span-2 space-y-1">
-                <Label>Body</Label>
+                <Label htmlFor="admin-family-body">Body</Label>
                 <Textarea
+                  id="admin-family-body"
                   rows={4}
                   value={editing.body}
                   onChange={(e) => setEditing({ ...editing, body: e.target.value })}
                 />
               </div>
               <div className="space-y-1">
-                <Label>Icon</Label>
+                <Label htmlFor="admin-family-icon">Icon</Label>
                 <Select
                   value={editing.icon}
                   onValueChange={(v) => setEditing({ ...editing, icon: v })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="admin-family-icon">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

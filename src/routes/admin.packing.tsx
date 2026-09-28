@@ -314,6 +314,7 @@ function PackingAdmin() {
                           <Button
                             size="sm"
                             variant="ghost"
+                            aria-label={`Edit ${p.label}`}
                             onClick={() => {
                               setEditing({ ...p });
                               setIsNew(false);
@@ -324,7 +325,12 @@ function PackingAdmin() {
                           </Button>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button size="sm" variant="ghost" className="text-red-600">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-red-600"
+                                aria-label={`Delete ${p.label}`}
+                              >
                                 <Trash2 className="h-3.5 w-3.5" />
                               </Button>
                             </AlertDialogTrigger>
@@ -365,22 +371,23 @@ function PackingAdmin() {
           {editing && (
             <div className="grid gap-3">
               <div className="space-y-1">
-                <Label>Label</Label>
+                <Label htmlFor="admin-packing-label">Label</Label>
                 <Input
+                  id="admin-packing-label"
                   value={editing.label}
                   onChange={(e) => setEditing({ ...editing, label: e.target.value })}
                 />
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-1">
-                  <Label>Preset</Label>
+                  <Label htmlFor="admin-packing-preset">Preset</Label>
                   <Select
                     value={editing.preset}
                     onValueChange={(v) =>
                       setEditing({ ...editing, preset: v as "rider" | "volunteer" })
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger id="admin-packing-preset">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -390,7 +397,7 @@ function PackingAdmin() {
                   </Select>
                 </div>
                 <div className="space-y-1">
-                  <Label>Category</Label>
+                  <Label htmlFor="admin-packing-category">Category</Label>
                   <Select
                     value={editing.category}
                     onValueChange={(v) => {
@@ -398,7 +405,7 @@ function PackingAdmin() {
                       setCustomCat("");
                     }}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger id="admin-packing-category">
                       <SelectValue placeholder="Pick or type below" />
                     </SelectTrigger>
                     <SelectContent>
@@ -419,8 +426,9 @@ function PackingAdmin() {
               </div>
 
               <div className="space-y-1">
-                <Label>Description</Label>
+                <Label htmlFor="admin-packing-description">Description</Label>
                 <Textarea
+                  id="admin-packing-description"
                   rows={2}
                   value={editing.description ?? ""}
                   onChange={(e) => setEditing({ ...editing, description: e.target.value })}

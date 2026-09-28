@@ -13,6 +13,7 @@ export function InlineEditText({
   editing,
   multiline = false,
   placeholder = "Add text",
+  label,
   className,
   as: As = "span",
 }: {
@@ -21,6 +22,8 @@ export function InlineEditText({
   editing: boolean;
   multiline?: boolean;
   placeholder?: string;
+  /** Accessible name for the text box while editing. Defaults to the placeholder. */
+  label?: string;
   className?: string;
   as?: "span" | "p" | "div";
 }) {
@@ -57,6 +60,7 @@ export function InlineEditText({
     return multiline ? (
       <Textarea
         {...shared}
+        aria-label={label ?? placeholder}
         rows={3}
         ref={ref as React.Ref<HTMLTextAreaElement>}
         onKeyDown={(e) => {
@@ -69,6 +73,7 @@ export function InlineEditText({
     ) : (
       <Input
         {...shared}
+        aria-label={label ?? placeholder}
         ref={ref as React.Ref<HTMLInputElement>}
         onKeyDown={(e) => {
           if (e.key === "Enter") {

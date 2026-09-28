@@ -135,7 +135,7 @@ function AdminFaqs() {
           className="w-64"
         />
         <Select value={cat} onValueChange={(v) => setCat(v as FAQCategory | "All")}>
-          <SelectTrigger className="w-52">
+          <SelectTrigger className="w-52" aria-label="Filter by category">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -248,12 +248,14 @@ function AdminFaqs() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Category</label>
+                <label htmlFor="admin-faqs-category" className="text-sm font-medium">
+                  Category
+                </label>
                 <Select
                   value={editing.category}
                   onValueChange={(v) => setEditing({ ...editing, category: v as FAQCategory })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="admin-faqs-category">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

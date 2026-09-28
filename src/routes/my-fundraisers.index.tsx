@@ -315,9 +315,9 @@ function NewFundraiserDialog() {
           }}
         >
           <div className="space-y-1.5">
-            <Label>Type</Label>
+            <Label htmlFor="my-fundraisers-index-type">Type</Label>
             <Select value={kind} onValueChange={(v) => setKind(v as FundraiserKind)}>
-              <SelectTrigger>
+              <SelectTrigger id="my-fundraisers-index-type">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

@@ -934,12 +934,20 @@ function PayoutPanel({
               }}
             >
               <div className="space-y-1.5">
-                <Label>Recipient / bank account</Label>
-                <Input required value={recipient} onChange={(e) => setRecipient(e.target.value)} />
+                <Label htmlFor="my-fundraisers-detail-recipient-bank-account">
+                  Recipient / bank account
+                </Label>
+                <Input
+                  id="my-fundraisers-detail-recipient-bank-account"
+                  required
+                  value={recipient}
+                  onChange={(e) => setRecipient(e.target.value)}
+                />
               </div>
               <div className="space-y-1.5">
-                <Label>Transfer date</Label>
+                <Label htmlFor="my-fundraisers-detail-transfer-date">Transfer date</Label>
                 <Input
+                  id="my-fundraisers-detail-transfer-date"
                   type="date"
                   required
                   value={date}
@@ -947,8 +955,9 @@ function PayoutPanel({
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Gross amount ($)</Label>
+                <Label htmlFor="my-fundraisers-detail-gross-amount">Gross amount ($)</Label>
                 <Input
+                  id="my-fundraisers-detail-gross-amount"
                   type="number"
                   min={0}
                   step="0.01"
@@ -957,8 +966,9 @@ function PayoutPanel({
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Fees ($)</Label>
+                <Label htmlFor="my-fundraisers-detail-fees">Fees ($)</Label>
                 <Input
+                  id="my-fundraisers-detail-fees"
                   type="number"
                   min={0}
                   step="0.01"
@@ -975,8 +985,12 @@ function PayoutPanel({
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Notes</Label>
-                <Input value={notes} onChange={(e) => setNotes(e.target.value)} />
+                <Label htmlFor="my-fundraisers-detail-notes">Notes</Label>
+                <Input
+                  id="my-fundraisers-detail-notes"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                />
               </div>
               <div className="sm:col-span-2">
                 <Button

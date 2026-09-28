@@ -345,7 +345,7 @@ function ParticipantsAdmin() {
             />
           </div>
           <Select value={participationFilter} onValueChange={setParticipationFilter}>
-            <SelectTrigger className="w-full sm:w-44">
+            <SelectTrigger className="w-full sm:w-44" aria-label="Filter by participation">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -571,9 +571,9 @@ function EditDialog({
             <Input id="e-name" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
           <div className="space-y-1.5">
-            <Label>Participation</Label>
+            <Label htmlFor="admin-participants-participation">Participation</Label>
             <Select value={participation} onValueChange={setParticipation}>
-              <SelectTrigger>
+              <SelectTrigger id="admin-participants-participation">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -736,12 +736,12 @@ function AddDialog({ onClose, onSaved }: { onClose: () => void; onSaved: () => v
             />
           </div>
           <div className="space-y-1.5">
-            <Label>Participation</Label>
+            <Label htmlFor="admin-participants-participation-2">Participation</Label>
             <Select
               value={participation}
               onValueChange={(v) => setParticipation(v as typeof participation)}
             >
-              <SelectTrigger>
+              <SelectTrigger id="admin-participants-participation-2">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

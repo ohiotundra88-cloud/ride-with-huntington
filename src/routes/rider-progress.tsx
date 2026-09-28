@@ -410,7 +410,7 @@ function RiderProgressPage() {
               />
             </div>
             <Select value={participation} onValueChange={setParticipation}>
-              <SelectTrigger className="w-36">
+              <SelectTrigger className="w-36" aria-label="Filter by role">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -423,7 +423,7 @@ function RiderProgressPage() {
             </Select>
             {regionOptions.length > 0 && (
               <Select value={region} onValueChange={setRegion}>
-                <SelectTrigger className="w-48">
+                <SelectTrigger className="w-48" aria-label="Filter by region">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -437,7 +437,7 @@ function RiderProgressPage() {
               </Select>
             )}
             <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger className="w-44">
+              <SelectTrigger className="w-44" aria-label="Filter by progress">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -451,7 +451,7 @@ function RiderProgressPage() {
             </Select>
             {pelotonOptions.length > 0 && (
               <Select value={peloton} onValueChange={setPeloton}>
-                <SelectTrigger className="w-52">
+                <SelectTrigger className="w-52" aria-label="Filter by sub-peloton">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -466,7 +466,7 @@ function RiderProgressPage() {
             )}
             {routeOptions.length > 0 && (
               <Select value={route} onValueChange={setRoute}>
-                <SelectTrigger className="w-40">
+                <SelectTrigger className="w-40" aria-label="Filter by route">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -480,7 +480,7 @@ function RiderProgressPage() {
               </Select>
             )}
             <Select value={sort} onValueChange={(v) => setSort(v as SortKey)}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-40" aria-label="Sort riders">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
