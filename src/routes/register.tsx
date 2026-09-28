@@ -16,7 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { StatusBadge } from "@/components/StatusBadge";
 import { addAudit, genRegId, useStore, type Participation } from "@/lib/store";
-import { isRiderParticipation, isVolunteerParticipation, isFundraisingParticipation } from "@/lib/registration-progress";
+import { isRiderParticipation, isVolunteerParticipation, needsTravelAndApparel } from "@/lib/registration-progress";
 import { useAdmin } from "@/lib/admin-store";
 import {
   Copy,
@@ -163,18 +163,20 @@ function RegisterWizard() {
   const [step, setStep] = useState(1);
 
   const isRider = isRiderParticipation(registration.participation);
+  const travelAndApparel = needsTravelAndApparel(registration.participation);
 
+  // Bike is for riders only; challengers also skip travel/hotel and apparel.
   const steps = useMemo(() => {
     const base = [
       { key: "A", label: t("step.A"), icon: ClipboardCheck },
       { key: "B", label: t("step.B"), icon: CheckCircle2 },
-      { key: "C", label: t("step.C"), icon: Plane },
     ];
+    if (travelAndApparel) base.push({ key: "C", label: t("step.C"), icon: Plane });
     if (isRider) base.push({ key: "D", label: t("step.D"), icon: Bike });
-    base.push({ key: "E", label: t("step.E"), icon: Shirt });
+    if (travelAndApparel) base.push({ key: "E", label: t("step.E"), icon: Shirt });
     base.push({ key: "F", label: t("step.F"), icon: CheckCircle2 });
     return base;
-  }, [isRider, t]);
+  }, [isRider, travelAndApparel, t]);
 
   // Deep link: /register?step=D opens that step directly. Only react to the
   // param itself — re-running when `steps` is rebuilt would snap the wizard
@@ -237,7 +239,7 @@ function RegisterWizard() {
         {steps[step - 1].key === "C" && <StepTravel />}
         {steps[step - 1].key === "D" && <StepBike />}
         {steps[step - 1].key === "E" && <StepApparel />}
-        {steps[step - 1].key === "F" && <StepReview onEdit={(n) => setStep(n)} />}
+        {steps[step - 1].key === "F" && <StepReview onEdit={(key) => setStep(Math.max(1, steps.findIndex((s) => s.key === key) + 1))} />}
       </div>
     </div>
   );
@@ -424,15 +426,15 @@ function StepPelotonia() {
                 </div>
               )}
               <div>
-                <Label>Region</Label>
+                <Label htmlFor="register-region">Region</Label>
                 <Select
                   value={user.region || undefined}
                   onValueChange={(v) => {
-                    void saveProfile({ region: v });
+                    void saveProfile({ region: v, market: v });
                     toast.success("Region saved to your profile");
                   }}
                 >
-                  <SelectTrigger className="mt-1.5"><SelectValue placeholder="Select your region..." /></SelectTrigger>
+                  <SelectTrigger id="register-region" className="mt-1.5"><SelectValue placeholder="Select your region..." /></SelectTrigger>
                   <SelectContent>
                     {REGIONS.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
                   </SelectContent>
@@ -724,9 +726,9 @@ function StepApparel() {
   const a = registration.apparel;
   const addr = registration.address;
   // When participation isn't a definite choice (null or "unsure"), show both
-  // apparel sections so options are always editable. Challengers get a jersey.
+  // apparel sections so options are always editable. Challengers skip this step.
   const undecided = !registration.participation || registration.participation === "unsure";
-  const isRider = undecided || isFundraisingParticipation(registration.participation);
+  const isRider = undecided || isRiderParticipation(registration.participation);
   const isVol = undecided || isVolunteerParticipation(registration.participation);
   const upd = (patch: Partial<typeof a>) => setRegistration((prev) => ({ ...prev, apparel: { ...prev.apparel, ...patch } }));
   const updA = (patch: Partial<typeof addr>) => setRegistration((prev) => ({ ...prev, address: { ...prev.address, ...patch } }));
@@ -888,19 +890,19 @@ function StepApparel() {
 }
 
 /* ---------- STEP F ---------- */
-function StepReview({ onEdit }: { onEdit: (n: number) => void }) {
+function StepReview({ onEdit }: { onEdit: (stepKey: string) => void }) {
   const { registration, user } = useStore();
   const { t, field } = useRegisterContent();
   const missing: string[] = [];
   if (!registration.participation) missing.push(t("step.A"));
   if (registration.pelotonia.status !== "complete") missing.push(t("step.B"));
-  if (registration.travel.status !== "complete") missing.push(t("step.C"));
+  const travelAndApparel = needsTravelAndApparel(registration.participation);
   const isRider = isRiderParticipation(registration.participation);
-  const wearsJersey = isFundraisingParticipation(registration.participation);
+  if (travelAndApparel && registration.travel.status !== "complete") missing.push(t("step.C"));
   if (isRider && registration.bike.status !== "complete") missing.push(t("step.D"));
-  if (registration.apparel.status !== "complete") missing.push(t("step.E"));
+  if (travelAndApparel && registration.apparel.status !== "complete") missing.push(t("step.E"));
 
-  const Row = ({ label, value, editStep }: { label: string; value: string; editStep: number }) => (
+  const Row = ({ label, value, editStep }: { label: string; value: string; editStep: string }) => (
     <div className="flex items-start justify-between gap-4 py-2 border-b last:border-0">
       <div>
         <p className="text-xs uppercase tracking-wider text-muted-foreground">{label}</p>
@@ -924,57 +926,61 @@ function StepReview({ onEdit }: { onEdit: (n: number) => void }) {
       <Card>
         <CardHeader><CardTitle><Copy k="F.colleagueTitle" /></CardTitle></CardHeader>
         <CardContent>
-          <Row label="Name" value={user.name} editStep={1} />
-          <Row label="Email" value={user.email} editStep={1} />
-          <Row label="Market" value={user.market} editStep={1} />
+          <Row label="Name" value={user.name} editStep="A" />
+          <Row label="Email" value={user.email} editStep="A" />
+          <Row label="Market / location" value={user.region} editStep="A" />
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader><CardTitle><Copy k="F.participationTitle" /></CardTitle></CardHeader>
         <CardContent>
-          <Row label="Type" value={registration.participation ?? ""} editStep={1} />
+          <Row label="Type" value={registration.participation ?? ""} editStep="A" />
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader><CardTitle><Copy k="F.pelotoniaTitle" /></CardTitle></CardHeader>
         <CardContent>
-          <Row label={t("B.discountLabel")} value={registration.pelotonia.discountCode} editStep={2} />
-          <Row label={field("confirmation").label} value={registration.pelotonia.confirmation} editStep={2} />
-          <Row label={field("hbNumber").label} value={registration.pelotonia.hbNumber} editStep={2} />
-          <Row label={field("employmentType").label} value={registration.pelotonia.employmentType} editStep={2} />
-          <Row label={field("payGrade74Below").label} value={registration.pelotonia.payGrade74Below} editStep={2} />
+          <Row label={t("B.discountLabel")} value={registration.pelotonia.discountCode} editStep="B" />
+          <Row label={field("confirmation").label} value={registration.pelotonia.confirmation} editStep="B" />
+          <Row label={field("hbNumber").label} value={registration.pelotonia.hbNumber} editStep="B" />
+          <Row label={field("employmentType").label} value={registration.pelotonia.employmentType} editStep="B" />
+          <Row label={field("payGrade74Below").label} value={registration.pelotonia.payGrade74Below} editStep="B" />
         </CardContent>
       </Card>
 
+      {travelAndApparel && (
       <Card>
         <CardHeader><CardTitle><Copy k="F.travelTitle" /></CardTitle></CardHeader>
         <CardContent>
-          <Row label="Needs" value={registration.travel.needs} editStep={3} />
-          <Row label={field("departureCity").label} value={registration.travel.departureCity} editStep={3} />
-          <Row label={field("hotelName").label} value={registration.travel.hotelName} editStep={3} />
+          <Row label="Needs" value={registration.travel.needs} editStep="C" />
+          <Row label={field("departureCity").label} value={registration.travel.departureCity} editStep="C" />
+          <Row label={field("hotelName").label} value={registration.travel.hotelName} editStep="C" />
         </CardContent>
       </Card>
+      )}
 
       {isRider && (
         <Card>
           <CardHeader><CardTitle><Copy k="F.bikeTitle" /></CardTitle></CardHeader>
           <CardContent>
-            <Row label="Rental" value={registration.bike.needs} editStep={4} />
-            <Row label={field("bikeSize").label} value={registration.bike.bikeSize} editStep={4} />
-            <Row label={field("bikeConfirmation").label} value={registration.bike.confirmation} editStep={4} />
+            <Row label="Rental" value={registration.bike.needs} editStep="D" />
+            <Row label={field("bikeSize").label} value={registration.bike.bikeSize} editStep="D" />
+            <Row label={field("bikeConfirmation").label} value={registration.bike.confirmation} editStep="D" />
           </CardContent>
         </Card>
       )}
 
+      {travelAndApparel && (
       <Card>
         <CardHeader><CardTitle><Copy k="F.apparelTitle" /></CardTitle></CardHeader>
         <CardContent>
-          {wearsJersey && <Row label="Jersey" value={[registration.apparel.jerseySize, registration.apparel.jerseyStyle, registration.apparel.cut].filter(Boolean).join(" · ")} editStep={isRider ? 5 : 4} />}
-          <Row label="Address" value={[registration.address.street, registration.address.city, registration.address.state, registration.address.zip].filter(Boolean).join(", ")} editStep={isRider ? 5 : 4} />
+          {isRider && <Row label="Jersey" value={[registration.apparel.jerseySize, registration.apparel.jerseyStyle, registration.apparel.cut].filter(Boolean).join(" · ")} editStep="E" />}
+          <Row label="Address" value={[registration.address.street, registration.address.city, registration.address.state, registration.address.zip].filter(Boolean).join(", ")} editStep="E" />
         </CardContent>
       </Card>
+      )}
     </>
   );
 }

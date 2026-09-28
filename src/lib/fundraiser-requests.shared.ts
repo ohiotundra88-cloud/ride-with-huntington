@@ -28,6 +28,8 @@ export interface FundraiserRequest {
   alcohol_details: string;
   serves_food: boolean | null;
   food_policy_acknowledged: boolean | null;
+  /** Food trucks can't be hosted on Huntington Bank property. */
+  food_truck: boolean | null;
   uses_logos: boolean | null;
   contract_needed: boolean | null;
   liability_waiver_needed: boolean | null;
@@ -62,7 +64,7 @@ export interface ApprovalEntry {
 }
 
 export const REQUEST_COLUMNS =
-  "id, title, description, event_type, event_date, start_time, end_time, location, expected_attendance, fundraising_method, contact_name, contact_email, contact_phone, on_huntington_property, facilities_approved, serves_alcohol, alcohol_details, serves_food, food_policy_acknowledged, uses_logos, contract_needed, liability_waiver_needed, flier_path, flier_name, status, captain_status, legal_status, risk_status, compliance_status, marketing_status, cochair_status, event_id, submitted_by, captain_id, created_at, updated_at";
+  "id, title, description, event_type, event_date, start_time, end_time, location, expected_attendance, fundraising_method, contact_name, contact_email, contact_phone, on_huntington_property, facilities_approved, serves_alcohol, alcohol_details, serves_food, food_policy_acknowledged, food_truck, uses_logos, contract_needed, liability_waiver_needed, flier_path, flier_name, status, captain_status, legal_status, risk_status, compliance_status, marketing_status, cochair_status, event_id, submitted_by, captain_id, created_at, updated_at";
 
 export const STAGES: { key: StageKey; label: string; role: string; tier: 1 | 2 | 3 }[] = [
   { key: "captain", label: "Peloton Captain", role: "captain", tier: 1 },
@@ -160,6 +162,7 @@ export const requestInputSchema = z.object({
   alcohol_details: z.string().trim().max(1000).optional().default(""),
   serves_food: yesNo("Tell us whether food will be served"),
   food_policy_acknowledged: z.boolean().optional().nullable(),
+  food_truck: z.boolean().optional().nullable(),
   uses_logos: yesNo("Tell us whether you'll use Huntington or Pelotonia logos"),
   contract_needed: yesNo("Tell us whether a contract is needed"),
   liability_waiver_needed: yesNo("Tell us whether a liability waiver is needed"),
@@ -175,6 +178,16 @@ export const requestInputSchema = z.object({
       code: z.ZodIssueCode.custom,
       path: ["food_policy_acknowledged"],
       message: "Food can't be served by a Huntington colleague. Confirm you agree to submit this request.",
+    });
+  }
+  if (v.serves_food && typeof v.food_truck !== "boolean") {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["food_truck"], message: "Tell us whether a food truck will be there" });
+  }
+  if (v.on_huntington_property && v.serves_food && v.food_truck) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["food_truck"],
+      message: "Food trucks can't be hosted on Huntington Bank property. Choose another location or skip the food truck.",
     });
   }
 });

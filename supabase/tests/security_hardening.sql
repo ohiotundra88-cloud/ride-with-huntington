@@ -148,5 +148,19 @@ SELECT pg_temp.expect_ok('server sets a profile photo',
   $q$UPDATE public.profiles SET avatar_path = 'x/avatar.png', avatar_content_type = 'image/png'
      WHERE id = '00000000-0000-0000-0000-00000000000a'$q$);
 
+-- Business rules the database enforces for everyone, the server included ------
+DO $$
+BEGIN
+  BEGIN
+    UPDATE public.fundraiser_requests
+       SET on_huntington_property = true, serves_food = true, food_truck = true
+     WHERE id = '00000000-0000-0000-0000-0000000000e1';
+  EXCEPTION WHEN check_violation THEN
+    RAISE NOTICE 'PASS (blocked): food truck on Huntington property';
+    RETURN;
+  END;
+  RAISE EXCEPTION 'FAIL: food truck on Huntington property was allowed';
+END $$;
+
 RESET ROLE;
 ROLLBACK;

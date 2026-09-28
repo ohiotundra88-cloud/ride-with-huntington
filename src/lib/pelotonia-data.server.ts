@@ -19,6 +19,8 @@ export interface TeamOverview {
   raised: number;
   goal: number;
   allTimeRaised: number;
+  /** Pelotonia Kids money raised on PledgeIt (already included in raised and allTimeRaised). */
+  kidsRaised: number | null;
   members: number;
   riders: number | null;
   challengers: number | null;
@@ -64,22 +66,26 @@ const MIN_PROFILE_SHARE = 0.9;
 export async function teamOverview(): Promise<TeamOverview | null> {
   try {
     const client = db();
-    const [{ data: team }, { data: statsRows }, { data: subs }, { data: snaps }] = await Promise.all([
+    const [{ data: team }, { data: statsRows }, { data: subs }, { data: snaps }, { data: kidsRows }] = await Promise.all([
       client.from("pelotonia_pelotons").select("*").eq("id", TEAM_PELOTON_ID).maybeSingle(),
       client.from("pelotonia_team_stats").select("*"),
       client.from("pelotonia_subteam_stats").select("*"),
-      client.from("pelotonia_team_snapshots").select("snapshot_date, raised").order("snapshot_date", { ascending: false }).limit(9),
+      client.from("pelotonia_team_snapshots").select("snapshot_date, raised, kids_raised").order("snapshot_date", { ascending: false }).limit(9),
+      client.from("pelotonia_kids_campaigns").select("raised"),
     ]);
     if (team) {
       const stats = statsRows?.[0] ?? {};
       const profilesComplete = n(stats.members) > 0 && n(stats.profiles_synced) / n(stats.members) >= MIN_PROFILE_SHARE;
       const count = (v: unknown) => (profilesComplete ? n(v) : null);
-      const daily = (snaps ?? []).map((s) => ({ date: String(s.snapshot_date), raised: n(s.raised) }));
+      const daily = (snaps ?? []).map((s) => ({ date: String(s.snapshot_date), raised: n(s.raised) + n(s.kids_raised) }));
+      // Team totals include Pelotonia Kids, matching Pelotonia's team dashboard.
+      const kids = kidsRows?.length ? kidsRows.reduce((t, k) => t + n(k.raised), 0) : null;
       return {
         teamName: String(team.name ?? "Team Huntington Bank"),
-        raised: n(team.raised),
+        raised: n(team.raised) + (kids ?? 0),
         goal: n(team.goal),
-        allTimeRaised: n(team.all_time_raised),
+        allTimeRaised: n(team.all_time_raised) + (kids ?? 0),
+        kidsRaised: kids,
         members: n(team.members_count),
         riders: count(stats.riders),
         challengers: count(stats.challengers),
@@ -115,6 +121,7 @@ export async function teamOverview(): Promise<TeamOverview | null> {
     raised: live.raised,
     goal: live.goal,
     allTimeRaised: live.allTimeRaised,
+    kidsRaised: null,
     members: live.members,
     riders: null,
     challengers: null,

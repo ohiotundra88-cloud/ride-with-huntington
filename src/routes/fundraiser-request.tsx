@@ -46,6 +46,7 @@ type YesNoKey =
   | "serves_alcohol"
   | "serves_food"
   | "food_policy_acknowledged"
+  | "food_truck"
   | "uses_logos"
   | "contract_needed"
   | "liability_waiver_needed";
@@ -72,6 +73,7 @@ const emptyForm: FormState = {
   alcohol_details: "",
   serves_food: null,
   food_policy_acknowledged: null,
+  food_truck: null,
   uses_logos: null,
   contract_needed: null,
   liability_waiver_needed: null,
@@ -320,7 +322,10 @@ function FundraiserRequestPage() {
                   value={form.serves_food}
                   onChange={(v) => {
                     set("serves_food", v);
-                    if (!v) set("food_policy_acknowledged", null);
+                    if (!v) {
+                      set("food_policy_acknowledged", null);
+                      set("food_truck", null);
+                    }
                   }}
                   error={errors.serves_food}
                 />
@@ -331,6 +336,16 @@ function FundraiserRequestPage() {
                     value={form.food_policy_acknowledged}
                     onChange={(v) => set("food_policy_acknowledged", v)}
                     error={errors.food_policy_acknowledged}
+                  />
+                )}
+                {form.serves_food && (
+                  <YesNo
+                    id="fr-food-truck"
+                    label="Will a food truck be there?"
+                    hint={form.on_huntington_property ? "Food trucks can't be hosted on Huntington Bank property." : undefined}
+                    value={form.food_truck}
+                    onChange={(v) => set("food_truck", v)}
+                    error={errors.food_truck}
                   />
                 )}
 
@@ -412,6 +427,7 @@ function FundraiserRequestPage() {
                   alcohol_details: r.alcohol_details ?? "",
                   serves_food: r.serves_food,
                   food_policy_acknowledged: r.food_policy_acknowledged,
+                  food_truck: r.food_truck,
                   uses_logos: r.uses_logos,
                   contract_needed: r.contract_needed,
                   liability_waiver_needed: r.liability_waiver_needed,

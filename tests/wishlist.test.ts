@@ -7,6 +7,7 @@ import {
   requestInputSchema,
   type FundraiserRequest,
 } from "../src/lib/fundraiser-requests.shared.ts";
+import { apparelStatus, bikeStatus, needsTravelAndApparel, travelStatus } from "../src/lib/registration-progress.ts";
 
 // Vendor tiers -----------------------------------------------------------------
 const cases: [number, string | null][] = [
@@ -86,8 +87,16 @@ test("alcohol needs a description", () => {
   assert.deepEqual(issues({ ...base, serves_alcohol: true, alcohol_details: "Beer and wine by the venue's bartender" }), []);
 });
 test("serving food requires agreeing colleagues won't serve it", () => {
-  assert.deepEqual(issues({ ...base, serves_food: true, food_policy_acknowledged: false }), ["food_policy_acknowledged"]);
-  assert.deepEqual(issues({ ...base, serves_food: true, food_policy_acknowledged: true }), []);
+  assert.deepEqual(issues({ ...base, serves_food: true, food_policy_acknowledged: false, food_truck: false }), ["food_policy_acknowledged"]);
+  assert.deepEqual(issues({ ...base, serves_food: true, food_policy_acknowledged: true, food_truck: false }), []);
+});
+test("food needs the food truck answer", () => {
+  assert.deepEqual(issues({ ...base, serves_food: true, food_policy_acknowledged: true }), ["food_truck"]);
+});
+test("food trucks can't be hosted on Huntington property", () => {
+  const food = { serves_food: true, food_policy_acknowledged: true, food_truck: true };
+  assert.deepEqual(issues({ ...base, ...food }), []);
+  assert.deepEqual(issues({ ...base, ...food, on_huntington_property: true, facilities_approved: true }), ["food_truck"]);
 });
 test("raffle is an event type", () => assert.deepEqual(issues({ ...base, event_type: "raffle" }), []));
 
@@ -108,4 +117,17 @@ test("a request with Marketing not required is fully approved once the rest sign
   } as FundraiserRequest;
   assert.equal(isFullyApproved(r), true);
   assert.equal(isFullyApproved({ ...r, cochair_status: "pending" } as FundraiserRequest), false);
+});
+
+// Challengers ------------------------------------------------------------------
+test("challengers skip bike, travel/hotel and apparel", () => {
+  const reg = { participation: "challenger", travel: {}, bike: {}, apparel: {} } as never;
+  assert.equal(needsTravelAndApparel("challenger"), false);
+  assert.equal(needsTravelAndApparel("rider"), true);
+  assert.equal(needsTravelAndApparel("volunteer"), true);
+  assert.equal(travelStatus(reg), "complete");
+  assert.equal(bikeStatus(reg), "complete");
+  assert.equal(apparelStatus(reg), "complete");
+  const rider = { participation: "rider", travel: {}, bike: {}, apparel: {} } as never;
+  assert.equal(apparelStatus(rider), "not_started");
 });

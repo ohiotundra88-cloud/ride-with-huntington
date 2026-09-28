@@ -26,14 +26,19 @@ export function isVolunteerParticipation(p: Registration["participation"]): bool
   return p === "volunteer" || p === "both";
 }
 
-/** Takes on their own Pelotonia challenge: fundraises, no route or bike. */
+/** Takes on their own Pelotonia challenge: fundraises; no route, bike, hotel or apparel. */
 export function isChallengerParticipation(p: Registration["participation"]): boolean {
   return p === "challenger";
 }
 
-/** Riders and challengers carry a fundraising commitment and get a jersey. */
+/** Riders and challengers carry a fundraising commitment. */
 export function isFundraisingParticipation(p: Registration["participation"]): boolean {
   return isRiderParticipation(p) || isChallengerParticipation(p);
+}
+
+/** Travel/hotel and apparel steps apply to everyone except challengers (Chris Kemper, 2026-09-28). */
+export function needsTravelAndApparel(p: Registration["participation"]): boolean {
+  return !isChallengerParticipation(p);
 }
 
 export function pelotoniaHasData(reg: Registration): boolean {
@@ -59,6 +64,7 @@ export function travelHasData(reg: Registration): boolean {
 
 export function travelStatus(reg: Registration): StepStatus {
   const t = reg.travel;
+  if (!needsTravelAndApparel(reg.participation)) return "complete";
   if (t.needs === "none") return "complete";
   const complete = t.bookLater || filled(t.arrivalDate) || filled(t.hotelName) || filled(t.hotelCheckIn);
   if (t.status === "complete" && complete) return "complete";
@@ -88,7 +94,8 @@ export function apparelHasData(reg: Registration): boolean {
 
 export function apparelStatus(reg: Registration): StepStatus {
   const a = reg.apparel;
-  const isRider = isFundraisingParticipation(reg.participation);
+  if (!needsTravelAndApparel(reg.participation)) return "complete";
+  const isRider = isRiderParticipation(reg.participation);
   const complete = isRider
     ? filled(a.jerseySize) || filled(a.shirtSize)
     : filled(a.volunteerShirtSize) || filled(a.shirtSize);

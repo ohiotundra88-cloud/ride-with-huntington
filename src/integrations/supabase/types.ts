@@ -600,6 +600,7 @@ export type Database = {
           flier_name: string | null
           flier_path: string | null
           food_policy_acknowledged: boolean | null
+          food_truck: boolean | null
           fundraising_method: string | null
           id: string
           legal_status: string
@@ -639,6 +640,7 @@ export type Database = {
           flier_name?: string | null
           flier_path?: string | null
           food_policy_acknowledged?: boolean | null
+          food_truck?: boolean | null
           fundraising_method?: string | null
           id?: string
           legal_status?: string
@@ -678,6 +680,7 @@ export type Database = {
           flier_name?: string | null
           flier_path?: string | null
           food_policy_acknowledged?: boolean | null
+          food_truck?: boolean | null
           fundraising_method?: string | null
           id?: string
           legal_status?: string
@@ -1108,6 +1111,33 @@ export type Database = {
         }
         Relationships: []
       }
+      pelotonia_kids_campaigns: {
+        Row: {
+          goal: number | null
+          name: string
+          raised: number
+          slug: string
+          synced_at: string
+          url: string
+        }
+        Insert: {
+          goal?: number | null
+          name: string
+          raised?: number
+          slug: string
+          synced_at?: string
+          url: string
+        }
+        Update: {
+          goal?: number | null
+          name?: string
+          raised?: number
+          slug?: string
+          synced_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
       pelotonia_pelotons: {
         Row: {
           all_time_raised: number
@@ -1432,6 +1462,7 @@ export type Database = {
           challengers: number
           goal: number
           high_rollers: number
+          kids_raised: number
           members_count: number
           raised: number
           riders: number
@@ -1444,6 +1475,7 @@ export type Database = {
           challengers?: number
           goal: number
           high_rollers?: number
+          kids_raised?: number
           members_count: number
           raised: number
           riders?: number
@@ -1456,6 +1488,7 @@ export type Database = {
           challengers?: number
           goal?: number
           high_rollers?: number
+          kids_raised?: number
           members_count?: number
           raised?: number
           riders?: number

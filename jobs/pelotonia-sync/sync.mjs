@@ -13,6 +13,8 @@
  *   PELOTONIA_TEAM_PELOTON_ID  default a0s3t00000BKX8sAAH (Team Huntington Bank)
  *   SYNC_PROFILES        "all" (default) | "stale" (only profiles older than 20h) | "none"
  *   SYNC_MAX_PROFILES    cap on profiles per run (default: no cap)
+ *   PLEDGEIT_KIDS_SLUGS  comma-separated PledgeIt campaign slugs for Pelotonia Kids
+ *                        (default PelotoniaKids-TeamHuntington; "" to skip)
  *
  * Politeness: at most 3 requests in flight, 150 ms between request starts
  * per worker, 20 s timeout each, 3 retries with backoff on 429/5xx.
@@ -29,6 +31,10 @@ const CONCURRENCY = 3;
 const GAP_MS = 150;
 const PAGE_SIZE = 200;
 const UA = "TeamHuntingtonHub-PelotoniaSync/1.0";
+const KIDS_SLUGS = (process.env.PLEDGEIT_KIDS_SLUGS ?? "PelotoniaKids-TeamHuntington")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
 
 let requests = 0;
 let errors = 0;
@@ -75,6 +81,41 @@ async function pelotonia(path, { page } = {}) {
     }
   }
   return { data: null, pages: 0 };
+}
+
+// ---------------------------------------------------------------- PledgeIt (Pelotonia Kids)
+
+/**
+ * Reads one public PledgeIt campaign page. PledgeIt has no public API; the
+ * page embeds its data as Next.js JSON (__NEXT_DATA__), which is what we parse.
+ * Returns null (and counts an error) if the page or its shape changed.
+ */
+async function pledgeItCampaign(slug) {
+  const url = `https://charity.pledgeit.org/${encodeURIComponent(slug)}`;
+  requests++;
+  try {
+    const res = await fetch(url, { headers: { Accept: "text/html", "User-Agent": UA }, signal: AbortSignal.timeout(20_000) });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const html = await res.text();
+    const m = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
+    if (!m) throw new Error("no __NEXT_DATA__");
+    const data = JSON.parse(m[1])?.props?.apolloState?.data ?? {};
+    const c = Object.values(data).find((v) => v?.__typename === "Campaign" && String(v.slug).toLowerCase() === slug.toLowerCase());
+    const raised = Number(c?.amountRaised ?? c?.stats?.estimatedAmountRaised);
+    if (!c || !Number.isFinite(raised)) throw new Error("campaign total not found");
+    return {
+      slug,
+      name: String(c.campaignHeadline ?? c.name ?? slug),
+      raised,
+      goal: Number.isFinite(Number(c.monetaryGoal)) ? Number(c.monetaryGoal) : null,
+      url,
+      synced_at: new Date().toISOString(),
+    };
+  } catch (e) {
+    errors++;
+    log(`WARN pledgeit ${slug}: ${e.message}`);
+    return null;
+  }
 }
 
 // ---------------------------------------------------------------- Hub database
@@ -313,13 +354,23 @@ async function main() {
       log(`profiles: ${stats.profiles_fetched}, rides: ${rides.size}, routes: ${routes.size}`);
     }
 
-    // 4. Daily snapshot for the fundraising history
+    // 4. Pelotonia Kids totals from PledgeIt
+    const kids = (await Promise.all(KIDS_SLUGS.map(pledgeItCampaign))).filter(Boolean);
+    if (kids.length) await upsert("pelotonia_kids_campaigns", kids);
+    // Sum the stored rows for the configured campaigns, so one failed read keeps last night's figure.
+    const slugList = KIDS_SLUGS.map((s) => `"${s}"`).join(",");
+    const kidsRows = KIDS_SLUGS.length ? await rest("GET", `pelotonia_kids_campaigns?select=raised&slug=in.(${encodeURIComponent(slugList)})`) : [];
+    const kidsTotal = kidsRows.reduce((t, k) => t + num(Number(k.raised)), 0);
+    log(`pelotonia kids: ${kids.length}/${KIDS_SLUGS.length} campaigns, $${kidsTotal}`);
+
+    // 5. Daily snapshot for the fundraising history
     const [counts] = await rest("GET", "pelotonia_team_stats?select=*");
     const day = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date());
     await upsert("pelotonia_team_snapshots", [
       {
         snapshot_date: day,
         raised: num(team.fundraising?.raised),
+        kids_raised: kidsTotal,
         goal: num(team.fundraising?.goal),
         members_count: num(team.membersCount),
         riders: counts?.riders ?? 0,

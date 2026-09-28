@@ -5,7 +5,7 @@ import { useStore, type Registration } from "@/lib/store";
 import { useAdmin, readinessScore, type EditableReadinessItem } from "@/lib/admin-store";
 import type { ReadinessStatus } from "@/lib/mock-data";
 import { getRiderFundraising } from "@/lib/pelotonia.functions";
-import { pelotoniaStatus, travelStatus, bikeStatus, apparelStatus, isRiderParticipation, isVolunteerParticipation, isFundraisingParticipation } from "@/lib/registration-progress";
+import { pelotoniaStatus, travelStatus, bikeStatus, apparelStatus, isRiderParticipation, isVolunteerParticipation, isFundraisingParticipation, isChallengerParticipation } from "@/lib/registration-progress";
 
 /**
  * Presentation-only overlay: derive readiness card status/detail from the
@@ -21,6 +21,8 @@ export function mergeReadinessWithRegistration(
   const isRider = isRiderParticipation(participation);
   const isVolunteer = isVolunteerParticipation(participation);
   const fundraises = isFundraisingParticipation(participation);
+  const isChallenger = isChallengerParticipation(participation);
+  const roleLabel = isChallenger ? "a Challenger" : "a Volunteer";
 
   return items.map((item) => {
     const over = (status: ReadinessStatus, detail?: string, ctaLabel?: string): EditableReadinessItem => ({
@@ -42,6 +44,7 @@ export function mergeReadinessWithRegistration(
       }
       case "hotel": {
         const t = reg.travel;
+        if (isChallenger) return over("not_applicable", "You're registered as a Challenger, so no travel or hotel is needed.", "View travel");
         if (t.needs === "none") return over("not_applicable", "No travel or hotel needed.", "Update travel");
         const st = travelStatus(reg);
         if (st === "complete") {
@@ -55,7 +58,7 @@ export function mergeReadinessWithRegistration(
       }
       case "bike": {
         const b = reg.bike;
-        if (participation && !isRider) return over("not_applicable", "You're registered as a Volunteer — no bike needed.", "View bike step");
+        if (participation && !isRider) return over("not_applicable", `You're registered as ${roleLabel}, so no bike is needed.`, "View bike step");
         if (b.needs === "no") return over("complete", "Bringing your own bike — no rental needed.", "Update bike plan");
         if (b.needs === "yes") {
           if (bikeStatus(reg) === "complete") {
@@ -74,6 +77,7 @@ export function mergeReadinessWithRegistration(
       }
       case "apparel": {
         const a = reg.apparel;
+        if (isChallenger) return over("not_applicable", "You're registered as a Challenger, so there's no apparel to order.", "View apparel");
         const st = apparelStatus(reg);
         if (st === "complete") {
           const bits = [a.jerseyStyle && a.jerseyStyle.replace("-", " "), a.jerseySize && `jersey (${a.jerseySize})`].filter(Boolean).join(" ");

@@ -26,10 +26,6 @@ const segments = [
   "Consumer & Business Banking", "Commercial Banking", "Wealth Management",
   "Technology", "Risk", "Marketing", "Human Resources", "Operations",
 ];
-const markets = [
-  "Columbus, OH", "Cleveland, OH", "Cincinnati, OH", "Detroit, MI",
-  "Pittsburgh, PA", "Indianapolis, IN", "Chicago, IL", "Minneapolis, MN",
-];
 
 function ProfilePage() {
   const { user, saveProfile } = useStore();
@@ -102,17 +98,12 @@ function ProfilePage() {
               <SelectContent>{segments.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
             </Select>
           </div>
+          {/* Same Huntington region list as registration (Chris Kemper, 2026-09-28).
+              Saved as the profile's region; market mirrors it for older reports. */}
           <div className="space-y-2">
-            <Label>Market / location</Label>
-            <Select value={form.market} onValueChange={(v) => update({ market: v })}>
-              <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
-              <SelectContent>{markets.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2 sm:col-span-2">
-            <Label>Region</Label>
-            <Select value={form.region} onValueChange={(v) => update({ region: v })}>
-              <SelectTrigger><SelectValue placeholder="Select your region..." /></SelectTrigger>
+            <Label htmlFor="profile-market">Market / location</Label>
+            <Select value={form.region || undefined} onValueChange={(v) => update({ region: v, market: v })}>
+              <SelectTrigger id="profile-market"><SelectValue placeholder="Select your market..." /></SelectTrigger>
               <SelectContent>{REGIONS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
             </Select>
           </div>

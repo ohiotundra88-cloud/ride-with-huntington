@@ -44,7 +44,7 @@ export const getPelotoniaTeamData = createServerFn({ method: "GET" }).handler(
   async (): Promise<PelotoniaTeamData | null> => {
     const { teamOverview } = await import("@/lib/pelotonia-data.server");
     const team = await teamOverview();
-    return team ? { ...team, kidsRaised: null, donationsCount: null } : null;
+    return team ? { ...team, donationsCount: null } : null;
   },
 );
 

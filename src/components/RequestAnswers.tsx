@@ -20,7 +20,10 @@ export function RequestAnswers({ request }: { request: FundraiserRequest }) {
     },
     { label: "Food served", value: yn(request.serves_food) },
     ...(request.serves_food
-      ? [{ label: "Agrees food isn't served by colleagues", value: yn(request.food_policy_acknowledged) }]
+      ? [
+          { label: "Agrees food isn't served by colleagues", value: yn(request.food_policy_acknowledged) },
+          { label: "Food truck", value: yn(request.food_truck), flag: !!request.food_truck },
+        ]
       : []),
     { label: "Uses HNB or Pelotonia logos", value: yn(request.uses_logos) },
     { label: "Contract needed", value: yn(request.contract_needed), flag: !!request.contract_needed },
