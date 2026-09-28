@@ -29,7 +29,10 @@ export const listManualParticipants = createServerFn({ method: "GET" })
     const { data: profiles } = await supabaseAdmin
       .from("profiles")
       .select("id, email, full_name")
-      .in("id", rows.map((r) => r.user_id));
+      .in(
+        "id",
+        rows.map((r) => r.user_id),
+      );
     const map = new Map((profiles ?? []).map((p) => [p.id, p]));
     return rows.map((r) => ({
       user_id: r.user_id,
@@ -48,8 +51,14 @@ export const createManualParticipant = createServerFn({ method: "POST" })
       .object({
         email: z.string().trim().toLowerCase().email(),
         full_name: z.string().trim().min(2).max(120),
-        participation: z.enum(["rider", "volunteer", "challenger", "both", "unsure"]).default("rider"),
-        roles: z.array(z.enum(["captain", "legal", "risk", "compliance", "marketing", "cochair", "admin"])).default([]),
+        participation: z
+          .enum(["rider", "volunteer", "challenger", "both", "unsure"])
+          .default("rider"),
+        roles: z
+          .array(
+            z.enum(["captain", "legal", "risk", "compliance", "marketing", "cochair", "admin"]),
+          )
+          .default([]),
       })
       .parse(d),
   )
@@ -94,12 +103,10 @@ export const createManualParticipant = createServerFn({ method: "POST" })
     if (partErr) throw new Error(partErr.message);
 
     if (data.roles.length > 0) {
-      const { error: rErr } = await supabaseAdmin
-        .from("user_roles")
-        .upsert(
-          data.roles.map((role) => ({ user_id: userId!, role: role as never })),
-          { onConflict: "user_id,role" },
-        );
+      const { error: rErr } = await supabaseAdmin.from("user_roles").upsert(
+        data.roles.map((role) => ({ user_id: userId!, role: role as never })),
+        { onConflict: "user_id,role" },
+      );
       if (rErr) throw new Error(rErr.message);
     }
 

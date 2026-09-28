@@ -6,7 +6,15 @@ import { useAdmin } from "@/lib/admin-store";
  * where a value would otherwise be editable so admins cannot overwrite
  * data owned by an external system.
  */
-export function ApiManagedField({ fieldKey, value, label }: { fieldKey: string; value: React.ReactNode; label?: string }) {
+export function ApiManagedField({
+  fieldKey,
+  value,
+  label,
+}: {
+  fieldKey: string;
+  value: React.ReactNode;
+  label?: string;
+}) {
   const { isApiManaged } = useAdmin();
   const meta = isApiManaged(fieldKey);
   if (!meta) return <>{value}</>;

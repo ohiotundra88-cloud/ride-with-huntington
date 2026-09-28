@@ -80,19 +80,37 @@ export function NotificationCenter() {
             <li key={n.id}>
               <Link
                 to="/inbox"
-                onClick={() => { if (!n.readAt) mark.mutate(n.id); setOpen(false); }}
+                onClick={() => {
+                  if (!n.readAt) mark.mutate(n.id);
+                  setOpen(false);
+                }}
                 className={`block p-3 hover:bg-muted focus-visible:bg-muted outline-none ${n.readAt ? "" : "bg-[var(--brand)]/5"}`}
               >
                 <div className="flex items-start gap-2">
-                  {!n.readAt && <span aria-hidden="true" className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[var(--brand)]" />}
+                  {!n.readAt && (
+                    <span
+                      aria-hidden="true"
+                      className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[var(--brand)]"
+                    />
+                  )}
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-foreground truncate flex items-center gap-1">
-                      {n.priority === "urgent" && <span className="rounded bg-red-600 text-white text-[9px] font-bold uppercase px-1 py-0.5">Urgent</span>}
-                      {n.priority === "important" && <span className="rounded bg-amber-500 text-black text-[9px] font-bold uppercase px-1 py-0.5">Important</span>}
+                      {n.priority === "urgent" && (
+                        <span className="rounded bg-red-600 text-white text-[9px] font-bold uppercase px-1 py-0.5">
+                          Urgent
+                        </span>
+                      )}
+                      {n.priority === "important" && (
+                        <span className="rounded bg-amber-500 text-black text-[9px] font-bold uppercase px-1 py-0.5">
+                          Important
+                        </span>
+                      )}
                       {n.title}
                     </p>
                     <p className="text-xs text-muted-foreground line-clamp-2">{n.body}</p>
-                    <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">{n.category}</p>
+                    <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">
+                      {n.category}
+                    </p>
                   </div>
                 </div>
                 <span className="sr-only">{n.readAt ? "Read" : "Unread"}</span>
@@ -101,7 +119,13 @@ export function NotificationCenter() {
           ))}
         </ul>
         <div className="border-t p-2">
-          <Button asChild variant="ghost" size="sm" className="w-full text-xs" onClick={() => setOpen(false)}>
+          <Button
+            asChild
+            variant="ghost"
+            size="sm"
+            className="w-full text-xs"
+            onClick={() => setOpen(false)}
+          >
             <Link to="/inbox">View all messages</Link>
           </Button>
         </div>

@@ -57,8 +57,14 @@ export function pelotoniaStatus(reg: Registration): StepStatus {
 export function travelHasData(reg: Registration): boolean {
   const t = reg.travel;
   return (
-    filled(t.needs) || filled(t.arrivalDate) || filled(t.departureDate) || filled(t.hotelName) ||
-    filled(t.hotelCheckIn) || filled(t.hotelCheckOut) || filled(t.departureCity) || t.bookLater
+    filled(t.needs) ||
+    filled(t.arrivalDate) ||
+    filled(t.departureDate) ||
+    filled(t.hotelName) ||
+    filled(t.hotelCheckIn) ||
+    filled(t.hotelCheckOut) ||
+    filled(t.departureCity) ||
+    t.bookLater
   );
 }
 
@@ -66,7 +72,8 @@ export function travelStatus(reg: Registration): StepStatus {
   const t = reg.travel;
   if (!needsTravelAndApparel(reg.participation)) return "complete";
   if (t.needs === "none") return "complete";
-  const complete = t.bookLater || filled(t.arrivalDate) || filled(t.hotelName) || filled(t.hotelCheckIn);
+  const complete =
+    t.bookLater || filled(t.arrivalDate) || filled(t.hotelName) || filled(t.hotelCheckIn);
   if (t.status === "complete" && complete) return "complete";
   if (travelHasData(reg)) return "pending";
   return "not_started";
@@ -87,8 +94,12 @@ export function bikeStatus(reg: Registration): StepStatus {
 export function apparelHasData(reg: Registration): boolean {
   const a = reg.apparel;
   return (
-    filled(a.jerseySize) || filled(a.jerseyStyle) || filled(a.shirtSize) ||
-    filled(a.cut) || filled(a.volunteerShirtSize) || filled(a.volunteerCut)
+    filled(a.jerseySize) ||
+    filled(a.jerseyStyle) ||
+    filled(a.shirtSize) ||
+    filled(a.cut) ||
+    filled(a.volunteerShirtSize) ||
+    filled(a.volunteerCut)
   );
 }
 

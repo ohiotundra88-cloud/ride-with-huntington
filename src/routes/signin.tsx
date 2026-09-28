@@ -59,7 +59,8 @@ function SignIn() {
             </Button>
             <p className="flex items-start gap-2 text-[11px] text-muted-foreground">
               <ShieldCheck className="mt-[1px] h-3.5 w-3.5 shrink-0" />
-              Access is by invitation. Sign in with Google or with a one-time code sent to your email.
+              Access is by invitation. Sign in with Google or with a one-time code sent to your
+              email.
             </p>
           </CardContent>
         </Card>

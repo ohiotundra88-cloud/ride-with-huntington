@@ -1,10 +1,5 @@
 /** Server-only roster building and audience resolution for team messaging. */
-import {
-  audienceIsEveryone,
-  type AudiencePerson,
-  type AudienceRules,
-} from "./messages.shared";
-
+import { audienceIsEveryone, type AudiencePerson, type AudienceRules } from "./messages.shared";
 
 const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : null);
 
@@ -40,7 +35,10 @@ export async function buildAudienceRoster(): Promise<AudiencePerson[]> {
   const { ridersByPublicId: fetchRiders } = await import("@/lib/pelotonia-data.server");
   const members = await fetchRiders(
     (participants ?? []).map(
-      (row) => ((row as Record<string, unknown>)["pelotonia"] as Record<string, unknown> | null)?.["confirmation"],
+      (row) =>
+        ((row as Record<string, unknown>)["pelotonia"] as Record<string, unknown> | null)?.[
+          "confirmation"
+        ],
     ),
   );
 
@@ -128,17 +126,22 @@ function matchesGap(person: AudiencePerson, key: string, raisedBelow: number | n
  * Applies the audience rules: AND across categories, OR within a category.
  * Explicit includes always win; explicit excludes always lose.
  */
-export function resolveAudience(
-  roster: AudiencePerson[],
-  rules: AudienceRules,
-): AudiencePerson[] {
+export function resolveAudience(roster: AudiencePerson[], rules: AudienceRules): AudiencePerson[] {
   const excluded = new Set(rules.excludeUserIds);
   const included = new Set(rules.includeUserIds);
   const everyone = audienceIsEveryone(rules);
   // Hand-picking people with no group rule means only those people.
-  const individualsOnly = !everyone && included.size > 0 &&
-    !rules.roles.length && !rules.regions.length && !rules.participation.length && !rules.tags.length &&
-    !rules.subPelotons.length && !rules.routes.length && !rules.flags.length && !rules.gaps.length;
+  const individualsOnly =
+    !everyone &&
+    included.size > 0 &&
+    !rules.roles.length &&
+    !rules.regions.length &&
+    !rules.participation.length &&
+    !rules.tags.length &&
+    !rules.subPelotons.length &&
+    !rules.routes.length &&
+    !rules.flags.length &&
+    !rules.gaps.length;
 
   const matched = roster.filter((person) => {
     if (excluded.has(person.userId)) return false;
@@ -146,21 +149,28 @@ export function resolveAudience(
     if (individualsOnly) return false;
     if (everyone) return true;
 
-
     if (rules.roles.length) {
       const has = rules.roles.some((r) =>
-        r === "user" ? person.roles.length === 0 || person.roles.includes("user") : person.roles.includes(r),
+        r === "user"
+          ? person.roles.length === 0 || person.roles.includes("user")
+          : person.roles.includes(r),
       );
       if (!has) return false;
     }
     if (rules.regions.length && !(person.region && rules.regions.includes(person.region))) {
       return false;
     }
-    if (rules.participation.length && !rules.participation.includes(person.participation ?? "unsure")) {
+    if (
+      rules.participation.length &&
+      !rules.participation.includes(person.participation ?? "unsure")
+    ) {
       return false;
     }
     if (rules.tags.length && !rules.tags.some((t) => person.tags.includes(t))) return false;
-    if (rules.subPelotons.length && !(person.subPeloton && rules.subPelotons.includes(person.subPeloton))) {
+    if (
+      rules.subPelotons.length &&
+      !(person.subPeloton && rules.subPelotons.includes(person.subPeloton))
+    ) {
       return false;
     }
     if (rules.routes.length && !(person.route && rules.routes.includes(person.route))) return false;
@@ -171,9 +181,7 @@ export function resolveAudience(
     return true;
   });
 
-  return matched
-    .filter((p) => !!p.userId)
-    .sort((a, b) => a.name.localeCompare(b.name));
+  return matched.filter((p) => !!p.userId).sort((a, b) => a.name.localeCompare(b.name));
 }
 
 /** Distinct filter values present in the roster, for the audience builder UI. */

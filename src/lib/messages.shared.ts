@@ -1,7 +1,13 @@
 /** Shared types and pure helpers for role/tag-targeted team messaging. */
 
 export const MESSAGE_PRIORITIES = ["info", "important", "urgent"] as const;
-export const MESSAGE_CATEGORIES = ["reminder", "deadline", "event", "fundraising", "general"] as const;
+export const MESSAGE_CATEGORIES = [
+  "reminder",
+  "deadline",
+  "event",
+  "fundraising",
+  "general",
+] as const;
 
 export type MessagePriority = (typeof MESSAGE_PRIORITIES)[number];
 export type MessageCategory = (typeof MESSAGE_CATEGORIES)[number];
@@ -49,7 +55,13 @@ export const LEADERSHIP_ONLY_ROLES = [
   "vendor_captain",
 ];
 
-export const PARTICIPATION_OPTIONS = ["rider", "volunteer", "challenger", "unsure", "both"] as const;
+export const PARTICIPATION_OPTIONS = [
+  "rider",
+  "volunteer",
+  "challenger",
+  "unsure",
+  "both",
+] as const;
 
 export const PELOTONIA_FLAGS = [
   { key: "highRoller", label: "High Roller" },
@@ -106,8 +118,7 @@ export const emptyAudience = (): AudienceRules => ({
 /** Normalizes any stored/incoming JSON blob into a complete rule set. */
 export function normalizeAudience(raw: unknown): AudienceRules {
   const o = (raw ?? {}) as Record<string, unknown>;
-  const list = (v: unknown) =>
-    Array.isArray(v) ? v.map((x) => String(x)).filter(Boolean) : [];
+  const list = (v: unknown) => (Array.isArray(v) ? v.map((x) => String(x)).filter(Boolean) : []);
   const n = o["raisedBelow"];
   return {
     allParticipants: o["allParticipants"] === true,
@@ -145,7 +156,6 @@ export function audienceIsEveryone(a: AudienceRules): boolean {
   );
 }
 
-
 /** Short human summary of the audience rules, for lists and history. */
 export function describeAudience(a: AudienceRules): string {
   const parts: string[] = [];
@@ -157,16 +167,10 @@ export function describeAudience(a: AudienceRules): string {
   if (a.subPelotons.length) parts.push(`sub-peloton: ${a.subPelotons.join(", ")}`);
   if (a.routes.length) parts.push(`route: ${a.routes.join(", ")}`);
   if (a.flags.length) {
-    parts.push(
-      a.flags
-        .map((f) => PELOTONIA_FLAGS.find((x) => x.key === f)?.label ?? f)
-        .join(", "),
-    );
+    parts.push(a.flags.map((f) => PELOTONIA_FLAGS.find((x) => x.key === f)?.label ?? f).join(", "));
   }
   if (a.gaps.length) {
-    parts.push(
-      a.gaps.map((g) => READINESS_GAPS.find((x) => x.key === g)?.label ?? g).join(", "),
-    );
+    parts.push(a.gaps.map((g) => READINESS_GAPS.find((x) => x.key === g)?.label ?? g).join(", "));
   }
   if (!parts.length && !a.includeUserIds.length) parts.push("Everyone");
   if (a.includeUserIds.length) {

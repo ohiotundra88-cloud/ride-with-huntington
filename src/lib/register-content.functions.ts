@@ -36,7 +36,8 @@ export const saveRegisterContent = createServerFn({ method: "POST" })
       context.supabase.rpc("is_admin_text", { _user_id: context.userId }),
       context.supabase.rpc("is_superuser", { _user_id: context.userId }),
     ]);
-    if (!isAdmin && !isSuper) throw new Error("Only admins and super users can change the Register page.");
+    if (!isAdmin && !isSuper)
+      throw new Error("Only admins and super users can change the Register page.");
 
     const merged = mergeRegisterContent(data);
     const { error } = await context.supabase

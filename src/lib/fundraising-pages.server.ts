@@ -26,7 +26,16 @@ import { activeProvider } from "@/lib/payments/demo.server";
 
 export type Ctx = { supabase: any; userId: string; claims?: Record<string, any> };
 
-const LEADERSHIP = ["admin", "superuser", "captain", "legal", "risk", "compliance", "marketing", "cochair"];
+const LEADERSHIP = [
+  "admin",
+  "superuser",
+  "captain",
+  "legal",
+  "risk",
+  "compliance",
+  "marketing",
+  "cochair",
+];
 const PAYOUT_ROLES = ["cochair", "superuser", "admin"];
 
 const actorEmail = (ctx: Ctx) => (ctx.claims?.email as string | undefined) ?? null;
@@ -74,7 +83,12 @@ export function paymentMode() {
 
 // ------------------------------------------------------------------ helpers
 
-async function audit(fundraiserId: string, action: string, ctx: Ctx | null, details: Record<string, unknown> = {}) {
+async function audit(
+  fundraiserId: string,
+  action: string,
+  ctx: Ctx | null,
+  details: Record<string, unknown> = {},
+) {
   const db = await admin();
   await db.from("fundraiser_audit").insert({
     fundraiser_id: fundraiserId,
@@ -114,7 +128,8 @@ async function assertManageable(ctx: Ctx, id: string) {
   const { data } = await db.from("fundraisers").select("*").eq("id", id).maybeSingle();
   if (!data) throw new Error("That fundraiser no longer exists.");
   const owned = data.organizer_id === ctx.userId;
-  if (!owned && !access.canManageAll) throw new Error("You can only manage fundraisers you created.");
+  if (!owned && !access.canManageAll)
+    throw new Error("You can only manage fundraisers you created.");
   return { access, record: data as FundraiserRecord, owned };
 }
 
@@ -206,7 +221,10 @@ export async function getPublic(slug: string): Promise<PublicFundraiser> {
       organizer_name: f.organizer_name,
       contact_email: f.contact_email,
     },
-    items: ((items ?? []) as FundraiserItem[]).map((i) => ({ ...i, unit_price: Number(i.unit_price) })),
+    items: ((items ?? []) as FundraiserItem[]).map((i) => ({
+      ...i,
+      unit_price: Number(i.unit_price),
+    })),
     totals,
     supporters,
   };
@@ -234,7 +252,8 @@ export async function createOrder(input: CheckoutInput, origin: string) {
     if (!it || !it.active) throw new Error("That option is no longer available.");
     item = { ...it, unit_price: Number(it.unit_price) } as FundraiserItem;
 
-    if (quantity > item.max_per_order) throw new Error(`You can buy at most ${item.max_per_order} at a time.`);
+    if (quantity > item.max_per_order)
+      throw new Error(`You can buy at most ${item.max_per_order} at a time.`);
     const left = remainingQuantity(item);
     if (left !== null && quantity > left) {
       throw new Error(left === 0 ? "That option is sold out." : `Only ${left} left.`);
@@ -294,13 +313,21 @@ export async function createOrder(input: CheckoutInput, origin: string) {
     await settleOrder(order.id);
   }
 
-  return { order_id: order.id as string, redirect_url: checkout.redirectUrl, slug: f.slug as string };
+  return {
+    order_id: order.id as string,
+    redirect_url: checkout.redirectUrl,
+    slug: f.slug as string,
+  };
 }
 
 /** Marks an order paid, decrements inventory and mints raffle entries. Idempotent. */
 export async function settleOrder(orderId: string) {
   const db = await admin();
-  const { data: order } = await db.from("fundraiser_orders").select("*").eq("id", orderId).maybeSingle();
+  const { data: order } = await db
+    .from("fundraiser_orders")
+    .select("*")
+    .eq("id", orderId)
+    .maybeSingle();
   if (!order) throw new Error("Order not found.");
   if (order.status === "paid") return { ok: true, already: true };
 
@@ -310,11 +337,19 @@ export async function settleOrder(orderId: string) {
     .eq("id", orderId)
     .eq("status", "pending");
 
-  const { data: f } = await db.from("fundraisers").select("id, kind").eq("id", order.fundraiser_id).maybeSingle();
+  const { data: f } = await db
+    .from("fundraisers")
+    .select("id, kind")
+    .eq("id", order.fundraiser_id)
+    .maybeSingle();
 
   let item: any = null;
   if (order.item_id) {
-    const { data: it } = await db.from("fundraiser_items").select("*").eq("id", order.item_id).maybeSingle();
+    const { data: it } = await db
+      .from("fundraiser_items")
+      .select("*")
+      .eq("id", order.item_id)
+      .maybeSingle();
     item = it;
     if (it) {
       await db
@@ -370,7 +405,9 @@ export async function getReceipt(orderId: string) {
   const db = await admin();
   const { data: order } = await db
     .from("fundraiser_orders")
-    .select("id, fundraiser_id, supporter_name, quantity, amount, fee_amount, status, created_at, item_id, anonymous")
+    .select(
+      "id, fundraiser_id, supporter_name, quantity, amount, fee_amount, status, created_at, item_id, anonymous",
+    )
     .eq("id", orderId)
     .maybeSingle();
   if (!order) throw new Error("We couldn't find that confirmation.");
@@ -381,7 +418,11 @@ export async function getReceipt(orderId: string) {
     .maybeSingle();
   let itemLabel: string | null = null;
   if (order.item_id) {
-    const { data: it } = await db.from("fundraiser_items").select("label").eq("id", order.item_id).maybeSingle();
+    const { data: it } = await db
+      .from("fundraiser_items")
+      .select("label")
+      .eq("id", order.item_id)
+      .maybeSingle();
     itemLabel = it?.label ?? null;
   }
   let entryNumbers: number[] = [];
@@ -425,7 +466,10 @@ export async function listMine(ctx: Ctx, all: boolean): Promise<FundraiserListRo
     .from("fundraiser_orders")
     .select("fundraiser_id, amount, fee_amount, net_amount, status, quantity, supporter_email")
     .in("fundraiser_id", ids);
-  const { data: payouts } = await db.from("fundraiser_payouts").select("fundraiser_id, net_amount").in("fundraiser_id", ids);
+  const { data: payouts } = await db
+    .from("fundraiser_payouts")
+    .select("fundraiser_id, net_amount")
+    .in("fundraiser_id", ids);
 
   return rows.map((r) => ({
     ...r,
@@ -435,7 +479,9 @@ export async function listMine(ctx: Ctx, all: boolean): Promise<FundraiserListRo
       Number(r.goal_amount),
     ),
     paid_out_amount: round2(
-      ((payouts ?? []) as any[]).filter((p) => p.fundraiser_id === r.id).reduce((s, p) => s + Number(p.net_amount), 0),
+      ((payouts ?? []) as any[])
+        .filter((p) => p.fundraiser_id === r.id)
+        .reduce((s, p) => s + Number(p.net_amount), 0),
     ),
   }));
 }
@@ -444,31 +490,43 @@ export async function getDetail(ctx: Ctx, id: string): Promise<FundraiserDetail>
   const { record } = await assertManageable(ctx, id);
   const db = await admin();
 
-  const [{ data: items }, orders, { data: entries }, { data: payouts }, { data: auditRows }] = await Promise.all([
-    db.from("fundraiser_items").select("*").eq("fundraiser_id", id).order("sort_order", { ascending: true }),
-    ordersFor(db, id),
-    db
-      .from("fundraiser_entries")
-      .select("id, kind, entry_number, bid_amount, supporter_name, supporter_email, is_winner, created_at")
-      .eq("fundraiser_id", id)
-      .order("created_at", { ascending: false })
-      .limit(500),
-    db
-      .from("fundraiser_payouts")
-      .select("id, gross_amount, fee_amount, net_amount, recipient, transfer_date, reference, notes, recorded_by_email, created_at")
-      .eq("fundraiser_id", id)
-      .order("created_at", { ascending: false }),
-    db
-      .from("fundraiser_audit")
-      .select("id, action, actor_email, details, created_at")
-      .eq("fundraiser_id", id)
-      .order("created_at", { ascending: false })
-      .limit(200),
-  ]);
+  const [{ data: items }, orders, { data: entries }, { data: payouts }, { data: auditRows }] =
+    await Promise.all([
+      db
+        .from("fundraiser_items")
+        .select("*")
+        .eq("fundraiser_id", id)
+        .order("sort_order", { ascending: true }),
+      ordersFor(db, id),
+      db
+        .from("fundraiser_entries")
+        .select(
+          "id, kind, entry_number, bid_amount, supporter_name, supporter_email, is_winner, created_at",
+        )
+        .eq("fundraiser_id", id)
+        .order("created_at", { ascending: false })
+        .limit(500),
+      db
+        .from("fundraiser_payouts")
+        .select(
+          "id, gross_amount, fee_amount, net_amount, recipient, transfer_date, reference, notes, recorded_by_email, created_at",
+        )
+        .eq("fundraiser_id", id)
+        .order("created_at", { ascending: false }),
+      db
+        .from("fundraiser_audit")
+        .select("id, action, actor_email, details, created_at")
+        .eq("fundraiser_id", id)
+        .order("created_at", { ascending: false })
+        .limit(200),
+    ]);
 
   return {
     fundraiser: { ...record, goal_amount: Number(record.goal_amount) },
-    items: ((items ?? []) as any[]).map((i) => ({ ...i, unit_price: Number(i.unit_price) })) as FundraiserItem[],
+    items: ((items ?? []) as any[]).map((i) => ({
+      ...i,
+      unit_price: Number(i.unit_price),
+    })) as FundraiserItem[],
     orders,
     entries: (entries ?? []) as FundraiserEntryRow[],
     payouts: (payouts ?? []) as FundraiserPayoutRow[],
@@ -487,7 +545,11 @@ export async function saveFundraiser(ctx: Ctx, input: FundraiserInput) {
   const db = await admin();
   const isNew = !input.id;
   let organizerName = (ctx.claims?.email as string) ?? "";
-  const { data: prof } = await db.from("profiles").select("full_name, email").eq("id", ctx.userId).maybeSingle();
+  const { data: prof } = await db
+    .from("profiles")
+    .select("full_name, email")
+    .eq("id", ctx.userId)
+    .maybeSingle();
   if (prof?.full_name) organizerName = prof.full_name;
 
   if (!isNew) await assertManageable(ctx, input.id!);
@@ -512,7 +574,13 @@ export async function saveFundraiser(ctx: Ctx, input: FundraiserInput) {
     const slug = await uniqueSlug(input.title);
     const { data, error } = await db
       .from("fundraisers")
-      .insert({ ...base, slug, organizer_id: ctx.userId, organizer_name: organizerName, status: "draft" })
+      .insert({
+        ...base,
+        slug,
+        organizer_id: ctx.userId,
+        organizer_name: organizerName,
+        status: "draft",
+      })
       .select("id")
       .single();
     if (error) throw new Error(error.message);
@@ -527,7 +595,9 @@ export async function saveFundraiser(ctx: Ctx, input: FundraiserInput) {
   // Items: upsert the submitted set, remove the ones dropped from the form.
   const { data: existing } = await db.from("fundraiser_items").select("id").eq("fundraiser_id", id);
   const keep = new Set(input.items.map((i) => i.id).filter(Boolean) as string[]);
-  const remove = ((existing ?? []) as any[]).map((e) => e.id).filter((eid: string) => !keep.has(eid));
+  const remove = ((existing ?? []) as any[])
+    .map((e) => e.id)
+    .filter((eid: string) => !keep.has(eid));
   if (remove.length > 0) await db.from("fundraiser_items").delete().in("id", remove);
 
   for (const [idx, item] of input.items.entries()) {
@@ -590,7 +660,9 @@ export async function approvalState(ctx: Ctx, requestId: string | null) {
   const db = await admin();
   const { data } = await db
     .from("fundraiser_requests")
-    .select("id, status, captain_status, legal_status, risk_status, compliance_status, marketing_status, cochair_status")
+    .select(
+      "id, status, captain_status, legal_status, risk_status, compliance_status, marketing_status, cochair_status",
+    )
     .eq("id", requestId)
     .maybeSingle();
   return data ?? null;
@@ -601,15 +673,24 @@ export async function setStatus(ctx: Ctx, id: string, status: FundraiserStatus) 
   const db = await admin();
 
   if (status === "live") {
-    if (!access.canManageAll) throw new Error("A captain or co-chair publishes the page once approvals are complete.");
+    if (!access.canManageAll)
+      throw new Error("A captain or co-chair publishes the page once approvals are complete.");
     const state = await approvalState(ctx, record.request_id);
-    const stages = ["captain_status", "legal_status", "risk_status", "compliance_status", "marketing_status", "cochair_status"];
+    const stages = [
+      "captain_status",
+      "legal_status",
+      "risk_status",
+      "compliance_status",
+      "marketing_status",
+      "cochair_status",
+    ];
     // "not_required" (e.g. Marketing when no logos are used) counts as cleared.
     if (!state || stages.some((s) => !["approved", "not_required"].includes((state as any)[s]))) {
       throw new Error("Every approval stage must be approved before this page can go live.");
     }
   }
-  if (status === "paid_out" && !access.canPayout) throw new Error("Only co-chairs and super users can close out payouts.");
+  if (status === "paid_out" && !access.canPayout)
+    throw new Error("Only co-chairs and super users can close out payouts.");
 
   const patch: Record<string, unknown> = { status };
   if (status === "live") patch.published_at = new Date().toISOString();
@@ -629,7 +710,9 @@ export async function setStatus(ctx: Ctx, id: string, status: FundraiserStatus) 
 export async function setPublicVisibility(ctx: Ctx, id: string, hidden: boolean) {
   const { record, access } = await assertManageable(ctx, id);
   if (!access.canManageAll) {
-    throw new Error("Only captains, co-chairs, admins and super users can change public visibility.");
+    throw new Error(
+      "Only captains, co-chairs, admins and super users can change public visibility.",
+    );
   }
   if (hidden && record.status === "live") {
     throw new Error("Close the fundraiser first, then hide it from public view.");
@@ -644,7 +727,9 @@ export async function setPublicVisibility(ctx: Ctx, id: string, hidden: boolean)
     })
     .eq("id", id);
   if (error) throw new Error(error.message);
-  await audit(id, hidden ? "hidden_from_public" : "restored_to_public", ctx, { status: record.status });
+  await audit(id, hidden ? "hidden_from_public" : "restored_to_public", ctx, {
+    status: record.status,
+  });
   return { ok: true, public_hidden: hidden };
 }
 
@@ -656,13 +741,26 @@ export async function yearlySummary(ctx: Ctx): Promise<FundraiserYearRow[]> {
 
   const [{ data: fundraisers }, { data: orders }] = await Promise.all([
     db.from("fundraisers").select("id, title"),
-    db.from("fundraiser_orders").select("fundraiser_id, amount, fee_amount, net_amount, status, supporter_email, paid_at, created_at"),
+    db
+      .from("fundraiser_orders")
+      .select(
+        "fundraiser_id, amount, fee_amount, net_amount, status, supporter_email, paid_at, created_at",
+      ),
   ]);
 
-  const titles = new Map<string, string>(((fundraisers ?? []) as any[]).map((f) => [f.id, f.title as string]));
+  const titles = new Map<string, string>(
+    ((fundraisers ?? []) as any[]).map((f) => [f.id, f.title as string]),
+  );
   const buckets = new Map<
     string,
-    { gross: number; fees: number; net: number; refunded: number; emails: Set<string>; ids: Set<string> }
+    {
+      gross: number;
+      fees: number;
+      net: number;
+      refunded: number;
+      emails: Set<string>;
+      ids: Set<string>;
+    }
   >();
 
   for (const o of (orders ?? []) as any[]) {
@@ -701,7 +799,11 @@ export async function yearlySummary(ctx: Ctx): Promise<FundraiserYearRow[]> {
 
 export async function refundOrder(ctx: Ctx, orderId: string) {
   const db = await admin();
-  const { data: order } = await db.from("fundraiser_orders").select("*").eq("id", orderId).maybeSingle();
+  const { data: order } = await db
+    .from("fundraiser_orders")
+    .select("*")
+    .eq("id", orderId)
+    .maybeSingle();
   if (!order) throw new Error("Order not found.");
   const { access } = await assertManageable(ctx, order.fundraiser_id);
   if (!access.canPayout) throw new Error("Only co-chairs and super users can issue refunds.");
@@ -715,7 +817,11 @@ export async function refundOrder(ctx: Ctx, orderId: string) {
     .update({ status: "refunded", refunded_at: new Date().toISOString() })
     .eq("id", orderId);
   if (order.item_id) {
-    const { data: it } = await db.from("fundraiser_items").select("quantity_sold").eq("id", order.item_id).maybeSingle();
+    const { data: it } = await db
+      .from("fundraiser_items")
+      .select("quantity_sold")
+      .eq("id", order.item_id)
+      .maybeSingle();
     if (it) {
       await db
         .from("fundraiser_items")
@@ -724,7 +830,11 @@ export async function refundOrder(ctx: Ctx, orderId: string) {
     }
   }
   await db.from("fundraiser_entries").delete().eq("order_id", orderId);
-  await audit(order.fundraiser_id, "order_refunded", ctx, { order_id: orderId, amount: Number(order.amount), refund_id: result.refundId });
+  await audit(order.fundraiser_id, "order_refunded", ctx, {
+    order_id: orderId,
+    amount: Number(order.amount),
+    refund_id: result.refundId,
+  });
   return { ok: true };
 }
 
@@ -769,13 +879,27 @@ export async function drawRaffleWinner(ctx: Ctx, id: string) {
   const winner = pool[Math.floor(Math.random() * pool.length)];
   await db.from("fundraiser_entries").update({ is_winner: false }).eq("fundraiser_id", id);
   await db.from("fundraiser_entries").update({ is_winner: true }).eq("id", winner.id);
-  await audit(id, "raffle_drawn", ctx, { entry_number: winner.entry_number, supporter: winner.supporter_name });
-  return { entry_number: winner.entry_number as number, supporter_name: winner.supporter_name as string };
+  await audit(id, "raffle_drawn", ctx, {
+    entry_number: winner.entry_number,
+    supporter: winner.supporter_name,
+  });
+  return {
+    entry_number: winner.entry_number as number,
+    supporter_name: winner.supporter_name as string,
+  };
 }
 
 const DEMO_NAMES = [
-  "Avery Bennett", "Jordan Ellis", "Riley Chen", "Morgan Patel", "Casey Nguyen",
-  "Devon Brooks", "Harper Diaz", "Quinn Walker", "Sasha Romano", "Toby Fischer",
+  "Avery Bennett",
+  "Jordan Ellis",
+  "Riley Chen",
+  "Morgan Patel",
+  "Casey Nguyen",
+  "Devon Brooks",
+  "Harper Diaz",
+  "Quinn Walker",
+  "Sasha Romano",
+  "Toby Fischer",
 ];
 
 export async function seedDemoSupporters(ctx: Ctx, id: string, count: number) {
@@ -783,7 +907,11 @@ export async function seedDemoSupporters(ctx: Ctx, id: string, count: number) {
   if (!access.canManageAll) throw new Error("Only leadership can seed demo supporters.");
   if (!record.is_demo) throw new Error("Demo seeding is disabled once real payments are enabled.");
   const db = await admin();
-  const { data: items } = await db.from("fundraiser_items").select("*").eq("fundraiser_id", id).eq("active", true);
+  const { data: items } = await db
+    .from("fundraiser_items")
+    .select("*")
+    .eq("fundraiser_id", id)
+    .eq("active", true);
   const pool = (items ?? []) as any[];
 
   let created = 0;
@@ -791,8 +919,12 @@ export async function seedDemoSupporters(ctx: Ctx, id: string, count: number) {
     const name = DEMO_NAMES[Math.floor(Math.random() * DEMO_NAMES.length)]!;
     const email = `${name.toLowerCase().replace(/\s+/g, ".")}.${i}@demo.invalid`;
     const item = pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : null;
-    const quantity = item ? 1 + Math.floor(Math.random() * Math.min(3, item.max_per_order || 1)) : 1;
-    const amount = item ? round2(Number(item.unit_price) * quantity) : round2(25 + Math.floor(Math.random() * 8) * 25);
+    const quantity = item
+      ? 1 + Math.floor(Math.random() * Math.min(3, item.max_per_order || 1))
+      : 1;
+    const amount = item
+      ? round2(Number(item.unit_price) * quantity)
+      : round2(25 + Math.floor(Math.random() * 8) * 25);
     if (amount <= 0) continue;
     const fee = estimateFee(amount);
     const { data: order } = await db
@@ -882,11 +1014,20 @@ export async function deleteFundraiser(ctx: Ctx, id: string) {
   }
   const db = await admin();
   const [{ count: moneyOrders }, { count: payouts }] = await Promise.all([
-    db.from("fundraiser_orders").select("id", { count: "exact", head: true }).eq("fundraiser_id", id).in("status", ["paid", "refunded"]),
-    db.from("fundraiser_payouts").select("id", { count: "exact", head: true }).eq("fundraiser_id", id),
+    db
+      .from("fundraiser_orders")
+      .select("id", { count: "exact", head: true })
+      .eq("fundraiser_id", id)
+      .in("status", ["paid", "refunded"]),
+    db
+      .from("fundraiser_payouts")
+      .select("id", { count: "exact", head: true })
+      .eq("fundraiser_id", id),
   ]);
   if ((moneyOrders ?? 0) > 0 || (payouts ?? 0) > 0) {
-    throw new Error("This fundraiser has payment records, so it can't be deleted. Close or cancel it, then hide it from public view.");
+    throw new Error(
+      "This fundraiser has payment records, so it can't be deleted. Close or cancel it, then hide it from public view.",
+    );
   }
   const flier = (record as any).flier_path as string | null;
   const { error } = await db.from("fundraisers").delete().eq("id", id);

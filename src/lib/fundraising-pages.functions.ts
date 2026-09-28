@@ -22,7 +22,6 @@ async function guardPages() {
   await assertFundraiserPagesEnabled();
 }
 
-
 /** Which payment provider is active (demo vs live) — safe for anyone. */
 export const getPaymentMode = createServerFn({ method: "GET" }).handler(async () => {
   const { paymentMode } = await import("@/lib/fundraising-pages.server");
@@ -30,21 +29,25 @@ export const getPaymentMode = createServerFn({ method: "GET" }).handler(async ()
 });
 
 /** Role snapshot; returns a denied shape for signed-out visitors instead of throwing. */
-export const getFundraiserAccess = createServerFn({ method: "GET" }).handler(async (): Promise<FundraiserAccess> => {
-  const { DENIED_ACCESS, getAccess } = await import("@/lib/fundraising-pages.server");
-  const { optionalAuthContext } = await import("@/server/auth-context");
-  const ctx = await optionalAuthContext();
-  if (!ctx) return DENIED_ACCESS;
-  return getAccess(ctx as never);
-});
+export const getFundraiserAccess = createServerFn({ method: "GET" }).handler(
+  async (): Promise<FundraiserAccess> => {
+    const { DENIED_ACCESS, getAccess } = await import("@/lib/fundraising-pages.server");
+    const { optionalAuthContext } = await import("@/server/auth-context");
+    const ctx = await optionalAuthContext();
+    if (!ctx) return DENIED_ACCESS;
+    return getAccess(ctx as never);
+  },
+);
 
 // ------------------------------------------------------------------ public
 
-export const listPublicFundraisers = createServerFn({ method: "GET" }).handler(async (): Promise<FundraiserListRow[]> => {
-  await guardPages();
+export const listPublicFundraisers = createServerFn({ method: "GET" }).handler(
+  async (): Promise<FundraiserListRow[]> => {
+    await guardPages();
     const { listPublic } = await import("@/lib/fundraising-pages.server");
-  return listPublic();
-});
+    return listPublic();
+  },
+);
 
 export const getPublicFundraiser = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ slug: z.string().trim().min(1).max(80) }).parse(d))
@@ -119,7 +122,9 @@ export const submitFundraiserForApproval = createServerFn({ method: "POST" })
 
 export const setFundraiserStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ id: z.string().uuid(), status: z.enum(FUNDRAISER_STATUSES) }).parse(d))
+  .inputValidator((d) =>
+    z.object({ id: z.string().uuid(), status: z.enum(FUNDRAISER_STATUSES) }).parse(d),
+  )
   .handler(async ({ data, context }) => {
     const { setStatus } = await import("@/lib/fundraising-pages.server");
     return setStatus(context as any, data.id, data.status);
@@ -177,7 +182,11 @@ export const drawFundraiserWinner = createServerFn({ method: "POST" })
 
 export const seedFundraiserDemoSupporters = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ id: z.string().uuid(), count: z.coerce.number().int().min(1).max(25).default(8) }).parse(d))
+  .inputValidator((d) =>
+    z
+      .object({ id: z.string().uuid(), count: z.coerce.number().int().min(1).max(25).default(8) })
+      .parse(d),
+  )
   .handler(async ({ data, context }) => {
     await guardPages();
     const { seedDemoSupporters } = await import("@/lib/fundraising-pages.server");

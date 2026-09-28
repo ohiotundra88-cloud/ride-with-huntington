@@ -10,14 +10,31 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Paperclip, ShieldCheck, History } from "lucide-react";
 import {
-  listReviewRequests, decideOnRequest, getMyReviewRoles, listRequestApprovals, getRequestFlier,
-  listCaptainOptions, reassignRequestCaptain, type CaptainOption,
+  listReviewRequests,
+  decideOnRequest,
+  getMyReviewRoles,
+  listRequestApprovals,
+  getRequestFlier,
+  listCaptainOptions,
+  reassignRequestCaptain,
+  type CaptainOption,
 } from "@/lib/fundraiser-requests.functions";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useStore } from "@/lib/store";
 import {
-  STAGES, actionableStages, canActOnStage, statusLabel,
-  type ApprovalEntry, type FundraiserRequest, type StageKey,
+  STAGES,
+  actionableStages,
+  canActOnStage,
+  statusLabel,
+  type ApprovalEntry,
+  type FundraiserRequest,
+  type StageKey,
 } from "@/lib/fundraiser-requests.shared";
 import { ApprovalTracker } from "@/components/ApprovalTracker";
 import { RequestAnswers } from "@/components/RequestAnswers";
@@ -29,7 +46,11 @@ export const Route = createFileRoute("/admin/approvals")({
   head: () => ({
     meta: [
       { title: "Fundraiser Approval Queue — Team Huntington Hub" },
-      { name: "description", content: "Review, approve, or return Team Huntington fundraiser requests across captain, legal, risk, compliance, marketing and co-chair stages." },
+      {
+        name: "description",
+        content:
+          "Review, approve, or return Team Huntington fundraiser requests across captain, legal, risk, compliance, marketing and co-chair stages.",
+      },
     ],
   }),
 });
@@ -37,9 +58,16 @@ export const Route = createFileRoute("/admin/approvals")({
 function ApprovalsPage() {
   const { user } = useStore();
   const userId = user.userId ?? "";
-  const { data: roleData } = useQuery({ queryKey: ["my-review-roles"], queryFn: () => getMyReviewRoles() });
+  const { data: roleData } = useQuery({
+    queryKey: ["my-review-roles"],
+    queryFn: () => getMyReviewRoles(),
+  });
   const roles = roleData?.roles ?? [];
-  const { data: requests = [], isLoading, error } = useQuery<FundraiserRequest[]>({
+  const {
+    data: requests = [],
+    isLoading,
+    error,
+  } = useQuery<FundraiserRequest[]>({
     queryKey: ["review-requests"],
     queryFn: () => listReviewRequests(),
   });
@@ -66,11 +94,32 @@ function ApprovalsPage() {
       ) : (
         <Tabs defaultValue="mine">
           <TabsList>
-            <TabsTrigger value="mine">Waiting on me <Badge variant="secondary" className="ml-2">{waitingOnMe.length}</Badge></TabsTrigger>
-            <TabsTrigger value="open">All open <Badge variant="secondary" className="ml-2">{open.length}</Badge></TabsTrigger>
-            <TabsTrigger value="closed">Decided <Badge variant="secondary" className="ml-2">{closed.length}</Badge></TabsTrigger>
+            <TabsTrigger value="mine">
+              Waiting on me{" "}
+              <Badge variant="secondary" className="ml-2">
+                {waitingOnMe.length}
+              </Badge>
+            </TabsTrigger>
+            <TabsTrigger value="open">
+              All open{" "}
+              <Badge variant="secondary" className="ml-2">
+                {open.length}
+              </Badge>
+            </TabsTrigger>
+            <TabsTrigger value="closed">
+              Decided{" "}
+              <Badge variant="secondary" className="ml-2">
+                {closed.length}
+              </Badge>
+            </TabsTrigger>
           </TabsList>
-          {([["mine", waitingOnMe], ["open", open], ["closed", closed]] as const).map(([key, list]) => (
+          {(
+            [
+              ["mine", waitingOnMe],
+              ["open", open],
+              ["closed", closed],
+            ] as const
+          ).map(([key, list]) => (
             <TabsContent key={key} value={key} className="space-y-4">
               {list.length === 0 ? (
                 <p className="text-sm text-muted-foreground">Nothing here right now.</p>
@@ -85,7 +134,15 @@ function ApprovalsPage() {
   );
 }
 
-function ReviewCard({ request, roles, userId }: { request: FundraiserRequest; roles: string[]; userId: string }) {
+function ReviewCard({
+  request,
+  roles,
+  userId,
+}: {
+  request: FundraiserRequest;
+  roles: string[];
+  userId: string;
+}) {
   const qc = useQueryClient();
   const [note, setNote] = useState("");
   const [showTrail, setShowTrail] = useState(false);
@@ -96,8 +153,13 @@ function ReviewCard({ request, roles, userId }: { request: FundraiserRequest; ro
   const decided = request.status === "approved" || request.status === "declined";
 
   const decide = useMutation({
-    mutationFn: (input: { stage: StageKey; decision: "approved" | "changes_requested" | "declined" }) =>
-      decideOnRequest({ data: { id: request.id, stage: input.stage, decision: input.decision, note } }),
+    mutationFn: (input: {
+      stage: StageKey;
+      decision: "approved" | "changes_requested" | "declined";
+    }) =>
+      decideOnRequest({
+        data: { id: request.id, stage: input.stage, decision: input.decision, note },
+      }),
     onSuccess: () => {
       toast.success("Decision recorded");
       setNote("");
@@ -121,8 +183,13 @@ function ReviewCard({ request, roles, userId }: { request: FundraiserRequest; ro
             <CardTitle className="text-base">{request.title}</CardTitle>
             <p className="mt-1 text-xs text-muted-foreground">
               {formatEventDate(request.event_date)} ·{" "}
-              {request.event_type === "virtual" ? "Virtual" : request.event_type === "raffle" ? "Raffle" : "In person"}
-              {request.location ? ` · ${request.location}` : ""} · Submitted by {request.submitter_name || request.submitter_email || "colleague"}
+              {request.event_type === "virtual"
+                ? "Virtual"
+                : request.event_type === "raffle"
+                  ? "Raffle"
+                  : "In person"}
+              {request.location ? ` · ${request.location}` : ""} · Submitted by{" "}
+              {request.submitter_name || request.submitter_email || "colleague"}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
               Captain: {request.captain_name || request.captain_email || "not assigned"}
@@ -135,12 +202,26 @@ function ReviewCard({ request, roles, userId }: { request: FundraiserRequest; ro
         <p className="whitespace-pre-line text-sm text-muted-foreground">{request.description}</p>
 
         <dl className="grid gap-2 text-sm sm:grid-cols-2">
-          {request.fundraising_method && (<div><dt className="text-xs uppercase text-muted-foreground">How funds are collected</dt><dd>{request.fundraising_method}</dd></div>)}
-          {request.expected_attendance != null && (<div><dt className="text-xs uppercase text-muted-foreground">Expected attendance</dt><dd>{request.expected_attendance}</dd></div>)}
+          {request.fundraising_method && (
+            <div>
+              <dt className="text-xs uppercase text-muted-foreground">How funds are collected</dt>
+              <dd>{request.fundraising_method}</dd>
+            </div>
+          )}
+          {request.expected_attendance != null && (
+            <div>
+              <dt className="text-xs uppercase text-muted-foreground">Expected attendance</dt>
+              <dd>{request.expected_attendance}</dd>
+            </div>
+          )}
           {(request.contact_name || request.contact_email) && (
             <div>
               <dt className="text-xs uppercase text-muted-foreground">Contact</dt>
-              <dd>{request.contact_name}{request.contact_email ? ` · ${request.contact_email}` : ""}{request.contact_phone ? ` · ${request.contact_phone}` : ""}</dd>
+              <dd>
+                {request.contact_name}
+                {request.contact_email ? ` · ${request.contact_email}` : ""}
+                {request.contact_phone ? ` · ${request.contact_phone}` : ""}
+              </dd>
             </div>
           )}
         </dl>
@@ -175,7 +256,8 @@ function ReviewCard({ request, roles, userId }: { request: FundraiserRequest; ro
               trail.map((t) => (
                 <li key={t.id}>
                   <span className="font-medium">{t.stage}</span> — {t.decision.replace("_", " ")}
-                  {t.actor_email ? ` by ${t.actor_email}` : ""} · {new Date(t.created_at).toLocaleString()}
+                  {t.actor_email ? ` by ${t.actor_email}` : ""} ·{" "}
+                  {new Date(t.created_at).toLocaleString()}
                   {t.note ? <div className="text-muted-foreground">“{t.note}”</div> : null}
                 </li>
               ))
@@ -188,7 +270,9 @@ function ReviewCard({ request, roles, userId }: { request: FundraiserRequest; ro
             <div className="flex items-center gap-2 text-sm font-medium text-[var(--brand-dark)]">
               <ShieldCheck className="h-4 w-4" /> Your decision
               {openStages.map((s) => (
-                <Badge key={s} variant="secondary">{STAGES.find((x) => x.key === s)!.label}</Badge>
+                <Badge key={s} variant="secondary">
+                  {STAGES.find((x) => x.key === s)!.label}
+                </Badge>
               ))}
             </div>
             <Textarea
@@ -199,7 +283,8 @@ function ReviewCard({ request, roles, userId }: { request: FundraiserRequest; ro
             />
             {note.trim().length < 5 && (
               <p className="text-xs text-muted-foreground">
-                Add a comment above to deny or request changes — the submitter sees it and can update and resubmit.
+                Add a comment above to deny or request changes — the submitter sees it and can
+                update and resubmit.
               </p>
             )}
             <div className="flex flex-wrap gap-2">
@@ -213,10 +298,21 @@ function ReviewCard({ request, roles, userId }: { request: FundraiserRequest; ro
                   >
                     Approve as {STAGES.find((x) => x.key === stage)!.label}
                   </Button>
-                  <Button size="sm" variant="outline" disabled={decide.isPending || note.trim().length < 5} onClick={() => decide.mutate({ stage, decision: "changes_requested" })}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={decide.isPending || note.trim().length < 5}
+                    onClick={() => decide.mutate({ stage, decision: "changes_requested" })}
+                  >
                     Request changes
                   </Button>
-                  <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10" disabled={decide.isPending || note.trim().length < 5} onClick={() => decide.mutate({ stage, decision: "declined" })}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-destructive hover:bg-destructive/10"
+                    disabled={decide.isPending || note.trim().length < 5}
+                    onClick={() => decide.mutate({ stage, decision: "declined" })}
+                  >
                     Deny
                   </Button>
                 </div>

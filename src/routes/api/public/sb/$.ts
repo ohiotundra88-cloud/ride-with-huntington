@@ -37,12 +37,19 @@ const STRIPPED = new Set([
   "cf-access-client-secret",
 ]);
 
-async function proxy({ request, params }: { request: Request; params: Record<string, string | undefined> }) {
+async function proxy({
+  request,
+  params,
+}: {
+  request: Request;
+  params: Record<string, string | undefined>;
+}) {
   const splat = (params["_splat"] ?? "").replace(/^\/+/, "");
   if (!splat.startsWith("rest/v1/")) return new Response("Not found", { status: 404 });
 
   const { currentUser } = await import("@/server/session.server");
-  const { databaseToken, databaseGatewayHeaders, databaseUrl } = await import("@/server/backend.server");
+  const { databaseToken, databaseGatewayHeaders, databaseUrl } =
+    await import("@/server/backend.server");
 
   const user = await currentUser(request).catch(() => null);
   const token = user
@@ -73,12 +80,17 @@ async function proxy({ request, params }: { request: Request; params: Record<str
 
   const outHeaders = new Headers();
   upstream.headers.forEach((value, key) => {
-    if (!HOP_BY_HOP.has(key.toLowerCase()) && key.toLowerCase() !== "set-cookie") outHeaders.set(key, value);
+    if (!HOP_BY_HOP.has(key.toLowerCase()) && key.toLowerCase() !== "set-cookie")
+      outHeaders.set(key, value);
   });
   outHeaders.set("cache-control", "no-store");
   outHeaders.set("x-content-type-options", "nosniff");
 
-  return new Response(upstream.body, { status: upstream.status, statusText: upstream.statusText, headers: outHeaders });
+  return new Response(upstream.body, {
+    status: upstream.status,
+    statusText: upstream.statusText,
+    headers: outHeaders,
+  });
 }
 
 export const Route = createFileRoute("/api/public/sb/$")({

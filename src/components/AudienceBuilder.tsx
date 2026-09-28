@@ -29,7 +29,8 @@ function ChipGroup({
   onToggle: (key: string) => void;
   disabledOptions?: string[];
 }) {
-  if (!options.length) return <p className="text-xs text-muted-foreground">No options available.</p>;
+  if (!options.length)
+    return <p className="text-xs text-muted-foreground">No options available.</p>;
   return (
     <div className="flex flex-wrap gap-1.5">
       {options.map((o) => {
@@ -99,7 +100,9 @@ export function AudienceBuilder({
     const needle = personQuery.trim().toLowerCase();
     if (!needle) return [];
     return (roster.data ?? [])
-      .filter((p) => p.name.toLowerCase().includes(needle) || p.email.toLowerCase().includes(needle))
+      .filter(
+        (p) => p.name.toLowerCase().includes(needle) || p.email.toLowerCase().includes(needle),
+      )
       .slice(0, 8);
   }, [roster.data, personQuery]);
 
@@ -116,7 +119,8 @@ export function AudienceBuilder({
             All Team Huntington Participants
           </Label>
           <p className="text-xs text-muted-foreground">
-            Invite everyone on the roster. Turn off to target by role, region, participation, and more.
+            Invite everyone on the roster. Turn off to target by role, region, participation, and
+            more.
           </p>
         </div>
         <Switch
@@ -126,17 +130,18 @@ export function AudienceBuilder({
             onChange({
               ...value,
               allParticipants: checked,
-              ...(checked ? {
-                  roles: [],
-                  regions: [],
-                  participation: [],
-                  tags: [],
-                  subPelotons: [],
-                  routes: [],
-                  flags: [],
-                  gaps: [],
-                  raisedBelow: null,
-                }
+              ...(checked
+                ? {
+                    roles: [],
+                    regions: [],
+                    participation: [],
+                    tags: [],
+                    subPelotons: [],
+                    routes: [],
+                    flags: [],
+                    gaps: [],
+                    raisedBelow: null,
+                  }
                 : {}),
             })
           }
@@ -169,7 +174,9 @@ export function AudienceBuilder({
         </div>
 
         <div className="space-y-2">
-          <Label className="text-xs uppercase tracking-wide text-muted-foreground">Participation</Label>
+          <Label className="text-xs uppercase tracking-wide text-muted-foreground">
+            Participation
+          </Label>
           <ChipGroup
             options={PARTICIPATION_OPTIONS.map((p) => ({ key: p, label: p }))}
             selected={value.participation}
@@ -178,7 +185,9 @@ export function AudienceBuilder({
         </div>
 
         <div className="space-y-2">
-          <Label className="text-xs uppercase tracking-wide text-muted-foreground">Pelotonia status</Label>
+          <Label className="text-xs uppercase tracking-wide text-muted-foreground">
+            Pelotonia status
+          </Label>
           <ChipGroup
             options={PELOTONIA_FLAGS.map((f) => ({ key: f.key, label: f.label }))}
             selected={value.flags}
@@ -187,7 +196,9 @@ export function AudienceBuilder({
         </div>
 
         <div className="space-y-2">
-          <Label className="text-xs uppercase tracking-wide text-muted-foreground">Rider tags</Label>
+          <Label className="text-xs uppercase tracking-wide text-muted-foreground">
+            Rider tags
+          </Label>
           <ChipGroup
             options={(options.data?.tags ?? []).map((t) => ({ key: t, label: t }))}
             selected={value.tags}
@@ -197,7 +208,9 @@ export function AudienceBuilder({
 
         <div className="grid gap-5 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label className="text-xs uppercase tracking-wide text-muted-foreground">Sub-peloton</Label>
+            <Label className="text-xs uppercase tracking-wide text-muted-foreground">
+              Sub-peloton
+            </Label>
             <ChipGroup
               options={(options.data?.subPelotons ?? []).map((t) => ({ key: t, label: t }))}
               selected={value.subPelotons}
@@ -205,7 +218,9 @@ export function AudienceBuilder({
             />
           </div>
           <div className="space-y-2">
-            <Label className="text-xs uppercase tracking-wide text-muted-foreground">Ride route</Label>
+            <Label className="text-xs uppercase tracking-wide text-muted-foreground">
+              Ride route
+            </Label>
             <ChipGroup
               options={(options.data?.routes ?? []).map((t) => ({ key: t, label: t }))}
               selected={value.routes}
@@ -215,7 +230,9 @@ export function AudienceBuilder({
         </div>
 
         <div className="space-y-2">
-          <Label className="text-xs uppercase tracking-wide text-muted-foreground">Readiness gaps</Label>
+          <Label className="text-xs uppercase tracking-wide text-muted-foreground">
+            Readiness gaps
+          </Label>
           <ChipGroup
             options={READINESS_GAPS.map((g) => ({ key: g.key, label: g.label }))}
             selected={value.gaps}
@@ -223,7 +240,9 @@ export function AudienceBuilder({
           />
           {value.gaps.includes("below_goal") && (
             <div className="flex items-center gap-2 pt-1">
-              <Label htmlFor="a-below" className="text-xs">Raised less than</Label>
+              <Label htmlFor="a-below" className="text-xs">
+                Raised less than
+              </Label>
               <Input
                 id="a-below"
                 type="number"
@@ -294,7 +313,11 @@ export function AudienceBuilder({
             {value.includeUserIds.map((id) => (
               <Badge key={`i-${id}`} className="gap-1 bg-emerald-100 text-emerald-900">
                 +{nameFor(id)}
-                <button type="button" onClick={() => toggle("includeUserIds", id)} aria-label="Remove">
+                <button
+                  type="button"
+                  onClick={() => toggle("includeUserIds", id)}
+                  aria-label="Remove"
+                >
                   <X className="h-3 w-3" />
                 </button>
               </Badge>
@@ -302,7 +325,11 @@ export function AudienceBuilder({
             {value.excludeUserIds.map((id) => (
               <Badge key={`e-${id}`} variant="outline" className="gap-1">
                 −{nameFor(id)}
-                <button type="button" onClick={() => toggle("excludeUserIds", id)} aria-label="Remove">
+                <button
+                  type="button"
+                  onClick={() => toggle("excludeUserIds", id)}
+                  aria-label="Remove"
+                >
                   <X className="h-3 w-3" />
                 </button>
               </Badge>

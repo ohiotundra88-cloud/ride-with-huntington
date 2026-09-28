@@ -27,10 +27,18 @@ export const getLoungeAccess = createServerFn({ method: "GET" })
       .eq("user_id", context.userId);
     if (error) throw new Error(error.message);
     const roles = (data ?? []).map((r: { role: string }) => String(r.role));
-    const allowed =
-      roles.some((r: string) =>
-        ["captain", "admin", "superuser", "legal", "risk", "compliance", "marketing", "cochair"].includes(r),
-      );
+    const allowed = roles.some((r: string) =>
+      [
+        "captain",
+        "admin",
+        "superuser",
+        "legal",
+        "risk",
+        "compliance",
+        "marketing",
+        "cochair",
+      ].includes(r),
+    );
     return { roles, allowed, userId: context.userId };
   });
 
@@ -59,7 +67,6 @@ export const listLoungePosts = createServerFn({ method: "GET" })
         post.author_email = prof?.email ?? null;
         post.author_avatar_version = prof?.avatar_path ? (prof.avatar_updated_at ?? "1") : null;
       }
-
     }
     return posts;
   });
@@ -188,7 +195,9 @@ export const getLoungeFile = createServerFn({ method: "POST" })
     if (!row?.file_path) throw new Error("No document attached to this post.");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: file, error: dErr } = await supabaseAdmin.storage.from(BUCKET).download(row.file_path);
+    const { data: file, error: dErr } = await supabaseAdmin.storage
+      .from(BUCKET)
+      .download(row.file_path);
     if (dErr || !file) throw new Error("Document could not be downloaded.");
     const buf = Buffer.from(await file.arrayBuffer());
     return {

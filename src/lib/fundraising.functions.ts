@@ -127,7 +127,8 @@ export const uploadAssetFile = createServerFn({ method: "POST" })
       .eq("id", data.id);
     if (updErr) throw new Error(updErr.message);
 
-    if (row.file_path) await supabaseAdmin.storage.from("fundraising-assets").remove([row.file_path]);
+    if (row.file_path)
+      await supabaseAdmin.storage.from("fundraising-assets").remove([row.file_path]);
     return { ok: true, file_path: path };
   });
 

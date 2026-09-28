@@ -6,10 +6,12 @@ import { usePublicFaqs } from "@/lib/faq-store";
 import { ArrowLeft, LifeBuoy } from "lucide-react";
 
 export const Route = createFileRoute("/resources/$id")({
-  head: () => ({ meta: [
-    { title: "Article — Team Huntington Hub" },
-    { name: "description", content: "Team Huntington resource article." },
-  ] }),
+  head: () => ({
+    meta: [
+      { title: "Article — Team Huntington Hub" },
+      { name: "description", content: "Team Huntington resource article." },
+    ],
+  }),
   component: Article,
 });
 
@@ -17,7 +19,9 @@ function Article() {
   const { id } = Route.useParams();
   const { data: faqs = [], isLoading } = usePublicFaqs();
   if (isLoading) {
-    return <div className="mx-auto max-w-3xl px-4 py-12 text-center text-muted-foreground">Loading…</div>;
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-12 text-center text-muted-foreground">Loading…</div>
+    );
   }
   const a = faqs.find((f) => f.id === id || (f as any).source_id === id);
   if (!a) throw notFound();
@@ -25,7 +29,12 @@ function Article() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <Link to="/resources" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" /> All resources</Link>
+      <Link
+        to="/resources"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+      >
+        <ArrowLeft className="h-4 w-4" /> All resources
+      </Link>
       <div className="mt-4">
         <Badge variant="outline">{a.category}</Badge>
         <h1 className="mt-3 text-3xl font-black text-[var(--brand-dark)]">{a.title}</h1>
@@ -39,9 +48,10 @@ function Article() {
             <p className="text-sm text-white/70">Reach the Team Huntington coordinators.</p>
           </div>
           <Link to="/resources" hash="contacts">
-            <Button className="bg-[var(--brand)] text-[var(--brand-foreground)] hover:bg-[var(--brand)]/90"><LifeBuoy className="mr-1 h-4 w-4" /> Contact Support</Button>
+            <Button className="bg-[var(--brand)] text-[var(--brand-foreground)] hover:bg-[var(--brand)]/90">
+              <LifeBuoy className="mr-1 h-4 w-4" /> Contact Support
+            </Button>
           </Link>
-
         </CardContent>
       </Card>
 
@@ -51,10 +61,12 @@ function Article() {
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             {related.map((r) => (
               <Link key={r.id} to="/resources/$id" params={{ id: r.id }}>
-                <Card className="hover:shadow-md transition-shadow"><CardContent className="p-4">
-                  <p className="font-semibold text-sm text-[var(--brand-dark)]">{r.title}</p>
-                  <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{r.body}</p>
-                </CardContent></Card>
+                <Card className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-4">
+                    <p className="font-semibold text-sm text-[var(--brand-dark)]">{r.title}</p>
+                    <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{r.body}</p>
+                  </CardContent>
+                </Card>
               </Link>
             ))}
           </div>

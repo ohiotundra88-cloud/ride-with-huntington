@@ -305,10 +305,31 @@ export interface VendorTier {
 
 /** Highest first. Thresholds from Chris Kemper, 2026-09-28. */
 export const VENDOR_TIERS: readonly VendorTier[] = [
-  { key: "pinnacle", label: "Pinnacle Partner", min: 50000, riderSlots: 5, slotHotel: true, rank: 4 },
+  {
+    key: "pinnacle",
+    label: "Pinnacle Partner",
+    min: 50000,
+    riderSlots: 5,
+    slotHotel: true,
+    rank: 4,
+  },
   { key: "one_goal", label: "One Goal", min: 30000, riderSlots: 2, slotHotel: false, rank: 3 },
-  { key: "gold_honeycomb", label: "Gold Honeycomb", min: 15000, riderSlots: 0, slotHotel: false, rank: 2 },
-  { key: "green_honeycomb", label: "Green Honeycomb", min: 5000, riderSlots: 0, slotHotel: false, rank: 1 },
+  {
+    key: "gold_honeycomb",
+    label: "Gold Honeycomb",
+    min: 15000,
+    riderSlots: 0,
+    slotHotel: false,
+    rank: 2,
+  },
+  {
+    key: "green_honeycomb",
+    label: "Green Honeycomb",
+    min: 5000,
+    riderSlots: 0,
+    slotHotel: false,
+    rank: 1,
+  },
 ];
 
 export type YearTotals = Record<number, { total: number; kids: number }>;
@@ -319,7 +340,12 @@ export type YearTotals = Record<number, { total: number; kids: number }>;
  * soon as it's made), plus that year's Pelotonia Kids donations.
  */
 export function yearTotals(
-  donations: { year: number; committed_amount: number; actual_donated_amount: number; kids_amount?: number }[],
+  donations: {
+    year: number;
+    committed_amount: number;
+    actual_donated_amount: number;
+    kids_amount?: number;
+  }[],
 ): YearTotals {
   const out: YearTotals = {};
   for (const d of donations) {
@@ -361,7 +387,10 @@ export const vendorRiderSlotSchema = z
       .trim()
       .toUpperCase()
       .max(12)
-      .refine((v) => v === "" || /^[A-Z0-9]{3,12}$/.test(v), "Rider IDs are letters and numbers, like CK0132")
+      .refine(
+        (v) => v === "" || /^[A-Z0-9]{3,12}$/.test(v),
+        "Rider IDs are letters and numbers, like CK0132",
+      )
       .optional()
       .default(""),
     bike_needed: z.boolean().optional().default(false),

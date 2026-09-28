@@ -10,10 +10,25 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
-  CalendarPlus, ShieldAlert, Loader2, Users, Send, Trash2, Pencil, Ban, Download,
+  CalendarPlus,
+  ShieldAlert,
+  Loader2,
+  Users,
+  Send,
+  Trash2,
+  Pencil,
+  Ban,
+  Download,
 } from "lucide-react";
 import { AudienceBuilder } from "@/components/AudienceBuilder";
 import { describeAudience, emptyAudience, type AudienceRules } from "@/lib/messages.shared";
@@ -21,8 +36,13 @@ import { previewAudience } from "@/lib/messages.functions";
 import { formatEventDate, formatTimeRange } from "@/lib/events.shared";
 import { rsvpLabel, type TeamEventSummary } from "@/lib/team-events.shared";
 import {
-  cancelTeamEvent, deleteTeamEvent, getTeamEventAccess, listManageableTeamEvents,
-  listTeamEventInvitees, publishTeamEvent, saveTeamEvent,
+  cancelTeamEvent,
+  deleteTeamEvent,
+  getTeamEventAccess,
+  listManageableTeamEvents,
+  listTeamEventInvitees,
+  publishTeamEvent,
+  saveTeamEvent,
 } from "@/lib/team-events.functions";
 
 export const Route = createFileRoute("/team-events")({
@@ -235,7 +255,8 @@ function TeamEventsPage() {
       <header className="mb-6">
         <h1 className="text-2xl font-black tracking-tight sm:text-3xl">Team events</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Create a company event, assign it to exactly the right colleagues, and track who is coming.
+          Create a company event, assign it to exactly the right colleagues, and track who is
+          coming.
         </p>
       </header>
 
@@ -278,15 +299,30 @@ function TeamEventsPage() {
                   <div className="grid gap-4 sm:grid-cols-3">
                     <div className="space-y-1.5">
                       <Label htmlFor="e-date">Date</Label>
-                      <Input id="e-date" type="date" value={eventDate} onChange={(ev) => setEventDate(ev.target.value)} />
+                      <Input
+                        id="e-date"
+                        type="date"
+                        value={eventDate}
+                        onChange={(ev) => setEventDate(ev.target.value)}
+                      />
                     </div>
                     <div className="space-y-1.5">
                       <Label htmlFor="e-start">Start time</Label>
-                      <Input id="e-start" type="time" value={startTime} onChange={(ev) => setStartTime(ev.target.value)} />
+                      <Input
+                        id="e-start"
+                        type="time"
+                        value={startTime}
+                        onChange={(ev) => setStartTime(ev.target.value)}
+                      />
                     </div>
                     <div className="space-y-1.5">
                       <Label htmlFor="e-end">End time</Label>
-                      <Input id="e-end" type="time" value={endTime} onChange={(ev) => setEndTime(ev.target.value)} />
+                      <Input
+                        id="e-end"
+                        type="time"
+                        value={endTime}
+                        onChange={(ev) => setEndTime(ev.target.value)}
+                      />
                     </div>
                   </div>
                   <div className="space-y-1.5">
@@ -301,7 +337,11 @@ function TeamEventsPage() {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-1.5">
                       <Label htmlFor="e-org">Organizer name</Label>
-                      <Input id="e-org" value={organizerName} onChange={(ev) => setOrganizerName(ev.target.value)} />
+                      <Input
+                        id="e-org"
+                        value={organizerName}
+                        onChange={(ev) => setOrganizerName(ev.target.value)}
+                      />
                     </div>
                     <div className="space-y-1.5">
                       <Label htmlFor="e-orgemail">Organizer email</Label>
@@ -340,7 +380,11 @@ function TeamEventsPage() {
                 <CardContent className="space-y-4">
                   <div>
                     <p className="text-3xl font-black tracking-tight">
-                      {previewQuery.isFetching ? <Loader2 className="h-6 w-6 animate-spin" /> : count}
+                      {previewQuery.isFetching ? (
+                        <Loader2 className="h-6 w-6 animate-spin" />
+                      ) : (
+                        count
+                      )}
                     </p>
                     <p className="text-xs text-muted-foreground">{describeAudience(audience)}</p>
                     {previewQuery.error && (
@@ -352,7 +396,9 @@ function TeamEventsPage() {
 
                   <div className="max-h-64 divide-y overflow-y-auto rounded-md border">
                     {people.length === 0 ? (
-                      <p className="p-3 text-xs text-muted-foreground">No one matches these rules yet.</p>
+                      <p className="p-3 text-xs text-muted-foreground">
+                        No one matches these rules yet.
+                      </p>
                     ) : (
                       people.slice(0, 200).map((p) => (
                         <div key={p.userId} className="p-2">
@@ -364,7 +410,10 @@ function TeamEventsPage() {
                   </div>
 
                   <div className="grid gap-2">
-                    <Button onClick={() => publishNow.mutate()} disabled={publishNow.isPending || count === 0}>
+                    <Button
+                      onClick={() => publishNow.mutate()}
+                      disabled={publishNow.isPending || count === 0}
+                    >
                       {publishNow.isPending ? (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       ) : (
@@ -372,7 +421,11 @@ function TeamEventsPage() {
                       )}
                       Publish &amp; invite
                     </Button>
-                    <Button variant="outline" onClick={() => saveDraft.mutate()} disabled={saveDraft.isPending}>
+                    <Button
+                      variant="outline"
+                      onClick={() => saveDraft.mutate()}
+                      disabled={saveDraft.isPending}
+                    >
                       <CalendarPlus className="mr-2 h-4 w-4" /> Save draft
                     </Button>
                     {editingId && (
@@ -455,7 +508,11 @@ function TeamEventsPage() {
                                   >
                                     <Send className="h-3.5 w-3.5" />
                                   </Button>
-                                  <Button size="sm" variant="ghost" onClick={() => cancel.mutate(e.id)}>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => cancel.mutate(e.id)}
+                                  >
                                     <Ban className="h-3.5 w-3.5" />
                                   </Button>
                                 </>
@@ -519,7 +576,9 @@ function TeamEventsPage() {
                     <p className="truncate text-sm font-medium">{r.name}</p>
                     <p className="truncate text-xs text-muted-foreground">{r.email}</p>
                   </div>
-                  <Badge variant={r.rsvp === "yes" ? "default" : "outline"}>{rsvpLabel(r.rsvp)}</Badge>
+                  <Badge variant={r.rsvp === "yes" ? "default" : "outline"}>
+                    {rsvpLabel(r.rsvp)}
+                  </Badge>
                 </div>
               ))
             )}

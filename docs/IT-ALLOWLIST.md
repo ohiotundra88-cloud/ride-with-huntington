@@ -2,15 +2,15 @@
 
 **Request:** allow the following site for Huntington colleagues on the corporate network and VPN.
 
-| Item | Value |
-| --- | --- |
-| Domains | `ridewithhuntington.com`, `www.ridewithhuntington.com` |
-| Protocol / port | HTTPS / 443 |
-| Suggested category | Business / Productivity (internal Huntington Pelotonia team site) |
-| API paths | `/api/public/sb/*` on the same domain (sign-in and data) |
-| Other external hosts required | None |
-| SSL inspection | Bypass/decrypt exception required in iBoss for both domains |
-| Transport | Allow HTTPS over TCP 443 and HTTP/2 |
+| Item                          | Value                                                             |
+| ----------------------------- | ----------------------------------------------------------------- |
+| Domains                       | `ridewithhuntington.com`, `www.ridewithhuntington.com`            |
+| Protocol / port               | HTTPS / 443                                                       |
+| Suggested category            | Business / Productivity (internal Huntington Pelotonia team site) |
+| API paths                     | `/api/public/sb/*` on the same domain (sign-in and data)          |
+| Other external hosts required | None                                                              |
+| SSL inspection                | Bypass/decrypt exception required in iBoss for both domains       |
+| Transport                     | Allow HTTPS over TCP 443 and HTTP/2                               |
 
 ## Why the request is limited to one domain
 

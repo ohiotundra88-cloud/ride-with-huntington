@@ -1,5 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { getSiteSettings, DEFAULT_SITE_SETTINGS, type SiteSettings } from "@/lib/site-settings.functions";
+import {
+  getSiteSettings,
+  DEFAULT_SITE_SETTINGS,
+  type SiteSettings,
+} from "@/lib/site-settings.functions";
 
 export const SITE_SETTINGS_KEY = ["site-settings"] as const;
 

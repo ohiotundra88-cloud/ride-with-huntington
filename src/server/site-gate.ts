@@ -15,7 +15,8 @@ export async function siteGateResponse(request: Request): Promise<Response | nul
   if (ALWAYS_OPEN.some((p) => url.pathname.startsWith(p))) return null;
   if (await currentUser(request).catch(() => null)) return null;
 
-  const wantsPage = request.method === "GET" && (request.headers.get("accept") ?? "").includes("text/html");
+  const wantsPage =
+    request.method === "GET" && (request.headers.get("accept") ?? "").includes("text/html");
   if (wantsPage) {
     const login = new URL("/auth/login", url);
     login.searchParams.set("returnTo", `${url.pathname}${url.search}`);

@@ -21,7 +21,10 @@
  */
 import { createHmac } from "node:crypto";
 
-const API = (process.env.PELOTONIA_API_BASE ?? "https://pelotonia-p3-middleware-production.azurewebsites.net/api").replace(/\/+$/, "");
+const API = (
+  process.env.PELOTONIA_API_BASE ??
+  "https://pelotonia-p3-middleware-production.azurewebsites.net/api"
+).replace(/\/+$/, "");
 const TEAM = process.env.PELOTONIA_TEAM_PELOTON_ID ?? "a0s3t00000BKX8sAAH";
 const REST = requiredEnv("HUB_REST_URL").replace(/\/+$/, "");
 const SECRET = requiredEnv("HUB_DB_JWT_SECRET");
@@ -52,7 +55,8 @@ const log = (...a) => console.log(new Date().toISOString(), ...a);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const num = (v) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
 const str = (v) => (typeof v === "string" && v.trim() ? v.trim() : null);
-const shortName = (name) => String(name ?? "").replace(/^Team Huntington Bank\s*-\s*/, "") || String(name ?? "");
+const shortName = (name) =>
+  String(name ?? "").replace(/^Team Huntington Bank\s*-\s*/, "") || String(name ?? "");
 
 // ---------------------------------------------------------------- Pelotonia
 
@@ -94,13 +98,18 @@ async function pledgeItCampaign(slug) {
   const url = `https://charity.pledgeit.org/${encodeURIComponent(slug)}`;
   requests++;
   try {
-    const res = await fetch(url, { headers: { Accept: "text/html", "User-Agent": UA }, signal: AbortSignal.timeout(20_000) });
+    const res = await fetch(url, {
+      headers: { Accept: "text/html", "User-Agent": UA },
+      signal: AbortSignal.timeout(20_000),
+    });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const html = await res.text();
     const m = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
     if (!m) throw new Error("no __NEXT_DATA__");
     const data = JSON.parse(m[1])?.props?.apolloState?.data ?? {};
-    const c = Object.values(data).find((v) => v?.__typename === "Campaign" && String(v.slug).toLowerCase() === slug.toLowerCase());
+    const c = Object.values(data).find(
+      (v) => v?.__typename === "Campaign" && String(v.slug).toLowerCase() === slug.toLowerCase(),
+    );
     const raised = Number(c?.amountRaised ?? c?.stats?.estimatedAmountRaised);
     if (!c || !Number.isFinite(raised)) throw new Error("campaign total not found");
     return {
@@ -140,14 +149,20 @@ async function rest(method, path, body, prefer) {
     body: body === undefined ? undefined : JSON.stringify(body),
     signal: AbortSignal.timeout(60_000),
   });
-  if (!res.ok) throw new Error(`DB ${method} ${path}: ${res.status} ${(await res.text()).slice(0, 300)}`);
+  if (!res.ok)
+    throw new Error(`DB ${method} ${path}: ${res.status} ${(await res.text()).slice(0, 300)}`);
   const text = await res.text();
   return text ? JSON.parse(text) : null;
 }
 
 async function upsert(table, rows, chunk = 500) {
   for (let i = 0; i < rows.length; i += chunk) {
-    await rest("POST", table, rows.slice(i, i + chunk), "resolution=merge-duplicates,return=minimal");
+    await rest(
+      "POST",
+      table,
+      rows.slice(i, i + chunk),
+      "resolution=merge-duplicates,return=minimal",
+    );
   }
 }
 
@@ -168,7 +183,9 @@ function pelotonRow(p, parentId) {
     all_time_raised: num(f.allTimeRaised),
     general_peloton_funds: num(f.generalPelotonFunds),
     raised_by_members: num(f.totalRaisedByMembers),
-    captain_name: str(p.captain?.name ?? [p.captain?.firstName, p.captain?.lastName].filter(Boolean).join(" ")),
+    captain_name: str(
+      p.captain?.name ?? [p.captain?.firstName, p.captain?.lastName].filter(Boolean).join(" "),
+    ),
     raw: { ...p, story: undefined },
     synced_at: new Date().toISOString(),
   };
@@ -207,7 +224,11 @@ function profileRow(base, u, routes) {
     is_survivor: base.is_survivor || tags.includes("Living Proof"),
     is_high_roller: !!f.committedHighRoller || tags.includes("High Roller"),
     registration_types: (u.registrationTypes ?? []).map(String),
-    ride_types: [...new Set((types.registeredRides ?? []).map((r) => String(r?.rideType ?? "")).filter(Boolean))],
+    ride_types: [
+      ...new Set(
+        (types.registeredRides ?? []).map((r) => String(r?.rideType ?? "")).filter(Boolean),
+      ),
+    ],
     route_ids: routeList.map((r) => String(r.id)).filter(Boolean),
     route_names: routeList.map((r) => String(r.name ?? "")).filter(Boolean),
     tags,
@@ -252,7 +273,8 @@ function routeRow(r) {
     duration: str(r.duration),
     difficulty: str(r.difficulty),
     start_date: str(r.startDate),
-    fundraising_commitment: typeof r.fundraisingCommitment === "number" ? r.fundraisingCommitment : null,
+    fundraising_commitment:
+      typeof r.fundraisingCommitment === "number" ? r.fundraisingCommitment : null,
     capacity: typeof r.capacity === "number" ? r.capacity : null,
     registration_count: typeof r.registrationCount === "number" ? r.registrationCount : null,
     highest_incline: typeof r.highestIncline === "number" ? r.highestIncline : null,
@@ -279,7 +301,12 @@ async function pool(items, worker) {
 }
 
 async function main() {
-  const [run] = await rest("POST", "pelotonia_sync_runs", { status: "running" }, "return=representation");
+  const [run] = await rest(
+    "POST",
+    "pelotonia_sync_runs",
+    { status: "running" },
+    "return=representation",
+  );
   const stats = { pelotons: 0, riders_listed: 0, profiles_fetched: 0 };
   let status = "succeeded";
   let note = null;
@@ -289,7 +316,9 @@ async function main() {
     if (!team?.id) throw new Error("Team peloton not found");
     await upsert("pelotonia_pelotons", [pelotonRow(team, null)]);
     const { data: subs } = await pelotonia(`peloton/${TEAM}/members`, { page: 1 });
-    const subIds = (subs ?? []).filter((s) => s.membersCount > 0 || s.publicId?.startsWith("a0")).map((s) => s.publicId);
+    const subIds = (subs ?? [])
+      .filter((s) => s.membersCount > 0 || s.publicId?.startsWith("a0"))
+      .map((s) => s.publicId);
     const subRows = [];
     for (const id of subIds) {
       const { data } = await pelotonia(`peloton/${id}`);
@@ -305,7 +334,9 @@ async function main() {
     for (const sub of subRows) {
       for (let page = 1; ; page++) {
         const { data, pages } = await pelotonia(`peloton/${sub.id}/members`, { page });
-        for (const m of data ?? []) if (m.publicId && !(m.membersCount > 0)) listed.set(String(m.publicId).toUpperCase(), riderListRow(m, sub.id));
+        for (const m of data ?? [])
+          if (m.publicId && !(m.membersCount > 0))
+            listed.set(String(m.publicId).toUpperCase(), riderListRow(m, sub.id));
         if (!data?.length || page >= pages) break;
         await sleep(GAP_MS);
       }
@@ -319,7 +350,10 @@ async function main() {
       let ids = [...listed.keys()];
       if (PROFILE_MODE === "stale") {
         const cutoff = new Date(Date.now() - 20 * 3600_000).toISOString();
-        const fresh = await rest("GET", `pelotonia_riders?select=public_id&profile_synced_at=gte.${cutoff}`);
+        const fresh = await rest(
+          "GET",
+          `pelotonia_riders?select=public_id&profile_synced_at=gte.${cutoff}`,
+        );
         const skip = new Set((fresh ?? []).map((r) => r.public_id));
         ids = ids.filter((id) => !skip.has(id));
       }
@@ -346,7 +380,8 @@ async function main() {
         batch.push(profileRow(listed.get(id), u, r));
         stats.profiles_fetched++;
         if (batch.length >= 100) await flush();
-        if (stats.profiles_fetched % 250 === 0) log(`profiles: ${stats.profiles_fetched}/${ids.length}`);
+        if (stats.profiles_fetched % 250 === 0)
+          log(`profiles: ${stats.profiles_fetched}/${ids.length}`);
       });
       await flush();
       await upsert("pelotonia_rides", [...rides.values()]);
@@ -359,13 +394,20 @@ async function main() {
     if (kids.length) await upsert("pelotonia_kids_campaigns", kids);
     // Sum the stored rows for the configured campaigns, so one failed read keeps last night's figure.
     const slugList = KIDS_SLUGS.map((s) => `"${s}"`).join(",");
-    const kidsRows = KIDS_SLUGS.length ? await rest("GET", `pelotonia_kids_campaigns?select=raised&slug=in.(${encodeURIComponent(slugList)})`) : [];
+    const kidsRows = KIDS_SLUGS.length
+      ? await rest(
+          "GET",
+          `pelotonia_kids_campaigns?select=raised&slug=in.(${encodeURIComponent(slugList)})`,
+        )
+      : [];
     const kidsTotal = kidsRows.reduce((t, k) => t + num(Number(k.raised)), 0);
     log(`pelotonia kids: ${kids.length}/${KIDS_SLUGS.length} campaigns, $${kidsTotal}`);
 
     // 5. Daily snapshot for the fundraising history
     const [counts] = await rest("GET", "pelotonia_team_stats?select=*");
-    const day = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date());
+    const day = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(
+      new Date(),
+    );
     await upsert("pelotonia_team_snapshots", [
       {
         snapshot_date: day,

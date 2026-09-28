@@ -8,12 +8,7 @@ import { useStore } from "@/lib/store";
  * Paths that render without a session. Everything else in the hub requires
  * sign-in — including cached registration progress in this browser.
  */
-const PUBLIC_PREFIXES = [
-  "/family",
-  "/signin",
-  "/health",
-  "/fundraisers",
-];
+const PUBLIC_PREFIXES = ["/family", "/signin", "/health", "/fundraisers"];
 
 function isPublicPath(pathname: string) {
   if (pathname === "/") return true;
@@ -43,14 +38,21 @@ export function AuthGate({ children }: { children: ReactNode }) {
       </div>
       <h1 className="mt-4 text-2xl font-bold">Sign in to continue</h1>
       <p className="mt-2 text-sm text-muted-foreground">
-        This part of the Team Huntington Hub — including your registration progress — is only available to
-        signed-in colleagues. The Family &amp; Spectator Guide stays open to everyone.
+        This part of the Team Huntington Hub — including your registration progress — is only
+        available to signed-in colleagues. The Family &amp; Spectator Guide stays open to everyone.
       </p>
       <div className="mt-6 flex flex-wrap justify-center gap-2">
-        <Button asChild className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90">
-          <Link to="/signin" search={{ returnTo: pathname }}>Sign in</Link>
+        <Button
+          asChild
+          className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90"
+        >
+          <Link to="/signin" search={{ returnTo: pathname }}>
+            Sign in
+          </Link>
         </Button>
-        <Button asChild variant="outline"><Link to="/family">Family &amp; Spectator Guide</Link></Button>
+        <Button asChild variant="outline">
+          <Link to="/family">Family &amp; Spectator Guide</Link>
+        </Button>
       </div>
     </div>
   );

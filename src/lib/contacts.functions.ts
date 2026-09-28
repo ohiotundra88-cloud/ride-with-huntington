@@ -25,7 +25,8 @@ async function assertContactManager(context: { supabase: any; userId: string }) 
     context.supabase.rpc("is_admin_text", { _user_id: context.userId }),
     context.supabase.rpc("is_superuser", { _user_id: context.userId }),
   ]);
-  if (!isAdmin && !isSuper) throw new Error("Only admins and super users can change the contact directory.");
+  if (!isAdmin && !isSuper)
+    throw new Error("Only admins and super users can change the contact directory.");
 }
 
 export const saveContact = createServerFn({ method: "POST" })

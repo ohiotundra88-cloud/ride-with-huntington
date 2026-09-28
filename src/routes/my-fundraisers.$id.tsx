@@ -4,8 +4,21 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  ArrowLeft, BadgeCheck, Banknote, Dice5, ExternalLink, History, Loader2,
-  Paperclip, Plus, Save, Send, Sparkles, Trash2, Upload, Users,
+  ArrowLeft,
+  BadgeCheck,
+  Banknote,
+  Dice5,
+  ExternalLink,
+  History,
+  Loader2,
+  Paperclip,
+  Plus,
+  Save,
+  Send,
+  Sparkles,
+  Trash2,
+  Upload,
+  Users,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -22,14 +35,34 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { DemoPaymentBanner } from "@/components/DemoPaymentBanner";
 import {
-  drawFundraiserWinner, getFundraiserAccess, getFundraiserApproval, getFundraiserDetail,
-  recordFundraiserPayout, refundFundraiserOrder, removeFundraiserFlier, saveFundraiserPage,
-  deleteFundraiserPage, seedFundraiserDemoSupporters, setFundraiserPublicVisibility, setFundraiserStatus, submitFundraiserForApproval, uploadFundraiserFlier,
+  drawFundraiserWinner,
+  getFundraiserAccess,
+  getFundraiserApproval,
+  getFundraiserDetail,
+  recordFundraiserPayout,
+  refundFundraiserOrder,
+  removeFundraiserFlier,
+  saveFundraiserPage,
+  deleteFundraiserPage,
+  seedFundraiserDemoSupporters,
+  setFundraiserPublicVisibility,
+  setFundraiserStatus,
+  submitFundraiserForApproval,
+  uploadFundraiserFlier,
 } from "@/lib/fundraising-pages.functions";
 import {
-  ALLOWED_FUNDRAISER_FLIER_TYPES, fundraiserFlierUrl, KIND_ITEM_NOUN, KIND_LABELS,
-  MAX_FUNDRAISER_FLIER_BYTES, money, moneyExact, STATUS_LABELS, validationIssues,
-  type FundraiserDetail, type FundraiserInput, type ItemInput,
+  ALLOWED_FUNDRAISER_FLIER_TYPES,
+  fundraiserFlierUrl,
+  KIND_ITEM_NOUN,
+  KIND_LABELS,
+  MAX_FUNDRAISER_FLIER_BYTES,
+  money,
+  moneyExact,
+  STATUS_LABELS,
+  validationIssues,
+  type FundraiserDetail,
+  type FundraiserInput,
+  type ItemInput,
 } from "@/lib/fundraising-pages.shared";
 
 export const Route = createFileRoute("/my-fundraisers/$id")({
@@ -37,9 +70,15 @@ export const Route = createFileRoute("/my-fundraisers/$id")({
   head: () => ({
     meta: [
       { title: "Manage fundraiser — Team Huntington Hub" },
-      { name: "description", content: "Edit your fundraising page, track orders and entries, and reconcile payouts." },
+      {
+        name: "description",
+        content: "Edit your fundraising page, track orders and entries, and reconcile payouts.",
+      },
       { property: "og:title", content: "Manage fundraiser — Team Huntington Hub" },
-      { property: "og:description", content: "Fundraising page editing, reporting, and payout reconciliation." },
+      {
+        property: "og:description",
+        content: "Fundraising page editing, reporting, and payout reconciliation.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -54,7 +93,10 @@ function ManageFundraiser() {
   const qc = useQueryClient();
   const navigate = useNavigate();
 
-  const { data: access } = useQuery({ queryKey: ["fundraiser-access"], queryFn: () => getFundraiserAccess() });
+  const { data: access } = useQuery({
+    queryKey: ["fundraiser-access"],
+    queryFn: () => getFundraiserAccess(),
+  });
   const { data, isPending, error } = useQuery<FundraiserDetail>({
     queryKey: ["fundraiser-detail", id],
     queryFn: () => getFundraiserDetail({ data: { id } }),
@@ -179,14 +221,22 @@ function ManageFundraiser() {
   });
 
   if (isPending || !form) {
-    return <main className="mx-auto max-w-5xl px-4 py-12 text-sm text-muted-foreground">Loading…</main>;
+    return (
+      <main className="mx-auto max-w-5xl px-4 py-12 text-sm text-muted-foreground">Loading…</main>
+    );
   }
   if (error || !data) {
     return (
       <main className="mx-auto max-w-lg px-4 py-16 text-center">
-        <h1 className="text-xl font-semibold text-[var(--brand-dark)]">We couldn't open that fundraiser</h1>
-        <p className="mt-2 text-sm text-muted-foreground">It may have been removed, or you may not have access.</p>
-        <Button asChild className="mt-5" variant="outline"><Link to="/my-fundraisers">Back to workspace</Link></Button>
+        <h1 className="text-xl font-semibold text-[var(--brand-dark)]">
+          We couldn't open that fundraiser
+        </h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          It may have been removed, or you may not have access.
+        </p>
+        <Button asChild className="mt-5" variant="outline">
+          <Link to="/my-fundraisers">Back to workspace</Link>
+        </Button>
       </main>
     );
   }
@@ -202,14 +252,19 @@ function ManageFundraiser() {
 
   const setItem = (i: number, patch: Partial<ItemInput>) =>
     setForm((prev) =>
-      prev ? { ...prev, items: prev.items.map((it, idx) => (idx === i ? { ...it, ...patch } : it)) } : prev,
+      prev
+        ? { ...prev, items: prev.items.map((it, idx) => (idx === i ? { ...it, ...patch } : it)) }
+        : prev,
     );
 
   if (fundraiserPagesPaused) return <FundraiserPagesPaused />;
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
-      <Link to="/my-fundraisers" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground">
+      <Link
+        to="/my-fundraisers"
+        className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+      >
         <ArrowLeft className="mr-1.5 h-4 w-4" /> Fundraiser workspace
       </Link>
 
@@ -217,9 +272,15 @@ function ManageFundraiser() {
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary">{KIND_LABELS[f.kind]}</Badge>
-            <Badge variant={f.status === "live" ? "default" : "outline"}>{STATUS_LABELS[f.status]}</Badge>
+            <Badge variant={f.status === "live" ? "default" : "outline"}>
+              {STATUS_LABELS[f.status]}
+            </Badge>
             {f.is_demo && <Badge variant="outline">Demo</Badge>}
-            {f.public_hidden && <Badge variant="outline" className="border-amber-400 text-amber-700">Hidden from public</Badge>}
+            {f.public_hidden && (
+              <Badge variant="outline" className="border-amber-400 text-amber-700">
+                Hidden from public
+              </Badge>
+            )}
           </div>
           <h1 className="mt-2 text-2xl font-bold text-[var(--brand-dark)]">{f.title}</h1>
           <p className="text-xs text-muted-foreground">
@@ -234,9 +295,15 @@ function ManageFundraiser() {
               </Link>
             </Button>
           )}
-          {f.status !== "draft" && !f.public_hidden && <ShareFundraiserButton slug={f.slug} title={f.title} />}
+          {f.status !== "draft" && !f.public_hidden && (
+            <ShareFundraiserButton slug={f.slug} title={f.title} />
+          )}
           {f.status === "draft" && (
-            <Button size="sm" onClick={() => submit.mutate()} disabled={submit.isPending || issues.length > 0}>
+            <Button
+              size="sm"
+              onClick={() => submit.mutate()}
+              disabled={submit.isPending || issues.length > 0}
+            >
               <Send className="mr-1.5 h-4 w-4" /> Submit for approval
             </Button>
           )}
@@ -246,20 +313,28 @@ function ManageFundraiser() {
             </Button>
           )}
           {canPublish && f.status === "live" && (
-            <Button size="sm" variant="outline" onClick={() => status.mutate("closed")} disabled={status.isPending}>
-              Close fundraiser
-            </Button>
-          )}
-          {canPublish && f.status !== "draft" && f.status !== "pending_approval" && f.status !== "live" && (
             <Button
               size="sm"
               variant="outline"
-              onClick={() => visibility.mutate(!f.public_hidden)}
-              disabled={visibility.isPending}
+              onClick={() => status.mutate("closed")}
+              disabled={status.isPending}
             >
-              {f.public_hidden ? "Show on public site" : "Hide from public view"}
+              Close fundraiser
             </Button>
           )}
+          {canPublish &&
+            f.status !== "draft" &&
+            f.status !== "pending_approval" &&
+            f.status !== "live" && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => visibility.mutate(!f.public_hidden)}
+                disabled={visibility.isPending}
+              >
+                {f.public_hidden ? "Show on public site" : "Hide from public view"}
+              </Button>
+            )}
           {(canPublish || ["draft", "pending_approval", "cancelled"].includes(f.status)) && (
             <ConfirmDelete
               label="Delete"
@@ -275,8 +350,9 @@ function ManageFundraiser() {
       {f.public_hidden && (
         <Card className="mt-4 border-amber-300 bg-amber-50/60">
           <CardContent className="p-4 text-sm text-amber-900">
-            This fundraiser is closed to the public — supporters can no longer find or open the page. It stays here as a past
-            fundraiser with all totals, supporters and activity intact for reporting.
+            This fundraiser is closed to the public — supporters can no longer find or open the
+            page. It stays here as a past fundraiser with all totals, supporters and activity intact
+            for reporting.
             {f.hidden_at ? ` Hidden ${new Date(f.hidden_at).toLocaleDateString()}.` : ""}
           </CardContent>
         </Card>
@@ -288,22 +364,36 @@ function ManageFundraiser() {
         <Card className="mt-4 border-amber-300 bg-amber-50/60">
           <CardContent className="p-4 text-sm text-amber-900">
             <p className="font-medium">Before this can go through approval:</p>
-            <ul className="mt-1 list-disc pl-5">{issues.map((i) => <li key={i}>{i}</li>)}</ul>
+            <ul className="mt-1 list-disc pl-5">
+              {issues.map((i) => (
+                <li key={i}>{i}</li>
+              ))}
+            </ul>
           </CardContent>
         </Card>
       )}
 
       {approval && (
         <Card className="mt-4">
-          <CardHeader className="pb-2"><CardTitle className="text-base">Approval progress</CardTitle></CardHeader>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Approval progress</CardTitle>
+          </CardHeader>
           <CardContent className="flex flex-wrap gap-2 text-xs">
-            {(["captain_status", "legal_status", "risk_status", "compliance_status", "marketing_status", "cochair_status"] as const).map(
-              (k) => (
-                <Badge key={k} variant={(approval as any)[k] === "approved" ? "default" : "outline"}>
-                  {k.replace("_status", "").replace(/^\w/, (c) => c.toUpperCase())}: {(approval as any)[k]}
-                </Badge>
-              ),
-            )}
+            {(
+              [
+                "captain_status",
+                "legal_status",
+                "risk_status",
+                "compliance_status",
+                "marketing_status",
+                "cochair_status",
+              ] as const
+            ).map((k) => (
+              <Badge key={k} variant={(approval as any)[k] === "approved" ? "default" : "outline"}>
+                {k.replace("_status", "").replace(/^\w/, (c) => c.toUpperCase())}:{" "}
+                {(approval as any)[k]}
+              </Badge>
+            ))}
           </CardContent>
         </Card>
       )}
@@ -316,8 +406,8 @@ function ManageFundraiser() {
       </div>
       <Progress value={data.totals.goalPercent} className="mt-3 h-2" />
       <p className="mt-1 text-xs text-muted-foreground">
-        {money(data.totals.gross)} of {money(f.goal_amount)} goal · {data.totals.supporters} supporters ·{" "}
-        {data.totals.units} {KIND_ITEM_NOUN[f.kind].toLowerCase()} sold
+        {money(data.totals.gross)} of {money(f.goal_amount)} goal · {data.totals.supporters}{" "}
+        supporters · {data.totals.units} {KIND_ITEM_NOUN[f.kind].toLowerCase()} sold
         {data.totals.refunded > 0 ? ` · ${money(data.totals.refunded)} refunded` : ""}
       </p>
 
@@ -333,61 +423,117 @@ function ManageFundraiser() {
         {/* ---------------------------------------------------------- page */}
         <TabsContent value="page" className="mt-4 space-y-4">
           <Card>
-            <CardHeader className="pb-3"><CardTitle className="text-base">Page details</CardTitle></CardHeader>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Page details</CardTitle>
+            </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-1.5">
                 <Label htmlFor="title">Title</Label>
-                <Input id="title" value={form.title} onChange={(e) => set("title", e.target.value)} />
+                <Input
+                  id="title"
+                  value={form.title}
+                  onChange={(e) => set("title", e.target.value)}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="summary">Short summary</Label>
-                <Textarea id="summary" rows={2} maxLength={240} value={form.summary} onChange={(e) => set("summary", e.target.value)} />
+                <Textarea
+                  id="summary"
+                  rows={2}
+                  maxLength={240}
+                  value={form.summary}
+                  onChange={(e) => set("summary", e.target.value)}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="story">Story</Label>
-                <Textarea id="story" rows={6} maxLength={6000} value={form.story} onChange={(e) => set("story", e.target.value)} />
+                <Textarea
+                  id="story"
+                  rows={6}
+                  maxLength={6000}
+                  value={form.story}
+                  onChange={(e) => set("story", e.target.value)}
+                />
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-1.5">
                   <Label htmlFor="goal">Goal ($)</Label>
-                  <Input id="goal" type="number" min={0} value={form.goal_amount}
-                    onChange={(e) => set("goal_amount", Number(e.target.value || 0))} />
+                  <Input
+                    id="goal"
+                    type="number"
+                    min={0}
+                    value={form.goal_amount}
+                    onChange={(e) => set("goal_amount", Number(e.target.value || 0))}
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="ben">Beneficiary</Label>
-                  <Input id="ben" value={form.beneficiary} onChange={(e) => set("beneficiary", e.target.value)} />
+                  <Input
+                    id="ben"
+                    value={form.beneficiary}
+                    onChange={(e) => set("beneficiary", e.target.value)}
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="opens">Opens</Label>
-                  <Input id="opens" type="date" value={form.opens_at ?? ""} onChange={(e) => set("opens_at", e.target.value)} />
+                  <Input
+                    id="opens"
+                    type="date"
+                    value={form.opens_at ?? ""}
+                    onChange={(e) => set("opens_at", e.target.value)}
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="closes">Closes</Label>
-                  <Input id="closes" type="date" value={form.closes_at ?? ""} onChange={(e) => set("closes_at", e.target.value)} />
+                  <Input
+                    id="closes"
+                    type="date"
+                    value={form.closes_at ?? ""}
+                    onChange={(e) => set("closes_at", e.target.value)}
+                  />
                 </div>
                 {f.kind === "raffle" && (
                   <div className="space-y-1.5">
                     <Label htmlFor="draw">Drawing date</Label>
-                    <Input id="draw" type="date" value={form.draw_at ?? ""} onChange={(e) => set("draw_at", e.target.value)} />
+                    <Input
+                      id="draw"
+                      type="date"
+                      value={form.draw_at ?? ""}
+                      onChange={(e) => set("draw_at", e.target.value)}
+                    />
                   </div>
                 )}
                 <div className="space-y-1.5">
                   <Label htmlFor="contact">Contact email</Label>
-                  <Input id="contact" type="email" value={form.contact_email ?? ""}
-                    onChange={(e) => set("contact_email", e.target.value as any)} />
+                  <Input
+                    id="contact"
+                    type="email"
+                    value={form.contact_email ?? ""}
+                    onChange={(e) => set("contact_email", e.target.value as any)}
+                  />
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-4">
                 <label className="flex items-center gap-2 text-sm">
-                  <Checkbox checked={form.allow_custom_amount}
-                    onCheckedChange={(v) => set("allow_custom_amount", v === true)} />
+                  <Checkbox
+                    checked={form.allow_custom_amount}
+                    onCheckedChange={(v) => set("allow_custom_amount", v === true)}
+                  />
                   Allow supporters to give any amount
                 </label>
                 {form.allow_custom_amount && (
                   <div className="flex items-center gap-2 text-sm">
-                    <Label htmlFor="min" className="whitespace-nowrap">Minimum $</Label>
-                    <Input id="min" className="w-24" type="number" min={1} value={form.min_custom_amount}
-                      onChange={(e) => set("min_custom_amount", Number(e.target.value || 1))} />
+                    <Label htmlFor="min" className="whitespace-nowrap">
+                      Minimum $
+                    </Label>
+                    <Input
+                      id="min"
+                      className="w-24"
+                      type="number"
+                      min={1}
+                      value={form.min_custom_amount}
+                      onChange={(e) => set("min_custom_amount", Number(e.target.value || 1))}
+                    />
                   </div>
                 )}
               </div>
@@ -396,28 +542,38 @@ function ManageFundraiser() {
 
           <FlierCard fundraiser={f} />
 
-
-
           <Card>
             <CardHeader className="flex-row items-center justify-between pb-3">
               <CardTitle className="text-base">{KIND_ITEM_NOUN[f.kind]}</CardTitle>
-              <Button size="sm" variant="outline"
+              <Button
+                size="sm"
+                variant="outline"
                 onClick={() =>
                   set("items", [
                     ...form.items,
                     {
-                      label: "", description: "", unit_price: 25, quantity_available: null,
-                      max_per_order: 10, entries_per_unit: 1, sort_order: form.items.length, active: true,
+                      label: "",
+                      description: "",
+                      unit_price: 25,
+                      quantity_available: null,
+                      max_per_order: 10,
+                      entries_per_unit: 1,
+                      sort_order: form.items.length,
+                      active: true,
                     } as ItemInput,
                   ])
-                }>
+                }
+              >
                 <Plus className="mr-1.5 h-4 w-4" /> Add
               </Button>
             </CardHeader>
             <CardContent className="space-y-4">
               {form.items.length === 0 && (
                 <p className="text-sm text-muted-foreground">
-                  No options yet. {f.kind === "donation" ? "Donation pages can run on custom amounts alone." : "Add at least one to go live."}
+                  No options yet.{" "}
+                  {f.kind === "donation"
+                    ? "Donation pages can run on custom amounts alone."
+                    : "Add at least one to go live."}
                 </p>
               )}
               {form.items.map((item, i) => (
@@ -425,42 +581,90 @@ function ManageFundraiser() {
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div className="space-y-1.5">
                       <Label>Label</Label>
-                      <Input aria-label="Item label" value={item.label} onChange={(e) => setItem(i, { label: e.target.value })} />
+                      <Input
+                        aria-label="Item label"
+                        value={item.label}
+                        onChange={(e) => setItem(i, { label: e.target.value })}
+                      />
                     </div>
                     <div className="space-y-1.5">
                       <Label>Price ($)</Label>
-                      <Input aria-label="Item price" type="number" min={0} value={item.unit_price}
-                        onChange={(e) => setItem(i, { unit_price: Number(e.target.value || 0) })} />
+                      <Input
+                        aria-label="Item price"
+                        type="number"
+                        min={0}
+                        value={item.unit_price}
+                        onChange={(e) => setItem(i, { unit_price: Number(e.target.value || 0) })}
+                      />
                     </div>
                     <div className="space-y-1.5">
                       <Label>Quantity available (blank = unlimited)</Label>
-                      <Input aria-label="Item quantity available" type="number" min={0} value={item.quantity_available ?? ""}
-                        onChange={(e) => setItem(i, { quantity_available: e.target.value === "" ? null : Number(e.target.value) })} />
+                      <Input
+                        aria-label="Item quantity available"
+                        type="number"
+                        min={0}
+                        value={item.quantity_available ?? ""}
+                        onChange={(e) =>
+                          setItem(i, {
+                            quantity_available:
+                              e.target.value === "" ? null : Number(e.target.value),
+                          })
+                        }
+                      />
                     </div>
                     <div className="space-y-1.5">
                       <Label>Max per order</Label>
-                      <Input aria-label="Item max per order" type="number" min={1} value={item.max_per_order}
-                        onChange={(e) => setItem(i, { max_per_order: Number(e.target.value || 1) })} />
+                      <Input
+                        aria-label="Item max per order"
+                        type="number"
+                        min={1}
+                        value={item.max_per_order}
+                        onChange={(e) => setItem(i, { max_per_order: Number(e.target.value || 1) })}
+                      />
                     </div>
                     {f.kind === "raffle" && (
                       <div className="space-y-1.5">
                         <Label>Entries per unit</Label>
-                        <Input aria-label="Item entries per unit" type="number" min={1} value={item.entries_per_unit}
-                          onChange={(e) => setItem(i, { entries_per_unit: Number(e.target.value || 1) })} />
+                        <Input
+                          aria-label="Item entries per unit"
+                          type="number"
+                          min={1}
+                          value={item.entries_per_unit}
+                          onChange={(e) =>
+                            setItem(i, { entries_per_unit: Number(e.target.value || 1) })
+                          }
+                        />
                       </div>
                     )}
                   </div>
                   <div className="space-y-1.5">
                     <Label>Description</Label>
-                    <Textarea aria-label="Item description" rows={2} value={item.description} onChange={(e) => setItem(i, { description: e.target.value })} />
+                    <Textarea
+                      aria-label="Item description"
+                      rows={2}
+                      value={item.description}
+                      onChange={(e) => setItem(i, { description: e.target.value })}
+                    />
                   </div>
                   <div className="flex items-center justify-between">
                     <label className="flex items-center gap-2 text-sm">
-                      <Checkbox checked={item.active} onCheckedChange={(v) => setItem(i, { active: v === true })} />
+                      <Checkbox
+                        checked={item.active}
+                        onCheckedChange={(v) => setItem(i, { active: v === true })}
+                      />
                       Available for purchase
                     </label>
-                    <Button size="sm" variant="ghost" className="text-destructive"
-                      onClick={() => set("items", form.items.filter((_, idx) => idx !== i))}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-destructive"
+                      onClick={() =>
+                        set(
+                          "items",
+                          form.items.filter((_, idx) => idx !== i),
+                        )
+                      }
+                    >
                       <Trash2 className="mr-1.5 h-4 w-4" /> Remove
                     </Button>
                   </div>
@@ -470,9 +674,16 @@ function ManageFundraiser() {
           </Card>
 
           <div className="flex flex-wrap gap-2">
-            <Button onClick={() => save.mutate()} disabled={save.isPending}
-              className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90">
-              {save.isPending ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Save className="mr-1.5 h-4 w-4" />}
+            <Button
+              onClick={() => save.mutate()}
+              disabled={save.isPending}
+              className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90"
+            >
+              {save.isPending ? (
+                <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="mr-1.5 h-4 w-4" />
+              )}
               Save changes
             </Button>
             {f.status === "live" && (
@@ -488,7 +699,8 @@ function ManageFundraiser() {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base">
-                <Users className="h-4 w-4 text-[var(--brand)]" /> Supporters ({paidOrders.length} paid)
+                <Users className="h-4 w-4 text-[var(--brand)]" /> Supporters ({paidOrders.length}{" "}
+                paid)
               </CardTitle>
             </CardHeader>
             <CardContent className="overflow-x-auto">
@@ -498,25 +710,44 @@ function ManageFundraiser() {
                 <table className="w-full min-w-[640px] text-sm">
                   <thead className="text-left text-xs uppercase text-muted-foreground">
                     <tr>
-                      <th className="py-2">Supporter</th><th>Qty</th><th>Amount</th><th>Fee</th>
-                      <th>Status</th><th>Date</th><th />
+                      <th className="py-2">Supporter</th>
+                      <th>Qty</th>
+                      <th>Amount</th>
+                      <th>Fee</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                      <th />
                     </tr>
                   </thead>
                   <tbody>
                     {data.orders.map((o) => (
                       <tr key={o.id} className="border-t">
                         <td className="py-2">
-                          <div className="font-medium">{o.supporter_name}{o.anonymous ? " (anonymous)" : ""}</div>
+                          <div className="font-medium">
+                            {o.supporter_name}
+                            {o.anonymous ? " (anonymous)" : ""}
+                          </div>
                           <div className="text-xs text-muted-foreground">{o.supporter_email}</div>
                         </td>
                         <td>{o.quantity}</td>
                         <td>{moneyExact(o.amount)}</td>
                         <td className="text-muted-foreground">{moneyExact(o.fee_amount)}</td>
-                        <td><Badge variant={o.status === "paid" ? "default" : "outline"}>{o.status}</Badge></td>
-                        <td className="text-xs text-muted-foreground">{new Date(o.created_at).toLocaleDateString()}</td>
+                        <td>
+                          <Badge variant={o.status === "paid" ? "default" : "outline"}>
+                            {o.status}
+                          </Badge>
+                        </td>
+                        <td className="text-xs text-muted-foreground">
+                          {new Date(o.created_at).toLocaleDateString()}
+                        </td>
                         <td className="text-right">
                           {o.status === "paid" && access?.canManageAll && (
-                            <Button size="sm" variant="ghost" onClick={() => refund.mutate(o.id)} disabled={refund.isPending}>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => refund.mutate(o.id)}
+                              disabled={refund.isPending}
+                            >
                               Refund
                             </Button>
                           )}
@@ -537,7 +768,11 @@ function ManageFundraiser() {
               <CardHeader className="flex-row items-center justify-between pb-3">
                 <CardTitle className="text-base">Raffle entries ({data.entries.length})</CardTitle>
                 {access?.canManageAll && (
-                  <Button size="sm" onClick={() => draw.mutate()} disabled={draw.isPending || data.entries.length === 0}>
+                  <Button
+                    size="sm"
+                    onClick={() => draw.mutate()}
+                    disabled={draw.isPending || data.entries.length === 0}
+                  >
                     <Dice5 className="mr-1.5 h-4 w-4" /> Draw winner
                   </Button>
                 )}
@@ -548,8 +783,10 @@ function ManageFundraiser() {
                 ) : (
                   <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     {data.entries.map((e) => (
-                      <div key={e.id}
-                        className={`rounded-md border px-3 py-2 text-sm ${e.is_winner ? "border-[var(--brand)] bg-[var(--brand)]/10" : ""}`}>
+                      <div
+                        key={e.id}
+                        className={`rounded-md border px-3 py-2 text-sm ${e.is_winner ? "border-[var(--brand)] bg-[var(--brand)]/10" : ""}`}
+                      >
                         <span className="font-mono">#{e.entry_number}</span> · {e.supporter_name}
                         {e.is_winner && <Badge className="ml-2">Winner</Badge>}
                       </div>
@@ -575,16 +812,22 @@ function ManageFundraiser() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-sm">
-              {data.audit.length === 0 && <p className="text-muted-foreground">Nothing recorded yet.</p>}
+              {data.audit.length === 0 && (
+                <p className="text-muted-foreground">Nothing recorded yet.</p>
+              )}
               {data.audit.map((a) => (
                 <div key={a.id} className="border-b pb-2 last:border-0">
                   <div className="flex flex-wrap justify-between gap-2">
                     <span className="font-medium">{a.action.replace(/_/g, " ")}</span>
-                    <span className="text-xs text-muted-foreground">{new Date(a.created_at).toLocaleString()}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(a.created_at).toLocaleString()}
+                    </span>
                   </div>
                   <p className="text-xs text-muted-foreground">
                     {a.actor_email ?? "system"}
-                    {Object.keys(a.details ?? {}).length > 0 ? ` · ${JSON.stringify(a.details)}` : ""}
+                    {Object.keys(a.details ?? {}).length > 0
+                      ? ` · ${JSON.stringify(a.details)}`
+                      : ""}
                   </p>
                 </div>
               ))}
@@ -607,7 +850,15 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function PayoutPanel({ data, canPayout, onDone }: { data: FundraiserDetail; canPayout: boolean; onDone: () => void }) {
+function PayoutPanel({
+  data,
+  canPayout,
+  onDone,
+}: {
+  data: FundraiserDetail;
+  canPayout: boolean;
+  onDone: () => void;
+}) {
   const paidOut = useMemo(() => data.payouts.reduce((s, p) => s + p.net_amount, 0), [data.payouts]);
   const remaining = Math.max(0, Number((data.totals.net - paidOut).toFixed(2)));
 
@@ -651,8 +902,8 @@ function PayoutPanel({ data, canPayout, onDone }: { data: FundraiserDetail; canP
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           <p className="text-muted-foreground">
-            Contributions land in the central team account. Once the fundraiser closes, the co-chair transfers the net
-            proceeds to the designated bank account and records the transfer here.
+            Contributions land in the central team account. Once the fundraiser closes, the co-chair
+            transfers the net proceeds to the designated bank account and records the transfer here.
           </p>
           <div className="grid gap-3 sm:grid-cols-3">
             <Stat label="Net collected" value={money(data.totals.net)} />
@@ -668,8 +919,8 @@ function PayoutPanel({ data, canPayout, onDone }: { data: FundraiserDetail; canP
                     <span className="font-semibold">{moneyExact(p.net_amount)}</span>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {new Date(p.transfer_date).toLocaleDateString()} · gross {moneyExact(p.gross_amount)} · fees{" "}
-                    {moneyExact(p.fee_amount)}
+                    {new Date(p.transfer_date).toLocaleDateString()} · gross{" "}
+                    {moneyExact(p.gross_amount)} · fees {moneyExact(p.fee_amount)}
                     {p.reference ? ` · ref ${p.reference}` : ""}
                     {p.recorded_by_email ? ` · by ${p.recorded_by_email}` : ""}
                   </p>
@@ -683,7 +934,9 @@ function PayoutPanel({ data, canPayout, onDone }: { data: FundraiserDetail; canP
 
       {canPayout && (
         <Card>
-          <CardHeader className="pb-3"><CardTitle className="text-base">Record a transfer</CardTitle></CardHeader>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Record a transfer</CardTitle>
+          </CardHeader>
           <CardContent>
             <form
               className="grid gap-3 sm:grid-cols-2"
@@ -698,28 +951,56 @@ function PayoutPanel({ data, canPayout, onDone }: { data: FundraiserDetail; canP
               </div>
               <div className="space-y-1.5">
                 <Label>Transfer date</Label>
-                <Input type="date" required value={date} onChange={(e) => setDate(e.target.value)} />
+                <Input
+                  type="date"
+                  required
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label>Gross amount ($)</Label>
-                <Input type="number" min={0} step="0.01" value={gross} onChange={(e) => setGross(e.target.value)} />
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={gross}
+                  onChange={(e) => setGross(e.target.value)}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label>Fees ($)</Label>
-                <Input type="number" min={0} step="0.01" value={fee} onChange={(e) => setFee(e.target.value)} />
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={fee}
+                  onChange={(e) => setFee(e.target.value)}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label>Reference</Label>
-                <Input value={reference} onChange={(e) => setReference(e.target.value)} placeholder="Wire / check number" />
+                <Input
+                  value={reference}
+                  onChange={(e) => setReference(e.target.value)}
+                  placeholder="Wire / check number"
+                />
               </div>
               <div className="space-y-1.5">
                 <Label>Notes</Label>
                 <Input value={notes} onChange={(e) => setNotes(e.target.value)} />
               </div>
               <div className="sm:col-span-2">
-                <Button type="submit" disabled={record.isPending}
-                  className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90">
-                  {record.isPending ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Banknote className="mr-1.5 h-4 w-4" />}
+                <Button
+                  type="submit"
+                  disabled={record.isPending}
+                  className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90"
+                >
+                  {record.isPending ? (
+                    <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Banknote className="mr-1.5 h-4 w-4" />
+                  )}
                   Record payout of {money(Number(gross || 0) - Number(fee || 0))}
                 </Button>
               </div>
@@ -741,21 +1022,29 @@ function FlierCard({ fundraiser }: { fundraiser: FundraiserDetail["fundraiser"] 
 
   const drop = useMutation({
     mutationFn: () => removeFundraiserFlier({ data: { id: fundraiser.id } }),
-    onSuccess: () => { toast.success("Attachment removed"); refresh(); },
+    onSuccess: () => {
+      toast.success("Attachment removed");
+      refresh();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const pick = async (file: File | null) => {
     if (!file) return;
     if (!(ALLOWED_FUNDRAISER_FLIER_TYPES as readonly string[]).includes(file.type)) {
-      toast.error("Attach a PNG, JPG, WEBP or PDF"); return;
+      toast.error("Attach a PNG, JPG, WEBP or PDF");
+      return;
     }
-    if (file.size > MAX_FUNDRAISER_FLIER_BYTES) { toast.error("File must be 8 MB or smaller"); return; }
+    if (file.size > MAX_FUNDRAISER_FLIER_BYTES) {
+      toast.error("File must be 8 MB or smaller");
+      return;
+    }
     setBusy(true);
     try {
       const buf = new Uint8Array(await file.arrayBuffer());
       let binary = "";
-      for (let i = 0; i < buf.length; i += 8192) binary += String.fromCharCode(...buf.subarray(i, i + 8192));
+      for (let i = 0; i < buf.length; i += 8192)
+        binary += String.fromCharCode(...buf.subarray(i, i + 8192));
       await uploadFundraiserFlier({
         data: {
           id: fundraiser.id,
@@ -783,24 +1072,36 @@ function FlierCard({ fundraiser }: { fundraiser: FundraiserDetail["fundraiser"] 
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-xs text-muted-foreground">
-          Attach one flier, menu, rules sheet or sponsorship packet (PNG, JPG, WEBP or PDF, up to 8 MB). Supporters can
-          download it right from your public page.
+          Attach one flier, menu, rules sheet or sponsorship packet (PNG, JPG, WEBP or PDF, up to 8
+          MB). Supporters can download it right from your public page.
         </p>
 
         {fundraiser.flier_path ? (
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border bg-muted/40 px-3 py-2 text-sm">
             {publiclyVisible ? (
-              <a href={fundraiserFlierUrl(fundraiser.id)} target="_blank" rel="noreferrer"
-                className="inline-flex items-center gap-1.5 font-medium text-[var(--brand-dark)] underline">
-                <Paperclip className="h-3.5 w-3.5" /> {fundraiser.flier_name || "Current attachment"}
+              <a
+                href={fundraiserFlierUrl(fundraiser.id)}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 font-medium text-[var(--brand-dark)] underline"
+              >
+                <Paperclip className="h-3.5 w-3.5" />{" "}
+                {fundraiser.flier_name || "Current attachment"}
               </a>
             ) : (
               <span className="inline-flex items-center gap-1.5 text-muted-foreground">
-                <Paperclip className="h-3.5 w-3.5" /> {fundraiser.flier_name || "Current attachment"} — downloadable once the page is live
+                <Paperclip className="h-3.5 w-3.5" />{" "}
+                {fundraiser.flier_name || "Current attachment"} — downloadable once the page is live
               </span>
             )}
-            <Button type="button" size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10"
-              onClick={() => drop.mutate()} disabled={drop.isPending || busy}>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              className="text-destructive hover:bg-destructive/10"
+              onClick={() => drop.mutate()}
+              disabled={drop.isPending || busy}
+            >
               Remove
             </Button>
           </div>
@@ -808,10 +1109,25 @@ function FlierCard({ fundraiser }: { fundraiser: FundraiserDetail["fundraiser"] 
           <p className="text-sm text-muted-foreground">No document attached yet.</p>
         )}
 
-        <input ref={fileRef} type="file" accept=".png,.jpg,.jpeg,.webp,.pdf" className="hidden"
-          onChange={(e) => pick(e.target.files?.[0] ?? null)} />
-        <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()} disabled={busy}>
-          {busy ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <Upload className="mr-1 h-3.5 w-3.5" />}
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".png,.jpg,.jpeg,.webp,.pdf"
+          className="hidden"
+          onChange={(e) => pick(e.target.files?.[0] ?? null)}
+        />
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => fileRef.current?.click()}
+          disabled={busy}
+        >
+          {busy ? (
+            <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Upload className="mr-1 h-3.5 w-3.5" />
+          )}
           {fundraiser.flier_path ? "Replace document" : "Attach document"}
         </Button>
       </CardContent>

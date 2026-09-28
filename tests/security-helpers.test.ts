@@ -14,7 +14,14 @@ test("search text is escaped inside a contains pattern", () => {
 });
 
 // Uploaded file headers -------------------------------------------------------
-for (const t of ["text/html", "image/svg+xml", "application/xhtml+xml", "text/html; charset=utf-8", "", null]) {
+for (const t of [
+  "text/html",
+  "image/svg+xml",
+  "application/xhtml+xml",
+  "text/html; charset=utf-8",
+  "",
+  null,
+]) {
   test(`never renders ${String(t) || "empty"} inline`, () => {
     const h = safeFileHeaders({ contentType: t, fileName: "x" });
     assert.equal(h["Content-Type"], "application/octet-stream");
@@ -46,10 +53,21 @@ const RIDER = {
   publicId: "CK0132",
   firstName: "Test",
   lastName: "Rider",
-  participantTypes: { isRider: true, isVolunteer: false, isChallenger: false, registeredRides: [{ rideType: "signature" }, { rideType: "gravel" }] },
+  participantTypes: {
+    isRider: true,
+    isVolunteer: false,
+    isChallenger: false,
+    registeredRides: [{ rideType: "signature" }, { rideType: "gravel" }],
+  },
   tags: [{ name: "10 years" }, { name: "Living Proof" }, { name: "High Roller" }],
   peloton: { id: "p1", name: "Team Huntington Bank - Consumer Regional Bank", isCaptain: false },
-  fundraising: { raised: 8365.01, goal: 10000, committedAmount: 5000, committedHighRoller: true, allTimeRaised: 36222.38 },
+  fundraising: {
+    raised: 8365.01,
+    goal: 10000,
+    committedAmount: 5000,
+    committedHighRoller: true,
+    allTimeRaised: 36222.38,
+  },
 };
 
 test("rider profile maps to the Hub's fields", async () => {

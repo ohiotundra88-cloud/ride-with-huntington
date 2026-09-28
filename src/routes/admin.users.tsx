@@ -6,25 +6,44 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { ShieldCheck, Trash2, UserPlus } from "lucide-react";
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { listAdmins, grantAdminByEmail, revokeAdmin, type AdminUserRow } from "@/lib/admins.functions";
-import { listCaptains, grantCaptainByEmail, revokeCaptain, type CaptainRow } from "@/lib/captains.functions";
+import {
+  listAdmins,
+  grantAdminByEmail,
+  revokeAdmin,
+  type AdminUserRow,
+} from "@/lib/admins.functions";
+import {
+  listCaptains,
+  grantCaptainByEmail,
+  revokeCaptain,
+  type CaptainRow,
+} from "@/lib/captains.functions";
 import { Flag, Scale, ShieldAlert, BadgeCheck, Megaphone, Crown, Briefcase } from "lucide-react";
 import { RoleMembersCard } from "@/components/RoleMembersCard";
 import { UserSearchPicker } from "@/components/UserSearchPicker";
 import { VendorAccessCard } from "@/components/VendorAccessCard";
 import { useStore } from "@/lib/store";
 
-
-
 export const Route = createFileRoute("/admin/users")({
   component: AdminUsersPage,
   head: () => ({
     meta: [
       { title: "Admins, Super Users & Captains — Team Huntington Hub" },
-      { name: "description", content: "Grant or revoke admin access and Captain designations for Team Huntington colleagues." },
+      {
+        name: "description",
+        content:
+          "Grant or revoke admin access and Captain designations for Team Huntington colleagues.",
+      },
     ],
   }),
 });
@@ -34,7 +53,11 @@ function AdminUsersPage() {
   const { user } = useStore();
   const canManageAdmins = user.isSuperUser;
 
-  const { data: admins = [], isLoading, error } = useQuery<AdminUserRow[]>({
+  const {
+    data: admins = [],
+    isLoading,
+    error,
+  } = useQuery<AdminUserRow[]>({
     queryKey: ["admins"],
     queryFn: () => listAdmins(),
   });
@@ -58,10 +81,15 @@ function AdminUsersPage() {
   });
 
   return (
-    <AdminShell title="Admins & Super Users" description="Anyone listed here can enter Super User Mode and manage Team Huntington content.">
+    <AdminShell
+      title="Admins & Super Users"
+      description="Anyone listed here can enter Super User Mode and manage Team Huntington content."
+    >
       <Card>
         <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2"><UserPlus className="h-4 w-4" /> Grant admin access</CardTitle>
+          <CardTitle className="text-base flex items-center gap-2">
+            <UserPlus className="h-4 w-4" /> Grant admin access
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {canManageAdmins ? (
@@ -74,7 +102,8 @@ function AdminUsersPage() {
                 onSelect={(u) => grant.mutate(u.email)}
               />
               <p className="mt-2 text-xs text-muted-foreground">
-                Start typing to search registered colleagues, then click their name to grant admin. New admins can enter Super User Mode from their profile menu.
+                Start typing to search registered colleagues, then click their name to grant admin.
+                New admins can enter Super User Mode from their profile menu.
               </p>
             </>
           ) : (
@@ -87,7 +116,9 @@ function AdminUsersPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-[var(--brand)]" /> Current admins</CardTitle>
+          <CardTitle className="text-base flex items-center gap-2">
+            <ShieldCheck className="h-4 w-4 text-[var(--brand)]" /> Current admins
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -104,37 +135,45 @@ function AdminUsersPage() {
                     <div className="truncate text-sm font-medium">{a.full_name || a.email}</div>
                     <div className="truncate text-xs text-muted-foreground">
                       {a.email}
-                      {a.is_self && <span className="ml-2 rounded bg-[var(--brand)]/20 px-1.5 py-0.5 text-[10px] font-semibold text-[var(--brand-dark)]">YOU</span>}
+                      {a.is_self && (
+                        <span className="ml-2 rounded bg-[var(--brand)]/20 px-1.5 py-0.5 text-[10px] font-semibold text-[var(--brand-dark)]">
+                          YOU
+                        </span>
+                      )}
                     </div>
                   </div>
                   {canManageAdmins && (
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-destructive hover:bg-destructive/10"
-                        disabled={a.is_self || revoke.isPending}
-                        aria-label={`Revoke admin from ${a.email}`}
-                      >
-                        <Trash2 className="mr-1 h-3.5 w-3.5" /> Revoke
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Revoke admin access?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          {a.full_name || a.email} will lose Super User Mode and admin content controls. They will still be able to sign in as a participant.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => revoke.mutate(a.user_id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                          Revoke
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:bg-destructive/10"
+                          disabled={a.is_self || revoke.isPending}
+                          aria-label={`Revoke admin from ${a.email}`}
+                        >
+                          <Trash2 className="mr-1 h-3.5 w-3.5" /> Revoke
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Revoke admin access?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            {a.full_name || a.email} will lose Super User Mode and admin content
+                            controls. They will still be able to sign in as a participant.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => revoke.mutate(a.user_id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Revoke
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   )}
                 </li>
               ))}
@@ -154,7 +193,6 @@ function AdminUsersPage() {
 
       <VendorAccessCard />
 
-
       <RoleMembersCard
         role="superuser"
         title="Super users"
@@ -162,13 +200,37 @@ function AdminUsersPage() {
         icon={<ShieldCheck className="h-4 w-4 text-[var(--brand)]" />}
       />
 
-
       <div className="grid gap-6 lg:grid-cols-2">
-        <RoleMembersCard role="legal" title="Legal reviewers" description="Approve the legal stage of fundraiser requests." icon={<Scale className="h-4 w-4 text-[var(--brand)]" />} />
-        <RoleMembersCard role="risk" title="Risk reviewers" description="Approve the risk stage of fundraiser requests." icon={<ShieldAlert className="h-4 w-4 text-[var(--brand)]" />} />
-        <RoleMembersCard role="compliance" title="Compliance reviewers" description="Approve the compliance stage of fundraiser requests." icon={<BadgeCheck className="h-4 w-4 text-[var(--brand)]" />} />
-        <RoleMembersCard role="marketing" title="Marketing reviewers" description="Approve the marketing stage of fundraiser requests." icon={<Megaphone className="h-4 w-4 text-[var(--brand)]" />} />
-        <RoleMembersCard role="cochair" title="Co-chairs" description="Final sign-off. Once a co-chair approves, the event publishes to the fundraising calendar." icon={<Crown className="h-4 w-4 text-[var(--brand)]" />} />
+        <RoleMembersCard
+          role="legal"
+          title="Legal reviewers"
+          description="Approve the legal stage of fundraiser requests."
+          icon={<Scale className="h-4 w-4 text-[var(--brand)]" />}
+        />
+        <RoleMembersCard
+          role="risk"
+          title="Risk reviewers"
+          description="Approve the risk stage of fundraiser requests."
+          icon={<ShieldAlert className="h-4 w-4 text-[var(--brand)]" />}
+        />
+        <RoleMembersCard
+          role="compliance"
+          title="Compliance reviewers"
+          description="Approve the compliance stage of fundraiser requests."
+          icon={<BadgeCheck className="h-4 w-4 text-[var(--brand)]" />}
+        />
+        <RoleMembersCard
+          role="marketing"
+          title="Marketing reviewers"
+          description="Approve the marketing stage of fundraiser requests."
+          icon={<Megaphone className="h-4 w-4 text-[var(--brand)]" />}
+        />
+        <RoleMembersCard
+          role="cochair"
+          title="Co-chairs"
+          description="Final sign-off. Once a co-chair approves, the event publishes to the fundraising calendar."
+          icon={<Crown className="h-4 w-4 text-[var(--brand)]" />}
+        />
       </div>
     </AdminShell>
   );
@@ -177,7 +239,11 @@ function AdminUsersPage() {
 function CaptainsCard() {
   const qc = useQueryClient();
 
-  const { data: captains = [], isLoading, error } = useQuery<CaptainRow[]>({
+  const {
+    data: captains = [],
+    isLoading,
+    error,
+  } = useQuery<CaptainRow[]>({
     queryKey: ["captains"],
     queryFn: () => listCaptains(),
   });
@@ -209,7 +275,8 @@ function CaptainsCard() {
       </CardHeader>
       <CardContent>
         <p className="text-sm text-muted-foreground">
-          Captains can post and manage fundraising events on the Events calendar. They can only edit the events they create.
+          Captains can post and manage fundraising events on the Events calendar. They can only edit
+          the events they create.
         </p>
         <div className="mt-4">
           <UserSearchPicker
@@ -220,7 +287,8 @@ function CaptainsCard() {
             onSelect={(u) => grant.mutate(u.email)}
           />
           <p className="mt-1.5 text-xs text-muted-foreground">
-            Start typing to search registered colleagues, then click their name to make them a captain.
+            Start typing to search registered colleagues, then click their name to make them a
+            captain.
           </p>
         </div>
 
@@ -255,12 +323,16 @@ function CaptainsCard() {
                       <AlertDialogHeader>
                         <AlertDialogTitle>Remove captain designation?</AlertDialogTitle>
                         <AlertDialogDescription>
-                          {c.full_name || c.email} will no longer be able to post fundraising events. Existing events stay on the calendar.
+                          {c.full_name || c.email} will no longer be able to post fundraising
+                          events. Existing events stay on the calendar.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => revoke.mutate(c.user_id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                        <AlertDialogAction
+                          onClick={() => revoke.mutate(c.user_id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
                           Remove
                         </AlertDialogAction>
                       </AlertDialogFooter>

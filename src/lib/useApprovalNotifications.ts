@@ -5,8 +5,13 @@ import { useStore } from "@/lib/store";
 import { useAdmin, type EditableNotification } from "@/lib/admin-store";
 import { listMyRequests } from "@/lib/fundraiser-requests.functions";
 import {
-  STAGES, stageStatus, isFullyApproved, trackerPhases,
-  type FundraiserRequest, type StageKey, type StageStatus,
+  STAGES,
+  stageStatus,
+  isFullyApproved,
+  trackerPhases,
+  type FundraiserRequest,
+  type StageKey,
+  type StageStatus,
 } from "@/lib/fundraiser-requests.shared";
 
 const SNAPSHOT_KEY = "thh.approval-snapshot.v1";
@@ -33,10 +38,15 @@ function snapshotOf(rows: FundraiserRequest[]): Snapshot {
 }
 
 function decisionCopy(status: StageStatus, stageLabel: string, title: string) {
-  if (status === "approved") return { headline: `${stageLabel} approved “${title}”`, priority: "info" as const };
+  if (status === "approved")
+    return { headline: `${stageLabel} approved “${title}”`, priority: "info" as const };
   if (status === "changes_requested")
-    return { headline: `${stageLabel} requested changes on “${title}”`, priority: "important" as const };
-  if (status === "declined") return { headline: `${stageLabel} declined “${title}”`, priority: "urgent" as const };
+    return {
+      headline: `${stageLabel} requested changes on “${title}”`,
+      priority: "important" as const,
+    };
+  if (status === "declined")
+    return { headline: `${stageLabel} declined “${title}”`, priority: "urgent" as const };
   return null;
 }
 
@@ -44,7 +54,7 @@ function makeNotification(
   id: string,
   title: string,
   body: string,
-  priority: EditableNotification["priority"]
+  priority: EditableNotification["priority"],
 ): EditableNotification {
   const now = new Date().toISOString();
   return {
@@ -111,8 +121,8 @@ export function useApprovalNotifications() {
             `fr-${r.id}-${s.key}-${now}`,
             copy.headline,
             trackerPhases(r).message,
-            copy.priority
-          )
+            copy.priority,
+          ),
         );
       }
       const finalNow = isFullyApproved(r) ? "approved" : r.status;
@@ -122,8 +132,8 @@ export function useApprovalNotifications() {
             `fr-${r.id}-final-approved`,
             `“${r.title}” is fully approved`,
             "Every reviewer signed off — your fundraiser is headed to the Team Huntington calendar.",
-            "important"
-          )
+            "important",
+          ),
         );
       }
     }

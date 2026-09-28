@@ -5,7 +5,6 @@ import type { SiteSettings } from "@/lib/site-settings.shared";
 
 export { DEFAULT_SITE_SETTINGS, type SiteSettings } from "@/lib/site-settings.shared";
 
-
 /** Readable by everyone (including signed-out visitors and SSR). */
 export const getSiteSettings = createServerFn({ method: "GET" }).handler(
   async (): Promise<SiteSettings> => {

@@ -21,28 +21,28 @@ export declare const DEFAULT_MACHINE_API_PREFIX = "/api/";
 /** Audience of a machine token for one organization. The auth host signs the same string. */
 export declare function machineAudience(orgSlug: string): string;
 export interface MachineAuditEvent {
-    event: "machine.used" | "machine.denied";
-    /** epoch seconds */
-    at: number;
-    org: string;
-    method: string;
-    path: string;
-    clientId: string | null;
-    jti: string | null;
-    /** Set on machine.denied, and on machine.used it is absent. */
-    reason?: string;
-    /** HTTP status the portal will answer with, on machine.denied. */
-    status?: number;
+  event: "machine.used" | "machine.denied";
+  /** epoch seconds */
+  at: number;
+  org: string;
+  method: string;
+  path: string;
+  clientId: string | null;
+  jti: string | null;
+  /** Set on machine.denied, and on machine.used it is absent. */
+  reason?: string;
+  /** HTTP status the portal will answer with, on machine.denied. */
+  status?: number;
 }
 export interface MachineAuthConfig {
-    /**
-     * Required. Called for every machine request, accepted or refused. Write it
-     * to the portal's audit log (decision 3: every use audited). A throw here
-     * refuses the request, so an audit outage never lets a call through.
-     */
-    audit: (e: MachineAuditEvent) => void | Promise<void>;
-    /** Machine tokens are refused outside this path prefix. Default "/api/". */
-    apiPathPrefix?: string;
+  /**
+   * Required. Called for every machine request, accepted or refused. Write it
+   * to the portal's audit log (decision 3: every use audited). A throw here
+   * refuses the request, so an audit outage never lets a call through.
+   */
+  audit: (e: MachineAuditEvent) => void | Promise<void>;
+  /** Machine tokens are refused outside this path prefix. Default "/api/". */
+  apiPathPrefix?: string;
 }
 /**
  * Client side: fetch and cache a machine token. Asks the auth host's token
@@ -50,17 +50,17 @@ export interface MachineAuthConfig {
  * For servers and scripts only. Never ship a machine secret to a browser.
  */
 export declare function createMachineTokenSource(cfg: {
-    authBaseUrl: string;
-    clientId: string;
-    clientSecret: string;
-    /** Optional: the org the token must be for. The auth host refuses any other. */
-    org?: string;
-    fetch?: typeof fetch;
-    now?: () => number;
+  authBaseUrl: string;
+  clientId: string;
+  clientSecret: string;
+  /** Optional: the org the token must be for. The auth host refuses any other. */
+  org?: string;
+  fetch?: typeof fetch;
+  now?: () => number;
 }): {
-    getToken: () => Promise<string>;
-    /** Headers for a portal API call. */
-    headers(extra?: Record<string, string>): Promise<Record<string, string>>;
-    /** Forget the cached token (for example after the client was rotated). */
-    clear(): void;
+  getToken: () => Promise<string>;
+  /** Headers for a portal API call. */
+  headers(extra?: Record<string, string>): Promise<Record<string, string>>;
+  /** Forget the cached token (for example after the client was rotated). */
+  clear(): void;
 };

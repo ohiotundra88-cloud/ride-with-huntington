@@ -8,9 +8,15 @@ export const Route = createFileRoute("/health")({
   head: () => ({
     meta: [
       { title: "Network self-check — Team Huntington Hub" },
-      { name: "description", content: "Check which parts of Team Huntington Hub are reachable from your network or VPN." },
+      {
+        name: "description",
+        content: "Check which parts of Team Huntington Hub are reachable from your network or VPN.",
+      },
       { property: "og:title", content: "Network self-check — Team Huntington Hub" },
-      { property: "og:description", content: "Diagnose VPN or corporate-filter issues loading Team Huntington Hub." },
+      {
+        property: "og:description",
+        content: "Diagnose VPN or corporate-filter issues loading Team Huntington Hub.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -75,7 +81,8 @@ function HealthPage() {
     setOrigin(window.location.origin);
 
     const set = (key: string, state: State, detail: string) =>
-      !cancelled && setChecks((prev) => prev.map((c) => (c.key === key ? { ...c, state, detail } : c)));
+      !cancelled &&
+      setChecks((prev) => prev.map((c) => (c.key === key ? { ...c, state, detail } : c)));
 
     set("html", "ok", "The HTML for this page reached your browser intact.");
     set("js", "ok", "JavaScript executed and the page is interactive.");
@@ -90,8 +97,10 @@ function HealthPage() {
     );
 
     (async () => {
-      const r = await timed(`${window.location.origin}/api/public/sb/rest/v1/site_settings?select=id&limit=1`, {
-      });
+      const r = await timed(
+        `${window.location.origin}/api/public/sb/rest/v1/site_settings?select=id&limit=1`,
+        {},
+      );
       set(
         "same",
         r.ok ? "ok" : "fail",
@@ -112,8 +121,8 @@ function HealthPage() {
     <div className="mx-auto max-w-2xl px-4 py-10">
       <h1 className="text-2xl font-bold tracking-tight">Network self-check</h1>
       <p className="mt-2 text-sm text-muted-foreground">
-        Run this page on the machine and network (including VPN) where the Hub isn't loading. It reports
-        exactly what your network allows.
+        Run this page on the machine and network (including VPN) where the Hub isn't loading. It
+        reports exactly what your network allows.
       </p>
 
       <Card className="mt-6">
@@ -139,7 +148,8 @@ function HealthPage() {
             <CardTitle className="text-base">This network is blocking the Hub</CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">
-            Pages will still display, but sign-in and saving are unavailable until IT allows this domain.
+            Pages will still display, but sign-in and saving are unavailable until IT allows this
+            domain.
           </CardContent>
         </Card>
       )}
@@ -150,17 +160,20 @@ function HealthPage() {
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
           <p className="text-muted-foreground">
-            Copy the details below into a ticket. All traffic for this application is on a single domain.
+            Copy the details below into a ticket. All traffic for this application is on a single
+            domain.
           </p>
           <ul className="list-disc space-y-1 pl-5">
             <li>
               Allow <code className="font-mono">ridewithhuntington.com</code> and{" "}
               <code className="font-mono">www.ridewithhuntington.com</code> (HTTPS, port 443)
             </li>
-            <li>Suggested category: Business / Productivity — internal Huntington Pelotonia team site</li>
             <li>
-              Includes the API path <code className="font-mono">/api/public/sb/*</code> on the same domain
-              (sign-in and data). No other external hosts are required.
+              Suggested category: Business / Productivity — internal Huntington Pelotonia team site
+            </li>
+            <li>
+              Includes the API path <code className="font-mono">/api/public/sb/*</code> on the same
+              domain (sign-in and data). No other external hosts are required.
             </li>
             <li>
               For iBoss / WireGuard, bypass SSL/TLS inspection for both domains. The tunnel is

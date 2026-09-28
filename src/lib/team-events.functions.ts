@@ -92,7 +92,12 @@ export const saveTeamEvent = createServerFn({ method: "POST" })
       if (error) throw new Error(error.message);
       await context.supabase
         .from("team_event_audit")
-        .insert({ event_id: data.id, action: "updated", actor_id: context.userId, actor_email: email });
+        .insert({
+          event_id: data.id,
+          action: "updated",
+          actor_id: context.userId,
+          actor_email: email,
+        });
       return { id: data.id };
     }
 
@@ -104,7 +109,12 @@ export const saveTeamEvent = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     await context.supabase
       .from("team_event_audit")
-      .insert({ event_id: created.id, action: "created", actor_id: context.userId, actor_email: email });
+      .insert({
+        event_id: created.id,
+        action: "created",
+        actor_id: context.userId,
+        actor_email: email,
+      });
     return { id: String(created.id) };
   });
 
@@ -341,9 +351,7 @@ export const listMyTeamEvents = createServerFn({ method: "GET" })
 
 /** Sets the caller's own RSVP on an event they were invited to. */
 export const setMyRsvp = createServerFn({ method: "POST" })
-  .inputValidator((d) =>
-    z.object({ id: z.string().uuid(), rsvp: z.enum(RSVP_VALUES) }).parse(d),
-  )
+  .inputValidator((d) => z.object({ id: z.string().uuid(), rsvp: z.enum(RSVP_VALUES) }).parse(d))
   .middleware([requireSupabaseAuth])
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
     const { error } = await context.supabase

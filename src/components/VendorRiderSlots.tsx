@@ -7,7 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { VendorTierBadge } from "@/components/VendorTierBadge";
 import { saveVendorRiderSlots } from "@/lib/vendors.functions";
 import {
@@ -83,16 +89,21 @@ function SlotsForYear({
 }) {
   const qc = useQueryClient();
   const tier = tierFor(yearTotals(vendor.donations), year)!;
-  const [drafts, setDrafts] = useState<Draft[]>(() => draftsFor(vendor.rider_slots, year, tier.riderSlots));
+  const [drafts, setDrafts] = useState<Draft[]>(() =>
+    draftsFor(vendor.rider_slots, year, tier.riderSlots),
+  );
   const saved = vendor.rider_slots.filter((s) => s.year === year);
 
   const save = useMutation({
     mutationFn: () => saveVendorRiderSlots({ data: { vendor_id: vendor.id, year, slots: drafts } }),
     onSuccess: (r) => {
-      toast.success("Sponsored riders saved", { description: `${r.filled} of ${tier.riderSlots} filled for ${year}.` });
+      toast.success("Sponsored riders saved", {
+        description: `${r.filled} of ${tier.riderSlots} filled for ${year}.`,
+      });
       qc.invalidateQueries({ queryKey: ["vendor", vendor.id] });
     },
-    onError: (e: Error) => toast.error("Couldn't save sponsored riders", { description: e.message }),
+    onError: (e: Error) =>
+      toast.error("Couldn't save sponsored riders", { description: e.message }),
   });
 
   const set = (i: number, patch: Partial<Draft>) =>
@@ -113,16 +124,24 @@ function SlotsForYear({
         </div>
         {years.length > 1 && (
           <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
-            <SelectTrigger className="w-28" aria-label="Year"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-28" aria-label="Year">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
-              {years.map((y) => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}
+              {years.map((y) => (
+                <SelectItem key={y} value={String(y)}>
+                  {y}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         )}
       </CardHeader>
       <CardContent className="space-y-4">
         {drafts.map((d, i) => {
-          const match = saved.find((s) => s.slot_number === d.slot_number && s.pelotonia_id === d.pelotonia_id)?.pelotonia;
+          const match = saved.find(
+            (s) => s.slot_number === d.slot_number && s.pelotonia_id === d.pelotonia_id,
+          )?.pelotonia;
           const idFor = (f: string) => `slot-${year}-${d.slot_number}-${f}`;
           return (
             <fieldset key={d.slot_number} className="rounded-lg border p-3">
@@ -132,7 +151,11 @@ function SlotsForYear({
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-1.5">
                   <Label htmlFor={idFor("name")}>Name</Label>
-                  <Input id={idFor("name")} value={d.rider_name} onChange={(e) => set(i, { rider_name: e.target.value })} />
+                  <Input
+                    id={idFor("name")}
+                    value={d.rider_name}
+                    onChange={(e) => set(i, { rider_name: e.target.value })}
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor={idFor("rid")}>Pelotonia rider ID</Label>
@@ -141,12 +164,15 @@ function SlotsForYear({
                     value={d.pelotonia_id}
                     placeholder="e.g. CK0132"
                     autoCapitalize="characters"
-                    onChange={(e) => set(i, { pelotonia_id: e.target.value.toUpperCase().replace(/\s/g, "") })}
+                    onChange={(e) =>
+                      set(i, { pelotonia_id: e.target.value.toUpperCase().replace(/\s/g, "") })
+                    }
                   />
                   {match && (
                     <p className="flex items-center gap-1 text-[11px] text-emerald-800">
                       <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
-                      {match.name} · {currency(match.raised)} raised{match.subTeam ? ` · ${match.subTeam}` : ""}
+                      {match.name} · {currency(match.raised)} raised
+                      {match.subTeam ? ` · ${match.subTeam}` : ""}
                     </p>
                   )}
                 </div>
@@ -166,9 +192,15 @@ function SlotsForYear({
                   </div>
                   {d.bike_needed && (
                     <Select value={d.bike_size} onValueChange={(v) => set(i, { bike_size: v })}>
-                      <SelectTrigger aria-label={`Rider ${d.slot_number} bike size`}><SelectValue placeholder="Bike size" /></SelectTrigger>
+                      <SelectTrigger aria-label={`Rider ${d.slot_number} bike size`}>
+                        <SelectValue placeholder="Bike size" />
+                      </SelectTrigger>
                       <SelectContent>
-                        {BIKE_SIZES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                        {BIKE_SIZES.map((s) => (
+                          <SelectItem key={s} value={s}>
+                            {s}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   )}
@@ -182,19 +214,37 @@ function SlotsForYear({
                         checked={d.hotel_needed}
                         onCheckedChange={(v) => set(i, { hotel_needed: v === true })}
                       />
-                      <Label htmlFor={idFor("hotel")} className="flex items-center gap-1 font-normal">
+                      <Label
+                        htmlFor={idFor("hotel")}
+                        className="flex items-center gap-1 font-normal"
+                      >
                         <BedDouble className="h-3.5 w-3.5" aria-hidden="true" /> Needs a hotel
                       </Label>
                     </div>
                     {d.hotel_needed && (
                       <div className="grid grid-cols-2 gap-2">
                         <div className="space-y-1">
-                          <Label htmlFor={idFor("in")} className="text-[11px]">Check-in</Label>
-                          <Input id={idFor("in")} type="date" value={d.hotel_check_in} onChange={(e) => set(i, { hotel_check_in: e.target.value })} />
+                          <Label htmlFor={idFor("in")} className="text-[11px]">
+                            Check-in
+                          </Label>
+                          <Input
+                            id={idFor("in")}
+                            type="date"
+                            value={d.hotel_check_in}
+                            onChange={(e) => set(i, { hotel_check_in: e.target.value })}
+                          />
                         </div>
                         <div className="space-y-1">
-                          <Label htmlFor={idFor("out")} className="text-[11px]">Check-out</Label>
-                          <Input id={idFor("out")} type="date" value={d.hotel_check_out} min={d.hotel_check_in || undefined} onChange={(e) => set(i, { hotel_check_out: e.target.value })} />
+                          <Label htmlFor={idFor("out")} className="text-[11px]">
+                            Check-out
+                          </Label>
+                          <Input
+                            id={idFor("out")}
+                            type="date"
+                            value={d.hotel_check_out}
+                            min={d.hotel_check_in || undefined}
+                            onChange={(e) => set(i, { hotel_check_out: e.target.value })}
+                          />
                         </div>
                       </div>
                     )}

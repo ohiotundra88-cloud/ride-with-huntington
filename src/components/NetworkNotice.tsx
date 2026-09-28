@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { WifiOff } from "lucide-react";
 
-
 /**
  * Silent connectivity probe. If this network (VPN / web filter) blocks the
  * same-origin backend path, show a slim inline notice instead of letting
@@ -41,7 +40,6 @@ export function NetworkNotice() {
       ctl.abort();
     };
   }, []);
-
 
   if (!blocked) return null;
 

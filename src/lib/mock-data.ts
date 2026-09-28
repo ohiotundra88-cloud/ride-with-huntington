@@ -2,26 +2,14 @@
 // All values are sample/demonstration data — clearly labeled in UI.
 
 import type { LucideIcon } from "lucide-react";
-import {
-  Bike,
-  CheckCircle2,
-  DollarSign,
-  Hotel,
-  Shirt,
-  Users,
-} from "lucide-react";
+import { Bike, CheckCircle2, DollarSign, Hotel, Shirt, Users } from "lucide-react";
 
 // Demo event date used across countdowns, timeline, notifications.
 export const RIDE_WEEKEND_DATE = "2027-08-07T07:00:00-04:00";
 
 // ============ TYPES ============
 export type ReadinessStatus =
-  | "complete"
-  | "reserved"
-  | "in_progress"
-  | "action_needed"
-  | "ordered"
-  | "not_applicable";
+  "complete" | "reserved" | "in_progress" | "action_needed" | "ordered" | "not_applicable";
 
 export interface ReadinessItem {
   id: string;
@@ -36,13 +24,7 @@ export interface ReadinessItem {
 }
 
 export type TimelinePhase =
-  | "today"
-  | "next_week"
-  | "two_weeks"
-  | "ride_week"
-  | "friday"
-  | "saturday"
-  | "sunday";
+  "today" | "next_week" | "two_weeks" | "ride_week" | "friday" | "saturday" | "sunday";
 
 export type TimelineState = "completed" | "current" | "upcoming";
 
@@ -479,8 +461,18 @@ export function analyticsMetrics(filter: "all" | "riders" | "volunteers"): Analy
   const factor = filter === "riders" ? 0.62 : filter === "volunteers" ? 0.38 : 1;
   const n = (v: number) => Math.round(v * factor).toLocaleString();
   return [
-    { id: "a-1", label: "Riders registered", value: filter === "volunteers" ? "0" : n(2400), delta: "+8%" },
-    { id: "a-2", label: "Volunteers registered", value: filter === "riders" ? "0" : n(1500), delta: "+12%" },
+    {
+      id: "a-1",
+      label: "Riders registered",
+      value: filter === "volunteers" ? "0" : n(2400),
+      delta: "+8%",
+    },
+    {
+      id: "a-2",
+      label: "Volunteers registered",
+      value: filter === "riders" ? "0" : n(1500),
+      delta: "+12%",
+    },
     { id: "a-3", label: "Registration completion", value: "78%", delta: "+4 pts" },
     { id: "a-4", label: "Hotel bookings", value: n(1120), delta: "+6%" },
     { id: "a-5", label: "Bike rentals", value: n(640), delta: "+11%" },

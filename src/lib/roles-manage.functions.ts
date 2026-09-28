@@ -53,5 +53,9 @@ export const searchRegisteredUsers = createServerFn({ method: "POST" })
       .order("email", { ascending: true })
       .limit(8);
     if (error) throw new Error(error.message);
-    return (profiles ?? []).map((p) => ({ user_id: p.id, email: p.email ?? "(unknown)", full_name: p.full_name }));
+    return (profiles ?? []).map((p) => ({
+      user_id: p.id,
+      email: p.email ?? "(unknown)",
+      full_name: p.full_name,
+    }));
   });

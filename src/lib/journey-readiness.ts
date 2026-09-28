@@ -5,7 +5,16 @@ import { useStore, type Registration } from "@/lib/store";
 import { useAdmin, readinessScore, type EditableReadinessItem } from "@/lib/admin-store";
 import type { ReadinessStatus } from "@/lib/mock-data";
 import { getRiderFundraising } from "@/lib/pelotonia.functions";
-import { pelotoniaStatus, travelStatus, bikeStatus, apparelStatus, isRiderParticipation, isVolunteerParticipation, isFundraisingParticipation, isChallengerParticipation } from "@/lib/registration-progress";
+import {
+  pelotoniaStatus,
+  travelStatus,
+  bikeStatus,
+  apparelStatus,
+  isRiderParticipation,
+  isVolunteerParticipation,
+  isFundraisingParticipation,
+  isChallengerParticipation,
+} from "@/lib/registration-progress";
 
 /**
  * Presentation-only overlay: derive readiness card status/detail from the
@@ -15,7 +24,7 @@ import { pelotoniaStatus, travelStatus, bikeStatus, apparelStatus, isRiderPartic
 export function mergeReadinessWithRegistration(
   items: EditableReadinessItem[],
   reg: Registration,
-  fundraising?: { raised: number; committed: number; goal: number } | null
+  fundraising?: { raised: number; committed: number; goal: number } | null,
 ): EditableReadinessItem[] {
   const participation = reg.participation;
   const isRider = isRiderParticipation(participation);
@@ -25,7 +34,11 @@ export function mergeReadinessWithRegistration(
   const roleLabel = isChallenger ? "a Challenger" : "a Volunteer";
 
   return items.map((item) => {
-    const over = (status: ReadinessStatus, detail?: string, ctaLabel?: string): EditableReadinessItem => ({
+    const over = (
+      status: ReadinessStatus,
+      detail?: string,
+      ctaLabel?: string,
+    ): EditableReadinessItem => ({
       ...item,
       status,
       detail: detail ?? item.detail,
@@ -37,15 +50,36 @@ export function mergeReadinessWithRegistration(
         const p = reg.pelotonia;
         const st = pelotoniaStatus(reg);
         if (st === "complete") {
-          return over("complete", p.confirmation ? `Registered · Rider ID ${p.confirmation}` : "Pelotonia registration confirmed.", "View registration");
+          return over(
+            "complete",
+            p.confirmation
+              ? `Registered · Rider ID ${p.confirmation}`
+              : "Pelotonia registration confirmed.",
+            "View registration",
+          );
         }
-        if (st === "pending") return over("in_progress", "Pelotonia registration started — add your Rider ID and HB number.", "Finish registration");
-        return over("action_needed", "Register with Pelotonia and add your Rider ID and HB number.", "Start registration");
+        if (st === "pending")
+          return over(
+            "in_progress",
+            "Pelotonia registration started — add your Rider ID and HB number.",
+            "Finish registration",
+          );
+        return over(
+          "action_needed",
+          "Register with Pelotonia and add your Rider ID and HB number.",
+          "Start registration",
+        );
       }
       case "hotel": {
         const t = reg.travel;
-        if (isChallenger) return over("not_applicable", "You're registered as a Challenger, so no travel or hotel is needed.", "View travel");
-        if (t.needs === "none") return over("not_applicable", "No travel or hotel needed.", "Update travel");
+        if (isChallenger)
+          return over(
+            "not_applicable",
+            "You're registered as a Challenger, so no travel or hotel is needed.",
+            "View travel",
+          );
+        if (t.needs === "none")
+          return over("not_applicable", "No travel or hotel needed.", "Update travel");
         const st = travelStatus(reg);
         if (st === "complete") {
           const detail = t.hotelName
@@ -53,43 +87,117 @@ export function mergeReadinessWithRegistration(
             : "Travel and hotel details confirmed.";
           return over("reserved", detail, "View travel");
         }
-        if (st === "pending") return over("in_progress", "Travel details started — confirm your dates.", "Finish travel");
-        return over("action_needed", "Add your travel and hotel plans before Jul 22.", "Add travel");
+        if (st === "pending")
+          return over(
+            "in_progress",
+            "Travel details started — confirm your dates.",
+            "Finish travel",
+          );
+        return over(
+          "action_needed",
+          "Add your travel and hotel plans before Jul 22.",
+          "Add travel",
+        );
       }
       case "bike": {
         const b = reg.bike;
-        if (participation && !isRider) return over("not_applicable", `You're registered as ${roleLabel}, so no bike is needed.`, "View bike step");
-        if (b.needs === "no") return over("complete", "Bringing your own bike — no rental needed.", "Update bike plan");
+        if (participation && !isRider)
+          return over(
+            "not_applicable",
+            `You're registered as ${roleLabel}, so no bike is needed.`,
+            "View bike step",
+          );
+        if (b.needs === "no")
+          return over("complete", "Bringing your own bike — no rental needed.", "Update bike plan");
         if (b.needs === "yes") {
           if (bikeStatus(reg) === "complete") {
-            const specs = [b.bikeType, b.bikeSize && `Size ${b.bikeSize}`, b.pedals].filter(Boolean).join(" · ");
-            return over("reserved", specs ? `Rental requested · ${specs}` : "Rental requested.", "View bike details");
+            const specs = [b.bikeType, b.bikeSize && `Size ${b.bikeSize}`, b.pedals]
+              .filter(Boolean)
+              .join(" · ");
+            return over(
+              "reserved",
+              specs ? `Rental requested · ${specs}` : "Rental requested.",
+              "View bike details",
+            );
           }
-          return over("action_needed", "Finish your rental details — size, type, pedals and dates.", "Finish bike rental");
+          return over(
+            "action_needed",
+            "Finish your rental details — size, type, pedals and dates.",
+            "Finish bike rental",
+          );
         }
-        if (b.needs === "unsure") return over("in_progress", "Still deciding — confirm your bike plan before Jul 22.", "Decide bike plan");
+        if (b.needs === "unsure")
+          return over(
+            "in_progress",
+            "Still deciding — confirm your bike plan before Jul 22.",
+            "Decide bike plan",
+          );
         return over("action_needed", "Tell us whether you need a bike rental.", "Choose bike plan");
       }
       case "volunteer": {
-        if (!participation) return over("action_needed", "Choose how you're taking part to see your next steps.", item.ctaLabel);
-        if (!isVolunteer) return over("not_applicable", "You're registered as a Rider — no shift needed.", item.ctaLabel);
-        return over("in_progress", "Volunteer shift assignments open closer to Ride Weekend.", "Volunteer info");
+        if (!participation)
+          return over(
+            "action_needed",
+            "Choose how you're taking part to see your next steps.",
+            item.ctaLabel,
+          );
+        if (!isVolunteer)
+          return over(
+            "not_applicable",
+            "You're registered as a Rider — no shift needed.",
+            item.ctaLabel,
+          );
+        return over(
+          "in_progress",
+          "Volunteer shift assignments open closer to Ride Weekend.",
+          "Volunteer info",
+        );
       }
       case "apparel": {
         const a = reg.apparel;
-        if (isChallenger) return over("not_applicable", "You're registered as a Challenger, so there's no apparel to order.", "View apparel");
+        if (isChallenger)
+          return over(
+            "not_applicable",
+            "You're registered as a Challenger, so there's no apparel to order.",
+            "View apparel",
+          );
         const st = apparelStatus(reg);
         if (st === "complete") {
-          const bits = [a.jerseyStyle && a.jerseyStyle.replace("-", " "), a.jerseySize && `jersey (${a.jerseySize})`].filter(Boolean).join(" ");
-          return over("ordered", bits ? `${bits.charAt(0).toUpperCase() + bits.slice(1)} · confirmed` : "Apparel selections confirmed.", "View apparel");
+          const bits = [
+            a.jerseyStyle && a.jerseyStyle.replace("-", " "),
+            a.jerseySize && `jersey (${a.jerseySize})`,
+          ]
+            .filter(Boolean)
+            .join(" ");
+          return over(
+            "ordered",
+            bits
+              ? `${bits.charAt(0).toUpperCase() + bits.slice(1)} · confirmed`
+              : "Apparel selections confirmed.",
+            "View apparel",
+          );
         }
-        if (st === "pending") return over("in_progress", "Apparel started — confirm sizes and mailing address.", "Finish apparel");
-        return over("action_needed", "Choose your sizes and confirm your mailing address.", "Choose apparel");
+        if (st === "pending")
+          return over(
+            "in_progress",
+            "Apparel started — confirm sizes and mailing address.",
+            "Finish apparel",
+          );
+        return over(
+          "action_needed",
+          "Choose your sizes and confirm your mailing address.",
+          "Choose apparel",
+        );
       }
 
       case "fundraising": {
         // Score against the live Pelotonia commitment, not seeded demo values.
-        if (participation && !fundraises) return over("not_applicable", "You're registered as a Volunteer — no fundraising commitment.", item.ctaLabel);
+        if (participation && !fundraises)
+          return over(
+            "not_applicable",
+            "You're registered as a Volunteer — no fundraising commitment.",
+            item.ctaLabel,
+          );
         if (!fundraising) {
           // No live fundraising total yet — don't let seeded demo numbers drag
           // the readiness percentage down.
@@ -133,7 +241,7 @@ export function useJourneyReadiness() {
 
   const merged = useMemo(
     () => mergeReadinessWithRegistration(state.readiness, registration, riderFundraising ?? null),
-    [state.readiness, registration, riderFundraising]
+    [state.readiness, registration, riderFundraising],
   );
   const score = useMemo(() => readinessScore(merged), [merged]);
 

@@ -11,20 +11,27 @@ import {
 } from "@/lib/branding.shared";
 
 /** Public read — used by the landing page and header. */
-export const getBranding = createServerFn({ method: "GET" }).handler(async (): Promise<SiteBranding> => {
-  const { createDbClient } = await import("@/server/backend.server");
-  const client = createDbClient("anon");
-  const { data, error } = await client.from("site_branding").select(BRANDING_COLUMNS).eq("id", 1).maybeSingle();
-  if (error) return defaultBranding;
-  return (data as SiteBranding | null) ?? defaultBranding;
-});
+export const getBranding = createServerFn({ method: "GET" }).handler(
+  async (): Promise<SiteBranding> => {
+    const { createDbClient } = await import("@/server/backend.server");
+    const client = createDbClient("anon");
+    const { data, error } = await client
+      .from("site_branding")
+      .select(BRANDING_COLUMNS)
+      .eq("id", 1)
+      .maybeSingle();
+    if (error) return defaultBranding;
+    return (data as SiteBranding | null) ?? defaultBranding;
+  },
+);
 
 async function assertBrandingManager(context: { supabase: any; userId: string }) {
   const [{ data: isAdmin }, { data: isSuper }] = await Promise.all([
     context.supabase.rpc("is_admin_text", { _user_id: context.userId }),
     context.supabase.rpc("is_superuser", { _user_id: context.userId }),
   ]);
-  if (!isAdmin && !isSuper) throw new Error("Only admins and super users can change site branding.");
+  if (!isAdmin && !isSuper)
+    throw new Error("Only admins and super users can change site branding.");
 }
 
 export const saveBrandingSettings = createServerFn({ method: "POST" })
@@ -70,7 +77,11 @@ export const uploadBrandingImage = createServerFn({ method: "POST" })
       .upload(path, bytes, { contentType: data.contentType, upsert: true });
     if (upErr) throw new Error(upErr.message);
 
-    const { data: prev } = await context.supabase.from("site_branding").select(BRANDING_COLUMNS).eq("id", 1).maybeSingle();
+    const { data: prev } = await context.supabase
+      .from("site_branding")
+      .select(BRANDING_COLUMNS)
+      .eq("id", 1)
+      .maybeSingle();
     const oldPath = data.kind === "hero" ? (prev as any)?.hero_path : (prev as any)?.logo_path;
 
     const patch =
@@ -95,7 +106,11 @@ export const removeBrandingImage = createServerFn({ method: "POST" })
   .inputValidator((d) => brandingRemoveSchema.parse(d))
   .handler(async ({ data, context }): Promise<SiteBranding> => {
     await assertBrandingManager(context as any);
-    const { data: prev } = await context.supabase.from("site_branding").select(BRANDING_COLUMNS).eq("id", 1).maybeSingle();
+    const { data: prev } = await context.supabase
+      .from("site_branding")
+      .select(BRANDING_COLUMNS)
+      .eq("id", 1)
+      .maybeSingle();
     const oldPath = data.kind === "hero" ? (prev as any)?.hero_path : (prev as any)?.logo_path;
 
     const patch =

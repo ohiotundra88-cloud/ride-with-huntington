@@ -3,7 +3,16 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import {
-  Archive, ArrowLeft, Download, FileText, History, Pencil, Plus, RotateCcw, Trash2, Upload,
+  Archive,
+  ArrowLeft,
+  Download,
+  FileText,
+  History,
+  Pencil,
+  Plus,
+  RotateCcw,
+  Trash2,
+  Upload,
 } from "lucide-react";
 import { VendorGate, useVendorAccess } from "@/components/VendorGate";
 
@@ -15,20 +24,57 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
-  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
-  archiveVendorAttachment, archiveVendorRecord, deleteVendorAttachment, deleteVendorRecord,
-  getVendorAttachment, getVendorRecord, listVendorAudit, logVendorActivity, uploadVendorAttachment,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  archiveVendorAttachment,
+  archiveVendorRecord,
+  deleteVendorAttachment,
+  deleteVendorRecord,
+  getVendorAttachment,
+  getVendorRecord,
+  listVendorAudit,
+  logVendorActivity,
+  uploadVendorAttachment,
 } from "@/lib/vendors.functions";
 import {
-  ALLOWED_VENDOR_FILE_TYPES, BEYOND_YEAR, CONTACT_METHODS, MAX_VENDOR_FILE_BYTES, currency, currentRideYear,
-  isKidsSupporter, percent, rollup, tierFor, yearLabel, yearTotals, type VendorDetail,
+  ALLOWED_VENDOR_FILE_TYPES,
+  BEYOND_YEAR,
+  CONTACT_METHODS,
+  MAX_VENDOR_FILE_BYTES,
+  currency,
+  currentRideYear,
+  isKidsSupporter,
+  percent,
+  rollup,
+  tierFor,
+  yearLabel,
+  yearTotals,
+  type VendorDetail,
 } from "@/lib/vendors.shared";
 
 export const Route = createFileRoute("/vendors/$id")({
@@ -41,9 +87,16 @@ export const Route = createFileRoute("/vendors/$id")({
   head: () => ({
     meta: [
       { title: "Vendor record — Vendor CRM" },
-      { name: "description", content: "Vendor relationship detail: spend, donation commitments, contacts, attachments, and activity history." },
+      {
+        name: "description",
+        content:
+          "Vendor relationship detail: spend, donation commitments, contacts, attachments, and activity history.",
+      },
       { property: "og:title", content: "Vendor record — Vendor CRM" },
-      { property: "og:description", content: "Spend, donations, contacts, and activity for a Team Huntington vendor." },
+      {
+        property: "og:description",
+        content: "Spend, donations, contacts, and activity for a Team Huntington vendor.",
+      },
     ],
   }),
 });
@@ -55,7 +108,11 @@ function VendorDetailPage() {
   const { data: access } = useVendorAccess();
   const [editing, setEditing] = useState(false);
 
-  const { data: vendor, isPending, error } = useQuery<VendorDetail>({
+  const {
+    data: vendor,
+    isPending,
+    error,
+  } = useQuery<VendorDetail>({
     queryKey: ["vendor", id],
     queryFn: () => getVendorRecord({ data: { id } }),
   });
@@ -80,23 +137,38 @@ function VendorDetailPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  if (isPending) return <p className="px-4 py-20 text-center text-sm text-muted-foreground">Loading vendor…</p>;
-  if (error || !vendor) return <p className="px-4 py-20 text-center text-sm text-destructive">{(error as Error)?.message ?? "Vendor not found"}</p>;
+  if (isPending)
+    return <p className="px-4 py-20 text-center text-sm text-muted-foreground">Loading vendor…</p>;
+  if (error || !vendor)
+    return (
+      <p className="px-4 py-20 text-center text-sm text-destructive">
+        {(error as Error)?.message ?? "Vendor not found"}
+      </p>
+    );
 
   const totals = rollup(vendor.spend, vendor.donations);
   const latest = vendor.activity[0];
-  const years = Array.from(new Set([...vendor.spend.map((s) => s.year), ...vendor.donations.map((d) => d.year)])).sort((a, b) => a - b);
+  const years = Array.from(
+    new Set([...vendor.spend.map((s) => s.year), ...vendor.donations.map((d) => d.year)]),
+  ).sort((a, b) => a - b);
   const contributions = yearTotals(vendor.donations);
   // Header badges: this ride year's tier, or the most recent year that earned one.
   const tierYear =
-    [currentRideYear(), ...Object.keys(contributions).map(Number).filter((y) => y !== BEYOND_YEAR).sort((a, b) => b - a)].find(
-      (y) => tierFor(contributions, y) || isKidsSupporter(contributions, y),
-    ) ?? currentRideYear();
+    [
+      currentRideYear(),
+      ...Object.keys(contributions)
+        .map(Number)
+        .filter((y) => y !== BEYOND_YEAR)
+        .sort((a, b) => b - a),
+    ].find((y) => tierFor(contributions, y) || isKidsSupporter(contributions, y)) ??
+    currentRideYear();
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
       <Button asChild variant="ghost" size="sm" className="-ml-2 mb-3">
-        <Link to="/vendors"><ArrowLeft className="mr-1 h-4 w-4" /> Vendor CRM</Link>
+        <Link to="/vendors">
+          <ArrowLeft className="mr-1 h-4 w-4" /> Vendor CRM
+        </Link>
       </Button>
 
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -111,7 +183,11 @@ function VendorDetailPage() {
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
             {vendor.status} · {vendor.business_segment || "No segment"}
-            {vendor.archived && <span className="ml-2 rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase">Archived</span>}
+            {vendor.archived && (
+              <span className="ml-2 rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase">
+                Archived
+              </span>
+            )}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
             Last modified {new Date(vendor.updated_at).toLocaleString()}
@@ -125,7 +201,8 @@ function VendorDetailPage() {
           </Button>
           {access?.canArchive && !vendor.archived && (
             <ConfirmButton
-              label="Archive" icon={<Archive className="mr-1.5 h-3.5 w-3.5" />}
+              label="Archive"
+              icon={<Archive className="mr-1.5 h-3.5 w-3.5" />}
               title="Archive this vendor?"
               body="Archived vendors are hidden from the default list but keep all spend, donation history, and attachments. They can be restored at any time."
               onConfirm={() => archive.mutate(true)}
@@ -138,7 +215,9 @@ function VendorDetailPage() {
           )}
           {access?.canPurge && vendor.archived && (
             <ConfirmButton
-              destructive label="Delete permanently" icon={<Trash2 className="mr-1.5 h-3.5 w-3.5" />}
+              destructive
+              label="Delete permanently"
+              icon={<Trash2 className="mr-1.5 h-3.5 w-3.5" />}
               title="Permanently delete this vendor?"
               body="This removes the vendor, its spend and donation history, contacts, activity, and every attachment. This cannot be undone."
               onConfirm={() => purge.mutate()}
@@ -163,35 +242,61 @@ function VendorDetailPage() {
               ["Support rate", percent(totals.support_rate)],
             ].map(([label, value]) => (
               <div key={label} className="rounded-lg border bg-card p-3">
-                <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</div>
+                <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                  {label}
+                </div>
                 <div className="mt-1 text-base font-bold text-[var(--brand-dark)]">{value}</div>
               </div>
             ))}
           </div>
 
           <Card className="mt-6">
-            <CardHeader className="pb-3"><CardTitle className="text-base">Relationship</CardTitle></CardHeader>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Relationship</CardTitle>
+            </CardHeader>
             <CardContent className="grid gap-3 text-sm sm:grid-cols-2">
               <Field label="Huntington relationship owner" value={vendor.relationship_owner} />
               <Field label="Secondary owner" value={vendor.secondary_relationship_owner} />
               <Field label="Internal business segment" value={vendor.internal_business_segment} />
               <Field label="Point of contact" value={vendor.primary_contact_name} />
               <Field label="Contact phone" value={vendor.primary_contact_phone} />
-              <Field label="Created" value={`${new Date(vendor.created_at).toLocaleDateString()}${vendor.created_by_name ? ` by ${vendor.created_by_name}` : ""}`} />
-              {vendor.internal_notes && <Field className="sm:col-span-2" label="Internal notes" value={vendor.internal_notes} />}
-              {vendor.general_notes && <Field className="sm:col-span-2" label="General notes" value={vendor.general_notes} />}
+              <Field
+                label="Created"
+                value={`${new Date(vendor.created_at).toLocaleDateString()}${vendor.created_by_name ? ` by ${vendor.created_by_name}` : ""}`}
+              />
+              {vendor.internal_notes && (
+                <Field
+                  className="sm:col-span-2"
+                  label="Internal notes"
+                  value={vendor.internal_notes}
+                />
+              )}
+              {vendor.general_notes && (
+                <Field
+                  className="sm:col-span-2"
+                  label="General notes"
+                  value={vendor.general_notes}
+                />
+              )}
             </CardContent>
           </Card>
 
           {vendor.contacts.length > 0 && (
             <Card className="mt-6">
-              <CardHeader className="pb-3"><CardTitle className="text-base">Additional contacts</CardTitle></CardHeader>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Additional contacts</CardTitle>
+              </CardHeader>
               <CardContent>
                 <ul className="divide-y text-sm">
                   {vendor.contacts.map((c) => (
                     <li key={c.id} className="py-2">
-                      <div className="font-medium">{c.name}{c.title ? ` — ${c.title}` : ""}</div>
-                      <div className="text-xs text-muted-foreground">{[c.email, c.phone].filter(Boolean).join(" · ") || "No contact details"}</div>
+                      <div className="font-medium">
+                        {c.name}
+                        {c.title ? ` — ${c.title}` : ""}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {[c.email, c.phone].filter(Boolean).join(" · ") || "No contact details"}
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -200,30 +305,57 @@ function VendorDetailPage() {
           )}
 
           <Card className="mt-6">
-            <CardHeader className="pb-3"><CardTitle className="text-base">Spend & donations by year</CardTitle></CardHeader>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Spend & donations by year</CardTitle>
+            </CardHeader>
             <CardContent>
               {years.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No spend or donation activity recorded yet.</p>
+                <p className="text-sm text-muted-foreground">
+                  No spend or donation activity recorded yet.
+                </p>
               ) : (
                 <Tabs defaultValue={String(years[0])}>
                   <TabsList className="flex-wrap">
-                    {years.map((y) => <TabsTrigger key={y} value={String(y)}>{yearLabel(y)}</TabsTrigger>)}
+                    {years.map((y) => (
+                      <TabsTrigger key={y} value={String(y)}>
+                        {yearLabel(y)}
+                      </TabsTrigger>
+                    ))}
                   </TabsList>
                   {years.map((y) => {
                     const s = vendor.spend.find((r) => r.year === y);
                     const d = vendor.donations.find((r) => r.year === y);
                     const out = (d?.committed_amount ?? 0) - (d?.actual_donated_amount ?? 0);
                     return (
-                      <TabsContent key={y} value={String(y)} className="grid gap-3 pt-4 text-sm sm:grid-cols-2">
+                      <TabsContent
+                        key={y}
+                        value={String(y)}
+                        className="grid gap-3 pt-4 text-sm sm:grid-cols-2"
+                      >
                         <Field label="Huntington spend" value={currency(s?.amount ?? 0)} />
                         <Field label="Spend notes" value={s?.notes} />
-                        <Field label="Committed donation" value={currency(d?.committed_amount ?? 0)} />
-                        <Field label="Actually donated" value={currency(d?.actual_donated_amount ?? 0)} />
+                        <Field
+                          label="Committed donation"
+                          value={currency(d?.committed_amount ?? 0)}
+                        />
+                        <Field
+                          label="Actually donated"
+                          value={currency(d?.actual_donated_amount ?? 0)}
+                        />
                         <Field label="Outstanding commitment (calculated)" value={currency(out)} />
-                        <Field label="Pelotonia Kids donation" value={currency(d?.kids_amount ?? 0)} />
+                        <Field
+                          label="Pelotonia Kids donation"
+                          value={currency(d?.kids_amount ?? 0)}
+                        />
                         <div className="sm:col-span-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                          {yearLabel(y)} contribution toward tier: <span className="font-semibold text-[var(--brand-dark)]">{currency(contributions[y]?.total ?? 0)}</span>
-                          <VendorTierBadge tier={y === BEYOND_YEAR ? null : tierFor(contributions, y)} year={y} />
+                          {yearLabel(y)} contribution toward tier:{" "}
+                          <span className="font-semibold text-[var(--brand-dark)]">
+                            {currency(contributions[y]?.total ?? 0)}
+                          </span>
+                          <VendorTierBadge
+                            tier={y === BEYOND_YEAR ? null : tierFor(contributions, y)}
+                            year={y}
+                          />
                           <KidsSupporterBadge show={isKidsSupporter(contributions, y)} year={y} />
                         </div>
                         <Field label="Recipient" value={d?.recipient} />
@@ -239,14 +371,26 @@ function VendorDetailPage() {
           <VendorRiderSlots vendor={vendor} />
 
           <ActivityCard vendorId={id} latest={latest} history={vendor.activity.slice(1)} />
-          <AttachmentsCard vendor={vendor} canArchive={!!access?.canArchive} canPurge={!!access?.canPurge} />
+          <AttachmentsCard
+            vendor={vendor}
+            canArchive={!!access?.canArchive}
+            canPurge={!!access?.canPurge}
+          />
         </>
       )}
     </main>
   );
 }
 
-function Field({ label, value, className = "" }: { label: string; value?: string | null; className?: string }) {
+function Field({
+  label,
+  value,
+  className = "",
+}: {
+  label: string;
+  value?: string | null;
+  className?: string;
+}) {
   return (
     <div className={className}>
       <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</div>
@@ -256,12 +400,28 @@ function Field({ label, value, className = "" }: { label: string; value?: string
 }
 
 function ConfirmButton({
-  label, title, body, onConfirm, icon, destructive,
-}: { label: string; title: string; body: string; onConfirm: () => void; icon?: React.ReactNode; destructive?: boolean }) {
+  label,
+  title,
+  body,
+  onConfirm,
+  icon,
+  destructive,
+}: {
+  label: string;
+  title: string;
+  body: string;
+  onConfirm: () => void;
+  icon?: React.ReactNode;
+  destructive?: boolean;
+}) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="outline" size="sm" className={destructive ? "text-destructive hover:bg-destructive/10" : ""}>
+        <Button
+          variant="outline"
+          size="sm"
+          className={destructive ? "text-destructive hover:bg-destructive/10" : ""}
+        >
           {icon} {label}
         </Button>
       </AlertDialogTrigger>
@@ -274,7 +434,11 @@ function ConfirmButton({
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
-            className={destructive ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : "bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90"}
+            className={
+              destructive
+                ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                : "bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90"
+            }
           >
             {label}
           </AlertDialogAction>
@@ -300,7 +464,9 @@ function AuditDialog({ vendorId }: { vendorId: string }) {
         </button>
       </DialogTrigger>
       <DialogContent className="max-h-[80vh] overflow-y-auto">
-        <DialogHeader><DialogTitle>Activity log</DialogTitle></DialogHeader>
+        <DialogHeader>
+          <DialogTitle>Activity log</DialogTitle>
+        </DialogHeader>
         {data.length === 0 ? (
           <p className="text-sm text-muted-foreground">No entries yet.</p>
         ) : (
@@ -310,7 +476,8 @@ function AuditDialog({ vendorId }: { vendorId: string }) {
                 <div className="font-medium capitalize">{row.action.replace(/_/g, " ")}</div>
                 <div className="text-xs text-muted-foreground">
                   {new Date(row.created_at).toLocaleString()} · {row.actor_email ?? "system"}
-                  {Array.isArray(row.details?.fields) && (row.details.fields as string[]).length > 0 &&
+                  {Array.isArray(row.details?.fields) &&
+                    (row.details.fields as string[]).length > 0 &&
                     ` · fields: ${(row.details.fields as string[]).join(", ")}`}
                   {typeof row.details?.file === "string" && ` · ${row.details.file}`}
                 </div>
@@ -324,8 +491,14 @@ function AuditDialog({ vendorId }: { vendorId: string }) {
 }
 
 function ActivityCard({
-  vendorId, latest, history,
-}: { vendorId: string; latest?: VendorDetail["activity"][number]; history: VendorDetail["activity"] }) {
+  vendorId,
+  latest,
+  history,
+}: {
+  vendorId: string;
+  latest?: VendorDetail["activity"][number];
+  history: VendorDetail["activity"];
+}) {
   const qc = useQueryClient();
   const [showHistory, setShowHistory] = useState(false);
   const [form, setForm] = useState({
@@ -349,16 +522,23 @@ function ActivityCard({
 
   return (
     <Card className="mt-6">
-      <CardHeader className="pb-3"><CardTitle className="text-base">Relationship activity</CardTitle></CardHeader>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base">Relationship activity</CardTitle>
+      </CardHeader>
       <CardContent className="space-y-4">
         {latest ? (
           <div className="rounded-lg border bg-muted/30 p-3 text-sm">
             <div className="font-semibold text-[var(--brand-dark)]">
-              {new Date(latest.contact_date + "T00:00:00").toLocaleDateString()} · {latest.contact_method}
+              {new Date(latest.contact_date + "T00:00:00").toLocaleDateString()} ·{" "}
+              {latest.contact_method}
               {latest.contacted_by ? ` · ${latest.contacted_by}` : ""}
             </div>
-            {latest.interaction_notes && <p className="mt-1 whitespace-pre-wrap">{latest.interaction_notes}</p>}
-            {latest.next_step && <p className="mt-1 text-xs text-muted-foreground">Next step: {latest.next_step}</p>}
+            {latest.interaction_notes && (
+              <p className="mt-1 whitespace-pre-wrap">{latest.interaction_notes}</p>
+            )}
+            {latest.next_step && (
+              <p className="mt-1 text-xs text-muted-foreground">Next step: {latest.next_step}</p>
+            )}
           </div>
         ) : (
           <p className="text-sm text-muted-foreground">No touchpoints logged yet.</p>
@@ -374,11 +554,18 @@ function ActivityCard({
                 {history.map((a) => (
                   <li key={a.id} className="py-2">
                     <div className="font-medium">
-                      {new Date(a.contact_date + "T00:00:00").toLocaleDateString()} · {a.contact_method}
+                      {new Date(a.contact_date + "T00:00:00").toLocaleDateString()} ·{" "}
+                      {a.contact_method}
                       {a.contacted_by ? ` · ${a.contacted_by}` : ""}
                     </div>
-                    {a.interaction_notes && <p className="whitespace-pre-wrap text-muted-foreground">{a.interaction_notes}</p>}
-                    {a.next_step && <p className="text-xs text-muted-foreground">Next step: {a.next_step}</p>}
+                    {a.interaction_notes && (
+                      <p className="whitespace-pre-wrap text-muted-foreground">
+                        {a.interaction_notes}
+                      </p>
+                    )}
+                    {a.next_step && (
+                      <p className="text-xs text-muted-foreground">Next step: {a.next_step}</p>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -387,36 +574,68 @@ function ActivityCard({
         )}
 
         <form
-          onSubmit={(e) => { e.preventDefault(); add.mutate(); }}
+          onSubmit={(e) => {
+            e.preventDefault();
+            add.mutate();
+          }}
           className="grid gap-3 rounded-lg border p-3 sm:grid-cols-2"
         >
           <div className="space-y-1.5">
             <Label>Last contact date</Label>
-            <Input type="date" value={form.contact_date} onChange={(e) => setForm((f) => ({ ...f, contact_date: e.target.value }))} required />
+            <Input
+              type="date"
+              value={form.contact_date}
+              onChange={(e) => setForm((f) => ({ ...f, contact_date: e.target.value }))}
+              required
+            />
           </div>
           <div className="space-y-1.5">
             <Label>Contacted by</Label>
-            <Input value={form.contacted_by} onChange={(e) => setForm((f) => ({ ...f, contacted_by: e.target.value }))} />
+            <Input
+              value={form.contacted_by}
+              onChange={(e) => setForm((f) => ({ ...f, contacted_by: e.target.value }))}
+            />
           </div>
           <div className="space-y-1.5">
             <Label>Contact method</Label>
-            <Select value={form.contact_method} onValueChange={(v) => setForm((f) => ({ ...f, contact_method: v }))}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+            <Select
+              value={form.contact_method}
+              onValueChange={(v) => setForm((f) => ({ ...f, contact_method: v }))}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
-                {CONTACT_METHODS.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+                {CONTACT_METHODS.map((m) => (
+                  <SelectItem key={m} value={m}>
+                    {m}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-1.5">
             <Label>Next step</Label>
-            <Input value={form.next_step} onChange={(e) => setForm((f) => ({ ...f, next_step: e.target.value }))} />
+            <Input
+              value={form.next_step}
+              onChange={(e) => setForm((f) => ({ ...f, next_step: e.target.value }))}
+            />
           </div>
           <div className="space-y-1.5 sm:col-span-2">
             <Label>Interaction notes</Label>
-            <Textarea rows={3} value={form.interaction_notes} onChange={(e) => setForm((f) => ({ ...f, interaction_notes: e.target.value }))} />
+            <Textarea
+              rows={3}
+              value={form.interaction_notes}
+              onChange={(e) => setForm((f) => ({ ...f, interaction_notes: e.target.value }))}
+            />
           </div>
           <div>
-            <Button type="submit" size="sm" disabled={add.isPending} className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90">
+            <Button
+              type="submit"
+              size="sm"
+              disabled={add.isPending}
+              className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90"
+            >
               <Plus className="mr-1.5 h-3.5 w-3.5" /> {add.isPending ? "Saving…" : "Log touchpoint"}
             </Button>
           </div>
@@ -427,8 +646,14 @@ function ActivityCard({
 }
 
 function AttachmentsCard({
-  vendor, canArchive, canPurge,
-}: { vendor: VendorDetail; canArchive: boolean; canPurge: boolean }) {
+  vendor,
+  canArchive,
+  canPurge,
+}: {
+  vendor: VendorDetail;
+  canArchive: boolean;
+  canPurge: boolean;
+}) {
   const qc = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
@@ -452,7 +677,12 @@ function AttachmentsCard({
         binary += String.fromCharCode(...bytes.subarray(i, i + 8192));
       }
       await uploadVendorAttachment({
-        data: { vendor_id: vendor.id, fileName: file.name, contentType: file.type as any, base64: btoa(binary) },
+        data: {
+          vendor_id: vendor.id,
+          fileName: file.name,
+          contentType: file.type as any,
+          base64: btoa(binary),
+        },
       });
       toast.success("Attachment uploaded");
       refresh();
@@ -483,13 +713,19 @@ function AttachmentsCard({
 
   const setArchived = useMutation({
     mutationFn: (p: { id: string; archived: boolean }) => archiveVendorAttachment({ data: p }),
-    onSuccess: () => { toast.success("Attachment updated"); refresh(); },
+    onSuccess: () => {
+      toast.success("Attachment updated");
+      refresh();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const purge = useMutation({
     mutationFn: (id: string) => deleteVendorAttachment({ data: { id } }),
-    onSuccess: () => { toast.success("Attachment permanently deleted"); refresh(); },
+    onSuccess: () => {
+      toast.success("Attachment permanently deleted");
+      refresh();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -497,17 +733,31 @@ function AttachmentsCard({
 
   return (
     <Card className="mt-6">
-      <CardHeader className="pb-3"><CardTitle className="text-base">Attachments</CardTitle></CardHeader>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base">Attachments</CardTitle>
+      </CardHeader>
       <CardContent className="space-y-4">
         <div>
           <input
-            ref={fileRef} type="file" className="hidden"
-            onChange={(e) => { const f = e.target.files?.[0]; if (f) void upload(f); }}
+            ref={fileRef}
+            type="file"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) void upload(f);
+            }}
           />
-          <Button variant="outline" size="sm" disabled={busy} onClick={() => fileRef.current?.click()}>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={busy}
+            onClick={() => fileRef.current?.click()}
+          >
             <Upload className="mr-1.5 h-3.5 w-3.5" /> {busy ? "Uploading…" : "Upload file"}
           </Button>
-          <p className="mt-1 text-xs text-muted-foreground">Contracts, W9s, sponsorship agreements, logos. 15 MB max.</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Contracts, W9s, sponsorship agreements, logos. 15 MB max.
+          </p>
         </div>
 
         {visible.length === 0 ? (
@@ -519,7 +769,11 @@ function AttachmentsCard({
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 truncate text-sm font-medium">
                     <FileText className="h-3.5 w-3.5 text-[var(--brand)]" /> {a.file_name}
-                    {a.archived && <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase">Archived</span>}
+                    {a.archived && (
+                      <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase">
+                        Archived
+                      </span>
+                    )}
                   </div>
                   <div className="text-xs text-muted-foreground">
                     {a.uploader_name ?? "Unknown"} · {new Date(a.created_at).toLocaleDateString()}
@@ -530,17 +784,30 @@ function AttachmentsCard({
                     <Download className="mr-1 h-3.5 w-3.5" /> Download
                   </Button>
                   {canArchive && !a.archived && (
-                    <Button variant="ghost" size="sm" onClick={() => setArchived.mutate({ id: a.id, archived: true })}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setArchived.mutate({ id: a.id, archived: true })}
+                    >
                       <Archive className="mr-1 h-3.5 w-3.5" /> Archive
                     </Button>
                   )}
                   {canArchive && a.archived && (
-                    <Button variant="ghost" size="sm" onClick={() => setArchived.mutate({ id: a.id, archived: false })}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setArchived.mutate({ id: a.id, archived: false })}
+                    >
                       <RotateCcw className="mr-1 h-3.5 w-3.5" /> Restore
                     </Button>
                   )}
                   {canPurge && a.archived && (
-                    <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10" onClick={() => purge.mutate(a.id)}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:bg-destructive/10"
+                      onClick={() => purge.mutate(a.id)}
+                    >
                       <Trash2 className="mr-1 h-3.5 w-3.5" /> Delete
                     </Button>
                   )}

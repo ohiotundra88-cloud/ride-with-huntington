@@ -40,7 +40,10 @@ function portalAuth(): PortalAuth {
   const key = `${cfg.authBaseUrl}|${cfg.clientId}|${cfg.portalOrigin}|${cfg.orgSlug}`;
   if (cached?.key !== key) {
     const db = binding<D1Like>("HUB_SESSIONS");
-    cached = { key, auth: createPortalAuth({ ...cfg, ...(db ? { store: createD1SessionStore(db) } : {}) }) };
+    cached = {
+      key,
+      auth: createPortalAuth({ ...cfg, ...(db ? { store: createD1SessionStore(db) } : {}) }),
+    };
   }
   return cached.auth;
 }
@@ -58,14 +61,18 @@ async function hubUserId(session: PortalSession): Promise<string> {
   if (hit && Date.now() - hit.at < USER_ID_TTL_MS) return hit.id;
   const db = createDbClient("service_role");
   const rpc = db as unknown as {
-    rpc(fn: string, args: Record<string, unknown>): Promise<{ data: unknown; error: { message: string } | null }>;
+    rpc(
+      fn: string,
+      args: Record<string, unknown>,
+    ): Promise<{ data: unknown; error: { message: string } | null }>;
   };
   const { data, error } = await rpc.rpc("hub_sign_in", {
     p_subject: session.sub,
     p_email: session.email,
     p_name: session.name,
   });
-  if (error || !data) throw new Error(`Could not open your Hub account: ${error?.message ?? "no id"}`);
+  if (error || !data)
+    throw new Error(`Could not open your Hub account: ${error?.message ?? "no id"}`);
   const id = String(data);
   userIds.set(session.sub, { id, at: Date.now() });
   return id;

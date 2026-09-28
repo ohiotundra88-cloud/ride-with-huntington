@@ -13,17 +13,21 @@ import { usePublicFaqs } from "@/lib/faq-store";
 import { FundraisingResources } from "@/components/FundraisingResources";
 import { Search, LifeBuoy, ChevronDown, ChevronUp, Mail, Phone } from "lucide-react";
 
-
 const searchSchema = z.object({
   q: z.string().optional().catch(""),
 });
 
 export const Route = createFileRoute("/resources")({
   validateSearch: searchSchema,
-  head: () => ({ meta: [
-    { title: "Resources — Team Huntington Hub" },
-    { name: "description", content: "Search Team Huntington answers for Pelotonia participants." },
-  ] }),
+  head: () => ({
+    meta: [
+      { title: "Resources — Team Huntington Hub" },
+      {
+        name: "description",
+        content: "Search Team Huntington answers for Pelotonia participants.",
+      },
+    ],
+  }),
   component: Resources,
 });
 
@@ -33,17 +37,28 @@ function Resources() {
   const [cat, setCat] = useState<FAQCategory | "All">("All");
   const { data: faqs = [], isLoading } = usePublicFaqs();
 
-  const filtered = useMemo(() => faqs.filter((a) => {
-    const catOk = cat === "All" || a.category === cat;
-    if (!q) return catOk;
-    const s = q.toLowerCase();
-    return catOk && (a.title.toLowerCase().includes(s) || a.body.toLowerCase().includes(s) || a.keywords.some((k) => k.includes(s)));
-  }), [q, cat, faqs]);
+  const filtered = useMemo(
+    () =>
+      faqs.filter((a) => {
+        const catOk = cat === "All" || a.category === cat;
+        if (!q) return catOk;
+        const s = q.toLowerCase();
+        return (
+          catOk &&
+          (a.title.toLowerCase().includes(s) ||
+            a.body.toLowerCase().includes(s) ||
+            a.keywords.some((k) => k.includes(s)))
+        );
+      }),
+    [q, cat, faqs],
+  );
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
       <div className="text-center">
-        <h1 className="text-3xl sm:text-4xl font-black text-[var(--brand-dark)]">Resource Center</h1>
+        <h1 className="text-3xl sm:text-4xl font-black text-[var(--brand-dark)]">
+          Resource Center
+        </h1>
         <p className="mt-2 text-muted-foreground">Search Team Huntington answers for Pelotonia.</p>
       </div>
 
@@ -58,9 +73,28 @@ function Resources() {
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        <Button size="sm" variant={cat === "All" ? "default" : "outline"} onClick={() => setCat("All")} className={cat === "All" ? "bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90" : ""}>All</Button>
+        <Button
+          size="sm"
+          variant={cat === "All" ? "default" : "outline"}
+          onClick={() => setCat("All")}
+          className={
+            cat === "All" ? "bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90" : ""
+          }
+        >
+          All
+        </Button>
         {faqCategories.map((c) => (
-          <Button key={c} size="sm" variant={cat === c ? "default" : "outline"} onClick={() => setCat(c)} className={cat === c ? "bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90" : ""}>{c}</Button>
+          <Button
+            key={c}
+            size="sm"
+            variant={cat === c ? "default" : "outline"}
+            onClick={() => setCat(c)}
+            className={
+              cat === c ? "bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90" : ""
+            }
+          >
+            {c}
+          </Button>
         ))}
       </div>
 
@@ -68,9 +102,7 @@ function Resources() {
         {isLoading && (
           <div className="sm:col-span-2 py-12 text-center text-muted-foreground">Loading…</div>
         )}
-        {!isLoading && filtered.map((a) => (
-          <ExpandableTile key={a.id} article={a} />
-        ))}
+        {!isLoading && filtered.map((a) => <ExpandableTile key={a.id} article={a} />)}
         {!isLoading && filtered.length === 0 && (
           <div className="sm:col-span-2 py-12 text-center text-muted-foreground">
             <LifeBuoy className="mx-auto h-10 w-10 opacity-40" />
@@ -82,7 +114,6 @@ function Resources() {
       <FundraisingResources />
 
       <ContactDirectory />
-
     </div>
   );
 }
@@ -95,7 +126,6 @@ function ContactDirectory() {
   });
   const contacts = data.filter((c) => c.active);
   if (contacts.length === 0) return null;
-
 
   return (
     <section id="contacts" className="mt-14 scroll-mt-24">
@@ -110,19 +140,30 @@ function ContactDirectory() {
                   <h3 className="font-bold text-[var(--brand-dark)]">{c.name}</h3>
                   <p className="text-sm text-muted-foreground">{c.role}</p>
                 </div>
-                <Badge variant={c.emergency ? "default" : "outline"} className="text-xs">{c.category}</Badge>
+                <Badge variant={c.emergency ? "default" : "outline"} className="text-xs">
+                  {c.category}
+                </Badge>
               </div>
-              {c.department && <p className="mt-2 text-xs text-muted-foreground">{c.department}{c.region && c.region !== "All" ? ` · ${c.region}` : ""}</p>}
+              {c.department && (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {c.department}
+                  {c.region && c.region !== "All" ? ` · ${c.region}` : ""}
+                </p>
+              )}
               {c.hours && <p className="mt-1 text-xs text-muted-foreground">{c.hours}</p>}
               <div className="mt-4 flex flex-wrap gap-2">
                 {c.email && (
                   <a href={`mailto:${c.email}`}>
-                    <Button size="sm" variant="outline"><Mail className="mr-1 h-4 w-4" /> Email</Button>
+                    <Button size="sm" variant="outline">
+                      <Mail className="mr-1 h-4 w-4" /> Email
+                    </Button>
                   </a>
                 )}
                 {c.phone && (
                   <a href={`tel:${c.phone.replace(/[^0-9+]/g, "")}`}>
-                    <Button size="sm" variant="outline"><Phone className="mr-1 h-4 w-4" /> {c.phone}</Button>
+                    <Button size="sm" variant="outline">
+                      <Phone className="mr-1 h-4 w-4" /> {c.phone}
+                    </Button>
                   </a>
                 )}
               </div>
@@ -134,32 +175,47 @@ function ContactDirectory() {
   );
 }
 
-
-function ExpandableTile({ article: a }: { article: { id: string; category: FAQCategory; title: string; body: string } }) {
+function ExpandableTile({
+  article: a,
+}: {
+  article: { id: string; category: FAQCategory; title: string; body: string };
+}) {
   const [expanded, setExpanded] = useState(false);
   return (
     <Card
       role="button"
       tabIndex={0}
       onClick={() => setExpanded((v) => !v)}
-      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setExpanded((v) => !v); }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") setExpanded((v) => !v);
+      }}
       className="h-full cursor-pointer hover:shadow-md transition-shadow"
     >
       <CardContent className="p-5">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <Badge variant="outline" className="text-xs">{a.category}</Badge>
+            <Badge variant="outline" className="text-xs">
+              {a.category}
+            </Badge>
             <h3 className="mt-2 font-bold text-[var(--brand-dark)]">{a.title}</h3>
           </div>
-          {expanded ? <ChevronUp className="h-5 w-5 shrink-0 text-muted-foreground" /> : <ChevronDown className="h-5 w-5 shrink-0 text-muted-foreground" />}
+          {expanded ? (
+            <ChevronUp className="h-5 w-5 shrink-0 text-muted-foreground" />
+          ) : (
+            <ChevronDown className="h-5 w-5 shrink-0 text-muted-foreground" />
+          )}
         </div>
-        <p className={`mt-2 text-sm text-muted-foreground transition-all ${expanded ? "" : "line-clamp-2"}`}>
+        <p
+          className={`mt-2 text-sm text-muted-foreground transition-all ${expanded ? "" : "line-clamp-2"}`}
+        >
           {a.body}
         </p>
         {expanded && (
           <div className="mt-4">
             <Link to="/resources/$id" params={{ id: a.id }} onClick={(e) => e.stopPropagation()}>
-              <Button size="sm" variant="outline" className="w-full sm:w-auto">View full article</Button>
+              <Button size="sm" variant="outline" className="w-full sm:w-auto">
+                View full article
+              </Button>
             </Link>
           </div>
         )}

@@ -16,7 +16,8 @@ import { TEMPLATES } from "./registry";
 
 const SITE_NAME = "Team Huntington Hub";
 
-export type SendTemplateEmailResult = { sent: true } | { sent: false; reason: "recipient_suppressed" };
+export type SendTemplateEmailResult =
+  { sent: true } | { sent: false; reason: "recipient_suppressed" };
 
 export interface SendTemplateEmailOptions {
   templateData?: Record<string, unknown>;
@@ -73,7 +74,9 @@ export async function sendTemplateEmail(
 
   const template = TEMPLATES[templateName];
   if (!template) {
-    throw new Error(`Template '${templateName}' not found. Available: ${Object.keys(TEMPLATES).join(", ")}`);
+    throw new Error(
+      `Template '${templateName}' not found. Available: ${Object.keys(TEMPLATES).join(", ")}`,
+    );
   }
 
   // Template-level `to` takes precedence — notification templates always
@@ -85,7 +88,8 @@ export async function sendTemplateEmail(
   const element = React.createElement(template.component, templateData);
   const html = await render(element);
   const text = await render(element, { plainText: true });
-  const baseSubject = typeof template.subject === "function" ? template.subject(templateData) : template.subject;
+  const baseSubject =
+    typeof template.subject === "function" ? template.subject(templateData) : template.subject;
 
   const redirect = setting("EMAIL_REDIRECT_TO", { optional: true });
   const msg: OutgoingEmail = {

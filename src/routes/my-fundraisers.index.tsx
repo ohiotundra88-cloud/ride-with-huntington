@@ -7,33 +7,59 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { DemoPaymentBanner } from "@/components/DemoPaymentBanner";
 import {
-  getFundraiserAccess, getFundraiserYearSummary, listMyFundraisers, saveFundraiserPage,
+  getFundraiserAccess,
+  getFundraiserYearSummary,
+  listMyFundraisers,
+  saveFundraiserPage,
 } from "@/lib/fundraising-pages.functions";
 import { FundraiserPagesPaused } from "@/components/FundraiserPagesPaused";
 import { useSiteSettings } from "@/lib/useSiteSettings";
 import {
-  FUNDRAISER_KINDS, KIND_BLURBS, KIND_LABELS, money, STATUS_LABELS,
-  type FundraiserKind, type FundraiserListRow, type FundraiserYearRow,
+  FUNDRAISER_KINDS,
+  KIND_BLURBS,
+  KIND_LABELS,
+  money,
+  STATUS_LABELS,
+  type FundraiserKind,
+  type FundraiserListRow,
+  type FundraiserYearRow,
 } from "@/lib/fundraising-pages.shared";
-
 
 export const Route = createFileRoute("/my-fundraisers/")({
   component: MyFundraisers,
   head: () => ({
     meta: [
       { title: "Fundraiser workspace — Team Huntington Hub" },
-      { name: "description", content: "Create, submit for approval, and manage Team Huntington fundraising pages." },
+      {
+        name: "description",
+        content: "Create, submit for approval, and manage Team Huntington fundraising pages.",
+      },
       { property: "og:title", content: "Fundraiser workspace — Team Huntington Hub" },
-      { property: "og:description", content: "Build raffle, ticket, sponsorship, and giving pages for Team Huntington." },
+      {
+        property: "og:description",
+        content: "Build raffle, ticket, sponsorship, and giving pages for Team Huntington.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -56,21 +82,31 @@ function MyFundraisers() {
     enabled: Boolean(access?.canCreate),
   });
 
-  if (accessPending) return <main className="mx-auto max-w-5xl px-4 py-12 text-sm text-muted-foreground">Loading…</main>;
+  if (accessPending)
+    return (
+      <main className="mx-auto max-w-5xl px-4 py-12 text-sm text-muted-foreground">Loading…</main>
+    );
 
   if (!access?.canCreate) {
     return (
       <main className="mx-auto max-w-lg px-4 py-16 text-center">
         <ShieldAlert className="mx-auto h-9 w-9 text-[var(--brand)]" />
-        <h1 className="mt-3 text-xl font-semibold text-[var(--brand-dark)]">Sign in to build a fundraiser</h1>
+        <h1 className="mt-3 text-xl font-semibold text-[var(--brand-dark)]">
+          Sign in to build a fundraiser
+        </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Fundraising pages are created by registered Team Huntington riders and captains.
         </p>
         <div className="mt-5 flex justify-center gap-2">
-          <Button asChild className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90">
+          <Button
+            asChild
+            className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90"
+          >
             <Link to="/signin">Sign in</Link>
           </Button>
-          <Button asChild variant="outline"><Link to="/fundraisers">Browse fundraisers</Link></Button>
+          <Button asChild variant="outline">
+            <Link to="/fundraisers">Browse fundraisers</Link>
+          </Button>
         </div>
       </main>
     );
@@ -121,10 +157,14 @@ function MyFundraisers() {
                 <div className="min-w-[220px] flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge variant="secondary">{KIND_LABELS[f.kind]}</Badge>
-                    <Badge variant={f.status === "live" ? "default" : "outline"}>{STATUS_LABELS[f.status]}</Badge>
+                    <Badge variant={f.status === "live" ? "default" : "outline"}>
+                      {STATUS_LABELS[f.status]}
+                    </Badge>
                     {f.is_demo && <Badge variant="outline">Demo</Badge>}
                     {f.public_hidden && (
-                      <Badge variant="outline" className="border-amber-400 text-amber-700">Hidden from public</Badge>
+                      <Badge variant="outline" className="border-amber-400 text-amber-700">
+                        Hidden from public
+                      </Badge>
                     )}
                   </div>
                   <p className="mt-2 font-semibold text-[var(--brand-dark)]">{f.title}</p>
@@ -135,11 +175,14 @@ function MyFundraisers() {
                 <div className="w-full max-w-[220px]">
                   <Progress value={f.totals.goalPercent} className="h-2" />
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {money(f.totals.gross)} raised of {money(f.goal_amount)} · {f.totals.supporters} supporters
+                    {money(f.totals.gross)} raised of {money(f.goal_amount)} · {f.totals.supporters}{" "}
+                    supporters
                   </p>
                 </div>
                 <Button asChild variant="outline" size="sm">
-                  <Link to="/my-fundraisers/$id" params={{ id: f.id }}>Manage</Link>
+                  <Link to="/my-fundraisers/$id" params={{ id: f.id }}>
+                    Manage
+                  </Link>
                 </Button>
               </CardContent>
             </Card>
@@ -157,7 +200,11 @@ function YearSummary() {
   });
 
   const allTime = years.reduce(
-    (acc, y) => ({ gross: acc.gross + y.gross, net: acc.net + y.net, supporters: acc.supporters + y.supporters }),
+    (acc, y) => ({
+      gross: acc.gross + y.gross,
+      net: acc.net + y.net,
+      supporters: acc.supporters + y.supporters,
+    }),
     { gross: 0, net: 0, supporters: 0 },
   );
 
@@ -190,7 +237,9 @@ function YearSummary() {
                     <tr key={y.year} className="border-b last:border-0">
                       <td className="py-2 pr-3 font-semibold text-[var(--brand-dark)]">{y.year}</td>
                       <td className="py-2 pr-3 text-right font-medium">{money(y.gross)}</td>
-                      <td className="py-2 pr-3 text-right text-muted-foreground">{money(y.fees)}</td>
+                      <td className="py-2 pr-3 text-right text-muted-foreground">
+                        {money(y.fees)}
+                      </td>
                       <td className="py-2 pr-3 text-right">{money(y.net)}</td>
                       <td className="py-2 pr-3 text-right">{y.supporters}</td>
                       <td className="py-2 text-right">{y.fundraisers}</td>
@@ -200,8 +249,8 @@ function YearSummary() {
               </table>
             </div>
             <p className="mt-3 text-xs text-muted-foreground">
-              All time: {money(allTime.gross)} raised · {money(allTime.net)} net · {allTime.supporters} supporter records.
-              Hidden past fundraisers stay counted here.
+              All time: {money(allTime.gross)} raised · {money(allTime.net)} net ·{" "}
+              {allTime.supporters} supporter records. Hidden past fundraisers stay counted here.
             </p>
           </>
         )}
@@ -251,7 +300,9 @@ function NewFundraiserDialog() {
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-lg">
-        <DialogHeader><DialogTitle>Start a fundraising page</DialogTitle></DialogHeader>
+        <DialogHeader>
+          <DialogTitle>Start a fundraising page</DialogTitle>
+        </DialogHeader>
         <form
           className="space-y-4"
           onSubmit={(e) => {
@@ -262,10 +313,14 @@ function NewFundraiserDialog() {
           <div className="space-y-1.5">
             <Label>Type</Label>
             <Select value={kind} onValueChange={(v) => setKind(v as FundraiserKind)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 {FUNDRAISER_KINDS.map((k) => (
-                  <SelectItem key={k} value={k}>{KIND_LABELS[k]}</SelectItem>
+                  <SelectItem key={k} value={k}>
+                    {KIND_LABELS[k]}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -273,18 +328,46 @@ function NewFundraiserDialog() {
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="t">Title</Label>
-            <Input id="t" required minLength={3} value={title} onChange={(e) => setTitle(e.target.value)} />
+            <Input
+              id="t"
+              required
+              minLength={3}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="s">Short summary</Label>
-            <Textarea id="s" rows={2} maxLength={240} value={summary} onChange={(e) => setSummary(e.target.value)} />
+            <Textarea
+              id="s"
+              rows={2}
+              maxLength={240}
+              value={summary}
+              onChange={(e) => setSummary(e.target.value)}
+            />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="g">Goal ($)</Label>
-            <Input id="g" type="number" min={0} value={goal} onChange={(e) => setGoal(e.target.value)} />
+            <Input
+              id="g"
+              type="number"
+              min={0}
+              value={goal}
+              onChange={(e) => setGoal(e.target.value)}
+            />
           </div>
-          <Button type="submit" disabled={create.isPending} className="w-full bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90">
-            {create.isPending ? <><Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> Creating…</> : "Create draft"}
+          <Button
+            type="submit"
+            disabled={create.isPending}
+            className="w-full bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90"
+          >
+            {create.isPending ? (
+              <>
+                <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> Creating…
+              </>
+            ) : (
+              "Create draft"
+            )}
           </Button>
         </form>
       </DialogContent>

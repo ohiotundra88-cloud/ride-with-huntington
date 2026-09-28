@@ -16,7 +16,10 @@ const log = (...a) => console.log(new Date().toISOString(), "[scheduler]", ...a)
 
 function runSync() {
   return new Promise((resolve) => {
-    const child = spawn(process.execPath, [join(here, "sync.mjs")], { stdio: "inherit", env: process.env });
+    const child = spawn(process.execPath, [join(here, "sync.mjs")], {
+      stdio: "inherit",
+      env: process.env,
+    });
     child.on("exit", (code) => resolve(code ?? 1));
   });
 }
@@ -36,7 +39,9 @@ async function lastSuccessAgeHours() {
     const now = Math.floor(Date.now() / 1000);
     const h = b64({ alg: "HS256", typ: "JWT" });
     const p = b64({ role: "service_role", iat: now, exp: now + 60 });
-    const s = createHmac("sha256", process.env.HUB_DB_JWT_SECRET).update(`${h}.${p}`).digest("base64url");
+    const s = createHmac("sha256", process.env.HUB_DB_JWT_SECRET)
+      .update(`${h}.${p}`)
+      .digest("base64url");
     const res = await fetch(
       `${process.env.HUB_REST_URL}/pelotonia_sync_runs?select=finished_at&status=in.(succeeded,partial)&order=finished_at.desc&limit=1`,
       { headers: { Authorization: `Bearer ${h}.${p}.${s}` } },

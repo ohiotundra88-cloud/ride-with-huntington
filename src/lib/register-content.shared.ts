@@ -43,7 +43,11 @@ export const registerContentSchema = z.object({
   links: z.record(z.object({ label: z.string(), url: z.string() })),
 });
 
-const f = (label: string, required = false, visible = true): RegisterField => ({ label, visible, required });
+const f = (label: string, required = false, visible = true): RegisterField => ({
+  label,
+  visible,
+  required,
+});
 
 export const DEFAULT_REGISTER_CONTENT: RegisterContent = {
   text: {
@@ -94,7 +98,8 @@ export const DEFAULT_REGISTER_CONTENT: RegisterContent = {
     "E.mailTitle": "Mailing address",
     "E.sizeGuideBtn": "Size guide",
     "E.sizeGuideTitle": "Size guide",
-    "E.sizeGuideNote": "Cycling jerseys run one size smaller than everyday shirts. When in doubt, size up.",
+    "E.sizeGuideNote":
+      "Cycling jerseys run one size smaller than everyday shirts. When in doubt, size up.",
     "E.sizeGuideCol1": "Size",
     "E.sizeGuideCol2": "Chest (in)",
     "E.addrConfirm": "I confirm this address is current.",
@@ -159,8 +164,16 @@ export const DEFAULT_REGISTER_CONTENT: RegisterContent = {
     participation: [
       { value: "rider", label: "Rider", desc: "I'll ride in the Team Huntington peloton." },
       { value: "volunteer", label: "Volunteer", desc: "I'll support the event on the ground." },
-      { value: "challenger", label: "Challenger", desc: "I'll take on my own Pelotonia challenge and fundraise, without riding a route." },
-      { value: "unsure", label: "Not sure yet", desc: "Explore first — you can change this later." },
+      {
+        value: "challenger",
+        label: "Challenger",
+        desc: "I'll take on my own Pelotonia challenge and fundraise, without riding a route.",
+      },
+      {
+        value: "unsure",
+        label: "Not sure yet",
+        desc: "Explore first — you can change this later.",
+      },
     ],
     employmentTypes: [
       { value: "salary", label: "Salary" },
@@ -231,7 +244,8 @@ export function mergeRegisterContent(raw: unknown): RegisterContent {
   const partial = (raw ?? {}) as Partial<RegisterContent>;
   const fields: RegisterContent["fields"] = { ...d.fields };
   for (const [k, v] of Object.entries(partial.fields ?? {})) {
-    if (v && typeof v.label === "string") fields[k] = { label: v.label, visible: !!v.visible, required: !!v.required };
+    if (v && typeof v.label === "string")
+      fields[k] = { label: v.label, visible: !!v.visible, required: !!v.required };
   }
   const lists: RegisterContent["lists"] = { ...d.lists };
   for (const [k, v] of Object.entries(partial.lists ?? {})) {

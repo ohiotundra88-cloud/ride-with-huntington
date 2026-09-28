@@ -191,15 +191,20 @@ export const sendMessageNow = createServerFn({ method: "POST" })
     return { id };
   })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ data, context }): Promise<{
-    recipientCount: number;
-    emailsSent: number;
-    emailsSkipped: number;
-  }> => {
-    await requireSender(context.supabase, context.userId);
-    const email = String((context.claims as { email?: string } | null)?.email ?? "");
-    return deliverMessage(context.supabase, data.id, email);
-  });
+  .handler(
+    async ({
+      data,
+      context,
+    }): Promise<{
+      recipientCount: number;
+      emailsSent: number;
+      emailsSkipped: number;
+    }> => {
+      await requireSender(context.supabase, context.userId);
+      const email = String((context.claims as { email?: string } | null)?.email ?? "");
+      return deliverMessage(context.supabase, data.id, email);
+    },
+  );
 
 /** Colleagues permanently excluded from announcement emails. */
 export const listEmailOptOuts = createServerFn({ method: "GET" })
@@ -324,8 +329,8 @@ export const listMyMessages = createServerFn({ method: "GET" })
           priority: String(m["priority"] ?? "info") as InboxMessage["priority"],
           category: String(m["category"] ?? "general") as InboxMessage["category"],
           sentAt: (m["sent_at"] as string | null) ?? null,
-          readAt: ((row as { read_at: string | null }).read_at) ?? null,
-          dismissedAt: ((row as { dismissed_at: string | null }).dismissed_at) ?? null,
+          readAt: (row as { read_at: string | null }).read_at ?? null,
+          dismissedAt: (row as { dismissed_at: string | null }).dismissed_at ?? null,
           fromEmail: String(m["created_by_email"] ?? ""),
           status: String(m["status"] ?? "sent"),
         };

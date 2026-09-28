@@ -13,7 +13,6 @@ import {
   useState,
   type Context,
   type ReactNode,
-
 } from "react";
 import {
   conciergeFallback as seedConciergeFallback,
@@ -39,12 +38,7 @@ import {
 // ============ TYPES ============
 
 export type PublishState = "draft" | "published" | "archived";
-export type Audience =
-  | "all"
-  | "riders"
-  | "volunteers"
-  | "families"
-  | "admins";
+export type Audience = "all" | "riders" | "volunteers" | "families" | "admins";
 
 export interface SuperUserState {
   active: boolean;
@@ -231,7 +225,16 @@ export interface AuditEntry {
   id: string;
   at: string;
   user: string;
-  action: "create" | "update" | "delete" | "publish" | "unpublish" | "archive" | "reorder" | "reset" | "toggle";
+  action:
+    | "create"
+    | "update"
+    | "delete"
+    | "publish"
+    | "unpublish"
+    | "archive"
+    | "reorder"
+    | "reset"
+    | "toggle";
   entity: string;
   entityId?: string;
   detail?: string;
@@ -288,7 +291,6 @@ export const journeyCopyDefaults: Record<string, string> = {
   qaFundraising: "Fundraising Resources",
 };
 
-
 // ============ SEED ============
 
 const NOW = () => new Date().toISOString();
@@ -311,7 +313,6 @@ const readinessWeights: Record<string, number> = {
   fundraising: 25,
   apparel: 15,
 };
-
 
 function seedReadinessItems(): EditableReadinessItem[] {
   const items = seedReadiness as MDReadinessItem[];
@@ -393,45 +394,191 @@ function seedConciergeIntentList(): ConciergeIntent[] {
 }
 
 const riderPackingSeed: Omit<PackingDefault, "order" | "active" | "updatedAt" | "updatedBy">[] = [
-  { id: "r-1", label: "Helmet", category: "Ride Essentials", preset: "rider", required: true, description: "Required by Pelotonia." },
-  { id: "r-2", label: "Bib number + safety pins", category: "Ride Essentials", preset: "rider", required: true },
-  { id: "r-3", label: "Water bottles (2)", category: "Ride Essentials", preset: "rider", required: true },
-  { id: "r-4", label: "Spare tube & tire levers", category: "Ride Essentials", preset: "rider", required: false },
+  {
+    id: "r-1",
+    label: "Helmet",
+    category: "Ride Essentials",
+    preset: "rider",
+    required: true,
+    description: "Required by Pelotonia.",
+  },
+  {
+    id: "r-2",
+    label: "Bib number + safety pins",
+    category: "Ride Essentials",
+    preset: "rider",
+    required: true,
+  },
+  {
+    id: "r-3",
+    label: "Water bottles (2)",
+    category: "Ride Essentials",
+    preset: "rider",
+    required: true,
+  },
+  {
+    id: "r-4",
+    label: "Spare tube & tire levers",
+    category: "Ride Essentials",
+    preset: "rider",
+    required: false,
+  },
   { id: "r-5", label: "Team jersey", category: "Clothing", preset: "rider", required: true },
-  { id: "r-6", label: "Padded cycling shorts", category: "Clothing", preset: "rider", required: false },
+  {
+    id: "r-6",
+    label: "Padded cycling shorts",
+    category: "Clothing",
+    preset: "rider",
+    required: false,
+  },
   { id: "r-7", label: "Cycling socks", category: "Clothing", preset: "rider", required: false },
   { id: "r-8", label: "Rain shell", category: "Clothing", preset: "rider", required: false },
-  { id: "r-9", label: "Energy gels / chews", category: "Nutrition", preset: "rider", required: false },
+  {
+    id: "r-9",
+    label: "Energy gels / chews",
+    category: "Nutrition",
+    preset: "rider",
+    required: false,
+  },
   { id: "r-10", label: "Electrolyte mix", category: "Nutrition", preset: "rider", required: false },
   { id: "r-11", label: "Breakfast bar", category: "Nutrition", preset: "rider", required: false },
   { id: "r-12", label: "Photo ID", category: "Travel", preset: "rider", required: true },
   { id: "r-13", label: "Hotel confirmation", category: "Travel", preset: "rider", required: false },
   { id: "r-14", label: "Duffle & shoe bag", category: "Travel", preset: "rider", required: false },
   { id: "r-15", label: "Phone + charger", category: "Technology", preset: "rider", required: true },
-  { id: "r-16", label: "Bike computer / GPS", category: "Technology", preset: "rider", required: false },
-  { id: "r-17", label: "Portable battery", category: "Technology", preset: "rider", required: false },
+  {
+    id: "r-16",
+    label: "Bike computer / GPS",
+    category: "Technology",
+    preset: "rider",
+    required: false,
+  },
+  {
+    id: "r-17",
+    label: "Portable battery",
+    category: "Technology",
+    preset: "rider",
+    required: false,
+  },
   { id: "r-18", label: "Chamois cream", category: "Recovery", preset: "rider", required: false },
-  { id: "r-19", label: "Ibuprofen / first aid", category: "Recovery", preset: "rider", required: false },
-  { id: "r-20", label: "Compression sleeves", category: "Recovery", preset: "rider", required: false },
+  {
+    id: "r-19",
+    label: "Ibuprofen / first aid",
+    category: "Recovery",
+    preset: "rider",
+    required: false,
+  },
+  {
+    id: "r-20",
+    label: "Compression sleeves",
+    category: "Recovery",
+    preset: "rider",
+    required: false,
+  },
 ];
 
-const volunteerPackingSeed: Omit<PackingDefault, "order" | "active" | "updatedAt" | "updatedBy">[] = [
-  { id: "v-1", label: "Volunteer credential", category: "Shift Essentials", preset: "volunteer", required: true },
-  { id: "v-2", label: "Shift assignment printout", category: "Shift Essentials", preset: "volunteer", required: false },
-  { id: "v-3", label: "Reusable water bottle", category: "Shift Essentials", preset: "volunteer", required: true },
-  { id: "v-4", label: "Team volunteer shirt", category: "Clothing", preset: "volunteer", required: true },
-  { id: "v-5", label: "Comfortable sneakers", category: "Clothing", preset: "volunteer", required: false },
-  { id: "v-6", label: "Cap or visor", category: "Clothing", preset: "volunteer", required: false },
-  { id: "v-7", label: "Sunscreen (SPF 30+)", category: "Weather Protection", preset: "volunteer", required: false },
-  { id: "v-8", label: "Rain poncho", category: "Weather Protection", preset: "volunteer", required: false },
-  { id: "v-9", label: "Light jacket for morning", category: "Weather Protection", preset: "volunteer", required: false },
-  { id: "v-10", label: "Snacks & granola bars", category: "Food and Hydration", preset: "volunteer", required: false },
-  { id: "v-11", label: "Electrolyte packets", category: "Food and Hydration", preset: "volunteer", required: false },
-  { id: "v-12", label: "Phone + charger", category: "Technology", preset: "volunteer", required: true },
-  { id: "v-13", label: "Portable battery", category: "Technology", preset: "volunteer", required: false },
-  { id: "v-14", label: "Photo ID", category: "Travel", preset: "volunteer", required: true },
-  { id: "v-15", label: "Hotel confirmation", category: "Travel", preset: "volunteer", required: false },
-];
+const volunteerPackingSeed: Omit<PackingDefault, "order" | "active" | "updatedAt" | "updatedBy">[] =
+  [
+    {
+      id: "v-1",
+      label: "Volunteer credential",
+      category: "Shift Essentials",
+      preset: "volunteer",
+      required: true,
+    },
+    {
+      id: "v-2",
+      label: "Shift assignment printout",
+      category: "Shift Essentials",
+      preset: "volunteer",
+      required: false,
+    },
+    {
+      id: "v-3",
+      label: "Reusable water bottle",
+      category: "Shift Essentials",
+      preset: "volunteer",
+      required: true,
+    },
+    {
+      id: "v-4",
+      label: "Team volunteer shirt",
+      category: "Clothing",
+      preset: "volunteer",
+      required: true,
+    },
+    {
+      id: "v-5",
+      label: "Comfortable sneakers",
+      category: "Clothing",
+      preset: "volunteer",
+      required: false,
+    },
+    {
+      id: "v-6",
+      label: "Cap or visor",
+      category: "Clothing",
+      preset: "volunteer",
+      required: false,
+    },
+    {
+      id: "v-7",
+      label: "Sunscreen (SPF 30+)",
+      category: "Weather Protection",
+      preset: "volunteer",
+      required: false,
+    },
+    {
+      id: "v-8",
+      label: "Rain poncho",
+      category: "Weather Protection",
+      preset: "volunteer",
+      required: false,
+    },
+    {
+      id: "v-9",
+      label: "Light jacket for morning",
+      category: "Weather Protection",
+      preset: "volunteer",
+      required: false,
+    },
+    {
+      id: "v-10",
+      label: "Snacks & granola bars",
+      category: "Food and Hydration",
+      preset: "volunteer",
+      required: false,
+    },
+    {
+      id: "v-11",
+      label: "Electrolyte packets",
+      category: "Food and Hydration",
+      preset: "volunteer",
+      required: false,
+    },
+    {
+      id: "v-12",
+      label: "Phone + charger",
+      category: "Technology",
+      preset: "volunteer",
+      required: true,
+    },
+    {
+      id: "v-13",
+      label: "Portable battery",
+      category: "Technology",
+      preset: "volunteer",
+      required: false,
+    },
+    { id: "v-14", label: "Photo ID", category: "Travel", preset: "volunteer", required: true },
+    {
+      id: "v-15",
+      label: "Hotel confirmation",
+      category: "Travel",
+      preset: "volunteer",
+      required: false,
+    },
+  ];
 
 function seedPackingItems(): PackingDefault[] {
   return [...riderPackingSeed, ...volunteerPackingSeed].map((p, i) => ({
@@ -444,32 +591,175 @@ function seedPackingItems(): PackingDefault[] {
 }
 
 const familySeed: FamilySection[] = [
-  { id: "parking", icon: "car", title: "Spectator parking", body: "Recommended lots: McFerson Commons Garage and Neil Ave. Garage. Arrive by 6:00 AM Saturday for closest access. Overflow: Convention Center North Garage.", order: 0, active: true, publish: "published", updatedAt: NOW(), updatedBy: EDITOR },
-  { id: "viewing", icon: "map", title: "Recommended viewing locations", body: "Mile 12 (McFerson Commons), Mile 34 (Pickerington Cheer Zone), Mile 68 (Granville), and the finish line at Hilton Columbus Downtown.", order: 1, active: true, publish: "published", updatedAt: NOW(), updatedBy: EDITOR },
-  { id: "tent", icon: "tent", title: "Team Huntington tent", body: "Bright-lime canopy at the finish village near the bandshell, plus rest stops 2 and 4. Team snacks, cheer squad, and photo backdrop.", order: 2, active: true, publish: "published", updatedAt: NOW(), updatedBy: EDITOR },
-  { id: "tracking", icon: "radio", title: "Rider tracking", body: "Live rider tracker will be linked here on Ride Day (placeholder). Save your rider's bib number to search quickly.", order: 3, active: true, publish: "published", updatedAt: NOW(), updatedBy: EDITOR },
-  { id: "kids", icon: "baby", title: "Kids activities", body: "Family village at the finish: face painting, balloon artist, mini-obstacle course, and a shaded story-time tent. Free for all ages.", order: 4, active: true, publish: "published", updatedAt: NOW(), updatedBy: EDITOR },
-  { id: "food", icon: "utensils", title: "Food & rest areas", body: "Food trucks open 7 AM at the finish village. Free water and shaded seating throughout the family village.", order: 5, active: true, publish: "published", updatedAt: NOW(), updatedBy: EDITOR },
-  { id: "access", icon: "accessibility", title: "Accessibility", body: "Accessible parking with placard in the Nationwide Blvd lot. Accessible restrooms and viewing platforms at Mile 12, Mile 34, and the finish.", order: 6, active: true, publish: "published", updatedAt: NOW(), updatedBy: EDITOR },
-  { id: "weather", icon: "cloud", title: "Weather preparation", body: "August in Columbus averages 82°F high, 62°F low. Bring sunscreen, hats, water, and a light rain shell. Final forecast in Wednesday update.", order: 7, active: true, publish: "published", updatedAt: NOW(), updatedBy: EDITOR },
-  { id: "emergency", icon: "alert", title: "Emergency & contact", body: "For life-threatening emergencies dial 911. Medical tents at every rest stop. Family info hotline: (614) 555-0142 (demo).", order: 8, active: true, publish: "published", updatedAt: NOW(), updatedBy: EDITOR },
+  {
+    id: "parking",
+    icon: "car",
+    title: "Spectator parking",
+    body: "Recommended lots: McFerson Commons Garage and Neil Ave. Garage. Arrive by 6:00 AM Saturday for closest access. Overflow: Convention Center North Garage.",
+    order: 0,
+    active: true,
+    publish: "published",
+    updatedAt: NOW(),
+    updatedBy: EDITOR,
+  },
+  {
+    id: "viewing",
+    icon: "map",
+    title: "Recommended viewing locations",
+    body: "Mile 12 (McFerson Commons), Mile 34 (Pickerington Cheer Zone), Mile 68 (Granville), and the finish line at Hilton Columbus Downtown.",
+    order: 1,
+    active: true,
+    publish: "published",
+    updatedAt: NOW(),
+    updatedBy: EDITOR,
+  },
+  {
+    id: "tent",
+    icon: "tent",
+    title: "Team Huntington tent",
+    body: "Bright-lime canopy at the finish village near the bandshell, plus rest stops 2 and 4. Team snacks, cheer squad, and photo backdrop.",
+    order: 2,
+    active: true,
+    publish: "published",
+    updatedAt: NOW(),
+    updatedBy: EDITOR,
+  },
+  {
+    id: "tracking",
+    icon: "radio",
+    title: "Rider tracking",
+    body: "Live rider tracker will be linked here on Ride Day (placeholder). Save your rider's bib number to search quickly.",
+    order: 3,
+    active: true,
+    publish: "published",
+    updatedAt: NOW(),
+    updatedBy: EDITOR,
+  },
+  {
+    id: "kids",
+    icon: "baby",
+    title: "Kids activities",
+    body: "Family village at the finish: face painting, balloon artist, mini-obstacle course, and a shaded story-time tent. Free for all ages.",
+    order: 4,
+    active: true,
+    publish: "published",
+    updatedAt: NOW(),
+    updatedBy: EDITOR,
+  },
+  {
+    id: "food",
+    icon: "utensils",
+    title: "Food & rest areas",
+    body: "Food trucks open 7 AM at the finish village. Free water and shaded seating throughout the family village.",
+    order: 5,
+    active: true,
+    publish: "published",
+    updatedAt: NOW(),
+    updatedBy: EDITOR,
+  },
+  {
+    id: "access",
+    icon: "accessibility",
+    title: "Accessibility",
+    body: "Accessible parking with placard in the Nationwide Blvd lot. Accessible restrooms and viewing platforms at Mile 12, Mile 34, and the finish.",
+    order: 6,
+    active: true,
+    publish: "published",
+    updatedAt: NOW(),
+    updatedBy: EDITOR,
+  },
+  {
+    id: "weather",
+    icon: "cloud",
+    title: "Weather preparation",
+    body: "August in Columbus averages 82°F high, 62°F low. Bring sunscreen, hats, water, and a light rain shell. Final forecast in Wednesday update.",
+    order: 7,
+    active: true,
+    publish: "published",
+    updatedAt: NOW(),
+    updatedBy: EDITOR,
+  },
+  {
+    id: "emergency",
+    icon: "alert",
+    title: "Emergency & contact",
+    body: "For life-threatening emergencies dial 911. Medical tents at every rest stop. Family info hotline: (614) 555-0142 (demo).",
+    order: 8,
+    active: true,
+    publish: "published",
+    updatedAt: NOW(),
+    updatedBy: EDITOR,
+  },
 ];
 
 const familyScheduleSeed: FamilyScheduleDay[] = [
-  { id: "fri", day: "Friday · Aug 6", items: ["2–7 PM — Packet pickup, Columbus Convention Center", "6:30 PM — Team gathering, Hilton Union Ballroom"], active: true },
-  { id: "sat", day: "Saturday · Aug 7 (Ride Day)", items: ["5:30 AM — Staging opens", "7:00 AM — Roll-out", "10 AM–3 PM — Finish village open"], active: true },
-  { id: "sun", day: "Sunday · Aug 8", items: ["11:00 AM — Team brunch, Hilton", "1:00 PM — Recognition & photos"], active: true },
+  {
+    id: "fri",
+    day: "Friday · Aug 6",
+    items: [
+      "2–7 PM — Packet pickup, Columbus Convention Center",
+      "6:30 PM — Team gathering, Hilton Union Ballroom",
+    ],
+    active: true,
+  },
+  {
+    id: "sat",
+    day: "Saturday · Aug 7 (Ride Day)",
+    items: ["5:30 AM — Staging opens", "7:00 AM — Roll-out", "10 AM–3 PM — Finish village open"],
+    active: true,
+  },
+  {
+    id: "sun",
+    day: "Sunday · Aug 8",
+    items: ["11:00 AM — Team brunch, Hilton", "1:00 PM — Recognition & photos"],
+    active: true,
+  },
 ];
 
 const apiManagedSeed: APIManagedField[] = [
-  { key: "readiness.pelotonia.status", label: "Official Pelotonia registration status", source: "Pelotonia.org API", lastSync: "2027-07-14T09:12:00Z" },
-  { key: "readiness.hotel.status", label: "Hotel reservation status", source: "Concur / ATG", lastSync: "2027-07-14T09:12:00Z" },
-  { key: "readiness.fundraising.current", label: "Fundraising total raised", source: "Pelotonia CRM", lastSync: "2027-07-14T09:12:00Z" },
-  { key: "team.goal.current", label: "Team cumulative raised", source: "Pelotonia CRM", lastSync: "2027-07-14T09:12:00Z" },
-  { key: "route.official", label: "Official rider route", source: "Pelotonia Course Ops", lastSync: "2027-06-30T00:00:00Z" },
+  {
+    key: "readiness.pelotonia.status",
+    label: "Official Pelotonia registration status",
+    source: "Pelotonia.org API",
+    lastSync: "2027-07-14T09:12:00Z",
+  },
+  {
+    key: "readiness.hotel.status",
+    label: "Hotel reservation status",
+    source: "Concur / ATG",
+    lastSync: "2027-07-14T09:12:00Z",
+  },
+  {
+    key: "readiness.fundraising.current",
+    label: "Fundraising total raised",
+    source: "Pelotonia CRM",
+    lastSync: "2027-07-14T09:12:00Z",
+  },
+  {
+    key: "team.goal.current",
+    label: "Team cumulative raised",
+    source: "Pelotonia CRM",
+    lastSync: "2027-07-14T09:12:00Z",
+  },
+  {
+    key: "route.official",
+    label: "Official rider route",
+    source: "Pelotonia Course Ops",
+    lastSync: "2027-06-30T00:00:00Z",
+  },
   { key: "weather", label: "Live weather", source: "NOAA", lastSync: "n/a — live" },
-  { key: "rider.tracking", label: "Live rider tracking", source: "Pelotonia Timing", lastSync: "n/a — live" },
-  { key: "expenses.reimbursement", label: "Expense reimbursement status", source: "Concur Expense", lastSync: "2027-07-13T00:00:00Z" },
+  {
+    key: "rider.tracking",
+    label: "Live rider tracking",
+    source: "Pelotonia Timing",
+    lastSync: "n/a — live",
+  },
+  {
+    key: "expenses.reimbursement",
+    label: "Expense reimbursement status",
+    source: "Concur Expense",
+    lastSync: "2027-07-13T00:00:00Z",
+  },
 ];
 
 const announcementsSeed: Announcement[] = [
@@ -508,11 +798,81 @@ const announcementsSeed: Announcement[] = [
 ];
 
 const goalsSeed: Goal[] = [
-  { id: "g-1", name: "Team Huntington fundraising", current: 3_450_000, target: 5_000_000, unit: "dollars", startDate: "2027-01-01", endDate: "2027-08-31", status: "on_track", location: "Dashboard, Team Hub", visibleToParticipants: true, publish: "published", updatedAt: NOW(), updatedBy: EDITOR },
-  { id: "g-2", name: "Rider registration goal", current: 2400, target: 3000, unit: "participants", startDate: "2027-01-01", endDate: "2027-07-15", status: "on_track", location: "Analytics", visibleToParticipants: false, publish: "published", updatedAt: NOW(), updatedBy: EDITOR },
-  { id: "g-3", name: "Volunteer registration goal", current: 1500, target: 2000, unit: "participants", startDate: "2027-01-01", endDate: "2027-07-15", status: "at_risk", location: "Analytics", visibleToParticipants: false, publish: "published", updatedAt: NOW(), updatedBy: EDITOR },
-  { id: "g-4", name: "Participant fundraising goal", current: 3800, target: 5000, unit: "dollars", startDate: "2027-01-01", endDate: "2027-08-31", status: "on_track", location: "Dashboard readiness", visibleToParticipants: true, publish: "published", updatedAt: NOW(), updatedBy: EDITOR },
-  { id: "g-5", name: "Readiness completion target", current: 72, target: 90, unit: "percentage", startDate: "2027-01-01", endDate: "2027-08-01", status: "on_track", location: "Analytics", visibleToParticipants: false, publish: "published", updatedAt: NOW(), updatedBy: EDITOR },
+  {
+    id: "g-1",
+    name: "Team Huntington fundraising",
+    current: 3_450_000,
+    target: 5_000_000,
+    unit: "dollars",
+    startDate: "2027-01-01",
+    endDate: "2027-08-31",
+    status: "on_track",
+    location: "Dashboard, Team Hub",
+    visibleToParticipants: true,
+    publish: "published",
+    updatedAt: NOW(),
+    updatedBy: EDITOR,
+  },
+  {
+    id: "g-2",
+    name: "Rider registration goal",
+    current: 2400,
+    target: 3000,
+    unit: "participants",
+    startDate: "2027-01-01",
+    endDate: "2027-07-15",
+    status: "on_track",
+    location: "Analytics",
+    visibleToParticipants: false,
+    publish: "published",
+    updatedAt: NOW(),
+    updatedBy: EDITOR,
+  },
+  {
+    id: "g-3",
+    name: "Volunteer registration goal",
+    current: 1500,
+    target: 2000,
+    unit: "participants",
+    startDate: "2027-01-01",
+    endDate: "2027-07-15",
+    status: "at_risk",
+    location: "Analytics",
+    visibleToParticipants: false,
+    publish: "published",
+    updatedAt: NOW(),
+    updatedBy: EDITOR,
+  },
+  {
+    id: "g-4",
+    name: "Participant fundraising goal",
+    current: 3800,
+    target: 5000,
+    unit: "dollars",
+    startDate: "2027-01-01",
+    endDate: "2027-08-31",
+    status: "on_track",
+    location: "Dashboard readiness",
+    visibleToParticipants: true,
+    publish: "published",
+    updatedAt: NOW(),
+    updatedBy: EDITOR,
+  },
+  {
+    id: "g-5",
+    name: "Readiness completion target",
+    current: 72,
+    target: 90,
+    unit: "percentage",
+    startDate: "2027-01-01",
+    endDate: "2027-08-01",
+    status: "on_track",
+    location: "Analytics",
+    visibleToParticipants: false,
+    publish: "published",
+    updatedAt: NOW(),
+    updatedBy: EDITOR,
+  },
 ];
 
 const defaultFlags: FeatureFlags = {
@@ -547,7 +907,14 @@ function initialState(): AdminState {
     packing: {
       categories: {
         rider: ["Ride Essentials", "Clothing", "Nutrition", "Travel", "Technology", "Recovery"],
-        volunteer: ["Shift Essentials", "Clothing", "Weather Protection", "Food and Hydration", "Technology", "Travel"],
+        volunteer: [
+          "Shift Essentials",
+          "Clothing",
+          "Weather Protection",
+          "Food and Hydration",
+          "Technology",
+          "Travel",
+        ],
       },
       items: seedPackingItems(),
     },
@@ -566,7 +933,6 @@ function initialState(): AdminState {
     audit: [],
     journeyCopy: { ...journeyCopyDefaults },
   };
-
 }
 
 // ============ PERSISTENCE ============
@@ -586,7 +952,6 @@ function load(): AdminState {
       superUser: { ...base.superUser, ...parsed.superUser },
       journeyCopy: { ...journeyCopyDefaults, ...(parsed.journeyCopy ?? {}) },
     };
-
   } catch {
     return initialState();
   }
@@ -609,7 +974,6 @@ interface AdminCtx {
 // "useAdmin must be used inside AdminStoreProvider" with a blank screen.
 const g = globalThis as unknown as { __adminStoreCtx?: Context<AdminCtx | null> };
 const Ctx = (g.__adminStoreCtx ??= createContext<AdminCtx | null>(null));
-
 
 export function AdminStoreProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AdminState>(() => initialState());
@@ -649,12 +1013,12 @@ export function AdminStoreProvider({ children }: { children: ReactNode }) {
 
   const isApiManaged = useCallback(
     (key: string) => state.apiManaged.find((f) => f.key === key),
-    [state.apiManaged]
+    [state.apiManaged],
   );
 
   const value = useMemo<AdminCtx>(
     () => ({ state, setState, audit, resetSection, resetAll, isApiManaged }),
-    [state, audit, resetSection, resetAll, isApiManaged]
+    [state, audit, resetSection, resetAll, isApiManaged],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
@@ -691,8 +1055,6 @@ export function readinessScore(items: EditableReadinessItem[]): number {
   return Math.round((earned / totalWeight) * 100);
 }
 
-
-
 export function announcementIsActive(a: Announcement): boolean {
   if (a.publish !== "published") return false;
   const now = Date.now();
@@ -710,7 +1072,8 @@ export function formatCurrencyUSD(n: number): string {
 }
 
 export function formatGoalValue(g: Goal): { current: string; target: string } {
-  if (g.unit === "dollars") return { current: formatCurrencyUSD(g.current), target: formatCurrencyUSD(g.target) };
+  if (g.unit === "dollars")
+    return { current: formatCurrencyUSD(g.current), target: formatCurrencyUSD(g.target) };
   if (g.unit === "percentage") return { current: `${g.current}%`, target: `${g.target}%` };
   return { current: g.current.toLocaleString(), target: g.target.toLocaleString() };
 }

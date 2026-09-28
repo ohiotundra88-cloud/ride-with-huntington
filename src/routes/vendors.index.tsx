@@ -8,12 +8,30 @@ import { VendorGate, useVendorAccess } from "@/components/VendorGate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { listVendorRecords } from "@/lib/vendors.functions";
 import {
-  BEYOND_YEAR, BUSINESS_SEGMENTS, DEFAULT_YEARS, HIGH_SPEND_THRESHOLD, VENDOR_STATUSES, VENDOR_TIERS,
-  currency, currentRideYear, isKidsSupporter, isOpportunity, percent, rollup, tierFor, yearLabel,
+  BEYOND_YEAR,
+  BUSINESS_SEGMENTS,
+  DEFAULT_YEARS,
+  HIGH_SPEND_THRESHOLD,
+  VENDOR_STATUSES,
+  VENDOR_TIERS,
+  currency,
+  currentRideYear,
+  isKidsSupporter,
+  isOpportunity,
+  percent,
+  rollup,
+  tierFor,
+  yearLabel,
   type VendorListRow,
 } from "@/lib/vendors.shared";
 
@@ -27,16 +45,29 @@ export const Route = createFileRoute("/vendors/")({
   head: () => ({
     meta: [
       { title: "Vendor CRM — Team Huntington Hub" },
-      { name: "description", content: "Track Team Huntington vendor relationships, spend, commitments, and donations." },
+      {
+        name: "description",
+        content: "Track Team Huntington vendor relationships, spend, commitments, and donations.",
+      },
       { property: "og:title", content: "Vendor CRM — Team Huntington Hub" },
-      { property: "og:description", content: "Vendor relationships, spend, and donation tracking for Team Huntington." },
+      {
+        property: "og:description",
+        content: "Vendor relationships, spend, and donation tracking for Team Huntington.",
+      },
     ],
   }),
 });
 
 type SortKey =
-  | "name" | "status" | "segment" | "modified"
-  | "spend_desc" | "donated_desc" | "support_desc" | "support_asc" | "tier";
+  | "name"
+  | "status"
+  | "segment"
+  | "modified"
+  | "spend_desc"
+  | "donated_desc"
+  | "support_desc"
+  | "support_asc"
+  | "tier";
 
 const TIER_YEARS = DEFAULT_YEARS.filter((y) => y !== BEYOND_YEAR);
 
@@ -54,7 +85,11 @@ function VendorDashboard() {
   const [tierYear, setTierYear] = useState(currentRideYear());
   const [tierFilter, setTierFilter] = useState("all");
 
-  const { data: vendors = [], isPending, error } = useQuery<VendorListRow[]>({
+  const {
+    data: vendors = [],
+    isPending,
+    error,
+  } = useQuery<VendorListRow[]>({
     queryKey: ["vendors", tab],
     queryFn: () => listVendorRecords({ data: { archived: tab === "archived" } }),
   });
@@ -63,12 +98,23 @@ function VendorDashboard() {
     let rows = vendors.filter((v) => {
       if (q && !v.business_name.toLowerCase().includes(q.toLowerCase())) return false;
       if (status !== "all" && v.status !== status) return false;
-      if (segment !== "all" && v.business_segment !== segment && v.internal_business_segment !== segment) return false;
+      if (
+        segment !== "all" &&
+        v.business_segment !== segment &&
+        v.internal_business_segment !== segment
+      )
+        return false;
       if (year !== "all" && !v.years.includes(Number(year))) return false;
       if (opportunityOnly && !isOpportunity(v.rollup)) return false;
       if (tierFilter !== "all") {
         const t = tierFor(v.year_totals, tierYear);
-        if (tierFilter === "kids" ? !isKidsSupporter(v.year_totals, tierYear) : tierFilter === "none" ? !!t : t?.key !== tierFilter)
+        if (
+          tierFilter === "kids"
+            ? !isKidsSupporter(v.year_totals, tierYear)
+            : tierFilter === "none"
+              ? !!t
+              : t?.key !== tierFilter
+        )
           return false;
       }
       return true;
@@ -83,7 +129,8 @@ function VendorDashboard() {
       support_desc: (a, b) => (b.rollup.support_rate ?? -1) - (a.rollup.support_rate ?? -1),
       support_asc: (a, b) => (a.rollup.support_rate ?? 99) - (b.rollup.support_rate ?? 99),
       tier: (a, b) =>
-        (tierFor(b.year_totals, tierYear)?.rank ?? 0) - (tierFor(a.year_totals, tierYear)?.rank ?? 0) ||
+        (tierFor(b.year_totals, tierYear)?.rank ?? 0) -
+          (tierFor(a.year_totals, tierYear)?.rank ?? 0) ||
         (b.year_totals[tierYear]?.total ?? 0) - (a.year_totals[tierYear]?.total ?? 0) ||
         a.business_name.localeCompare(b.business_name),
     };
@@ -92,19 +139,42 @@ function VendorDashboard() {
 
   const exportCsv = () => {
     const head = [
-      "Business Name", `Tier (${tierYear})`, `Contribution ${tierYear}`, `Pelotonia Kids ${tierYear}`,
-      "Status", "Business Segment", "Internal Segment", "Relationship Owner",
-      "Total Spend", "Total Committed", "Total Donated", "Outstanding", "Fulfillment %", "Support Rate %",
-      "Years With Activity", "Last Modified", "Last Modified By",
+      "Business Name",
+      `Tier (${tierYear})`,
+      `Contribution ${tierYear}`,
+      `Pelotonia Kids ${tierYear}`,
+      "Status",
+      "Business Segment",
+      "Internal Segment",
+      "Relationship Owner",
+      "Total Spend",
+      "Total Committed",
+      "Total Donated",
+      "Outstanding",
+      "Fulfillment %",
+      "Support Rate %",
+      "Years With Activity",
+      "Last Modified",
+      "Last Modified By",
     ];
     const rows = filtered.map((v) => [
-      v.business_name, tierFor(v.year_totals, tierYear)?.label ?? "",
-      v.year_totals[tierYear]?.total ?? 0, v.year_totals[tierYear]?.kids ?? 0,
-      v.status, v.business_segment ?? "", v.internal_business_segment ?? "", v.relationship_owner ?? "",
-      v.rollup.total_spend, v.rollup.total_committed, v.rollup.total_donated, v.rollup.outstanding,
+      v.business_name,
+      tierFor(v.year_totals, tierYear)?.label ?? "",
+      v.year_totals[tierYear]?.total ?? 0,
+      v.year_totals[tierYear]?.kids ?? 0,
+      v.status,
+      v.business_segment ?? "",
+      v.internal_business_segment ?? "",
+      v.relationship_owner ?? "",
+      v.rollup.total_spend,
+      v.rollup.total_committed,
+      v.rollup.total_donated,
+      v.rollup.outstanding,
       v.rollup.fulfillment === null ? "" : Math.round(v.rollup.fulfillment * 100),
       v.rollup.support_rate === null ? "" : Math.round(v.rollup.support_rate * 100),
-      v.years.map(yearLabel).join(" / "), new Date(v.updated_at).toLocaleString(), v.updated_by_name ?? "",
+      v.years.map(yearLabel).join(" / "),
+      new Date(v.updated_at).toLocaleString(),
+      v.updated_by_name ?? "",
     ]);
     const csv = [head, ...rows]
       .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
@@ -126,12 +196,22 @@ function VendorDashboard() {
             Team Huntington vendor relationships, spend, and donation commitments.
           </p>
         </div>
-        <Button asChild className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90">
-          <Link to="/vendors/new"><Plus className="mr-1.5 h-4 w-4" /> New vendor</Link>
+        <Button
+          asChild
+          className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90"
+        >
+          <Link to="/vendors/new">
+            <Plus className="mr-1.5 h-4 w-4" /> New vendor
+          </Link>
         </Button>
       </div>
 
-      <ExecutiveSummary vendors={vendors} year={dashYear} setYear={setDashYear} onOpportunity={() => setOpportunityOnly(true)} />
+      <ExecutiveSummary
+        vendors={vendors}
+        year={dashYear}
+        setYear={setDashYear}
+        onOpportunity={() => setOpportunityOnly(true)}
+      />
 
       <TierSummary
         vendors={vendors}
@@ -146,47 +226,76 @@ function VendorDashboard() {
 
       <Card className="mt-6">
         <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2"><Building2 className="h-4 w-4 text-[var(--brand)]" /> Vendors</CardTitle>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Building2 className="h-4 w-4 text-[var(--brand)]" /> Vendors
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
             <TabsList>
               <TabsTrigger value="active">Active list</TabsTrigger>
-              <TabsTrigger value="archived" disabled={!access?.canArchive}>Archived</TabsTrigger>
+              <TabsTrigger value="archived" disabled={!access?.canArchive}>
+                Archived
+              </TabsTrigger>
             </TabsList>
           </Tabs>
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             <div className="relative sm:col-span-2">
               <Search className="pointer-events-none absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input className="pl-8" placeholder="Search business name" value={q} onChange={(e) => setQ(e.target.value)} />
+              <Input
+                className="pl-8"
+                placeholder="Search business name"
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+              />
             </div>
             <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All statuses</SelectItem>
-                {VENDOR_STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                {VENDOR_STATUSES.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <Select value={segment} onValueChange={setSegment}>
-              <SelectTrigger><SelectValue placeholder="Segment" /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue placeholder="Segment" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All segments</SelectItem>
-                {BUSINESS_SEGMENTS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                {BUSINESS_SEGMENTS.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <Select value={year} onValueChange={setYear}>
-              <SelectTrigger><SelectValue placeholder="Year" /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue placeholder="Year" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Any year</SelectItem>
-                {DEFAULT_YEARS.map((y) => <SelectItem key={y} value={String(y)}>{yearLabel(y)}</SelectItem>)}
+                {DEFAULT_YEARS.map((y) => (
+                  <SelectItem key={y} value={String(y)}>
+                    {yearLabel(y)}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
             <Select value={sort} onValueChange={(v) => setSort(v as SortKey)}>
-              <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-56">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="tier">Sort: Sponsorship tier ({tierYear})</SelectItem>
                 <SelectItem value="name">Sort: Business name</SelectItem>
@@ -200,15 +309,25 @@ function VendorDashboard() {
               </SelectContent>
             </Select>
             <Select value={tierFilter} onValueChange={setTierFilter}>
-              <SelectTrigger className="w-52" aria-label="Filter by tier"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-52" aria-label="Filter by tier">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All tiers</SelectItem>
-                {VENDOR_TIERS.map((t) => <SelectItem key={t.key} value={t.key}>{t.label}</SelectItem>)}
+                {VENDOR_TIERS.map((t) => (
+                  <SelectItem key={t.key} value={t.key}>
+                    {t.label}
+                  </SelectItem>
+                ))}
                 <SelectItem value="kids">Pelotonia Kids Supporters</SelectItem>
                 <SelectItem value="none">No tier yet</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant={opportunityOnly ? "default" : "outline"} size="sm" onClick={() => setOpportunityOnly((v) => !v)}>
+            <Button
+              variant={opportunityOnly ? "default" : "outline"}
+              size="sm"
+              onClick={() => setOpportunityOnly((v) => !v)}
+            >
               High spend, no donation
             </Button>
             <Button variant="outline" size="sm" onClick={exportCsv}>
@@ -226,14 +345,28 @@ function VendorDashboard() {
             <ul className="divide-y">
               {filtered.map((v) => (
                 <li key={v.id} className="py-3">
-                  <Link to="/vendors/$id" params={{ id: v.id }} className="block rounded-md px-1 hover:bg-muted/50">
+                  <Link
+                    to="/vendors/$id"
+                    params={{ id: v.id }}
+                    className="block rounded-md px-1 hover:bg-muted/50"
+                  >
                     <div className="flex flex-wrap items-start justify-between gap-2">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="truncate font-semibold text-[var(--brand-dark)]">{v.business_name}</span>
-                          <VendorTierBadge tier={tierFor(v.year_totals, tierYear)} year={tierYear} />
-                          <KidsSupporterBadge show={isKidsSupporter(v.year_totals, tierYear)} year={tierYear} />
-                          <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase">{v.status}</span>
+                          <span className="truncate font-semibold text-[var(--brand-dark)]">
+                            {v.business_name}
+                          </span>
+                          <VendorTierBadge
+                            tier={tierFor(v.year_totals, tierYear)}
+                            year={tierYear}
+                          />
+                          <KidsSupporterBadge
+                            show={isKidsSupporter(v.year_totals, tierYear)}
+                            year={tierYear}
+                          />
+                          <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase">
+                            {v.status}
+                          </span>
                           {isOpportunity(v.rollup) && (
                             <span className="rounded-full bg-[var(--brand)]/20 px-2 py-0.5 text-[10px] font-semibold text-[var(--brand-dark)]">
                               Opportunity
@@ -241,14 +374,24 @@ function VendorDashboard() {
                           )}
                         </div>
                         <p className="truncate text-xs text-muted-foreground">
-                          {v.business_segment || "No segment"} · Owner {v.relationship_owner || "—"} · Updated{" "}
-                          {new Date(v.updated_at).toLocaleDateString()} {v.updated_by_name ? `by ${v.updated_by_name}` : ""}
+                          {v.business_segment || "No segment"} · Owner {v.relationship_owner || "—"}{" "}
+                          · Updated {new Date(v.updated_at).toLocaleDateString()}{" "}
+                          {v.updated_by_name ? `by ${v.updated_by_name}` : ""}
                         </p>
                       </div>
                       <div className="flex gap-4 text-right text-xs">
-                        <div><div className="text-muted-foreground">Spend</div><div className="font-semibold">{currency(v.rollup.total_spend)}</div></div>
-                        <div><div className="text-muted-foreground">Donated</div><div className="font-semibold">{currency(v.rollup.total_donated)}</div></div>
-                        <div><div className="text-muted-foreground">Support</div><div className="font-semibold">{percent(v.rollup.support_rate)}</div></div>
+                        <div>
+                          <div className="text-muted-foreground">Spend</div>
+                          <div className="font-semibold">{currency(v.rollup.total_spend)}</div>
+                        </div>
+                        <div>
+                          <div className="text-muted-foreground">Donated</div>
+                          <div className="font-semibold">{currency(v.rollup.total_donated)}</div>
+                        </div>
+                        <div>
+                          <div className="text-muted-foreground">Support</div>
+                          <div className="font-semibold">{percent(v.rollup.support_rate)}</div>
+                        </div>
                       </div>
                     </div>
                   </Link>
@@ -263,12 +406,23 @@ function VendorDashboard() {
 }
 
 function ExecutiveSummary({
-  vendors, year, setYear, onOpportunity,
-}: { vendors: VendorListRow[]; year: string; setYear: (v: string) => void; onOpportunity: () => void }) {
+  vendors,
+  year,
+  setYear,
+  onOpportunity,
+}: {
+  vendors: VendorListRow[];
+  year: string;
+  setYear: (v: string) => void;
+  onOpportunity: () => void;
+}) {
   const scoped = year === "all" ? vendors : vendors.filter((v) => v.years.includes(Number(year)));
   const totals = rollup(
     scoped.map((v) => ({ amount: v.rollup.total_spend })),
-    scoped.map((v) => ({ committed_amount: v.rollup.total_committed, actual_donated_amount: v.rollup.total_donated })),
+    scoped.map((v) => ({
+      committed_amount: v.rollup.total_committed,
+      actual_donated_amount: v.rollup.total_donated,
+    })),
   );
   const activeCount = scoped.filter((v) => v.status === "Active").length;
   const donatingCount = scoped.filter((v) => v.rollup.total_donated > 0).length;
@@ -284,12 +438,20 @@ function ExecutiveSummary({
   return (
     <Card className="mt-6">
       <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3 pb-3">
-        <CardTitle className="text-base flex items-center gap-2"><BarChart3 className="h-4 w-4 text-[var(--brand)]" /> Executive summary</CardTitle>
+        <CardTitle className="text-base flex items-center gap-2">
+          <BarChart3 className="h-4 w-4 text-[var(--brand)]" /> Executive summary
+        </CardTitle>
         <Select value={year} onValueChange={setYear}>
-          <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-36">
+            <SelectValue />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All years</SelectItem>
-            {DEFAULT_YEARS.map((y) => <SelectItem key={y} value={String(y)}>{yearLabel(y)}</SelectItem>)}
+            {DEFAULT_YEARS.map((y) => (
+              <SelectItem key={y} value={String(y)}>
+                {yearLabel(y)}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </CardHeader>
@@ -301,10 +463,18 @@ function ExecutiveSummary({
         {stat("Donation-to-spend ratio", percent(totals.support_rate))}
         {stat("Active vendors", String(activeCount))}
         {stat("Donating vendors", String(donatingCount))}
-        <button type="button" onClick={onOpportunity} className="rounded-lg border bg-card p-3 text-left transition hover:border-[var(--brand)]">
-          <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Spend but no donation</div>
+        <button
+          type="button"
+          onClick={onOpportunity}
+          className="rounded-lg border bg-card p-3 text-left transition hover:border-[var(--brand)]"
+        >
+          <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
+            Spend but no donation
+          </div>
           <div className="mt-1 text-lg font-bold text-[var(--brand-dark)]">{opportunities}</div>
-          <div className="text-[11px] text-[var(--brand-dark)] underline">View opportunity list (spend ≥ {currency(HIGH_SPEND_THRESHOLD)})</div>
+          <div className="text-[11px] text-[var(--brand-dark)] underline">
+            View opportunity list (spend ≥ {currency(HIGH_SPEND_THRESHOLD)})
+          </div>
         </button>
       </CardContent>
     </Card>
@@ -312,7 +482,11 @@ function ExecutiveSummary({
 }
 
 function TierSummary({
-  vendors, year, setYear, active, onPick,
+  vendors,
+  year,
+  setYear,
+  active,
+  onPick,
 }: {
   vendors: VendorListRow[];
   year: number;
@@ -322,7 +496,9 @@ function TierSummary({
 }) {
   const count = (key: string) =>
     vendors.filter((v) =>
-      key === "kids" ? isKidsSupporter(v.year_totals, year) : tierFor(v.year_totals, year)?.key === key,
+      key === "kids"
+        ? isKidsSupporter(v.year_totals, year)
+        : tierFor(v.year_totals, year)?.key === key,
     ).length;
   const tile = (key: string, label: string, detail: string) => (
     <button
@@ -344,21 +520,31 @@ function TierSummary({
           <Award className="h-4 w-4 text-[var(--brand)]" /> Sponsorship tiers
         </CardTitle>
         <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
-          <SelectTrigger className="w-36" aria-label="Tier year"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-36" aria-label="Tier year">
+            <SelectValue />
+          </SelectTrigger>
           <SelectContent>
-            {TIER_YEARS.map((y) => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}
+            {TIER_YEARS.map((y) => (
+              <SelectItem key={y} value={String(y)}>
+                {y}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </CardHeader>
       <CardContent className="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {VENDOR_TIERS.map((t) =>
-          tile(t.key, t.label, `${currency(t.min)}${t.key === "pinnacle" ? "+" : ` to ${currency((VENDOR_TIERS[VENDOR_TIERS.indexOf(t) - 1]?.min ?? 0) - 1)}`}`),
+          tile(
+            t.key,
+            t.label,
+            `${currency(t.min)}${t.key === "pinnacle" ? "+" : ` to ${currency((VENDOR_TIERS[VENDOR_TIERS.indexOf(t) - 1]?.min ?? 0) - 1)}`}`,
+          ),
         )}
         {tile("kids", "Pelotonia Kids", "gave to Pelotonia Kids")}
       </CardContent>
       <p className="px-6 pb-4 text-[11px] text-muted-foreground">
-        A vendor's tier is its {year} contribution: the larger of what it committed or gave, plus Pelotonia Kids
-        donations. Tap a tier to list those vendors.
+        A vendor's tier is its {year} contribution: the larger of what it committed or gave, plus
+        Pelotonia Kids donations. Tap a tier to list those vendors.
       </p>
     </Card>
   );

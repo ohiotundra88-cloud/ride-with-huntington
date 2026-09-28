@@ -72,9 +72,16 @@ export function SuperUserBar() {
 
   const startPreview = (as: "participant" | "family" | "standard-admin") => {
     setState((s) => ({ ...s, superUser: { ...s.superUser, previewAs: as } }));
-    if (as === "participant") { setUser({ isAdmin: false }); nav({ to: "/dashboard" }); }
-    else if (as === "family") { setUser({ isAdmin: false }); nav({ to: "/family" }); }
-    else if (as === "standard-admin") { setUser({ isAdmin: true }); nav({ to: "/admin/participants" }); }
+    if (as === "participant") {
+      setUser({ isAdmin: false });
+      nav({ to: "/dashboard" });
+    } else if (as === "family") {
+      setUser({ isAdmin: false });
+      nav({ to: "/family" });
+    } else if (as === "standard-admin") {
+      setUser({ isAdmin: true });
+      nav({ to: "/admin/participants" });
+    }
   };
 
   const exitPreview = () => {
@@ -89,7 +96,9 @@ export function SuperUserBar() {
         <div className="mx-auto max-w-7xl flex items-center gap-3 px-4 py-2 text-sm">
           <Eye className="h-4 w-4" />
           <span className="font-semibold">Previewing as {su.previewAs.replace("-", " ")}</span>
-          <span className="hidden sm:inline text-black/70 text-xs">Draft content and preview values only — no changes are saved.</span>
+          <span className="hidden sm:inline text-black/70 text-xs">
+            Draft content and preview values only — no changes are saved.
+          </span>
           <Button size="sm" variant="secondary" onClick={exitPreview} className="ml-auto h-7">
             Exit preview
           </Button>
@@ -115,9 +124,15 @@ export function SuperUserBar() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-52">
             <DropdownMenuLabel>Preview experience</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => startPreview("participant")}>Participant (Rider)</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => startPreview("family")}>Family member</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => startPreview("standard-admin")}>Standard Admin</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => startPreview("participant")}>
+              Participant (Rider)
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => startPreview("family")}>
+              Family member
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => startPreview("standard-admin")}>
+              Standard Admin
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
         <Button size="sm" variant="secondary" onClick={exit} className="h-7">
@@ -128,7 +143,12 @@ export function SuperUserBar() {
   );
 }
 
-export function AdminShell({ title, description, actions, children }: {
+export function AdminShell({
+  title,
+  description,
+  actions,
+  children,
+}: {
   title: string;
   description?: string;
   actions?: React.ReactNode;
@@ -149,16 +169,21 @@ export function AdminShell({ title, description, actions, children }: {
   }
 
   if (!user.isAdmin || !state.superUser.active) {
-
     return (
       <div className="mx-auto max-w-lg px-4 py-16 text-center">
         <ShieldCheck className="mx-auto h-10 w-10 text-[var(--brand-dark)]" />
-        <h1 className="mt-4 text-2xl font-bold text-[var(--brand-dark)]">Super User access required</h1>
+        <h1 className="mt-4 text-2xl font-bold text-[var(--brand-dark)]">
+          Super User access required
+        </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Open the profile menu and choose "Enter Super User Mode" to open the administration
           experience. This area is limited to accounts with the Super User role.
         </p>
-        <Button asChild className="mt-6"><Link to="/"><Home className="mr-1 h-4 w-4" /> Go home</Link></Button>
+        <Button asChild className="mt-6">
+          <Link to="/">
+            <Home className="mr-1 h-4 w-4" /> Go home
+          </Link>
+        </Button>
       </div>
     );
   }
@@ -186,8 +211,12 @@ export function AdminShell({ title, description, actions, children }: {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
             <p className="text-xs uppercase tracking-wider text-muted-foreground">Super User</p>
-            <h1 className="mt-1 text-2xl sm:text-3xl font-black text-[var(--brand-dark)]">{title}</h1>
-            {description && <p className="mt-1 text-sm text-muted-foreground max-w-3xl">{description}</p>}
+            <h1 className="mt-1 text-2xl sm:text-3xl font-black text-[var(--brand-dark)]">
+              {title}
+            </h1>
+            {description && (
+              <p className="mt-1 text-sm text-muted-foreground max-w-3xl">{description}</p>
+            )}
           </div>
           <div className="flex flex-wrap items-center gap-2">{actions}</div>
         </div>
@@ -213,7 +242,9 @@ function MobileNav({ pathname }: { pathname: string }) {
       aria-label="Admin section"
     >
       {links.map((l) => (
-        <option key={l.to} value={l.to}>{l.label}</option>
+        <option key={l.to} value={l.to}>
+          {l.label}
+        </option>
       ))}
     </select>
   );

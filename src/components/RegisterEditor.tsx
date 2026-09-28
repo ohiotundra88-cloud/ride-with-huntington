@@ -37,7 +37,8 @@ export function useRegisterContent() {
 
   const t = (key: string) => content.text[key] ?? DEFAULT_REGISTER_CONTENT.text[key] ?? "";
   const field = (key: string) =>
-    content.fields[key] ?? DEFAULT_REGISTER_CONTENT.fields[key] ?? { label: key, visible: true, required: false };
+    content.fields[key] ??
+    DEFAULT_REGISTER_CONTENT.fields[key] ?? { label: key, visible: true, required: false };
   const list = (key: string) => content.lists[key] ?? DEFAULT_REGISTER_CONTENT.lists[key] ?? [];
   const link = (key: string) =>
     content.links[key] ?? DEFAULT_REGISTER_CONTENT.links[key] ?? { label: key, url: "about:blank" };
@@ -51,7 +52,19 @@ export function useRegisterContent() {
   const setLink = (key: string, patch: Partial<RegisterContent["links"][string]>) =>
     setContent({ ...content, links: { ...content.links, [key]: { ...link(key), ...patch } } });
 
-  return { content, editing, setContent, t, field, list, link, setText, setField, setList, setLink };
+  return {
+    content,
+    editing,
+    setContent,
+    t,
+    field,
+    list,
+    link,
+    setText,
+    setField,
+    setList,
+    setLink,
+  };
 }
 
 /** Editable piece of copy. Renders plain text for everyone else. */
@@ -96,7 +109,11 @@ export function FieldLabel({
   return (
     <span className={`inline-flex items-center gap-1.5 ${className ?? ""}`}>
       {editing ? (
-        <InlineEditText value={f.label} editing onCommit={(next) => setField(name, { label: next })} />
+        <InlineEditText
+          value={f.label}
+          editing
+          onCommit={(next) => setField(name, { label: next })}
+        />
       ) : (
         <span>{f.label}</span>
       )}
@@ -124,7 +141,10 @@ function FieldSettings({ name, listKey }: { name: string; listKey?: string }) {
   };
   const remove = (i: number) => {
     if (options.length <= 1) return;
-    setList(listKey!, options.filter((_, idx) => idx !== i));
+    setList(
+      listKey!,
+      options.filter((_, idx) => idx !== i),
+    );
   };
   const add = () => {
     const value = `option-${Date.now().toString(36)}`;
@@ -134,14 +154,20 @@ function FieldSettings({ name, listKey }: { name: string; listKey?: string }) {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-6 w-6 text-[var(--brand-dark)]" title="Field settings">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-6 w-6 text-[var(--brand-dark)]"
+          title="Field settings"
+        >
           <Settings2 className="h-3.5 w-3.5" />
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-80 space-y-3">
         <div className="flex items-center justify-between">
           <Label className="flex items-center gap-2 text-xs">
-            {f.visible ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />} Visible
+            {f.visible ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}{" "}
+            Visible
           </Label>
           <Switch checked={f.visible} onCheckedChange={(v) => setField(name, { visible: v })} />
         </div>
@@ -151,7 +177,9 @@ function FieldSettings({ name, listKey }: { name: string; listKey?: string }) {
         </div>
         {listKey && (
           <div className="space-y-2 border-t pt-2">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Choices</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Choices
+            </p>
             {options.map((o, i) => (
               <div key={o.value} className="flex items-center gap-1">
                 <Input
@@ -159,10 +187,22 @@ function FieldSettings({ name, listKey }: { name: string; listKey?: string }) {
                   onChange={(e) => rename(i, e.target.value)}
                   className="h-8 text-xs"
                 />
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => move(i, -1)} title="Move up">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={() => move(i, -1)}
+                  title="Move up"
+                >
                   <ArrowUp className="h-3.5 w-3.5" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => move(i, 1)} title="Move down">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={() => move(i, 1)}
+                  title="Move down"
+                >
                   <ArrowDown className="h-3.5 w-3.5" />
                 </Button>
                 <Button
@@ -188,12 +228,23 @@ function FieldSettings({ name, listKey }: { name: string; listKey?: string }) {
 }
 
 /** Standalone editor for a choice list that isn't tied to a single labelled field. */
-export function ListSettings({ listKey, title, withDesc = false }: { listKey: string; title: string; withDesc?: boolean }) {
+export function ListSettings({
+  listKey,
+  title,
+  withDesc = false,
+}: {
+  listKey: string;
+  title: string;
+  withDesc?: boolean;
+}) {
   const { editing, list, setList } = useRegisterContent();
   if (!editing) return null;
   const options = list(listKey);
   const patch = (i: number, p: Partial<RegisterOption>) =>
-    setList(listKey, options.map((o, idx) => (idx === i ? { ...o, ...p } : o)));
+    setList(
+      listKey,
+      options.map((o, idx) => (idx === i ? { ...o, ...p } : o)),
+    );
   const move = (i: number, dir: -1 | 1) => {
     const next = [...options];
     const j = i + dir;
@@ -210,10 +261,16 @@ export function ListSettings({ listKey, title, withDesc = false }: { listKey: st
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-96 space-y-2">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{title}</p>
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          {title}
+        </p>
         {options.map((o, i) => (
           <div key={o.value} className="flex items-center gap-1">
-            <Input value={o.label} onChange={(e) => patch(i, { label: e.target.value })} className="h-8 text-xs" />
+            <Input
+              value={o.label}
+              onChange={(e) => patch(i, { label: e.target.value })}
+              className="h-8 text-xs"
+            />
             {withDesc && (
               <Input
                 value={o.desc ?? ""}
@@ -222,17 +279,35 @@ export function ListSettings({ listKey, title, withDesc = false }: { listKey: st
                 placeholder="Description"
               />
             )}
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => move(i, -1)} title="Move up">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={() => move(i, -1)}
+              title="Move up"
+            >
               <ArrowUp className="h-3.5 w-3.5" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => move(i, 1)} title="Move down">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={() => move(i, 1)}
+              title="Move down"
+            >
               <ArrowDown className="h-3.5 w-3.5" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
               className="h-7 w-7 text-red-500"
-              onClick={() => options.length > 1 && setList(listKey, options.filter((_, idx) => idx !== i))}
+              onClick={() =>
+                options.length > 1 &&
+                setList(
+                  listKey,
+                  options.filter((_, idx) => idx !== i),
+                )
+              }
               title="Remove"
               disabled={options.length <= 1}
             >
@@ -244,7 +319,12 @@ export function ListSettings({ listKey, title, withDesc = false }: { listKey: st
           variant="outline"
           size="sm"
           className="w-full"
-          onClick={() => setList(listKey, [...options, { value: `option-${Date.now().toString(36)}`, label: "New option" }])}
+          onClick={() =>
+            setList(listKey, [
+              ...options,
+              { value: `option-${Date.now().toString(36)}`, label: "New option" },
+            ])
+          }
         >
           <Plus className="mr-1 h-3.5 w-3.5" /> Add choice
         </Button>
@@ -268,7 +348,11 @@ export function LinkSettings({ linkKey }: { linkKey: string }) {
       </PopoverTrigger>
       <PopoverContent align="start" className="w-80 space-y-2">
         <Label className="text-xs">Button label</Label>
-        <Input value={l.label} onChange={(e) => setLink(linkKey, { label: e.target.value })} className="h-8 text-xs" />
+        <Input
+          value={l.label}
+          onChange={(e) => setLink(linkKey, { label: e.target.value })}
+          className="h-8 text-xs"
+        />
         <Label className="text-xs">Web address</Label>
         <Input
           value={draft ?? l.url}

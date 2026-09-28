@@ -55,9 +55,9 @@
   --radius: 0.75rem;
 
   /* Huntington palette */
-  --brand: oklch(0.82 0.19 128);            /* #7ECF1C bright green */
+  --brand: oklch(0.82 0.19 128); /* #7ECF1C bright green */
   --brand-foreground: oklch(0.2 0.05 165);
-  --brand-dark: oklch(0.24 0.04 170);       /* #002D2A deep green */
+  --brand-dark: oklch(0.24 0.04 170); /* #002D2A deep green */
   --brand-dark-foreground: oklch(0.98 0.01 130);
   --charcoal: oklch(0.28 0.01 250);
 
@@ -112,7 +112,8 @@
   * {
     border-color: var(--color-border);
   }
-  html, body {
+  html,
+  body {
     font-family: var(--font-display);
   }
   body {
@@ -129,6 +130,14 @@
 }
 @utility arrow-motif-bg {
   background-image:
-    radial-gradient(circle at 15% 10%, color-mix(in oklab, var(--brand) 22%, transparent) 0, transparent 42%),
-    radial-gradient(circle at 85% 90%, color-mix(in oklab, var(--brand-dark) 30%, transparent) 0, transparent 45%);
+    radial-gradient(
+      circle at 15% 10%,
+      color-mix(in oklab, var(--brand) 22%, transparent) 0,
+      transparent 42%
+    ),
+    radial-gradient(
+      circle at 85% 90%,
+      color-mix(in oklab, var(--brand-dark) 30%, transparent) 0,
+      transparent 45%
+    );
 }

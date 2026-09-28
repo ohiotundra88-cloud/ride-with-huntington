@@ -21,15 +21,15 @@
     "HUB_DB_URL": "https://rwh-db.madebyotten.com",
     "EMAIL_PROVIDER": "resend",
     "EMAIL_FROM": "Team Huntington Hub <hub@send.madebyaspire.com>",
-    "HUB_REQUIRE_SIGN_IN": "true"
+    "HUB_REQUIRE_SIGN_IN": "true",
   },
   "d1_databases": [
     {
       "binding": "HUB_SESSIONS",
       "database_name": "ride-with-huntington-sessions",
       "database_id": "f3ebe3a1-1839-41de-98a4-e4347ae4301b",
-      "migrations_dir": "deploy/cloudflare/d1-migrations"
-    }
+      "migrations_dir": "deploy/cloudflare/d1-migrations",
+    },
   ],
-  "r2_buckets": [{ "binding": "HUB_FILES", "bucket_name": "ride-with-huntington-files" }]
+  "r2_buckets": [{ "binding": "HUB_FILES", "bucket_name": "ride-with-huntington-files" }],
 }

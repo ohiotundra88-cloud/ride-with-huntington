@@ -29,7 +29,12 @@ export function ConfirmDelete({
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10 hover:text-destructive" disabled={pending}>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+          disabled={pending}
+        >
           <Trash2 className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
           {pending ? "Deleting…" : label}
         </Button>
@@ -41,7 +46,10 @@ export function ConfirmDelete({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Keep it</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+          <AlertDialogAction
+            onClick={onConfirm}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
             Delete permanently
           </AlertDialogAction>
         </AlertDialogFooter>

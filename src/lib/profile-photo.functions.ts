@@ -42,7 +42,8 @@ export const uploadProfilePhoto = createServerFn({ method: "POST" })
       throw new Error("That file isn't a PNG, JPEG or WebP image.");
     }
 
-    const ext = data.contentType === "image/png" ? "png" : data.contentType === "image/webp" ? "webp" : "jpg";
+    const ext =
+      data.contentType === "image/png" ? "png" : data.contentType === "image/webp" ? "webp" : "jpg";
     const path = `${context.userId}/avatar-${Date.now()}.${ext}`;
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -62,7 +63,11 @@ export const uploadProfilePhoto = createServerFn({ method: "POST" })
     const stamp = new Date().toISOString();
     const { error: updErr } = await supabaseAdmin
       .from("profiles")
-      .update({ avatar_path: path, avatar_content_type: data.contentType, avatar_updated_at: stamp })
+      .update({
+        avatar_path: path,
+        avatar_content_type: data.contentType,
+        avatar_updated_at: stamp,
+      })
       .eq("id", context.userId);
     if (updErr) throw new Error(updErr.message);
 

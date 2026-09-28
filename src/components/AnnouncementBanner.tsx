@@ -10,7 +10,11 @@ const DISMISS_KEY = "hh_dismissed_announcements_v1";
 
 function loadDismissed(): string[] {
   if (typeof window === "undefined") return [];
-  try { return JSON.parse(localStorage.getItem(DISMISS_KEY) || "[]"); } catch { return []; }
+  try {
+    return JSON.parse(localStorage.getItem(DISMISS_KEY) || "[]");
+  } catch {
+    return [];
+  }
 }
 
 export function AnnouncementBanner({ audience }: { audience?: Audience }) {
@@ -18,7 +22,9 @@ export function AnnouncementBanner({ audience }: { audience?: Audience }) {
   const { user, registration } = useStore();
   const [dismissed, setDismissed] = useState<string[]>([]);
 
-  useEffect(() => { setDismissed(loadDismissed()); }, []);
+  useEffect(() => {
+    setDismissed(loadDismissed());
+  }, []);
 
   // Which audiences does this viewer belong to? An explicit prop (e.g. the
   // family page) narrows it; otherwise derive it from the signed-in colleague.
@@ -30,7 +36,8 @@ export function AnnouncementBanner({ audience }: { audience?: Audience }) {
     }
     const participation = String(registration?.participation ?? "").toLowerCase();
     // Challengers get rider (fundraising) announcements.
-    const isRider = participation.includes("rider") || participation === "both" || participation === "challenger";
+    const isRider =
+      participation.includes("rider") || participation === "both" || participation === "challenger";
     const isVolunteer = participation.includes("volunteer") || participation === "both";
     if (isRider) set.add("riders");
     if (isVolunteer) set.add("volunteers");
@@ -38,10 +45,12 @@ export function AnnouncementBanner({ audience }: { audience?: Audience }) {
     // If we don't know the viewer's lane yet (not registered, or registration
     // still hydrating from the backend), show both tracks so a rider-targeted
     // announcement is never silently hidden.
-    if (!isRider && !isVolunteer) { set.add("riders"); set.add("volunteers"); }
+    if (!isRider && !isVolunteer) {
+      set.add("riders");
+      set.add("volunteers");
+    }
     return [...set];
   }, [audience, registration?.participation, user]);
-
 
   const active = useMemo(() => {
     if (!state.flags.announcements) return [];
@@ -51,7 +60,6 @@ export function AnnouncementBanner({ audience }: { audience?: Audience }) {
       .filter((a) => !dismissed.includes(a.id))
       .sort((a, b) => Number(b.pinned) - Number(a.pinned));
   }, [state.announcements, state.flags.announcements, viewerAudiences, dismissed]);
-
 
   if (active.length === 0) return null;
 
@@ -64,13 +72,20 @@ export function AnnouncementBanner({ audience }: { audience?: Audience }) {
   return (
     <div className="space-y-2">
       {active.map((a) => (
-        <div key={a.id} className="flex items-start gap-3 rounded-lg border border-[var(--brand)]/40 bg-[var(--brand)]/10 p-3">
+        <div
+          key={a.id}
+          className="flex items-start gap-3 rounded-lg border border-[var(--brand)]/40 bg-[var(--brand)]/10 p-3"
+        >
           <div className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-[var(--brand-dark)] text-white">
             <AdminIcon name={a.icon || "megaphone"} className="h-4 w-4" />
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-bold text-[var(--brand-dark)] flex items-center gap-2">
-              {a.pinned && <span className="rounded bg-[var(--brand-dark)] text-white text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5">Pinned</span>}
+              {a.pinned && (
+                <span className="rounded bg-[var(--brand-dark)] text-white text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5">
+                  Pinned
+                </span>
+              )}
               {a.headline}
             </p>
             <p className="mt-0.5 text-sm text-foreground/80">{a.body}</p>
@@ -81,8 +96,12 @@ export function AnnouncementBanner({ audience }: { audience?: Audience }) {
             )}
           </div>
           {a.dismissible && (
-            <button type="button" aria-label="Dismiss announcement" onClick={() => dismiss(a.id)}
-              className="rounded-md p-1 hover:bg-black/5 text-muted-foreground">
+            <button
+              type="button"
+              aria-label="Dismiss announcement"
+              onClick={() => dismiss(a.id)}
+              className="rounded-md p-1 hover:bg-black/5 text-muted-foreground"
+            >
               <X className="h-4 w-4" />
             </button>
           )}

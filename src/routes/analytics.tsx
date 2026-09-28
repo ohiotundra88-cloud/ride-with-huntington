@@ -20,7 +20,11 @@ export const Route = createFileRoute("/analytics")({
   head: () => ({
     meta: [
       { title: "Executive Analytics — Team Huntington Hub" },
-      { name: "description", content: "Executive analytics dashboard for Team Huntington Ride Weekend readiness. Sample data." },
+      {
+        name: "description",
+        content:
+          "Executive analytics dashboard for Team Huntington Ride Weekend readiness. Sample data.",
+      },
       { property: "og:title", content: "Executive Analytics" },
       { property: "og:description", content: "Team Huntington executive analytics — sample data." },
     ],
@@ -38,7 +42,9 @@ function AnalyticsPage() {
     return (
       <div className="mx-auto max-w-lg px-4 py-16 text-center">
         <h1 className="text-2xl font-bold">Executive Analytics unavailable</h1>
-        <p className="mt-2 text-muted-foreground">Requires admin access and the feature to be enabled.</p>
+        <p className="mt-2 text-muted-foreground">
+          Requires admin access and the feature to be enabled.
+        </p>
       </div>
     );
   }
@@ -66,7 +72,11 @@ function AnalyticsPage() {
               <TabsTrigger value="volunteers">Volunteers</TabsTrigger>
             </TabsList>
           </Tabs>
-          <Button asChild variant="outline"><Link to="/admin"><ArrowLeft className="mr-1 h-4 w-4" /> Admin</Link></Button>
+          <Button asChild variant="outline">
+            <Link to="/admin">
+              <ArrowLeft className="mr-1 h-4 w-4" /> Admin
+            </Link>
+          </Button>
         </div>
       </div>
 
@@ -84,7 +94,9 @@ function AnalyticsPage() {
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
         <Card>
-          <CardHeader><CardTitle>Registration funnel</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle>Registration funnel</CardTitle>
+          </CardHeader>
           <CardContent className="space-y-3">
             {funnelStages.map((s) => {
               const pct = Math.round((s.value / maxFunnel) * 100);
@@ -92,7 +104,9 @@ function AnalyticsPage() {
                 <div key={s.id}>
                   <div className="flex items-center justify-between text-sm">
                     <span className="font-semibold">{s.label}</span>
-                    <span className="tabular-nums text-muted-foreground">{s.value.toLocaleString()} · {pct}%</span>
+                    <span className="tabular-nums text-muted-foreground">
+                      {s.value.toLocaleString()} · {pct}%
+                    </span>
                   </div>
                   <div className="mt-1 h-3 rounded-full bg-muted overflow-hidden">
                     <div className="h-full bg-[var(--brand)]" style={{ width: `${pct}%` }} />
@@ -104,7 +118,9 @@ function AnalyticsPage() {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle>Top support topics</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle>Top support topics</CardTitle>
+          </CardHeader>
           <CardContent className="space-y-3">
             {topSupportTopics.map((t) => {
               const pct = Math.round((t.value / maxTopic) * 100);
@@ -124,7 +140,9 @@ function AnalyticsPage() {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle>Readiness breakdown</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle>Readiness breakdown</CardTitle>
+          </CardHeader>
           <CardContent className="space-y-3">
             {readinessBreakdown.map((r) => (
               <div key={r.label} className="flex items-center gap-3">
@@ -137,7 +155,9 @@ function AnalyticsPage() {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle>Registration completion by region</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle>Registration completion by region</CardTitle>
+          </CardHeader>
           <CardContent className="space-y-3">
             {regionCompletion.map((r) => (
               <div key={r.label} className="flex items-center gap-3">

@@ -97,16 +97,29 @@ export const listRiderProgress = createServerFn({ method: "GET" })
     const { data: profiles } = await supabaseAdmin
       .from("profiles")
       .select("id, email, full_name, region")
-      .in("id", rows.map((r: { user_id: string }) => r.user_id));
+      .in(
+        "id",
+        rows.map((r: { user_id: string }) => r.user_id),
+      );
     const people = new Map(
-      (profiles ?? []).map((p: { id: string; email: string | null; full_name: string | null; region?: string | null }) => [p.id, p] as const),
+      (profiles ?? []).map(
+        (p: {
+          id: string;
+          email: string | null;
+          full_name: string | null;
+          region?: string | null;
+        }) => [p.id, p] as const,
+      ),
     );
 
     // Live fundraising totals from Pelotonia, keyed by public/rider ID.
     const { normalizePublicId } = await import("@/lib/pelotonia-api.server");
     const { ridersByPublicId: fetchRiders } = await import("@/lib/pelotonia-data.server");
     const fundraising = await fetchRiders(
-      rows.map((r: { pelotonia?: unknown }) => ((r.pelotonia ?? {}) as Record<string, unknown>)["confirmation"]),
+      rows.map(
+        (r: { pelotonia?: unknown }) =>
+          ((r.pelotonia ?? {}) as Record<string, unknown>)["confirmation"],
+      ),
     );
 
     return rows.map((r): RiderProgressRow => {
@@ -130,14 +143,21 @@ export const listRiderProgress = createServerFn({ method: "GET" })
         registeredWithPelotonia: p["completed"] === true || p["status"] === "complete",
         pelotoniaStatus: String(p["status"] ?? "not_started"),
         travelStatus: String(t["status"] ?? "not_started"),
-        hotelBooked: !!str(t["hotelConfirmation"]) || (!!str(t["hotelName"]) && !!str(t["hotelCheckIn"])),
+        hotelBooked:
+          !!str(t["hotelConfirmation"]) || (!!str(t["hotelName"]) && !!str(t["hotelCheckIn"])),
         hotelName: str(t["hotelName"]),
         hotelCheckIn: str(t["hotelCheckIn"]),
         hotelCheckOut: str(t["hotelCheckOut"]),
         travelNeeds: str(t["needs"]),
         bikeStatus: String(b["status"] ?? "not_started"),
         bikePlan:
-          b["needs"] === "yes" ? "Rental" : b["needs"] === "no" ? "Own bike" : b["needs"] === "unsure" ? "Undecided" : null,
+          b["needs"] === "yes"
+            ? "Rental"
+            : b["needs"] === "no"
+              ? "Own bike"
+              : b["needs"] === "unsure"
+                ? "Undecided"
+                : null,
         bikeType: str(b["bikeType"]),
         bikeSize: str(b["bikeSize"]),
         pedals: str(b["pedals"]),
@@ -157,9 +177,11 @@ export const listRiderProgress = createServerFn({ method: "GET" })
         rideRoute: member && member.routes.length ? member.routes.join(", ") : null,
         rideType: member && member.rideTypes.length ? member.rideTypes.join(", ") : null,
         registrationTypes: member
-          ? [member.isRider && "Rider", member.isChallenger && "Challenger", member.isVolunteer && "Volunteer"].filter(
-              (v): v is string => !!v,
-            )
+          ? [
+              member.isRider && "Rider",
+              member.isChallenger && "Challenger",
+              member.isVolunteer && "Volunteer",
+            ].filter((v): v is string => !!v)
           : [],
         tags: member?.tags ?? [],
         isCaptain: !!member?.isCaptain,

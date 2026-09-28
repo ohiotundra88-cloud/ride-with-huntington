@@ -5,26 +5,49 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useStore } from "@/lib/store";
 import { REGIONS } from "@/lib/regions.shared";
 import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Camera, Trash2 } from "lucide-react";
-import { getMyProfilePhoto, uploadProfilePhoto, removeProfilePhoto } from "@/lib/profile-photo.functions";
-import { AVATAR_TYPES, MAX_AVATAR_BYTES, avatarUrl, initialsFrom } from "@/lib/profile-photo.shared";
+import {
+  getMyProfilePhoto,
+  uploadProfilePhoto,
+  removeProfilePhoto,
+} from "@/lib/profile-photo.functions";
+import {
+  AVATAR_TYPES,
+  MAX_AVATAR_BYTES,
+  avatarUrl,
+  initialsFrom,
+} from "@/lib/profile-photo.shared";
 
 export const Route = createFileRoute("/profile")({
-  head: () => ({ meta: [
-    { title: "Profile — Team Huntington Hub" },
-    { name: "description", content: "Review and update your Team Huntington colleague profile." },
-  ] }),
+  head: () => ({
+    meta: [
+      { title: "Profile — Team Huntington Hub" },
+      { name: "description", content: "Review and update your Team Huntington colleague profile." },
+    ],
+  }),
   component: ProfilePage,
 });
 
 const segments = [
-  "Consumer & Business Banking", "Commercial Banking", "Wealth Management",
-  "Technology", "Risk", "Marketing", "Human Resources", "Operations",
+  "Consumer & Business Banking",
+  "Commercial Banking",
+  "Wealth Management",
+  "Technology",
+  "Risk",
+  "Marketing",
+  "Human Resources",
+  "Operations",
 ];
 
 function ProfilePage() {
@@ -65,17 +88,19 @@ function ProfilePage() {
     }
   };
 
-
   return (
     <div className="mx-auto max-w-2xl px-4 py-10">
       <h1 className="text-3xl font-black text-[var(--brand-dark)]">Your profile</h1>
-      <p className="mt-1 text-muted-foreground">Prefilled from your Huntington record. Update anything that has changed.</p>
+      <p className="mt-1 text-muted-foreground">
+        Prefilled from your Huntington record. Update anything that has changed.
+      </p>
 
       <ProfilePhotoCard name={form.name} email={form.email} />
 
       <Card className="mt-6">
-
-        <CardHeader><CardTitle>Colleague details</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle>Colleague details</CardTitle>
+        </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2 sm:col-span-2">
             <Label>Full name</Label>
@@ -84,8 +109,16 @@ function ProfilePage() {
           </div>
           <div className="space-y-2">
             <Label>Work email</Label>
-            <Input type="email" value={form.email} readOnly aria-readonly="true" className="bg-muted" />
-            <p className="text-xs text-muted-foreground">This is your sign-in address and can't be changed here.</p>
+            <Input
+              type="email"
+              value={form.email}
+              readOnly
+              aria-readonly="true"
+              className="bg-muted"
+            />
+            <p className="text-xs text-muted-foreground">
+              This is your sign-in address and can't be changed here.
+            </p>
           </div>
           <div className="space-y-2">
             <Label>Mobile number</Label>
@@ -94,17 +127,36 @@ function ProfilePage() {
           <div className="space-y-2">
             <Label>Business segment</Label>
             <Select value={form.segment} onValueChange={(v) => update({ segment: v })}>
-              <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
-              <SelectContent>{segments.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+              <SelectTrigger>
+                <SelectValue placeholder="Select..." />
+              </SelectTrigger>
+              <SelectContent>
+                {segments.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
           {/* Same Huntington region list as registration (Chris Kemper, 2026-09-28).
               Saved as the profile's region; market mirrors it for older reports. */}
           <div className="space-y-2">
             <Label htmlFor="profile-market">Market / location</Label>
-            <Select value={form.region || undefined} onValueChange={(v) => update({ region: v, market: v })}>
-              <SelectTrigger id="profile-market"><SelectValue placeholder="Select your market..." /></SelectTrigger>
-              <SelectContent>{REGIONS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+            <Select
+              value={form.region || undefined}
+              onValueChange={(v) => update({ region: v, market: v })}
+            >
+              <SelectTrigger id="profile-market">
+                <SelectValue placeholder="Select your market..." />
+              </SelectTrigger>
+              <SelectContent>
+                {REGIONS.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
           <div className="space-y-2 sm:col-span-2">
@@ -120,7 +172,9 @@ function ProfilePage() {
                 className="mt-0.5"
               />
               <span className="text-sm text-muted-foreground">
-                <b className="text-foreground">Privacy notice.</b> I understand that Team Huntington will use this information to coordinate my Pelotonia participation, travel, apparel and reimbursements. Data is handled per Huntington's colleague privacy policy.
+                <b className="text-foreground">Privacy notice.</b> I understand that Team Huntington
+                will use this information to coordinate my Pelotonia participation, travel, apparel
+                and reimbursements. Data is handled per Huntington's colleague privacy policy.
               </span>
             </label>
             {errors.consent && <p className="mt-2 text-xs text-destructive">{errors.consent}</p>}
@@ -129,8 +183,14 @@ function ProfilePage() {
       </Card>
 
       <div className="mt-6 flex justify-end gap-2">
-        <Button variant="outline" onClick={() => nav({ to: "/" })}>Cancel</Button>
-        <Button onClick={save} disabled={saving} className="bg-[var(--brand)] text-[var(--brand-foreground)] hover:bg-[var(--brand)]/90 font-semibold">
+        <Button variant="outline" onClick={() => nav({ to: "/" })}>
+          Cancel
+        </Button>
+        <Button
+          onClick={save}
+          disabled={saving}
+          className="bg-[var(--brand)] text-[var(--brand-foreground)] hover:bg-[var(--brand)]/90 font-semibold"
+        >
           {saving ? "Saving…" : "Save & continue"}
         </Button>
       </div>
@@ -161,7 +221,11 @@ function ProfilePhotoCard({ name, email }: { name: string; email: string }) {
         reader.readAsDataURL(file);
       });
       return uploadProfilePhoto({
-        data: { fileName: file.name, contentType: file.type as (typeof AVATAR_TYPES)[number], base64 },
+        data: {
+          fileName: file.name,
+          contentType: file.type as (typeof AVATAR_TYPES)[number],
+          base64,
+        },
       });
     },
     onSuccess: () => {
@@ -186,7 +250,9 @@ function ProfilePhotoCard({ name, email }: { name: string; email: string }) {
 
   return (
     <Card className="mt-6">
-      <CardHeader><CardTitle>Profile photo</CardTitle></CardHeader>
+      <CardHeader>
+        <CardTitle>Profile photo</CardTitle>
+      </CardHeader>
       <CardContent className="flex flex-wrap items-center gap-4">
         {signedIn && photo.data?.hasPhoto ? (
           <img
@@ -224,10 +290,19 @@ function ProfilePhotoCard({ name, email }: { name: string; email: string }) {
               onClick={() => inputRef.current?.click()}
             >
               <Camera className="mr-1.5 h-4 w-4" />
-              {upload.isPending ? "Uploading…" : photo.data?.hasPhoto ? "Replace photo" : "Upload photo"}
+              {upload.isPending
+                ? "Uploading…"
+                : photo.data?.hasPhoto
+                  ? "Replace photo"
+                  : "Upload photo"}
             </Button>
             {signedIn && photo.data?.hasPhoto && (
-              <Button size="sm" variant="ghost" disabled={remove.isPending} onClick={() => remove.mutate()}>
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={remove.isPending}
+                onClick={() => remove.mutate()}
+              >
                 <Trash2 className="mr-1.5 h-4 w-4 text-destructive" /> Remove
               </Button>
             )}

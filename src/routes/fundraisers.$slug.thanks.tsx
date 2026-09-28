@@ -17,9 +17,15 @@ export const Route = createFileRoute("/fundraisers/$slug/thanks")({
   head: () => ({
     meta: [
       { title: "Thank you — Team Huntington fundraiser" },
-      { name: "description", content: "Your contribution to a Team Huntington Pelotonia fundraiser is confirmed." },
+      {
+        name: "description",
+        content: "Your contribution to a Team Huntington Pelotonia fundraiser is confirmed.",
+      },
       { property: "og:title", content: "Thank you for supporting Team Huntington" },
-      { property: "og:description", content: "Contribution confirmation for a Team Huntington fundraiser." },
+      {
+        property: "og:description",
+        content: "Contribution confirmation for a Team Huntington fundraiser.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -47,21 +53,30 @@ function ThanksPage() {
           <h1 className="mt-3 text-xl font-bold text-[var(--brand-dark)]">Thank you!</h1>
 
           {!order ? (
-            <p className="mt-2 text-sm text-muted-foreground">Your contribution to Team Huntington is confirmed.</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Your contribution to Team Huntington is confirmed.
+            </p>
           ) : isPending ? (
             <p className="mt-2 text-sm text-muted-foreground">Loading your confirmation…</p>
           ) : !data ? (
-            <p className="mt-2 text-sm text-muted-foreground">We couldn't find that confirmation.</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              We couldn't find that confirmation.
+            </p>
           ) : (
             <div className="mt-3 space-y-3 text-sm">
               <p className="text-muted-foreground">
-                {data.order.supporter_name}, your support of <span className="font-medium">{data.fundraiser?.title}</span>{" "}
-                is recorded.
+                {data.order.supporter_name}, your support of{" "}
+                <span className="font-medium">{data.fundraiser?.title}</span> is recorded.
               </p>
               <div className="rounded-lg border bg-muted/40 p-4 text-left">
                 <Row label="Amount" value={money(data.order.amount)} />
-                {data.item_label && <Row label="Item" value={`${data.order.quantity} × ${data.item_label}`} />}
-                <Row label="Status" value={data.order.status === "paid" ? "Paid" : data.order.status} />
+                {data.item_label && (
+                  <Row label="Item" value={`${data.order.quantity} × ${data.item_label}`} />
+                )}
+                <Row
+                  label="Status"
+                  value={data.order.status === "paid" ? "Paid" : data.order.status}
+                />
                 <Row label="Confirmation" value={data.order.id.slice(0, 8).toUpperCase()} />
                 <Row label="Date" value={new Date(data.order.created_at).toLocaleString()} />
               </div>
@@ -80,9 +95,14 @@ function ThanksPage() {
 
           <div className="mt-5 flex flex-wrap justify-center gap-2">
             <Button asChild variant="outline">
-              <Link to="/fundraisers/$slug" params={{ slug }}>Back to the fundraiser</Link>
+              <Link to="/fundraisers/$slug" params={{ slug }}>
+                Back to the fundraiser
+              </Link>
             </Button>
-            <Button asChild className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90">
+            <Button
+              asChild
+              className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90"
+            >
               <Link to="/fundraisers">See all fundraisers</Link>
             </Button>
           </div>

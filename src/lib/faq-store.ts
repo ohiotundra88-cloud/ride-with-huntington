@@ -55,7 +55,8 @@ export function useAdminFaqs() {
   const query = useQuery({
     queryKey: ["faqs", "admin"],
     queryFn: () => fn(),
-    select: (rows) => rows.map((r) => ({ ...toArticle(r), hidden: r.hidden, is_builtin: r.is_builtin })),
+    select: (rows) =>
+      rows.map((r) => ({ ...toArticle(r), hidden: r.hidden, is_builtin: r.is_builtin })),
   });
 
   const invalidate = () => {
@@ -63,7 +64,14 @@ export function useAdminFaqs() {
   };
 
   const upsert = useMutation({
-    mutationFn: (a: Partial<FAQArticle> & { title: string; category: string; body: string; keywords: string[] }) =>
+    mutationFn: (
+      a: Partial<FAQArticle> & {
+        title: string;
+        category: string;
+        body: string;
+        keywords: string[];
+      },
+    ) =>
       upsertFn({
         data: {
           id: a.id && a.id.length === 36 ? a.id : undefined,

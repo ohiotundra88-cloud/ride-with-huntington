@@ -5,7 +5,10 @@ const STYLES: Record<VendorTier["key"], { className: string; Icon: typeof Hexago
   pinnacle: { className: "bg-[var(--brand-dark)] text-white", Icon: Mountain },
   one_goal: { className: "bg-[var(--brand)] text-[var(--brand-foreground)]", Icon: Target },
   gold_honeycomb: { className: "bg-amber-100 text-amber-900 ring-1 ring-amber-300", Icon: Hexagon },
-  green_honeycomb: { className: "bg-emerald-50 text-emerald-900 ring-1 ring-emerald-300", Icon: Hexagon },
+  green_honeycomb: {
+    className: "bg-emerald-50 text-emerald-900 ring-1 ring-emerald-300",
+    Icon: Hexagon,
+  },
 };
 
 const base =
@@ -16,7 +19,11 @@ export function VendorTierBadge({ tier, year }: { tier: VendorTier | null; year?
   const { className, Icon } = STYLES[tier.key];
   return (
     <span className={`${base} ${className}`} title={`${tier.label}${year ? ` · ${year}` : ""}`}>
-      <Icon className="h-3 w-3" aria-hidden="true" fill={tier.key.endsWith("honeycomb") ? "currentColor" : "none"} />
+      <Icon
+        className="h-3 w-3"
+        aria-hidden="true"
+        fill={tier.key.endsWith("honeycomb") ? "currentColor" : "none"}
+      />
       {tier.label}
     </span>
   );

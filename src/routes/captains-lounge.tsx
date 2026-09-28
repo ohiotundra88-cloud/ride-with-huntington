@@ -10,25 +10,58 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
-  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import {
-  Lock, ShieldCheck, Pin, Paperclip, Plus, Pencil, Trash2, EyeOff, Upload, X, Download, Search,
-  Eye, ChevronUp,
+  Lock,
+  ShieldCheck,
+  Pin,
+  Paperclip,
+  Plus,
+  Pencil,
+  Trash2,
+  EyeOff,
+  Upload,
+  X,
+  Download,
+  Search,
+  Eye,
+  ChevronUp,
 } from "lucide-react";
 import {
-  listLoungePosts, saveLoungePost, deleteLoungePost, uploadLoungeFile, removeLoungeFile, getLoungeFile,
+  listLoungePosts,
+  saveLoungePost,
+  deleteLoungePost,
+  uploadLoungeFile,
+  removeLoungeFile,
+  getLoungeFile,
 } from "@/lib/captain-lounge.functions";
 import {
-  ALLOWED_DOC_TYPES, MAX_DOC_BYTES, formatPostDate, postCategories, type CaptainPost,
+  ALLOWED_DOC_TYPES,
+  MAX_DOC_BYTES,
+  formatPostDate,
+  postCategories,
+  type CaptainPost,
 } from "@/lib/captain-lounge.shared";
 import { avatarUrl, initialsFrom } from "@/lib/profile-photo.shared";
-
 
 export const Route = createFileRoute("/captains-lounge")({
   component: CaptainsLoungePage,
@@ -41,7 +74,10 @@ export const Route = createFileRoute("/captains-lounge")({
           "Private hub for Team Huntington captains and leadership: updates, playbooks, meeting notes and shared documents.",
       },
       { property: "og:title", content: "Captains Lounge — Team Huntington Hub" },
-      { property: "og:description", content: "Leadership-only updates, playbooks and documents for Team Huntington captains." },
+      {
+        property: "og:description",
+        content: "Leadership-only updates, playbooks and documents for Team Huntington captains.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "robots", content: "noindex" },
@@ -74,9 +110,21 @@ function CaptainsLoungePage() {
     );
   }
 
-  if (!user.signedIn) return <Gate title="Sign in required" body="The Captains Lounge is a private space for Team Huntington leadership. Sign in with your Huntington email to continue." cta />;
-  if (!allowed) return <Gate title="Leadership access only" body="This space is limited to colleagues with a Team Captain, Admin, Super User, Legal, Risk, Compliance, Marketing or Co-Chair role. If you should have access, ask an admin to add your role." />;
-
+  if (!user.signedIn)
+    return (
+      <Gate
+        title="Sign in required"
+        body="The Captains Lounge is a private space for Team Huntington leadership. Sign in with your Huntington email to continue."
+        cta
+      />
+    );
+  if (!allowed)
+    return (
+      <Gate
+        title="Leadership access only"
+        body="This space is limited to colleagues with a Team Captain, Admin, Super User, Legal, Risk, Compliance, Marketing or Co-Chair role. If you should have access, ask an admin to add your role."
+      />
+    );
 
   return <Lounge />;
 }
@@ -95,11 +143,16 @@ function Gate({ title, body, cta }: { title: string; body: string; cta?: boolean
           <p className="text-sm text-muted-foreground">{body}</p>
           <div className="flex gap-2">
             {cta && (
-              <Button asChild className="bg-[var(--brand)] text-[var(--brand-foreground)] hover:brightness-95">
+              <Button
+                asChild
+                className="bg-[var(--brand)] text-[var(--brand-foreground)] hover:brightness-95"
+              >
                 <Link to="/signin">Sign in</Link>
               </Button>
             )}
-            <Button asChild variant="outline"><Link to="/dashboard">Back to My Journey</Link></Button>
+            <Button asChild variant="outline">
+              <Link to="/dashboard">Back to My Journey</Link>
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -113,7 +166,11 @@ function Lounge() {
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string>("all");
 
-  const { data: posts = [], isLoading, error } = useQuery<CaptainPost[]>({
+  const {
+    data: posts = [],
+    isLoading,
+    error,
+  } = useQuery<CaptainPost[]>({
     queryKey: ["lounge-posts"],
     queryFn: () => listLoungePosts(),
   });
@@ -126,7 +183,9 @@ function Lounge() {
     return visible.filter((p) => {
       if (cat !== "all" && p.category !== cat) return false;
       if (!needle) return true;
-      return `${p.title} ${p.body} ${p.category} ${p.file_name ?? ""}`.toLowerCase().includes(needle);
+      return `${p.title} ${p.body} ${p.category} ${p.file_name ?? ""}`
+        .toLowerCase()
+        .includes(needle);
     });
   }, [visible, q, cat]);
 
@@ -142,13 +201,23 @@ function Lounge() {
           </div>
           <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">Captains Lounge</h1>
           <p className="mt-2 max-w-2xl text-sm text-white/75">
-            Updates, playbooks, meeting notes and shared documents for the colleagues leading Team Huntington.
+            Updates, playbooks, meeting notes and shared documents for the colleagues leading Team
+            Huntington.
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <span className="text-xs text-white/60">Your access:</span>
-            {myRoles.length ? myRoles.map((r) => (
-              <Badge key={r} className="bg-[var(--brand)] text-[var(--brand-foreground)] hover:bg-[var(--brand)]">{r}</Badge>
-            )) : <Badge variant="secondary">Leadership</Badge>}
+            {myRoles.length ? (
+              myRoles.map((r) => (
+                <Badge
+                  key={r}
+                  className="bg-[var(--brand)] text-[var(--brand-foreground)] hover:bg-[var(--brand)]"
+                >
+                  {r}
+                </Badge>
+              ))
+            ) : (
+              <Badge variant="secondary">Leadership</Badge>
+            )}
           </div>
         </div>
       </section>
@@ -157,9 +226,16 @@ function Lounge() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search updates and documents" className="pl-9" />
+            <Input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search updates and documents"
+              className="pl-9"
+            />
           </div>
-          {canManage && <PostDialog onSaved={() => qc.invalidateQueries({ queryKey: ["lounge-posts"] })} />}
+          {canManage && (
+            <PostDialog onSaved={() => qc.invalidateQueries({ queryKey: ["lounge-posts"] })} />
+          )}
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -183,12 +259,16 @@ function Lounge() {
         ) : error ? (
           <p className="text-sm text-destructive">{(error as Error).message}</p>
         ) : filtered.length === 0 ? (
-          <Card><CardContent className="py-10 text-center text-sm text-muted-foreground">
-            Nothing posted yet. {canManage && "Use “New post” to share the first update."}
-          </CardContent></Card>
+          <Card>
+            <CardContent className="py-10 text-center text-sm text-muted-foreground">
+              Nothing posted yet. {canManage && "Use “New post” to share the first update."}
+            </CardContent>
+          </Card>
         ) : (
           <div className="space-y-4">
-            {filtered.map((p) => <PostCard key={p.id} post={p} canManage={canManage} />)}
+            {filtered.map((p) => (
+              <PostCard key={p.id} post={p} canManage={canManage} />
+            ))}
           </div>
         )}
       </div>
@@ -202,7 +282,10 @@ function PostCard({ post, canManage }: { post: CaptainPost; canManage: boolean }
 
   const del = useMutation({
     mutationFn: () => deleteLoungePost({ data: { id: post.id } }),
-    onSuccess: () => { toast.success("Post removed"); invalidate(); },
+    onSuccess: () => {
+      toast.success("Post removed");
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -228,16 +311,28 @@ function PostCard({ post, canManage }: { post: CaptainPost; canManage: boolean }
         <div className="flex flex-wrap items-start gap-2">
           <div className="min-w-0 flex-1">
             <div className="mb-1 flex flex-wrap items-center gap-2">
-              <Badge variant="secondary" className="text-[10px] uppercase tracking-wide">{post.category}</Badge>
-              {post.pinned && <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--brand-dark)]"><Pin className="h-3 w-3" /> Pinned</span>}
-              {!post.published && <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-600"><EyeOff className="h-3 w-3" /> Draft</span>}
+              <Badge variant="secondary" className="text-[10px] uppercase tracking-wide">
+                {post.category}
+              </Badge>
+              {post.pinned && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--brand-dark)]">
+                  <Pin className="h-3 w-3" /> Pinned
+                </span>
+              )}
+              {!post.published && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-600">
+                  <EyeOff className="h-3 w-3" /> Draft
+                </span>
+              )}
             </div>
             <CardTitle className="text-lg leading-snug">{post.title}</CardTitle>
             <p className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-muted-foreground">
               {post.author_avatar_version ? (
                 <img
                   src={avatarUrl(post.created_by, post.author_avatar_version)}
-                  alt={post.author_name ? `${post.author_name} profile photo` : "Author profile photo"}
+                  alt={
+                    post.author_name ? `${post.author_name} profile photo` : "Author profile photo"
+                  }
                   loading="lazy"
                   className="mr-0.5 h-6 w-6 shrink-0 rounded-full object-cover ring-1 ring-border"
                 />
@@ -262,12 +357,16 @@ function PostCard({ post, canManage }: { post: CaptainPost; canManage: boolean }
               <PostDialog post={post} onSaved={invalidate} />
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="ghost" size="icon" aria-label="Delete post"><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                  <Button variant="ghost" size="icon" aria-label="Delete post">
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>Delete this post?</AlertDialogTitle>
-                    <AlertDialogDescription>“{post.title}” and any attached document will be removed for all leaders.</AlertDialogDescription>
+                    <AlertDialogDescription>
+                      “{post.title}” and any attached document will be removed for all leaders.
+                    </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -280,9 +379,17 @@ function PostCard({ post, canManage }: { post: CaptainPost; canManage: boolean }
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        {post.body && <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{post.body}</p>}
+        {post.body && (
+          <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
+            {post.body}
+          </p>
+        )}
         {post.file_path && (
-          <AttachmentPreview post={post} onDownload={() => download.mutate()} downloading={download.isPending} />
+          <AttachmentPreview
+            post={post}
+            onDownload={() => download.mutate()}
+            downloading={download.isPending}
+          />
         )}
 
         {canManage && <FileControls post={post} onChanged={invalidate} />}
@@ -302,7 +409,9 @@ function AttachmentPreview({
 }) {
   const ext = (post.file_name ?? "").split(".").pop()?.toLowerCase() ?? "";
   const type = (post.content_type ?? "").toLowerCase();
-  const isImage = type.startsWith("image/") || ["png", "jpg", "jpeg", "gif", "webp", "svg", "avif", "bmp"].includes(ext);
+  const isImage =
+    type.startsWith("image/") ||
+    ["png", "jpg", "jpeg", "gif", "webp", "svg", "avif", "bmp"].includes(ext);
   const isPdf = type.includes("pdf") || ext === "pdf";
   const isText = type.startsWith("text/") || ["txt", "csv", "md", "json"].includes(ext);
   const previewable = isImage || isPdf || isText;
@@ -331,7 +440,6 @@ function AttachmentPreview({
     }
   }, [file.data, isText, isPdf, isImage, ext]);
 
-
   useEffect(() => {
     return () => {
       if (objectUrl) URL.revokeObjectURL(objectUrl);
@@ -355,7 +463,11 @@ function AttachmentPreview({
         <span className="min-w-0 flex-1 truncate text-sm">{post.file_name}</span>
         {previewable && (
           <Button size="sm" variant="ghost" onClick={() => setOpen((v) => !v)}>
-            {open ? <ChevronUp className="mr-1.5 h-3.5 w-3.5" /> : <Eye className="mr-1.5 h-3.5 w-3.5" />}
+            {open ? (
+              <ChevronUp className="mr-1.5 h-3.5 w-3.5" />
+            ) : (
+              <Eye className="mr-1.5 h-3.5 w-3.5" />
+            )}
             {open ? "Hide preview" : "Preview"}
           </Button>
         )}
@@ -368,7 +480,9 @@ function AttachmentPreview({
         <div className="border-t bg-background p-3">
           {file.isPending && <p className="text-sm text-muted-foreground">Loading preview…</p>}
           {file.isError && (
-            <p className="text-sm text-destructive">{(file.error as Error).message || "Preview unavailable."}</p>
+            <p className="text-sm text-destructive">
+              {(file.error as Error).message || "Preview unavailable."}
+            </p>
           )}
           {file.data && isImage && objectUrl && (
             <img
@@ -380,8 +494,16 @@ function AttachmentPreview({
           )}
           {file.data && isPdf && objectUrl && (
             <div className="space-y-2">
-              <object data={objectUrl} type="application/pdf" className="h-[520px] w-full rounded-md border">
-                <iframe src={objectUrl} title={post.file_name ?? "Document preview"} className="h-[520px] w-full rounded-md border" />
+              <object
+                data={objectUrl}
+                type="application/pdf"
+                className="h-[520px] w-full rounded-md border"
+              >
+                <iframe
+                  src={objectUrl}
+                  title={post.file_name ?? "Document preview"}
+                  className="h-[520px] w-full rounded-md border"
+                />
               </object>
               <a
                 href={objectUrl}
@@ -410,7 +532,6 @@ function AttachmentPreview({
   );
 }
 
-
 function FileControls({ post, onChanged }: { post: CaptainPost; onChanged: () => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -426,15 +547,23 @@ function FileControls({ post, onChanged }: { post: CaptainPost; onChanged: () =>
         reader.onerror = () => reject(new Error("Could not read that file."));
         reader.readAsDataURL(file);
       });
-      return uploadLoungeFile({ data: { id: post.id, fileName: file.name, contentType: file.type as any, base64 } });
+      return uploadLoungeFile({
+        data: { id: post.id, fileName: file.name, contentType: file.type as any, base64 },
+      });
     },
-    onSuccess: () => { toast.success("Document attached"); onChanged(); },
+    onSuccess: () => {
+      toast.success("Document attached");
+      onChanged();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const remove = useMutation({
     mutationFn: () => removeLoungeFile({ data: { id: post.id } }),
-    onSuccess: () => { toast.success("Document removed"); onChanged(); },
+    onSuccess: () => {
+      toast.success("Document removed");
+      onChanged();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -445,13 +574,29 @@ function FileControls({ post, onChanged }: { post: CaptainPost; onChanged: () =>
         type="file"
         className="hidden"
         accept={ALLOWED_DOC_TYPES.join(",")}
-        onChange={(e) => { const f = e.target.files?.[0]; if (f) upload.mutate(f); e.target.value = ""; }}
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) upload.mutate(f);
+          e.target.value = "";
+        }}
       />
-      <Button size="sm" variant="ghost" onClick={() => inputRef.current?.click()} disabled={upload.isPending}>
-        <Upload className="mr-1.5 h-3.5 w-3.5" /> {post.file_path ? "Replace document" : "Attach document"}
+      <Button
+        size="sm"
+        variant="ghost"
+        onClick={() => inputRef.current?.click()}
+        disabled={upload.isPending}
+      >
+        <Upload className="mr-1.5 h-3.5 w-3.5" />{" "}
+        {post.file_path ? "Replace document" : "Attach document"}
       </Button>
       {post.file_path && (
-        <Button size="sm" variant="ghost" className="text-destructive" onClick={() => remove.mutate()} disabled={remove.isPending}>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="text-destructive"
+          onClick={() => remove.mutate()}
+          disabled={remove.isPending}
+        >
           <X className="mr-1.5 h-3.5 w-3.5" /> Remove document
         </Button>
       )}
@@ -470,9 +615,12 @@ function PostDialog({ post, onSaved }: { post?: CaptainPost; onSaved: () => void
   });
 
   const save = useMutation({
-    mutationFn: () =>
-      saveLoungePost({ data: { ...(post ? { id: post.id } : {}), ...form } }),
-    onSuccess: () => { toast.success(post ? "Post updated" : "Post published"); setOpen(false); onSaved(); },
+    mutationFn: () => saveLoungePost({ data: { ...(post ? { id: post.id } : {}), ...form } }),
+    onSuccess: () => {
+      toast.success(post ? "Post updated" : "Post published");
+      setOpen(false);
+      onSaved();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -480,7 +628,9 @@ function PostDialog({ post, onSaved }: { post?: CaptainPost; onSaved: () => void
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {post ? (
-          <Button variant="ghost" size="icon" aria-label="Edit post"><Pencil className="h-4 w-4" /></Button>
+          <Button variant="ghost" size="icon" aria-label="Edit post">
+            <Pencil className="h-4 w-4" />
+          </Button>
         ) : (
           <Button className="bg-[var(--brand)] text-[var(--brand-foreground)] hover:brightness-95">
             <Plus className="mr-1.5 h-4 w-4" /> New post
@@ -495,7 +645,12 @@ function PostDialog({ post, onSaved }: { post?: CaptainPost; onSaved: () => void
         <div className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="lp-title">Title</Label>
-            <Input id="lp-title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Captain huddle recap — August" />
+            <Input
+              id="lp-title"
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+              placeholder="Captain huddle recap — August"
+            />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="lp-cat">Category</Label>
@@ -505,30 +660,50 @@ function PostDialog({ post, onSaved }: { post?: CaptainPost; onSaved: () => void
               onChange={(e) => setForm({ ...form, category: e.target.value })}
               className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
             >
-              {postCategories.map((c) => <option key={c} value={c}>{c}</option>)}
+              {postCategories.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
             </select>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="lp-body">Message</Label>
-            <Textarea id="lp-body" rows={7} value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} placeholder="Share the update, key dates, and what captains need to do next." />
+            <Textarea
+              id="lp-body"
+              rows={7}
+              value={form.body}
+              onChange={(e) => setForm({ ...form, body: e.target.value })}
+              placeholder="Share the update, key dates, and what captains need to do next."
+            />
           </div>
           <div className="flex items-center justify-between rounded-lg border p-3">
             <div>
               <div className="text-sm font-medium">Pin to top</div>
               <div className="text-xs text-muted-foreground">Keep this above other posts.</div>
             </div>
-            <Switch checked={form.pinned} onCheckedChange={(v) => setForm({ ...form, pinned: v })} />
+            <Switch
+              checked={form.pinned}
+              onCheckedChange={(v) => setForm({ ...form, pinned: v })}
+            />
           </div>
           <div className="flex items-center justify-between rounded-lg border p-3">
             <div>
               <div className="text-sm font-medium">Published</div>
-              <div className="text-xs text-muted-foreground">Off keeps it a draft only managers see.</div>
+              <div className="text-xs text-muted-foreground">
+                Off keeps it a draft only managers see.
+              </div>
             </div>
-            <Switch checked={form.published} onCheckedChange={(v) => setForm({ ...form, published: v })} />
+            <Switch
+              checked={form.published}
+              onCheckedChange={(v) => setForm({ ...form, published: v })}
+            />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
           <Button
             className="bg-[var(--brand)] text-[var(--brand-foreground)] hover:brightness-95"
             disabled={form.title.trim().length < 2 || save.isPending}

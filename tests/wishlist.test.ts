@@ -7,7 +7,12 @@ import {
   requestInputSchema,
   type FundraiserRequest,
 } from "../src/lib/fundraiser-requests.shared.ts";
-import { apparelStatus, bikeStatus, needsTravelAndApparel, travelStatus } from "../src/lib/registration-progress.ts";
+import {
+  apparelStatus,
+  bikeStatus,
+  needsTravelAndApparel,
+  travelStatus,
+} from "../src/lib/registration-progress.ts";
 
 // Vendor tiers -----------------------------------------------------------------
 const cases: [number, string | null][] = [
@@ -23,7 +28,8 @@ const cases: [number, string | null][] = [
   [250000, "pinnacle"],
 ];
 for (const [amount, key] of cases) {
-  test(`$${amount} -> ${key ?? "no tier"}`, () => assert.equal(tierForAmount(amount)?.key ?? null, key));
+  test(`$${amount} -> ${key ?? "no tier"}`, () =>
+    assert.equal(tierForAmount(amount)?.key ?? null, key));
 }
 
 test("a commitment counts before the money arrives; the larger of the two is used", () => {
@@ -33,7 +39,9 @@ test("a commitment counts before the money arrives; the larger of the two is use
 });
 
 test("Pelotonia Kids donations count toward the tier and earn the Kids badge", () => {
-  const t = yearTotals([{ year: 2027, committed_amount: 45000, actual_donated_amount: 45000, kids_amount: 5000 }]);
+  const t = yearTotals([
+    { year: 2027, committed_amount: 45000, actual_donated_amount: 45000, kids_amount: 5000 },
+  ]);
   assert.equal(t[2027].total, 50000);
   assert.equal(tierFor(t, 2027)?.key, "pinnacle");
   assert.equal(isKidsSupporter(t, 2027), true);
@@ -80,25 +88,47 @@ test("every yes/no question must be answered", () => {
 });
 test("Huntington property needs the facilities answer", () => {
   assert.deepEqual(issues({ ...base, on_huntington_property: true }), ["facilities_approved"]);
-  assert.deepEqual(issues({ ...base, on_huntington_property: true, facilities_approved: false }), []);
+  assert.deepEqual(
+    issues({ ...base, on_huntington_property: true, facilities_approved: false }),
+    [],
+  );
 });
 test("alcohol needs a description", () => {
   assert.deepEqual(issues({ ...base, serves_alcohol: true }), ["alcohol_details"]);
-  assert.deepEqual(issues({ ...base, serves_alcohol: true, alcohol_details: "Beer and wine by the venue's bartender" }), []);
+  assert.deepEqual(
+    issues({
+      ...base,
+      serves_alcohol: true,
+      alcohol_details: "Beer and wine by the venue's bartender",
+    }),
+    [],
+  );
 });
 test("serving food requires agreeing colleagues won't serve it", () => {
-  assert.deepEqual(issues({ ...base, serves_food: true, food_policy_acknowledged: false, food_truck: false }), ["food_policy_acknowledged"]);
-  assert.deepEqual(issues({ ...base, serves_food: true, food_policy_acknowledged: true, food_truck: false }), []);
+  assert.deepEqual(
+    issues({ ...base, serves_food: true, food_policy_acknowledged: false, food_truck: false }),
+    ["food_policy_acknowledged"],
+  );
+  assert.deepEqual(
+    issues({ ...base, serves_food: true, food_policy_acknowledged: true, food_truck: false }),
+    [],
+  );
 });
 test("food needs the food truck answer", () => {
-  assert.deepEqual(issues({ ...base, serves_food: true, food_policy_acknowledged: true }), ["food_truck"]);
+  assert.deepEqual(issues({ ...base, serves_food: true, food_policy_acknowledged: true }), [
+    "food_truck",
+  ]);
 });
 test("food trucks can't be hosted on Huntington property", () => {
   const food = { serves_food: true, food_policy_acknowledged: true, food_truck: true };
   assert.deepEqual(issues({ ...base, ...food }), []);
-  assert.deepEqual(issues({ ...base, ...food, on_huntington_property: true, facilities_approved: true }), ["food_truck"]);
+  assert.deepEqual(
+    issues({ ...base, ...food, on_huntington_property: true, facilities_approved: true }),
+    ["food_truck"],
+  );
 });
-test("raffle is an event type", () => assert.deepEqual(issues({ ...base, event_type: "raffle" }), []));
+test("raffle is an event type", () =>
+  assert.deepEqual(issues({ ...base, event_type: "raffle" }), []));
 
 test("no logos means Marketing isn't needed", () => {
   assert.equal(initialMarketingStatus(false), "not_required");

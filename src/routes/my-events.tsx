@@ -20,7 +20,8 @@ export const Route = createFileRoute("/my-events")({
       { property: "og:title", content: "My Team Events — Team Huntington" },
       {
         property: "og:description",
-        content: "See the company events assigned to you and let your captain know if you can make it.",
+        content:
+          "See the company events assigned to you and let your captain know if you can make it.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

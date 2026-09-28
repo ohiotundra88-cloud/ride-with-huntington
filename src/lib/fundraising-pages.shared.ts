@@ -5,7 +5,13 @@ import { z } from "zod";
  * Client-safe: no server-only imports here.
  */
 
-export const FUNDRAISER_KINDS = ["donation", "raffle", "tickets", "sponsorship", "auction"] as const;
+export const FUNDRAISER_KINDS = [
+  "donation",
+  "raffle",
+  "tickets",
+  "sponsorship",
+  "auction",
+] as const;
 export type FundraiserKind = (typeof FUNDRAISER_KINDS)[number];
 
 export const KIND_LABELS: Record<FundraiserKind, string> = {
@@ -67,7 +73,11 @@ export function round2(n: number) {
 }
 
 export function money(n: number | null | undefined) {
-  return (Number(n) || 0).toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+  return (Number(n) || 0).toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  });
 }
 
 export function moneyExact(n: number | null | undefined) {
@@ -270,7 +280,12 @@ export interface FundraiserAccess {
 // ------------------------------------------------------------------ math
 
 export function totalsFromOrders(
-  orders: Array<Pick<FundraiserOrderRow, "amount" | "fee_amount" | "net_amount" | "status" | "quantity" | "supporter_email">>,
+  orders: Array<
+    Pick<
+      FundraiserOrderRow,
+      "amount" | "fee_amount" | "net_amount" | "status" | "quantity" | "supporter_email"
+    >
+  >,
   goal: number,
 ): FundraiserTotals {
   let gross = 0;
@@ -303,7 +318,10 @@ export function totalsFromOrders(
   };
 }
 
-export function isOpenForOrders(f: Pick<FundraiserRecord, "status" | "opens_at" | "closes_at">, now = new Date()) {
+export function isOpenForOrders(
+  f: Pick<FundraiserRecord, "status" | "opens_at" | "closes_at">,
+  now = new Date(),
+) {
   if (f.status !== "live") return false;
   if (f.opens_at && new Date(f.opens_at) > now) return false;
   if (f.closes_at && new Date(f.closes_at) < now) return false;

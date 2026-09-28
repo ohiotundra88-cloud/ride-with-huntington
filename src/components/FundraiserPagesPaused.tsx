@@ -18,10 +18,14 @@ export function FundraiserPagesPaused() {
       </h1>
       <p className="mt-2 text-sm text-muted-foreground">
         Donations and sign-ups are temporarily unavailable while Team Huntington makes some updates.
-        Nothing has been lost — pages and their history will be back as soon as this is switched on again.
+        Nothing has been lost — pages and their history will be back as soon as this is switched on
+        again.
       </p>
       <div className="mt-6 flex flex-wrap justify-center gap-2">
-        <Button asChild className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90">
+        <Button
+          asChild
+          className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90"
+        >
           <Link to="/">Back to the hub</Link>
         </Button>
         <Button asChild variant="outline">

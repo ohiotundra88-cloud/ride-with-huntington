@@ -70,7 +70,9 @@ export const grantAdminByEmail = createServerFn({ method: "POST" })
       .maybeSingle();
     if (pErr) throw new Error(pErr.message);
     if (!profile) {
-      throw new Error(`No colleague with email ${normalized} has signed in yet. Ask them to sign in once, then grant admin.`);
+      throw new Error(
+        `No colleague with email ${normalized} has signed in yet. Ask them to sign in once, then grant admin.`,
+      );
     }
     const { error: iErr } = await supabaseAdmin
       .from("user_roles")

@@ -1,19 +1,18 @@
-import type { ComponentType } from 'react'
-import { template as teamAnnouncementTemplate } from './team-announcement'
-import { template as eventInvitationTemplate } from './event-invitation'
-import { template as eventCancelledTemplate } from './event-cancelled'
-import { template as fundraiserDecisionTemplate } from './fundraiser-decision'
-import { template as fundraiserRequestAssignedTemplate } from './fundraiser-request-assigned'
-import { template as fundraiserReviewNeededTemplate } from './fundraiser-review-needed'
-
+import type { ComponentType } from "react";
+import { template as teamAnnouncementTemplate } from "./team-announcement";
+import { template as eventInvitationTemplate } from "./event-invitation";
+import { template as eventCancelledTemplate } from "./event-cancelled";
+import { template as fundraiserDecisionTemplate } from "./fundraiser-decision";
+import { template as fundraiserRequestAssignedTemplate } from "./fundraiser-request-assigned";
+import { template as fundraiserReviewNeededTemplate } from "./fundraiser-review-needed";
 
 export interface TemplateEntry {
-  component: ComponentType<any>
-  subject: string | ((data: Record<string, any>) => string)
-  displayName?: string
-  previewData?: Record<string, any>
+  component: ComponentType<any>;
+  subject: string | ((data: Record<string, any>) => string);
+  displayName?: string;
+  previewData?: Record<string, any>;
   /** Fixed recipient — overrides caller-provided recipientEmail when set. */
-  to?: string
+  to?: string;
 }
 
 /**
@@ -25,10 +24,10 @@ export interface TemplateEntry {
  *   // then add to TEMPLATES: 'welcome': welcomeTemplate
  */
 export const TEMPLATES: Record<string, TemplateEntry> = {
-  'team-announcement': teamAnnouncementTemplate,
-  'event-invitation': eventInvitationTemplate,
-  'event-cancelled': eventCancelledTemplate,
-  'fundraiser-decision': fundraiserDecisionTemplate,
-  'fundraiser-request-assigned': fundraiserRequestAssignedTemplate,
-  'fundraiser-review-needed': fundraiserReviewNeededTemplate,
-}
+  "team-announcement": teamAnnouncementTemplate,
+  "event-invitation": eventInvitationTemplate,
+  "event-cancelled": eventCancelledTemplate,
+  "fundraiser-decision": fundraiserDecisionTemplate,
+  "fundraiser-request-assigned": fundraiserRequestAssignedTemplate,
+  "fundraiser-review-needed": fundraiserReviewNeededTemplate,
+};

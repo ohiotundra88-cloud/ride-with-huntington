@@ -16,12 +16,13 @@ import type { VendorCaptainRow } from "@/lib/vendors.server";
 
 export type { VendorCaptainRow };
 
-export const getVendorAccess = createServerFn({ method: "GET" })
-  .handler(async (): Promise<VendorAccess> => {
+export const getVendorAccess = createServerFn({ method: "GET" }).handler(
+  async (): Promise<VendorAccess> => {
     const { optionalAuthContext } = await import("@/server/auth-context");
     const { vendorAccessFor } = await import("@/lib/vendors.server");
     return vendorAccessFor(await optionalAuthContext());
-  });
+  },
+);
 
 export const listVendorRecords = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

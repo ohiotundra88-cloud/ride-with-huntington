@@ -11,7 +11,11 @@ export const TEST_EMAIL_TEMPLATES = [
 
 export type TestEmailTemplateName = (typeof TEST_EMAIL_TEMPLATES)[number]["name"];
 
-async function resolveCallerEmail(context: { supabase: any; userId: string; claims?: Record<string, unknown> }): Promise<string> {
+async function resolveCallerEmail(context: {
+  supabase: any;
+  userId: string;
+  claims?: Record<string, unknown>;
+}): Promise<string> {
   const claimEmail = context.claims?.["email"];
   if (typeof claimEmail === "string" && claimEmail.includes("@")) return claimEmail;
   const { data, error } = await context.supabase
@@ -24,7 +28,10 @@ async function resolveCallerEmail(context: { supabase: any; userId: string; clai
   return data.email;
 }
 
-async function sendOne(context: { supabase: any; userId: string; claims?: Record<string, unknown> }, templateName: string) {
+async function sendOne(
+  context: { supabase: any; userId: string; claims?: Record<string, unknown> },
+  templateName: string,
+) {
   const { assertSuperUser } = await import("@/lib/roles-admin.server");
   await assertSuperUser(context);
   const { TEMPLATES } = await import("@/lib/email-templates/registry");

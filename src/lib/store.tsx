@@ -1,11 +1,19 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState, type Context, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type Context,
+  type ReactNode,
+} from "react";
 import { supabaseBrowser as supabase } from "@/integrations/supabase/proxy-client";
 import { useQueryClient } from "@tanstack/react-query";
 import { upsertMyParticipant, getMyParticipant } from "@/lib/participants.functions";
 import { ensureMyProfile } from "@/lib/profile.functions";
 import { effectiveStatuses } from "@/lib/registration-progress";
 import { isRiderParticipation } from "@/lib/registration-progress";
-
 
 // ============ TYPES ============
 /** "both" is a legacy choice kept readable; new registrations can't pick it. */
@@ -139,20 +147,65 @@ export interface AdminParticipant {
 const emptyReg: Registration = {
   id: null,
   participation: null,
-  pelotonia: { discountCode: "Huntington", confirmation: "", hbNumber: "", completed: false, highRoller: false, survivor: false, employmentType: "", payGrade74Below: "", status: "not_started" },
-  travel: {
-    needs: "", departureCity: "", arrivalDate: "", departureDate: "",
-    hotelCheckIn: "", hotelCheckOut: "", notes: "", travelConfirmation: "",
-    hotelConfirmation: "", hotelName: "", arrivalTime: "", departureTime: "",
-    bookLater: false, status: "not_started",
-  },
-  bike: {
-    needs: "", height: "", bikeSize: "", bikeType: "", pedals: "",
-    helmet: false, pickupDate: "", returnDate: "", confirmation: "",
+  pelotonia: {
+    discountCode: "Huntington",
+    confirmation: "",
+    hbNumber: "",
+    completed: false,
+    highRoller: false,
+    survivor: false,
+    employmentType: "",
+    payGrade74Below: "",
     status: "not_started",
   },
-  apparel: { jerseySize: "", jerseyStyle: "", shirtSize: "", cut: "", volunteerShirtSize: "", volunteerCut: "", status: "not_started" },
-  address: { name: "", street: "", unit: "", city: "", state: "", zip: "", country: "USA", type: "", confirmed: false },
+  travel: {
+    needs: "",
+    departureCity: "",
+    arrivalDate: "",
+    departureDate: "",
+    hotelCheckIn: "",
+    hotelCheckOut: "",
+    notes: "",
+    travelConfirmation: "",
+    hotelConfirmation: "",
+    hotelName: "",
+    arrivalTime: "",
+    departureTime: "",
+    bookLater: false,
+    status: "not_started",
+  },
+  bike: {
+    needs: "",
+    height: "",
+    bikeSize: "",
+    bikeType: "",
+    pedals: "",
+    helmet: false,
+    pickupDate: "",
+    returnDate: "",
+    confirmation: "",
+    status: "not_started",
+  },
+  apparel: {
+    jerseySize: "",
+    jerseyStyle: "",
+    shirtSize: "",
+    cut: "",
+    volunteerShirtSize: "",
+    volunteerCut: "",
+    status: "not_started",
+  },
+  address: {
+    name: "",
+    street: "",
+    unit: "",
+    city: "",
+    state: "",
+    zip: "",
+    country: "USA",
+    type: "",
+    confirmed: false,
+  },
   submittedAt: null,
   audit: [],
 };
@@ -178,18 +231,54 @@ const guestUser: User = {
 };
 
 // ============ SEED ADMIN DATA (mock table for admin dashboard fallback) ============
-const markets = ["Columbus, OH", "Cleveland, OH", "Cincinnati, OH", "Detroit, MI", "Pittsburgh, PA", "Indianapolis, IN", "Chicago, IL"];
-const segments = ["Consumer & Business Banking", "Commercial Banking", "Wealth Management", "Technology", "Risk", "Marketing"];
+const markets = [
+  "Columbus, OH",
+  "Cleveland, OH",
+  "Cincinnati, OH",
+  "Detroit, MI",
+  "Pittsburgh, PA",
+  "Indianapolis, IN",
+  "Chicago, IL",
+];
+const segments = [
+  "Consumer & Business Banking",
+  "Commercial Banking",
+  "Wealth Management",
+  "Technology",
+  "Risk",
+  "Marketing",
+];
 const roles: AdminParticipant["role"][] = ["Rider", "Volunteer", "Both"];
 const names = [
-  "Jordan Blake", "Sam Rivera", "Taylor Chen", "Morgan Patel", "Casey Kim",
-  "Riley Nguyen", "Avery Johnson", "Quinn O'Brien", "Rowan Diaz", "Skyler Reed",
-  "Drew Sullivan", "Parker Hayes", "Reese Martinez", "Emerson Lee", "Sage Thompson",
-  "Kendall Brooks", "Blair Foster", "Hayden Cole", "Micah Bennett", "Peyton Grant",
+  "Jordan Blake",
+  "Sam Rivera",
+  "Taylor Chen",
+  "Morgan Patel",
+  "Casey Kim",
+  "Riley Nguyen",
+  "Avery Johnson",
+  "Quinn O'Brien",
+  "Rowan Diaz",
+  "Skyler Reed",
+  "Drew Sullivan",
+  "Parker Hayes",
+  "Reese Martinez",
+  "Emerson Lee",
+  "Sage Thompson",
+  "Kendall Brooks",
+  "Blair Foster",
+  "Hayden Cole",
+  "Micah Bennett",
+  "Peyton Grant",
 ];
 const statuses: StepStatus[] = ["not_started", "pending", "complete"];
-function pick<T>(a: T[], i: number): T { return a[i % a.length]; }
-function rand(seed: number) { let x = seed; return () => (x = (x * 9301 + 49297) % 233280) / 233280; }
+function pick<T>(a: T[], i: number): T {
+  return a[i % a.length];
+}
+function rand(seed: number) {
+  let x = seed;
+  return () => (x = (x * 9301 + 49297) % 233280) / 233280;
+}
 
 export const seedParticipants: AdminParticipant[] = names.map((name, i) => {
   const r = rand(i + 7);
@@ -236,7 +325,6 @@ interface StoreCtx {
   incompleteStep: number;
   signOut: () => Promise<void>;
   saveProfile: (u: Partial<User>) => Promise<void>;
-
 }
 
 // Reuse one context instance across hot-module reloads so a re-evaluated
@@ -257,7 +345,9 @@ function loadRegistrationFromStorage(userId: string | null): Registration | null
   try {
     const raw = localStorage.getItem(regKeyFor(userId));
     return raw ? JSON.parse(raw) : null;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
 export function StoreProvider({ children }: { children: ReactNode }) {
@@ -279,7 +369,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setHydrated(true);
   }, []);
 
-
   // Sync auth session → user state; fetch roles + participant row on sign in
   useEffect(() => {
     let cancelled = false;
@@ -296,13 +385,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
 
       const email = sessionUser.email ?? "";
-      const nameGuess = email ? email.split("@")[0].replace(/[._-]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) : "Colleague";
+      const nameGuess = email
+        ? email
+            .split("@")[0]
+            .replace(/[._-]+/g, " ")
+            .replace(/\b\w/g, (c) => c.toUpperCase())
+        : "Colleague";
       // Fetch role + profile in parallel
       const [rolesRes, profileRes] = await Promise.all([
         supabase.from("user_roles").select("role").eq("user_id", sessionUser.id),
         supabase
           .from("profiles")
-          .select("full_name, email, mobile, segment, market, region, manager, consent, activated_at")
+          .select(
+            "full_name, email, mobile, segment, market, region, manager, consent, activated_at",
+          )
           .eq("id", sessionUser.id)
           .maybeSingle(),
       ]);
@@ -310,10 +406,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const isAdmin = myRoles.includes("admin");
       const isSuperUser = myRoles.includes("superuser");
       const isCaptain = isAdmin || isSuperUser || myRoles.includes("captain");
-      const isReviewer = isCaptain || ["legal", "risk", "compliance", "marketing", "cochair"].some((r) => myRoles.includes(r));
-      const prof = profileRes.data as
-        | { full_name?: string | null; mobile?: string | null; segment?: string | null; market?: string | null; region?: string | null; manager?: string | null; consent?: boolean | null; activated_at?: string | null }
-        | null;
+      const isReviewer =
+        isCaptain ||
+        ["legal", "risk", "compliance", "marketing", "cochair"].some((r) => myRoles.includes(r));
+      const prof = profileRes.data as {
+        full_name?: string | null;
+        mobile?: string | null;
+        segment?: string | null;
+        market?: string | null;
+        region?: string | null;
+        manager?: string | null;
+        consent?: boolean | null;
+        activated_at?: string | null;
+      } | null;
 
       const fullName = prof?.full_name || nameGuess;
       if (cancelled) return;
@@ -338,7 +443,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         roles: myRoles,
       });
 
-
       // Switching accounts on the same device: drop whatever answers are in
       // state so a previous colleague's cached answers can't leak through.
       if (loadedFor.current !== sessionUser.id) {
@@ -353,7 +457,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         const row = await getMyParticipant();
         if (cancelled) return;
         skipNextPersist.current = true;
-        if (!row) { setRegState(emptyReg); return; }
+        if (!row) {
+          setRegState(emptyReg);
+          return;
+        }
         setRegState({
           ...emptyReg,
           id: row.reg_id ?? null,
@@ -369,7 +476,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       } catch {
         // ignore — server fn may be unavailable during SSR
       }
-
     }
 
     // Sign-in happens on the Aspire Identity page (full-page redirects), so the
@@ -406,7 +512,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     // Don't write until this account's own record has loaded, so cached state
     // can never be pushed onto a different account.
     if (loadedFor.current !== user.userId) return;
-    if (skipNextPersist.current) { skipNextPersist.current = false; return; }
+    if (skipNextPersist.current) {
+      skipNextPersist.current = false;
+      return;
+    }
 
     const t = setTimeout(() => {
       upsertMyParticipant({
@@ -421,7 +530,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           submitted_at: registration.submittedAt,
           reg_id: registration.id,
         },
-      }).catch(() => { /* offline / transient */ });
+      }).catch(() => {
+        /* offline / transient */
+      });
     }, 900);
     return () => clearTimeout(t);
   }, [registration, user.signedIn, user.userId, hydrated]);
@@ -467,13 +578,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   };
 
   const setRegistration = (r: Partial<Registration> | ((prev: Registration) => Registration)) =>
-    setRegState((prev) => typeof r === "function" ? r(prev) : { ...prev, ...r });
+    setRegState((prev) => (typeof r === "function" ? r(prev) : { ...prev, ...r }));
 
   const addNote = (id: string, note: string) => {
-    setParticipants((prev) => prev.map((p) => p.id === id ? { ...p, notes: [...p.notes, note] } : p));
+    setParticipants((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, notes: [...p.notes, note] } : p)),
+    );
   };
 
-  const reset = () => { setRegState(emptyReg); };
+  const reset = () => {
+    setRegState(emptyReg);
+  };
 
   const signOut = async () => {
     const id = user.userId;
@@ -493,7 +608,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
    * skip the bike step, and a stored status never outranks missing fields.
    */
   const effective = useMemo(() => effectiveStatuses(registration), [registration]);
-
 
   /**
    * Percent of the steps that actually apply to this person. Choosing how you
@@ -522,9 +636,23 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return 5;
   }, [registration.participation, effective]);
 
-
   return (
-    <Ctx.Provider value={{ authReady, user, setUser, saveProfile, registration, setRegistration, participants, addNote, reset, completion, incompleteStep, signOut }}>
+    <Ctx.Provider
+      value={{
+        authReady,
+        user,
+        setUser,
+        saveProfile,
+        registration,
+        setRegistration,
+        participants,
+        addNote,
+        reset,
+        completion,
+        incompleteStep,
+        signOut,
+      }}
+    >
       {children}
     </Ctx.Provider>
   );
@@ -539,10 +667,15 @@ export function useStore() {
 export function addAudit(reg: Registration, message: string): Registration {
   return {
     ...reg,
-    audit: [{ id: crypto.randomUUID(), at: new Date().toISOString(), message }, ...reg.audit].slice(0, 30),
+    audit: [{ id: crypto.randomUUID(), at: new Date().toISOString(), message }, ...reg.audit].slice(
+      0,
+      30,
+    ),
   };
 }
 
 export function genRegId() {
-  return "TH-" + Math.random().toString(36).slice(2, 7).toUpperCase() + "-" + new Date().getFullYear();
+  return (
+    "TH-" + Math.random().toString(36).slice(2, 7).toUpperCase() + "-" + new Date().getFullYear()
+  );
 }

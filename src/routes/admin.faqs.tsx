@@ -5,18 +5,32 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useAdminFaqs, faqCategories, type FAQArticle, type FAQCategory } from "@/lib/faq-store";
 import { useStore } from "@/lib/store";
 import { Plus, Pencil, Trash2, EyeOff, Eye, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/faqs")({
-  head: () => ({ meta: [
-    { title: "FAQ management — Team Huntington Hub" },
-    { name: "description", content: "Create and edit Team Huntington Hub FAQ articles." },
-  ] }),
+  head: () => ({
+    meta: [
+      { title: "FAQ management — Team Huntington Hub" },
+      { name: "description", content: "Create and edit Team Huntington Hub FAQ articles." },
+    ],
+  }),
   component: AdminFaqs,
 });
 
@@ -76,7 +90,10 @@ function AdminFaqs() {
       title: editing.title.trim(),
       body: editing.body.trim(),
       category: editing.category,
-      keywords: keywordsInput.split(",").map((k) => k.trim().toLowerCase()).filter(Boolean),
+      keywords: keywordsInput
+        .split(",")
+        .map((k) => k.trim().toLowerCase())
+        .filter(Boolean),
     };
     upsert.mutate(payload, {
       onSuccess: () => {
@@ -89,29 +106,50 @@ function AdminFaqs() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <Link to="/admin" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+      <Link
+        to="/admin"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+      >
         <ArrowLeft className="h-4 w-4" /> Admin dashboard
       </Link>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black text-[var(--brand-dark)]">FAQ management</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Create, edit, or hide articles shown in the Resource Center. Backed by Lovable Cloud.</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Create, edit, or hide articles shown in the Resource Center. Backed by Lovable Cloud.
+          </p>
         </div>
-        <Button onClick={openNew} className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90">
+        <Button
+          onClick={openNew}
+          className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90"
+        >
           <Plus className="mr-1 h-4 w-4" /> New FAQ
         </Button>
       </div>
 
       <div className="mt-6 flex flex-wrap items-center gap-3">
-        <Input placeholder="Search FAQs…" value={q} onChange={(e) => setQ(e.target.value)} className="w-64" />
+        <Input
+          placeholder="Search FAQs…"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          className="w-64"
+        />
         <Select value={cat} onValueChange={(v) => setCat(v as FAQCategory | "All")}>
-          <SelectTrigger className="w-52"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-52">
+            <SelectValue />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="All">All categories</SelectItem>
-            {faqCategories.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+            {faqCategories.map((c) => (
+              <SelectItem key={c} value={c}>
+                {c}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
-        <span className="text-sm text-muted-foreground">{filtered.length} article{filtered.length === 1 ? "" : "s"}</span>
+        <span className="text-sm text-muted-foreground">
+          {filtered.length} article{filtered.length === 1 ? "" : "s"}
+        </span>
       </div>
 
       {isLoading ? (
@@ -124,10 +162,24 @@ function AdminFaqs() {
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <Badge variant="outline" className="text-xs">{a.category}</Badge>
-                      {a.is_builtin && <Badge variant="secondary" className="text-xs">Built-in</Badge>}
-                      {!a.is_builtin && <Badge className="bg-[var(--brand)] text-[var(--brand-foreground)] text-xs">Custom</Badge>}
-                      {a.hidden && <Badge variant="outline" className="text-xs">Hidden</Badge>}
+                      <Badge variant="outline" className="text-xs">
+                        {a.category}
+                      </Badge>
+                      {a.is_builtin && (
+                        <Badge variant="secondary" className="text-xs">
+                          Built-in
+                        </Badge>
+                      )}
+                      {!a.is_builtin && (
+                        <Badge className="bg-[var(--brand)] text-[var(--brand-foreground)] text-xs">
+                          Custom
+                        </Badge>
+                      )}
+                      {a.hidden && (
+                        <Badge variant="outline" className="text-xs">
+                          Hidden
+                        </Badge>
+                      )}
                     </div>
                     <h3 className="mt-2 font-bold text-[var(--brand-dark)] truncate">{a.title}</h3>
                     <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{a.body}</p>
@@ -142,7 +194,15 @@ function AdminFaqs() {
                     variant="outline"
                     onClick={() => toggleHidden.mutate({ id: a.id, hidden: !a.hidden })}
                   >
-                    {a.hidden ? <><Eye className="mr-1 h-3.5 w-3.5" /> Show</> : <><EyeOff className="mr-1 h-3.5 w-3.5" /> Hide</>}
+                    {a.hidden ? (
+                      <>
+                        <Eye className="mr-1 h-3.5 w-3.5" /> Show
+                      </>
+                    ) : (
+                      <>
+                        <EyeOff className="mr-1 h-3.5 w-3.5" /> Hide
+                      </>
+                    )}
                   </Button>
                   {!a.is_builtin && (
                     <Button
@@ -153,7 +213,8 @@ function AdminFaqs() {
                         if (!confirm("Delete this FAQ permanently?")) return;
                         remove.mutate(a.id, {
                           onSuccess: () => toast.success("Deleted"),
-                          onError: (e: any) => toast.error("Delete failed", { description: e.message }),
+                          onError: (e: any) =>
+                            toast.error("Delete failed", { description: e.message }),
                         });
                       }}
                     >
@@ -165,7 +226,9 @@ function AdminFaqs() {
             </Card>
           ))}
           {filtered.length === 0 && (
-            <div className="sm:col-span-2 py-12 text-center text-muted-foreground">No FAQs match.</div>
+            <div className="sm:col-span-2 py-12 text-center text-muted-foreground">
+              No FAQs match.
+            </div>
           )}
         </div>
       )}
@@ -187,10 +250,19 @@ function AdminFaqs() {
               </div>
               <div>
                 <label className="text-sm font-medium">Category</label>
-                <Select value={editing.category} onValueChange={(v) => setEditing({ ...editing, category: v as FAQCategory })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                <Select
+                  value={editing.category}
+                  onValueChange={(v) => setEditing({ ...editing, category: v as FAQCategory })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
-                    {faqCategories.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                    {faqCategories.map((c) => (
+                      <SelectItem key={c} value={c}>
+                        {c}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -214,7 +286,9 @@ function AdminFaqs() {
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditing(null)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setEditing(null)}>
+              Cancel
+            </Button>
             <Button
               onClick={save}
               disabled={upsert.isPending}

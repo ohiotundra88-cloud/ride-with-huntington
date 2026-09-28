@@ -21,8 +21,22 @@ export interface DirectoryContact {
   updated_at: string;
 }
 
-export const CONTACT_CATEGORIES = ["General", "Travel", "Volunteers", "Fundraising", "Apparel", "Emergency"] as const;
-export const CONTACT_REGIONS = ["All", "Columbus, OH", "Northeast", "Midwest", "Southeast", "West"] as const;
+export const CONTACT_CATEGORIES = [
+  "General",
+  "Travel",
+  "Volunteers",
+  "Fundraising",
+  "Apparel",
+  "Emergency",
+] as const;
+export const CONTACT_REGIONS = [
+  "All",
+  "Columbus, OH",
+  "Northeast",
+  "Midwest",
+  "Southeast",
+  "West",
+] as const;
 
 const phoneOk = (v: string) => v.trim() === "" || /^[\d\s()+.\-x]{7,25}$/i.test(v.trim());
 

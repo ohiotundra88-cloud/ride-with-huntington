@@ -44,7 +44,10 @@ async function hmacKey(): Promise<CryptoKey> {
 }
 
 /** Signs the JWT PostgREST uses to pick the database role and user. */
-export async function databaseToken(role: DbRole, user?: { id: string; email: string }): Promise<string> {
+export async function databaseToken(
+  role: DbRole,
+  user?: { id: string; email: string },
+): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   const header = b64url(JSON.stringify({ alg: "HS256", typ: "JWT" }));
   const payload = b64url(
@@ -55,7 +58,11 @@ export async function databaseToken(role: DbRole, user?: { id: string; email: st
       ...(user ? { sub: user.id, email: user.email } : {}),
     }),
   );
-  const sig = await crypto.subtle.sign("HMAC", await hmacKey(), new TextEncoder().encode(`${header}.${payload}`));
+  const sig = await crypto.subtle.sign(
+    "HMAC",
+    await hmacKey(),
+    new TextEncoder().encode(`${header}.${payload}`),
+  );
   return `${header}.${payload}.${b64url(new Uint8Array(sig))}`;
 }
 
@@ -99,7 +106,11 @@ interface R2ObjectBody {
   httpMetadata?: { contentType?: string };
 }
 interface R2BucketLike {
-  put(key: string, value: ArrayBuffer | Uint8Array | Blob, opts?: { httpMetadata?: { contentType?: string } }): Promise<unknown>;
+  put(
+    key: string,
+    value: ArrayBuffer | Uint8Array | Blob,
+    opts?: { httpMetadata?: { contentType?: string } },
+  ): Promise<unknown>;
   get(key: string): Promise<R2ObjectBody | null>;
   delete(keys: string | string[]): Promise<void>;
 }
@@ -114,7 +125,8 @@ function filesBucket(): R2BucketLike {
 
 function objectKey(bucket: string, path: string) {
   const clean = path.replace(/^\/+/, "");
-  if (!clean || clean.split("/").some((p) => p === ".." || p === "")) throw new Error("Invalid storage path");
+  if (!clean || clean.split("/").some((p) => p === ".." || p === ""))
+    throw new Error("Invalid storage path");
   return `${bucket}/${clean}`;
 }
 
@@ -133,7 +145,10 @@ export const storage = {
           });
           return { data: { path }, error: null };
         } catch (e) {
-          return { data: null, error: { message: e instanceof Error ? e.message : "Upload failed" } };
+          return {
+            data: null,
+            error: { message: e instanceof Error ? e.message : "Upload failed" },
+          };
         }
       },
       async download(path: string): Promise<StorageResult<Blob>> {
@@ -143,7 +158,10 @@ export const storage = {
           const type = obj.httpMetadata?.contentType ?? "application/octet-stream";
           return { data: new Blob([await obj.arrayBuffer()], { type }), error: null };
         } catch (e) {
-          return { data: null, error: { message: e instanceof Error ? e.message : "Download failed" } };
+          return {
+            data: null,
+            error: { message: e instanceof Error ? e.message : "Download failed" },
+          };
         }
       },
       async remove(paths: string[]): Promise<StorageResult<{ path: string }[]>> {
@@ -151,7 +169,10 @@ export const storage = {
           if (paths.length) await filesBucket().delete(paths.map((p) => objectKey(bucket, p)));
           return { data: paths.map((path) => ({ path })), error: null };
         } catch (e) {
-          return { data: null, error: { message: e instanceof Error ? e.message : "Delete failed" } };
+          return {
+            data: null,
+            error: { message: e instanceof Error ? e.message : "Delete failed" },
+          };
         }
       },
     };
@@ -174,14 +195,22 @@ export interface HubAccount {
 type AdminResult<T> = { data: T; error: null } | { data: T; error: { message: string } };
 
 export function accountAdmin(db: Db) {
-  const rpc = db.rpc.bind(db) as unknown as (fn: string, args?: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>;
+  const rpc = db.rpc.bind(db) as unknown as (
+    fn: string,
+    args?: Record<string, unknown>,
+  ) => Promise<{ data: unknown; error: { message: string } | null }>;
   return {
-    async createUser(input: { email: string; user_metadata?: { full_name?: string } }): Promise<AdminResult<{ user: { id: string } | null }>> {
+    async createUser(input: {
+      email: string;
+      user_metadata?: { full_name?: string };
+    }): Promise<AdminResult<{ user: { id: string } | null }>> {
       const { data, error } = await rpc("hub_create_user", {
         p_email: input.email,
         p_name: input.user_metadata?.full_name ?? "",
       });
-      return error ? { data: { user: null }, error } : { data: { user: { id: String(data) } }, error: null };
+      return error
+        ? { data: { user: null }, error }
+        : { data: { user: { id: String(data) } }, error: null };
     },
     async deleteUser(id: string): Promise<AdminResult<null>> {
       const { error } = await rpc("hub_delete_user", { p_id: id });
@@ -189,9 +218,16 @@ export function accountAdmin(db: Db) {
     },
     async listUsers(): Promise<AdminResult<{ users: HubAccount[] }>> {
       const { data, error } = await rpc("hub_list_users");
-      const rows = (Array.isArray(data) ? data : []) as (Omit<HubAccount, "user_metadata"> & { full_name: string | null })[];
+      const rows = (Array.isArray(data) ? data : []) as (Omit<HubAccount, "user_metadata"> & {
+        full_name: string | null;
+      })[];
       return {
-        data: { users: rows.map(({ full_name, ...u }) => ({ ...u, user_metadata: { full_name: full_name ?? undefined } })) },
+        data: {
+          users: rows.map(({ full_name, ...u }) => ({
+            ...u,
+            user_metadata: { full_name: full_name ?? undefined },
+          })),
+        },
         error,
       };
     },

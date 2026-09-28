@@ -47,8 +47,8 @@ async function hydratePeople(rows: FundraiserRequest[]): Promise<FundraiserReque
     ...r,
     submitter_email: map.get(r.submitted_by)?.email ?? null,
     submitter_name: map.get(r.submitted_by)?.full_name ?? null,
-    captain_email: r.captain_id ? map.get(r.captain_id)?.email ?? null : null,
-    captain_name: r.captain_id ? map.get(r.captain_id)?.full_name ?? null : null,
+    captain_email: r.captain_id ? (map.get(r.captain_id)?.email ?? null) : null,
+    captain_name: r.captain_id ? (map.get(r.captain_id)?.full_name ?? null) : null,
   }));
 }
 
@@ -110,7 +110,8 @@ export const listReviewRequests = createServerFn({ method: "GET" })
     );
     if (!seesEverything && roles.includes("captain")) {
       rows = rows.filter(
-        (r) => r.captain_id === context.userId || !r.captain_id || r.submitted_by === context.userId,
+        (r) =>
+          r.captain_id === context.userId || !r.captain_id || r.submitted_by === context.userId,
       );
     }
     return hydratePeople(rows);
@@ -145,7 +146,11 @@ export const saveMyRequest = createServerFn({ method: "POST" })
     }
     const { data: row, error } = await context.supabase
       .from("fundraiser_requests")
-      .insert({ ...fields, marketing_status: initialMarketingStatus(fields.uses_logos), submitted_by: context.userId })
+      .insert({
+        ...fields,
+        marketing_status: initialMarketingStatus(fields.uses_logos),
+        submitted_by: context.userId,
+      })
       .select(REQUEST_COLUMNS)
       .single();
     if (error) throw new Error(error.message);
@@ -237,7 +242,10 @@ export const reassignRequestCaptain = createServerFn({ method: "POST" })
     const { data: people } = await supabaseAdmin
       .from("profiles")
       .select("id, email, full_name")
-      .in("id", [data.captain_id, request.captain_id].filter((v): v is string => !!v));
+      .in(
+        "id",
+        [data.captain_id, request.captain_id].filter((v): v is string => !!v),
+      );
     const label = (id: string | null) => {
       const p = (people ?? []).find((x) => x.id === id);
       return p?.full_name || p?.email || "unassigned";
@@ -326,9 +334,8 @@ export const decideOnRequest = createServerFn({ method: "POST" })
   .inputValidator((d) => decisionSchema.parse(d))
   .handler(async ({ data, context }) => {
     const roles = await myRoles(context);
-    const { STAGES, actionableStages, canActOnStage, isFullyApproved } = await import(
-      "@/lib/fundraiser-requests.shared"
-    );
+    const { STAGES, actionableStages, canActOnStage, isFullyApproved } =
+      await import("@/lib/fundraiser-requests.shared");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: current, error: cErr } = await supabaseAdmin
       .from("fundraiser_requests")
@@ -376,7 +383,9 @@ export const decideOnRequest = createServerFn({ method: "POST" })
     const shouldPublish =
       fresh.status !== "declined" &&
       fresh.event_type !== "raffle" &&
-      (fresh.event_type === "virtual" ? fresh.captain_status === "approved" : isFullyApproved(fresh));
+      (fresh.event_type === "virtual"
+        ? fresh.captain_status === "approved"
+        : isFullyApproved(fresh));
 
     if (shouldPublish && !fresh.event_id) {
       const { data: ev, error: eErr } = await supabaseAdmin
@@ -400,7 +409,13 @@ export const decideOnRequest = createServerFn({ method: "POST" })
         .single();
       if (eErr) throw new Error(eErr.message);
       await supabaseAdmin.from("fundraiser_requests").update({ event_id: ev.id }).eq("id", data.id);
-      await logDecision(data.id, "published", "published", "Added to the fundraising calendar", context.userId);
+      await logDecision(
+        data.id,
+        "published",
+        "published",
+        "Added to the fundraising calendar",
+        context.userId,
+      );
     }
 
     // A fundraising page linked to this request goes live as soon as every
@@ -461,7 +476,6 @@ export const decideOnRequest = createServerFn({ method: "POST" })
     await notifyStageReviewers(fresh, opened);
 
     return { ok: true };
-
   });
 
 /**
@@ -576,7 +590,13 @@ export const getRequestFlier = createServerFn({ method: "POST" })
     if (dErr || !file) throw new Error("Flier could not be loaded");
     const ext = row.flier_path.split(".").pop()?.toLowerCase();
     const type =
-      ext === "pdf" ? "application/pdf" : ext === "png" ? "image/png" : ext === "webp" ? "image/webp" : "image/jpeg";
+      ext === "pdf"
+        ? "application/pdf"
+        : ext === "png"
+          ? "image/png"
+          : ext === "webp"
+            ? "image/webp"
+            : "image/jpeg";
     const base64 = Buffer.from(await file.arrayBuffer()).toString("base64");
     return { name: row.flier_name ?? "flier", dataUrl: `data:${type};base64,${base64}` };
   });

@@ -18,10 +18,14 @@ const url =
   `postgresql://postgres@localhost:${process.env.PGPORT ?? 54329}/${process.env.PGDATABASE_TEST ?? "rwh_test"}?host=${process.env.PGHOST ?? "/tmp"}`;
 
 function query(sql) {
-  const out = execFileSync(process.env.PSQL ?? "psql", [url, "-At", "-v", "ON_ERROR_STOP=1", "-c", sql], {
-    encoding: "utf8",
-    env: { ...process.env, LC_ALL: process.env.LC_ALL ?? "en_US.UTF-8" },
-  });
+  const out = execFileSync(
+    process.env.PSQL ?? "psql",
+    [url, "-At", "-v", "ON_ERROR_STOP=1", "-c", sql],
+    {
+      encoding: "utf8",
+      env: { ...process.env, LC_ALL: process.env.LC_ALL ?? "en_US.UTF-8" },
+    },
+  );
   return JSON.parse(out.trim() || "[]");
 }
 
@@ -98,7 +102,8 @@ function block(name, fields, pad) {
 function tableEntry(name, { cols }) {
   const row = cols.map((c) => `${c.column_name}: ${tsType(c)}${c.nullable ? " | null" : ""}`);
   const insert = cols.map(
-    (c) => `${c.column_name}${c.nullable || c.has_default ? "?" : ""}: ${tsType(c)}${c.nullable ? " | null" : ""}`,
+    (c) =>
+      `${c.column_name}${c.nullable || c.has_default ? "?" : ""}: ${tsType(c)}${c.nullable ? " | null" : ""}`,
   );
   const update = cols.map((c) => `${c.column_name}?: ${tsType(c)}${c.nullable ? " | null" : ""}`);
   return [
@@ -116,8 +121,12 @@ function viewEntry(name, { cols }) {
   return [`      ${name}: {`, block("Row", row, 8), relationships(name, 8), `      }`].join("\n");
 }
 
-const tables = [...byTable].filter(([, t]) => t.type === "BASE TABLE").sort(([a], [b]) => a.localeCompare(b));
-const views = [...byTable].filter(([, t]) => t.type === "VIEW").sort(([a], [b]) => a.localeCompare(b));
+const tables = [...byTable]
+  .filter(([, t]) => t.type === "BASE TABLE")
+  .sort(([a], [b]) => a.localeCompare(b));
+const views = [...byTable]
+  .filter(([, t]) => t.type === "VIEW")
+  .sort(([a], [b]) => a.localeCompare(b));
 const tablesTs = `    Tables: {\n${tables.map(([n, t]) => tableEntry(n, t)).join("\n")}\n    }`;
 const viewsTs = views.length
   ? `    Views: {\n${views.map(([n, t]) => viewEntry(n, t)).join("\n")}\n    }`
@@ -128,7 +137,8 @@ const pub = src.indexOf("  public: {");
 const tStart = src.indexOf("    Tables: {", pub);
 const vStart = src.indexOf("    Views: {", tStart);
 const fStart = src.indexOf("    Functions: {", vStart);
-if (pub < 0 || tStart < 0 || vStart < 0 || fStart < 0) throw new Error("Unexpected types.ts layout");
+if (pub < 0 || tStart < 0 || vStart < 0 || fStart < 0)
+  throw new Error("Unexpected types.ts layout");
 const out = src.slice(0, tStart) + tablesTs + "\n" + viewsTs + "\n" + src.slice(fStart);
 writeFileSync(FILE, out);
 console.log(`types.ts: ${tables.length} tables, ${views.length} views`);
