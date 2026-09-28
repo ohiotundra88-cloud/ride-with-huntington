@@ -212,7 +212,11 @@ function FundraiserPublicPage() {
         <div className="space-y-4 lg:sticky lg:top-20 lg:self-start">
           <Card>
             <CardContent className="space-y-3 p-5">
-              <Progress value={data.totals.goalPercent} className="h-2" />
+              <Progress
+                value={data.totals.goalPercent}
+                className="h-2"
+                aria-label={`${data.totals.goalPercent}% of fundraising goal`}
+              />
               <div className="flex items-baseline justify-between">
                 <span className="text-xl font-bold text-[var(--brand-dark)]">
                   {money(data.totals.gross)}

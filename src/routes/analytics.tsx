@@ -207,7 +207,11 @@ function AnalyticsPage() {
                   return (
                     <div key={b.label} className="flex items-center gap-3">
                       <div className="w-44 shrink-0 text-sm">{b.label}</div>
-                      <Progress value={share} className="h-2 flex-1 [&>div]:bg-[var(--brand)]" />
+                      <Progress
+                        value={share}
+                        className="h-2 flex-1 [&>div]:bg-[var(--brand)]"
+                        aria-label={`${b.label}: ${share}% of colleagues`}
+                      />
                       <div className="w-16 text-right font-mono text-sm">
                         {b.count} · {share}%
                       </div>
@@ -230,6 +234,7 @@ function AnalyticsPage() {
                     <Progress
                       value={r.averageCompletion}
                       className="h-2 flex-1 [&>div]:bg-[var(--brand-dark)]"
+                      aria-label={`${r.region}: average ${r.averageCompletion}% complete`}
                     />
                     <div className="w-10 text-right font-mono text-sm">{r.averageCompletion}%</div>
                   </div>

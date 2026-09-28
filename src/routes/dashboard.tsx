@@ -316,8 +316,13 @@ function DashboardPage() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <Tabs value={view} onValueChange={(v) => setView(v as "rider" | "family")}>
               <TabsList>
-                <TabsTrigger value="rider">Rider View</TabsTrigger>
-                <TabsTrigger value="family">Family View</TabsTrigger>
+                {/* Used as a view switch: both tabs control the single panel below. */}
+                <TabsTrigger value="rider" aria-controls="dashboard-view">
+                  Rider View
+                </TabsTrigger>
+                <TabsTrigger value="family" aria-controls="dashboard-view">
+                  Family View
+                </TabsTrigger>
               </TabsList>
             </Tabs>
             <p className="text-xs text-muted-foreground">
@@ -330,11 +335,13 @@ function DashboardPage() {
           </div>
         )}
 
-        {view === "rider" || !state.flags.familyMode ? (
-          <RiderView readiness={readiness} />
-        ) : (
-          <FamilyView />
-        )}
+        <div id="dashboard-view" role={state.flags.familyMode ? "tabpanel" : undefined}>
+          {view === "rider" || !state.flags.familyMode ? (
+            <RiderView readiness={readiness} />
+          ) : (
+            <FamilyView />
+          )}
+        </div>
       </div>
     </EditCtx.Provider>
   );
@@ -499,6 +506,7 @@ function RiderView({ readiness }: { readiness: EditableReadinessItem[] }) {
                         <Progress
                           value={Math.round((r.progressCurrent / r.progressGoal) * 100)}
                           className="h-2 [&>div]:bg-[var(--brand)]"
+                          aria-label={`${r.title}: ${Math.round((r.progressCurrent / r.progressGoal) * 100)}%`}
                         />
                       </div>
                     )}

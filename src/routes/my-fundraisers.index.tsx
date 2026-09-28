@@ -173,7 +173,11 @@ function MyFundraisers() {
                   </p>
                 </div>
                 <div className="w-full max-w-[220px]">
-                  <Progress value={f.totals.goalPercent} className="h-2" />
+                  <Progress
+                    value={f.totals.goalPercent}
+                    className="h-2"
+                    aria-label={`${f.title}: ${f.totals.goalPercent}% of goal`}
+                  />
                   <p className="mt-1 text-xs text-muted-foreground">
                     {money(f.totals.gross)} raised of {money(f.goal_amount)} · {f.totals.supporters}{" "}
                     supporters

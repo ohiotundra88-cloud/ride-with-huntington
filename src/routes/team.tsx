@@ -216,7 +216,11 @@ function TeamHub() {
                       .filter(Boolean)
                       .join(" · ")}
                   </p>
-                  <Progress value={share} className="mt-2 h-1.5 [&>div]:bg-[var(--brand-dark)]" />
+                  <Progress
+                    value={share}
+                    className="mt-2 h-1.5 [&>div]:bg-[var(--brand-dark)]"
+                    aria-label={`${s.name}: ${share}% of team total`}
+                  />
                 </div>
               );
             })}

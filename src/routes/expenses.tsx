@@ -64,7 +64,7 @@ const sections = [
 function Expenses() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
-      <p className="text-xs font-bold uppercase tracking-wider text-[var(--brand-dark)]/60">
+      <p className="text-xs font-bold uppercase tracking-wider text-[var(--brand-dark)]/75">
         Expense Guide
       </p>
       <h1 className="mt-2 text-3xl sm:text-4xl font-black text-[var(--brand-dark)]">

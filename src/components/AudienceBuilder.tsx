@@ -148,7 +148,11 @@ export function AudienceBuilder({
         />
       </div>
 
-      <div className={`space-y-5 ${allOn ? "pointer-events-none opacity-50" : ""}`}>
+      {/* "Everyone" is on: the filters don't apply, so disable them (not just dim them). */}
+      <fieldset
+        disabled={allOn}
+        className={`min-w-0 space-y-5 ${allOn ? "pointer-events-none opacity-50" : ""}`}
+      >
         <div className="space-y-2">
           <Label className="text-xs uppercase tracking-wide text-muted-foreground">App roles</Label>
           <ChipGroup
@@ -259,7 +263,7 @@ export function AudienceBuilder({
             </div>
           )}
         </div>
-      </div>
+      </fieldset>
 
       <div className="space-y-2 border-t pt-4">
         <Label className="text-xs uppercase tracking-wide text-muted-foreground">Individuals</Label>

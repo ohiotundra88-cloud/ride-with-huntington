@@ -152,7 +152,11 @@ function PackingPage() {
               <p className="text-sm font-semibold text-[var(--brand-dark)]">
                 {done} of {total} packed · {pct}%
               </p>
-              <Progress value={pct} className="mt-2 h-2 [&>div]:bg-[var(--brand)]" />
+              <Progress
+                value={pct}
+                className="mt-2 h-2 [&>div]:bg-[var(--brand)]"
+                aria-label={`Packing list ${pct}% done`}
+              />
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <label className="flex items-center gap-2 text-sm">

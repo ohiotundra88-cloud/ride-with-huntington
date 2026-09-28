@@ -11,7 +11,11 @@ const Progress = React.forwardRef<
 >(({ className, value, ...props }, ref) => (
   <ProgressPrimitive.Root
     ref={ref}
+    value={value}
     className={cn("relative h-2 w-full overflow-hidden rounded-full bg-primary/20", className)}
+    // Screen readers need a name for every progress bar; callers should pass a
+    // specific aria-label, and this is only the fallback.
+    aria-label={props["aria-label"] ?? (props["aria-labelledby"] ? undefined : "Progress")}
     {...props}
   >
     <ProgressPrimitive.Indicator

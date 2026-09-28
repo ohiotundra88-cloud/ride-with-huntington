@@ -103,13 +103,19 @@ function ProfilePage() {
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2 sm:col-span-2">
-            <Label>Full name</Label>
-            <Input value={form.name} onChange={(e) => update({ name: e.target.value })} />
+            <Label htmlFor="profile-name">Full name</Label>
+            <Input
+              id="profile-name"
+              autoComplete="name"
+              value={form.name}
+              onChange={(e) => update({ name: e.target.value })}
+            />
             {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
           </div>
           <div className="space-y-2">
-            <Label>Work email</Label>
+            <Label htmlFor="profile-email">Work email</Label>
             <Input
+              id="profile-email"
               type="email"
               value={form.email}
               readOnly
@@ -121,13 +127,19 @@ function ProfilePage() {
             </p>
           </div>
           <div className="space-y-2">
-            <Label>Mobile number</Label>
-            <Input value={form.mobile} onChange={(e) => update({ mobile: e.target.value })} />
+            <Label htmlFor="profile-mobile">Mobile number</Label>
+            <Input
+              id="profile-mobile"
+              type="tel"
+              autoComplete="tel"
+              value={form.mobile}
+              onChange={(e) => update({ mobile: e.target.value })}
+            />
           </div>
           <div className="space-y-2">
-            <Label>Business segment</Label>
+            <Label htmlFor="profile-segment">Business segment</Label>
             <Select value={form.segment} onValueChange={(v) => update({ segment: v })}>
-              <SelectTrigger>
+              <SelectTrigger id="profile-segment">
                 <SelectValue placeholder="Select..." />
               </SelectTrigger>
               <SelectContent>
@@ -160,8 +172,12 @@ function ProfilePage() {
             </Select>
           </div>
           <div className="space-y-2 sm:col-span-2">
-            <Label>Manager</Label>
-            <Input value={form.manager} onChange={(e) => update({ manager: e.target.value })} />
+            <Label htmlFor="profile-manager">Manager</Label>
+            <Input
+              id="profile-manager"
+              value={form.manager}
+              onChange={(e) => update({ manager: e.target.value })}
+            />
           </div>
 
           <div className="sm:col-span-2 rounded-lg bg-muted/50 p-4">

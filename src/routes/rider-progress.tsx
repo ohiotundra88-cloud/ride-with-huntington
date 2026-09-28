@@ -547,7 +547,7 @@ function RiderProgressPage() {
                             "—"}
                         </div>
                         {r.rideRoute && r.rideType && (
-                          <div className="text-[11px] text-muted-foreground/80">{r.rideType}</div>
+                          <div className="text-[11px] text-muted-foreground">{r.rideType}</div>
                         )}
                       </TableCell>
                       <TableCell>

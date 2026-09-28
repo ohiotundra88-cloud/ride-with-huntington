@@ -234,8 +234,15 @@ function VendorDashboard() {
         <CardContent className="space-y-4">
           <Tabs value={tab} onValueChange={(v) => setTab(v === "archived" ? "archived" : "active")}>
             <TabsList>
-              <TabsTrigger value="active">Active list</TabsTrigger>
-              <TabsTrigger value="archived" disabled={!access?.canArchive}>
+              {/* Used as a list switch: both tabs control the vendor list below. */}
+              <TabsTrigger value="active" aria-controls="vendor-list">
+                Active list
+              </TabsTrigger>
+              <TabsTrigger
+                value="archived"
+                aria-controls="vendor-list"
+                disabled={!access?.canArchive}
+              >
                 Archived
               </TabsTrigger>
             </TabsList>
@@ -336,70 +343,73 @@ function VendorDashboard() {
             </Button>
           </div>
 
-          {isPending ? (
-            <p className="text-sm text-muted-foreground">Loading vendors…</p>
-          ) : error ? (
-            <p className="text-sm text-destructive">{(error as Error).message}</p>
-          ) : filtered.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No vendors match these filters.</p>
-          ) : (
-            <ul className="divide-y">
-              {filtered.map((v) => (
-                <li key={v.id} className="py-3">
-                  <Link
-                    to="/vendors/$id"
-                    params={{ id: v.id }}
-                    className="block rounded-md px-1 hover:bg-muted/50"
-                  >
-                    <div className="flex flex-wrap items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="truncate font-semibold text-[var(--brand-dark)]">
-                            {v.business_name}
-                          </span>
-                          <VendorTierBadge
-                            tier={tierFor(v.year_totals, tierYear)}
-                            year={tierYear}
-                          />
-                          <KidsSupporterBadge
-                            show={isKidsSupporter(v.year_totals, tierYear)}
-                            year={tierYear}
-                          />
-                          <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase">
-                            {v.status}
-                          </span>
-                          {isOpportunity(v.rollup) && (
-                            <span className="rounded-full bg-[var(--brand)]/20 px-2 py-0.5 text-[10px] font-semibold text-[var(--brand-dark)]">
-                              Opportunity
+          <div id="vendor-list" role="tabpanel">
+            {isPending ? (
+              <p className="text-sm text-muted-foreground">Loading vendors…</p>
+            ) : error ? (
+              <p className="text-sm text-destructive">{(error as Error).message}</p>
+            ) : filtered.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No vendors match these filters.</p>
+            ) : (
+              <ul className="divide-y">
+                {filtered.map((v) => (
+                  <li key={v.id} className="py-3">
+                    <Link
+                      to="/vendors/$id"
+                      params={{ id: v.id }}
+                      className="block rounded-md px-1 hover:bg-muted/50"
+                    >
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="truncate font-semibold text-[var(--brand-dark)]">
+                              {v.business_name}
                             </span>
-                          )}
+                            <VendorTierBadge
+                              tier={tierFor(v.year_totals, tierYear)}
+                              year={tierYear}
+                            />
+                            <KidsSupporterBadge
+                              show={isKidsSupporter(v.year_totals, tierYear)}
+                              year={tierYear}
+                            />
+                            <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase">
+                              {v.status}
+                            </span>
+                            {isOpportunity(v.rollup) && (
+                              <span className="rounded-full bg-[var(--brand)]/20 px-2 py-0.5 text-[10px] font-semibold text-[var(--brand-dark)]">
+                                Opportunity
+                              </span>
+                            )}
+                          </div>
+                          <p className="truncate text-xs text-muted-foreground">
+                            {v.business_segment || "No segment"} · Owner{" "}
+                            {v.relationship_owner || "—"} · Updated{" "}
+                            {new Date(v.updated_at).toLocaleDateString()}{" "}
+                            {v.updated_by_name ? `by ${v.updated_by_name}` : ""}
+                          </p>
                         </div>
-                        <p className="truncate text-xs text-muted-foreground">
-                          {v.business_segment || "No segment"} · Owner {v.relationship_owner || "—"}{" "}
-                          · Updated {new Date(v.updated_at).toLocaleDateString()}{" "}
-                          {v.updated_by_name ? `by ${v.updated_by_name}` : ""}
-                        </p>
+                        <div className="flex gap-4 text-right text-xs">
+                          <div>
+                            <div className="text-muted-foreground">Spend</div>
+                            <div className="font-semibold">{currency(v.rollup.total_spend)}</div>
+                          </div>
+                          <div>
+                            <div className="text-muted-foreground">Donated</div>
+                            <div className="font-semibold">{currency(v.rollup.total_donated)}</div>
+                          </div>
+                          <div>
+                            <div className="text-muted-foreground">Support</div>
+                            <div className="font-semibold">{percent(v.rollup.support_rate)}</div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex gap-4 text-right text-xs">
-                        <div>
-                          <div className="text-muted-foreground">Spend</div>
-                          <div className="font-semibold">{currency(v.rollup.total_spend)}</div>
-                        </div>
-                        <div>
-                          <div className="text-muted-foreground">Donated</div>
-                          <div className="font-semibold">{currency(v.rollup.total_donated)}</div>
-                        </div>
-                        <div>
-                          <div className="text-muted-foreground">Support</div>
-                          <div className="font-semibold">{percent(v.rollup.support_rate)}</div>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>

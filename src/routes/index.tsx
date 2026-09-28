@@ -194,7 +194,7 @@ function Landing() {
             <li key={s.title}>
               <Card className="h-full border-2 hover:border-[var(--brand)] transition-colors">
                 <CardContent className="p-5">
-                  <div className="flex items-center gap-2 text-xs font-bold text-[var(--brand-dark)]/60">
+                  <div className="flex items-center gap-2 text-xs font-bold text-[var(--brand-dark)]/75">
                     STEP {i + 1}
                   </div>
                   <div className="mt-3 grid h-10 w-10 place-items-center rounded-lg bg-[var(--brand)]/15 text-[var(--brand-dark)]">
@@ -252,7 +252,7 @@ function Landing() {
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Card className="border-2 border-dashed border-[var(--brand-dark)]/20">
             <CardContent className="p-5">
-              <p className="text-xs font-bold uppercase tracking-wider text-[var(--brand-dark)]/60">
+              <p className="text-xs font-bold uppercase tracking-wider text-[var(--brand-dark)]/75">
                 Friday, Aug 6
               </p>
               <h3 className="mt-3 font-bold text-[var(--brand-dark)]">Packet Pickup & Expo</h3>
@@ -266,7 +266,7 @@ function Landing() {
           </Card>
           <Card className="border-2 border-dashed border-[var(--brand)]/40">
             <CardContent className="p-5">
-              <p className="text-xs font-bold uppercase tracking-wider text-[var(--brand-dark)]/60">
+              <p className="text-xs font-bold uppercase tracking-wider text-[var(--brand-dark)]/75">
                 Saturday, Aug 7
               </p>
               <h3 className="mt-3 font-bold text-[var(--brand-dark)]">Ride Day</h3>
@@ -280,7 +280,7 @@ function Landing() {
           </Card>
           <Card className="border-2 border-dashed border-[var(--brand-dark)]/20">
             <CardContent className="p-5">
-              <p className="text-xs font-bold uppercase tracking-wider text-[var(--brand-dark)]/60">
+              <p className="text-xs font-bold uppercase tracking-wider text-[var(--brand-dark)]/75">
                 Sunday, Aug 8
               </p>
               <h3 className="mt-3 font-bold text-[var(--brand-dark)]">Team Celebration</h3>
@@ -413,7 +413,11 @@ function SignedInHero() {
                   <span className="text-white/80">Journey progress</span>
                   <span className="font-bold text-[var(--brand)]">{completion}%</span>
                 </div>
-                <Progress value={completion} className="h-2 bg-white/20" />
+                <Progress
+                  value={completion}
+                  className="h-2 bg-white/20"
+                  aria-label={`Registration ${completion}% complete`}
+                />
               </div>
               <div className="mt-4 grid grid-cols-2 gap-3">
                 <Button

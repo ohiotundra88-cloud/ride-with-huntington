@@ -393,7 +393,11 @@ function ManageFundraiser() {
         <Stat label="Net to team" value={money(data.totals.net)} />
         <Stat label="Paid out" value={money(payoutTotal)} />
       </div>
-      <Progress value={data.totals.goalPercent} className="mt-3 h-2" />
+      <Progress
+        value={data.totals.goalPercent}
+        className="mt-3 h-2"
+        aria-label={`${data.totals.goalPercent}% of fundraising goal`}
+      />
       <p className="mt-1 text-xs text-muted-foreground">
         {money(data.totals.gross)} of {money(f.goal_amount)} goal · {data.totals.supporters}{" "}
         supporters · {data.totals.units} {KIND_ITEM_NOUN[f.kind].toLowerCase()} sold

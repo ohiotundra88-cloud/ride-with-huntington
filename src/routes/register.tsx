@@ -295,7 +295,11 @@ function RegisterWizard() {
             )}
           </div>
         </div>
-        <Progress value={progress} className="mt-3 h-2" />
+        <Progress
+          value={progress}
+          className="mt-3 h-2"
+          aria-label={`Registration step ${step} of ${total}`}
+        />
         <Copy k="top.autosave" as="p" className="mt-2 text-[11px] text-muted-foreground" />
       </div>
 

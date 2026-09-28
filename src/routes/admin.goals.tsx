@@ -180,7 +180,11 @@ function GoalsAdmin() {
                     <p className="mt-1 text-sm text-muted-foreground">
                       {f.current} of {f.target} · {g.location}
                     </p>
-                    <Progress value={pct} className="mt-2 h-2 [&>div]:bg-[var(--brand)]" />
+                    <Progress
+                      value={pct}
+                      className="mt-2 h-2 [&>div]:bg-[var(--brand)]"
+                      aria-label={`Goal ${pct}% reached`}
+                    />
                   </div>
                   <div className="flex gap-1">
                     <Button

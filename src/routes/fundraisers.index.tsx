@@ -136,7 +136,11 @@ function Section({ rows, title }: { rows: FundraiserListRow[]; title: string }) 
                   )}
                 </div>
                 <div className="mt-auto space-y-2">
-                  <Progress value={f.totals.goalPercent} className="h-2" />
+                  <Progress
+                    value={f.totals.goalPercent}
+                    className="h-2"
+                    aria-label={`${f.title}: ${f.totals.goalPercent}% of goal`}
+                  />
                   <div className="flex items-baseline justify-between text-sm">
                     <span className="font-semibold">{money(f.totals.gross)}</span>
                     <span className="text-muted-foreground">of {money(f.goal_amount)}</span>
