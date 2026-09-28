@@ -87,7 +87,7 @@ function MyEventsPage() {
   const past = all.filter((e) => !isUpcoming(e.eventDate)).reverse();
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-8">
+    <div className="mx-auto max-w-3xl px-4 py-8">
       <header className="mb-6">
         <h1 className="flex items-center gap-2 text-2xl font-black tracking-tight sm:text-3xl">
           <CalendarDays className="h-6 w-6" /> My team events
@@ -134,6 +134,6 @@ function MyEventsPage() {
           )}
         </div>
       )}
-    </main>
+    </div>
   );
 }

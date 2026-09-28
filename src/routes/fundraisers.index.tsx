@@ -60,7 +60,7 @@ function FundraiserDirectory() {
   if (fundraiserPagesPaused) return <FundraiserPagesPaused />;
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8">
+    <div className="mx-auto max-w-6xl px-4 py-8">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-[var(--brand-dark)]">
@@ -104,7 +104,7 @@ function FundraiserDirectory() {
           {past.length > 0 && <Section rows={past} title="Wrapped up" />}
         </>
       )}
-    </main>
+    </div>
   );
 }
 

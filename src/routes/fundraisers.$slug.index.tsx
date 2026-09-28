@@ -112,12 +112,12 @@ function FundraiserPublicPage() {
 
   if (isPending)
     return (
-      <main className="mx-auto max-w-5xl px-4 py-12 text-sm text-muted-foreground">Loading…</main>
+      <div className="mx-auto max-w-5xl px-4 py-12 text-sm text-muted-foreground">Loading…</div>
     );
 
   if (error || !data || !f) {
     return (
-      <main className="mx-auto max-w-2xl px-4 py-16 text-center">
+      <div className="mx-auto max-w-2xl px-4 py-16 text-center">
         <h1 className="text-xl font-semibold text-[var(--brand-dark)]">
           This fundraiser isn't available
         </h1>
@@ -129,7 +129,7 @@ function FundraiserPublicPage() {
             <ArrowLeft className="mr-1.5 h-4 w-4" /> All fundraisers
           </Link>
         </Button>
-      </main>
+      </div>
     );
   }
 
@@ -138,7 +138,7 @@ function FundraiserPublicPage() {
   if (fundraiserPagesPaused) return <FundraiserPagesPaused />;
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8">
+    <div className="mx-auto max-w-5xl px-4 py-8">
       <Link
         to="/fundraisers"
         className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
@@ -398,6 +398,6 @@ function FundraiserPublicPage() {
           </Card>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

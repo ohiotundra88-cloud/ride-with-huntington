@@ -222,12 +222,12 @@ function ManageFundraiser() {
 
   if (isPending || !form) {
     return (
-      <main className="mx-auto max-w-5xl px-4 py-12 text-sm text-muted-foreground">Loading…</main>
+      <div className="mx-auto max-w-5xl px-4 py-12 text-sm text-muted-foreground">Loading…</div>
     );
   }
   if (error || !data) {
     return (
-      <main className="mx-auto max-w-lg px-4 py-16 text-center">
+      <div className="mx-auto max-w-lg px-4 py-16 text-center">
         <h1 className="text-xl font-semibold text-[var(--brand-dark)]">
           We couldn't open that fundraiser
         </h1>
@@ -237,7 +237,7 @@ function ManageFundraiser() {
         <Button asChild className="mt-5" variant="outline">
           <Link to="/my-fundraisers">Back to workspace</Link>
         </Button>
-      </main>
+      </div>
     );
   }
 
@@ -260,7 +260,7 @@ function ManageFundraiser() {
   if (fundraiserPagesPaused) return <FundraiserPagesPaused />;
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8">
+    <div className="mx-auto max-w-5xl px-4 py-8">
       <Link
         to="/my-fundraisers"
         className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
@@ -835,7 +835,7 @@ function ManageFundraiser() {
           </Card>
         </TabsContent>
       </Tabs>
-    </main>
+    </div>
   );
 }
 

@@ -372,7 +372,7 @@ function RiderProgressPage() {
   }
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8">
+    <div className="mx-auto max-w-7xl px-4 py-8">
       <h1 className="text-2xl font-bold text-[var(--brand-dark)]">Rider progress</h1>
       <p className="mt-1 text-sm text-muted-foreground">
         Search the roster and see registration, hotel, bike and live fundraising progress.
@@ -607,6 +607,6 @@ function RiderProgressPage() {
           )}
         </CardContent>
       </Card>
-    </main>
+    </div>
   );
 }

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/vendors/new")({
   component: () => (
     <VendorGate>
-      <main className="mx-auto max-w-4xl px-4 py-8">
+      <div className="mx-auto max-w-4xl px-4 py-8">
         <Button asChild variant="ghost" size="sm" className="mb-3 -ml-2">
           <Link to="/vendors">
             <ArrowLeft className="mr-1 h-4 w-4" /> Vendor CRM
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/vendors/new")({
           Business name and a primary point of contact are required.
         </p>
         <VendorForm />
-      </main>
+      </div>
     </VendorGate>
   ),
 

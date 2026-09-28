@@ -84,12 +84,12 @@ function MyFundraisers() {
 
   if (accessPending)
     return (
-      <main className="mx-auto max-w-5xl px-4 py-12 text-sm text-muted-foreground">Loading…</main>
+      <div className="mx-auto max-w-5xl px-4 py-12 text-sm text-muted-foreground">Loading…</div>
     );
 
   if (!access?.canCreate) {
     return (
-      <main className="mx-auto max-w-lg px-4 py-16 text-center">
+      <div className="mx-auto max-w-lg px-4 py-16 text-center">
         <ShieldAlert className="mx-auto h-9 w-9 text-[var(--brand)]" />
         <h1 className="mt-3 text-xl font-semibold text-[var(--brand-dark)]">
           Sign in to build a fundraiser
@@ -108,14 +108,14 @@ function MyFundraisers() {
             <Link to="/fundraisers">Browse fundraisers</Link>
           </Button>
         </div>
-      </main>
+      </div>
     );
   }
 
   if (fundraiserPagesPaused) return <FundraiserPagesPaused />;
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8">
+    <div className="mx-auto max-w-5xl px-4 py-8">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-[var(--brand-dark)]">Fundraiser workspace</h1>
@@ -189,7 +189,7 @@ function MyFundraisers() {
           ))}
         </div>
       )}
-    </main>
+    </div>
   );
 }
 

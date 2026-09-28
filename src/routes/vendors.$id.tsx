@@ -164,7 +164,7 @@ function VendorDetailPage() {
     currentRideYear();
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8">
+    <div className="mx-auto max-w-5xl px-4 py-8">
       <Button asChild variant="ghost" size="sm" className="-ml-2 mb-3">
         <Link to="/vendors">
           <ArrowLeft className="mr-1 h-4 w-4" /> Vendor CRM
@@ -378,7 +378,7 @@ function VendorDetailPage() {
           />
         </>
       )}
-    </main>
+    </div>
   );
 }
 

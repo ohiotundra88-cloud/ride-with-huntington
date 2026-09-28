@@ -424,9 +424,9 @@ function MessagesPage() {
   if (access.isLoading) {
     return (
       <>
-        <main className="mx-auto max-w-3xl px-4 py-16 text-center text-muted-foreground">
+        <div className="mx-auto max-w-3xl px-4 py-16 text-center text-muted-foreground">
           <Loader2 className="mx-auto h-6 w-6 animate-spin" />
-        </main>
+        </div>
       </>
     );
   }
@@ -434,7 +434,7 @@ function MessagesPage() {
   if (!allowed) {
     return (
       <>
-        <main className="mx-auto max-w-2xl px-4 py-16">
+        <div className="mx-auto max-w-2xl px-4 py-16">
           <Card>
             <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
               <ShieldAlert className="h-8 w-8 text-muted-foreground" />
@@ -444,14 +444,14 @@ function MessagesPage() {
               </p>
             </CardContent>
           </Card>
-        </main>
+        </div>
       </>
     );
   }
 
   return (
     <>
-      <main className="mx-auto max-w-7xl px-4 py-8">
+      <div className="mx-auto max-w-7xl px-4 py-8">
         <header className="mb-6">
           <h1 className="text-2xl font-black tracking-tight sm:text-3xl">Team messages</h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -1151,7 +1151,7 @@ function MessagesPage() {
         </Tabs>
 
         <RecipientsDialog message={recipientsFor} onClose={() => setRecipientsFor(null)} />
-      </main>
+      </div>
     </>
   );
 }

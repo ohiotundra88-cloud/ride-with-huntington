@@ -60,7 +60,7 @@ function InboxPage() {
 
   return (
     <>
-      <main className="mx-auto max-w-3xl px-4 py-8">
+      <div className="mx-auto max-w-3xl px-4 py-8">
         <header className="mb-6 flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="text-2xl font-black tracking-tight sm:text-3xl">My inbox</h1>
@@ -160,7 +160,7 @@ function InboxPage() {
             ))}
           </ul>
         )}
-      </main>
+      </div>
     </>
   );
 }
