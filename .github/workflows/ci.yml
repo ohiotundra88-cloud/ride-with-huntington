@@ -1,0 +1,107 @@
+# Continuous integration for the Team Huntington Hub.
+#
+# Three independent jobs, all required:
+#   lint      ESLint (includes Prettier formatting). A hard gate.
+#   app       typecheck, unit tests, and both production builds.
+#   database  every migration applied to a clean PostgreSQL 17, the row-level
+#             security regression tests, and a schema drift check on the
+#             generated database types.
+#
+# The jobs are split so a red lint run still shows whether tests and builds pass.
+# Nothing here deploys, and no secrets are used.
+
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: ESLint and Prettier
+        run: npm run lint
+
+  app:
+    name: Typecheck, unit tests, build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Unit tests
+        run: npm test
+      - name: Build (Cloudflare Workers target)
+        run: npm run build
+      - name: Build (Node server target, used for Azure)
+        run: npm run build:node
+
+  database:
+    name: Migrations and RLS tests (PostgreSQL 17)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          # Throwaway CI database only. Never use trust auth anywhere else.
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      # Read by supabase/tests/local/reset.sh, the test:db script and
+      # scripts/gen-db-types.mjs. The same values work against any local
+      # PostgreSQL 17 listening on TCP.
+      PGHOST: localhost
+      PGPORT: "5432"
+      PGDATABASE_TEST: rwh_test
+      LC_ALL: C.UTF-8
+      PSQL: /usr/lib/postgresql/17/bin/psql
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install the PostgreSQL 17 client
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y --no-install-recommends postgresql-client-17
+          "$PSQL" --version
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Apply all migrations and run the security tests
+        run: npm run test:db
+      - name: Generated database types match the migrations
+        run: |
+          node scripts/gen-db-types.mjs
+          npx prettier --write src/integrations/supabase/types.ts
+          git diff --exit-code -- src/integrations/supabase/types.ts
