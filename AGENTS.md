@@ -1,12 +1,7 @@
-<!-- LOVABLE:BEGIN -->
+# Notes for AI coding assistants
 
-> [!IMPORTANT]
-> This project is connected to [Lovable](https://lovable.dev). Avoid rewriting
-> published git history — force pushing, or rebasing/amending/squashing commits
-> that are already pushed — as it rewrites history on Lovable's side and the
-> user will likely lose their project history.
->
-> Commits you push to the connected branch sync back to Lovable and show up in
-> the editor, so keep the branch in a working state.
+This project is no longer connected to Lovable. It is a normal Git repository: edit code, run the checks, open a pull request.
 
-<!-- LOVABLE:END -->
+Start with `README.md`, then `docs/ARCHITECTURE.md`. Conventions for assistants are in `.github/copilot-instructions.md` (they apply to any assistant, not just GitHub Copilot).
+
+Before finishing any change, run `npm run check` and, if you touched the database, `npm run test:db`.

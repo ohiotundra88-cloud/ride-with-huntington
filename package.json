@@ -12,7 +12,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "node --test tests/*.test.ts",
-    "test:db": "supabase/tests/local/reset.sh && psql -v ON_ERROR_STOP=1 -h ${PGHOST:-/tmp} -p ${PGPORT:-54329} -U postgres -d ${PGDATABASE_TEST:-rwh_test} -f supabase/tests/security_hardening.sql",
+    "test:db": "supabase/tests/local/reset.sh && psql -v ON_ERROR_STOP=1 -h ${PGHOST:-/tmp} -p ${PGPORT:-54329} -U postgres -d ${PGDATABASE_TEST:-rwh_test} -f supabase/tests/security_hardening.sql && psql -v ON_ERROR_STOP=1 -h ${PGHOST:-/tmp} -p ${PGPORT:-54329} -U postgres -d ${PGDATABASE_TEST:-rwh_test} -f supabase/tests/huntington_registration.sql",
     "check": "npm run typecheck && npm run lint && npm test && npm run build"
   },
   "dependencies": {

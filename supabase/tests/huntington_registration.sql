@@ -29,13 +29,10 @@ BEGIN
     RAISE EXCEPTION 'Outside email update succeeded';
   EXCEPTION WHEN check_violation THEN NULL;
   END;
-  BEGIN
-    UPDATE huntington_email_test SET email_change = 'a@gmail.com';
-    RAISE EXCEPTION 'Outside email change request succeeded';
-  EXCEPTION WHEN check_violation THEN NULL;
-  END;
-  UPDATE huntington_email_test SET email_change = 'new@huntington.com';
-  UPDATE huntington_email_test SET email_change = '';
+  -- Self-hosted sign-in has no pending "email change" step; instead, a few
+  -- non-Huntington addresses can be allowed explicitly (hub_email_allowlist).
+  INSERT INTO public.hub_email_allowlist (email) VALUES ('allowed.guest@example.com') ON CONFLICT DO NOTHING;
+  INSERT INTO huntington_email_test VALUES ('Allowed.Guest@example.com', '');
 END;
 $$;
 ROLLBACK;

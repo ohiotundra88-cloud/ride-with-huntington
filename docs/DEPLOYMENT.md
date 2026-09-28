@@ -342,4 +342,4 @@ PGOPTIONS='-c request.jwt.claims={"role":"service_role"}' \
 
 Success prints `PASS` lines and ends with `ROLLBACK`; any failure stops with `ERROR: FAIL: ...`. Run it against staging, not production, as a habit, even though it rolls back.
 
-`supabase/tests/huntington_registration.sql` is an older test from the Supabase Auth era. It currently fails at "Outside email change request succeeded" because migration `20260928160000_self_host_identity.sql` replaced the email trigger without the `email_change` check (a column Supabase Auth used and the self-hosted Hub no longer writes). It is not part of CI.
+`supabase/tests/huntington_registration.sql` checks the Huntington-only email rule (including lookalike domains and the explicit `hub_email_allowlist`). `npm run test:db` runs it after the security tests, so CI covers it; run it against staging the same way.

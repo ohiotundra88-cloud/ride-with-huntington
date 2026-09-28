@@ -98,7 +98,7 @@ Sign-in is the OpenID Connect authorization code flow with PKCE. The Hub is a co
 - `GET /auth/login` builds the authorize URL, stores `state`, `nonce` and the PKCE verifier in a signed 10-minute cookie, and redirects to the provider.
 - `GET /auth/callback` checks `state`, exchanges the code, verifies the ID token signature (JWKS), issuer, audience and nonce, and requires membership in `AUTH_ORG_SLUG` (the `orgs` claim). It then sets the session cookie and redirects to `returnTo`.
 - `GET /auth/logout` clears the cookie, revokes the server-side session if there is one, and redirects to the provider's end-session endpoint.
-- `GET /auth/me` returns `{ user: { id, email, name } | null }`. The browser app (`src/lib/store.tsx`) calls it on load.
+- `GET /auth/me` returns `{ user: { id, email, name } | null }`. The browser app (`src/components/StoreProvider.tsx`, logic in `src/lib/store.ts`) calls it on load.
 
 Session storage depends on the platform:
 
@@ -177,7 +177,7 @@ Extra protection beyond RLS, from migration `20260928140000_security_hardening.s
 - signs an `authenticated` token for the session's user, or an `anon` token,
 - adds the gateway headers and forwards to `<HUB_DB_URL>/rest/v1/...`.
 
-So the browser can never raise its own role, and corporate web filters only ever see the Hub's own hostname. Today only `src/lib/store.tsx` (profile and roles) uses this client; everything else goes through server functions.
+So the browser can never raise its own role, and corporate web filters only ever see the Hub's own hostname. Today only the browser store (`src/lib/store.ts`: profile and roles) uses this client; everything else goes through server functions.
 
 ### Generated types
 
@@ -286,8 +286,8 @@ Fundraiser pages have a checkout, but only a **demo** payment provider exists (`
 
 ## Parts that are still prototype-only
 
-Some screens from the original Lovable prototype still keep their data in the browser, not the database. Treat them as mock-ups until they are moved to server functions:
+One area from the original Lovable prototype still keeps its data in the browser, not the database:
 
-- `src/lib/admin-store.tsx`: the Super User console's editable content and feature flags (announcements, family guide, goals, journey, packing list, concierge, readiness). Stored in memory and `localStorage`, so changes are visible only in the editing browser.
-- `src/lib/mock-data.ts`: sample numbers used by `/analytics` (Executive Analytics) and parts of the dashboard timeline.
-- `src/lib/store.tsx` caches the registration in `localStorage` per user, but the source of truth is the `participants` table.
+- `src/lib/admin-store.ts` (provider: `src/components/AdminStoreProvider.tsx`): the Super User console's editable content and feature flags (announcements, family guide, goals, journey, packing list, concierge, readiness). Stored in memory and `localStorage`, so changes are visible only in the editing browser, and those screens say so. Defaults live in `src/lib/admin-content.ts`. Moving this to a database table plus server functions is the main piece of prototype debt left.
+
+Not prototype-only, for clarity: `/analytics` computes its figures from real registrations (`src/lib/registration-analytics.ts`), and `src/lib/store.ts` only caches the registration in `localStorage`; the source of truth is the `participants` table.
