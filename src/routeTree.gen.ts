@@ -9,167 +9,69 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TeamEventsRouteImport } from './routes/team-events'
-import { Route as TeamRouteImport } from './routes/team'
-import { Route as SigninRouteImport } from './routes/signin'
-import { Route as RiderProgressRouteImport } from './routes/rider-progress'
-import { Route as ResourcesRouteImport } from './routes/resources'
-import { Route as RegisterRouteImport } from './routes/register'
-import { Route as ProfileRouteImport } from './routes/profile'
-import { Route as PackingRouteImport } from './routes/packing'
-import { Route as MyEventsRouteImport } from './routes/my-events'
-import { Route as MessagesRouteImport } from './routes/messages'
-import { Route as McpRouteImport } from './routes/mcp'
-import { Route as InboxRouteImport } from './routes/inbox'
-import { Route as HealthRouteImport } from './routes/health'
-import { Route as FundraiserRequestRouteImport } from './routes/fundraiser-request'
-import { Route as FamilyRouteImport } from './routes/family'
-import { Route as ExpensesRouteImport } from './routes/expenses'
-import { Route as EventsRouteImport } from './routes/events'
-import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as ConfirmationRouteImport } from './routes/confirmation'
-import { Route as CaptainsLoungeRouteImport } from './routes/captains-lounge'
-import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as VendorsIndexRouteImport } from './routes/vendors.index'
-import { Route as MyFundraisersIndexRouteImport } from './routes/my-fundraisers.index'
-import { Route as FundraisersIndexRouteImport } from './routes/fundraisers.index'
+import { Route as AnalyticsRouteImport } from './routes/analytics'
+import { Route as CaptainsLoungeRouteImport } from './routes/captains-lounge'
+import { Route as ConfirmationRouteImport } from './routes/confirmation'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as EventsRouteImport } from './routes/events'
+import { Route as ExpensesRouteImport } from './routes/expenses'
+import { Route as FamilyRouteImport } from './routes/family'
+import { Route as FundraiserRequestRouteImport } from './routes/fundraiser-request'
+import { Route as HealthRouteImport } from './routes/health'
+import { Route as InboxRouteImport } from './routes/inbox'
+import { Route as MessagesRouteImport } from './routes/messages'
+import { Route as MyEventsRouteImport } from './routes/my-events'
+import { Route as PackingRouteImport } from './routes/packing'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as ResourcesRouteImport } from './routes/resources'
+import { Route as RiderProgressRouteImport } from './routes/rider-progress'
+import { Route as SigninRouteImport } from './routes/signin'
+import { Route as TeamRouteImport } from './routes/team'
+import { Route as TeamEventsRouteImport } from './routes/team-events'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as VendorsNewRouteImport } from './routes/vendors.new'
-import { Route as VendorsIdRouteImport } from './routes/vendors.$id'
-import { Route as ResourcesIdRouteImport } from './routes/resources.$id'
-import { Route as MyFundraisersIdRouteImport } from './routes/my-fundraisers.$id'
-import { Route as AdminUsersRouteImport } from './routes/admin.users'
-import { Route as AdminTestEmailsRouteImport } from './routes/admin.test-emails'
-import { Route as AdminRosterRouteImport } from './routes/admin.roster'
-import { Route as AdminReadinessRouteImport } from './routes/admin.readiness'
-import { Route as AdminParticipantsRouteImport } from './routes/admin.participants'
-import { Route as AdminPackingRouteImport } from './routes/admin.packing'
-import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
-import { Route as AdminJourneyRouteImport } from './routes/admin.journey'
-import { Route as AdminGoalsRouteImport } from './routes/admin.goals'
-import { Route as AdminFundraisingRouteImport } from './routes/admin.fundraising'
-import { Route as AdminFlagsRouteImport } from './routes/admin.flags'
-import { Route as AdminFaqsRouteImport } from './routes/admin.faqs'
-import { Route as AdminFamilyRouteImport } from './routes/admin.family'
-import { Route as AdminContactsRouteImport } from './routes/admin.contacts'
-import { Route as AdminConciergeRouteImport } from './routes/admin.concierge'
-import { Route as AdminBrandingRouteImport } from './routes/admin.branding'
-import { Route as AdminApprovalsRouteImport } from './routes/admin.approvals'
 import { Route as AdminAnnouncementsRouteImport } from './routes/admin.announcements'
-import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
-import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
+import { Route as AdminApprovalsRouteImport } from './routes/admin.approvals'
+import { Route as AdminBrandingRouteImport } from './routes/admin.branding'
+import { Route as AdminConciergeRouteImport } from './routes/admin.concierge'
+import { Route as AdminContactsRouteImport } from './routes/admin.contacts'
+import { Route as AdminFamilyRouteImport } from './routes/admin.family'
+import { Route as AdminFaqsRouteImport } from './routes/admin.faqs'
+import { Route as AdminFlagsRouteImport } from './routes/admin.flags'
+import { Route as AdminFundraisingRouteImport } from './routes/admin.fundraising'
+import { Route as AdminGoalsRouteImport } from './routes/admin.goals'
+import { Route as AdminJourneyRouteImport } from './routes/admin.journey'
+import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
+import { Route as AdminPackingRouteImport } from './routes/admin.packing'
+import { Route as AdminParticipantsRouteImport } from './routes/admin.participants'
+import { Route as AdminReadinessRouteImport } from './routes/admin.readiness'
+import { Route as AdminRosterRouteImport } from './routes/admin.roster'
+import { Route as AdminTestEmailsRouteImport } from './routes/admin.test-emails'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
+import { Route as AuthLoginRouteImport } from './routes/auth/login'
+import { Route as AuthLogoutRouteImport } from './routes/auth/logout'
+import { Route as AuthMeRouteImport } from './routes/auth/me'
+import { Route as FundraisersIndexRouteImport } from './routes/fundraisers.index'
+import { Route as MyFundraisersIndexRouteImport } from './routes/my-fundraisers.index'
+import { Route as MyFundraisersIdRouteImport } from './routes/my-fundraisers.$id'
+import { Route as ResourcesIdRouteImport } from './routes/resources.$id'
+import { Route as VendorsIndexRouteImport } from './routes/vendors.index'
+import { Route as VendorsIdRouteImport } from './routes/vendors.$id'
+import { Route as VendorsNewRouteImport } from './routes/vendors.new'
 import { Route as FundraisersSlugIndexRouteImport } from './routes/fundraisers.$slug.index'
 import { Route as FundraisersSlugThanksRouteImport } from './routes/fundraisers.$slug.thanks'
-import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
-import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
-import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
-import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
-import { Route as ApiPublicSbSplatRouteImport } from './routes/api/public/sb/$'
-import { Route as ApiPublicFundraisingAssetIdRouteImport } from './routes/api/public/fundraising-asset/$id'
-import { Route as ApiPublicFundraiserFlierIdRouteImport } from './routes/api/public/fundraiser-flier/$id'
-import { Route as ApiPublicEventFlierIdRouteImport } from './routes/api/public/event-flier/$id'
-import { Route as ApiPublicBrandingKindRouteImport } from './routes/api/public/branding/$kind'
 import { Route as ApiPublicAvatarUserIdRouteImport } from './routes/api/public/avatar/$userId'
+import { Route as ApiPublicBrandingKindRouteImport } from './routes/api/public/branding/$kind'
+import { Route as ApiPublicEventFlierIdRouteImport } from './routes/api/public/event-flier/$id'
+import { Route as ApiPublicFundraiserFlierIdRouteImport } from './routes/api/public/fundraiser-flier/$id'
+import { Route as ApiPublicFundraisingAssetIdRouteImport } from './routes/api/public/fundraising-asset/$id'
+import { Route as ApiPublicSbSplatRouteImport } from './routes/api/public/sb/$'
 
-const TeamEventsRoute = TeamEventsRouteImport.update({
-  id: '/team-events',
-  path: '/team-events',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TeamRoute = TeamRouteImport.update({
-  id: '/team',
-  path: '/team',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SigninRoute = SigninRouteImport.update({
-  id: '/signin',
-  path: '/signin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RiderProgressRoute = RiderProgressRouteImport.update({
-  id: '/rider-progress',
-  path: '/rider-progress',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResourcesRoute = ResourcesRouteImport.update({
-  id: '/resources',
-  path: '/resources',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RegisterRoute = RegisterRouteImport.update({
-  id: '/register',
-  path: '/register',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProfileRoute = ProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PackingRoute = PackingRouteImport.update({
-  id: '/packing',
-  path: '/packing',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MyEventsRoute = MyEventsRouteImport.update({
-  id: '/my-events',
-  path: '/my-events',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MessagesRoute = MessagesRouteImport.update({
-  id: '/messages',
-  path: '/messages',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const McpRoute = McpRouteImport.update({
-  id: '/mcp',
-  path: '/mcp',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const InboxRoute = InboxRouteImport.update({
-  id: '/inbox',
-  path: '/inbox',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HealthRoute = HealthRouteImport.update({
-  id: '/health',
-  path: '/health',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FundraiserRequestRoute = FundraiserRequestRouteImport.update({
-  id: '/fundraiser-request',
-  path: '/fundraiser-request',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FamilyRoute = FamilyRouteImport.update({
-  id: '/family',
-  path: '/family',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ExpensesRoute = ExpensesRouteImport.update({
-  id: '/expenses',
-  path: '/expenses',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EventsRoute = EventsRouteImport.update({
-  id: '/events',
-  path: '/events',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ConfirmationRoute = ConfirmationRouteImport.update({
-  id: '/confirmation',
-  path: '/confirmation',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CaptainsLoungeRoute = CaptainsLoungeRouteImport.update({
-  id: '/captains-lounge',
-  path: '/captains-lounge',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AnalyticsRoute = AnalyticsRouteImport.update({
@@ -177,24 +79,99 @@ const AnalyticsRoute = AnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const CaptainsLoungeRoute = CaptainsLoungeRouteImport.update({
+  id: '/captains-lounge',
+  path: '/captains-lounge',
   getParentRoute: () => rootRouteImport,
 } as any)
-const VendorsIndexRoute = VendorsIndexRouteImport.update({
-  id: '/vendors/',
-  path: '/vendors/',
+const ConfirmationRoute = ConfirmationRouteImport.update({
+  id: '/confirmation',
+  path: '/confirmation',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MyFundraisersIndexRoute = MyFundraisersIndexRouteImport.update({
-  id: '/my-fundraisers/',
-  path: '/my-fundraisers/',
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FundraisersIndexRoute = FundraisersIndexRouteImport.update({
-  id: '/fundraisers/',
-  path: '/fundraisers/',
+const EventsRoute = EventsRouteImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExpensesRoute = ExpensesRouteImport.update({
+  id: '/expenses',
+  path: '/expenses',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FamilyRoute = FamilyRouteImport.update({
+  id: '/family',
+  path: '/family',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FundraiserRequestRoute = FundraiserRequestRouteImport.update({
+  id: '/fundraiser-request',
+  path: '/fundraiser-request',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HealthRoute = HealthRouteImport.update({
+  id: '/health',
+  path: '/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InboxRoute = InboxRouteImport.update({
+  id: '/inbox',
+  path: '/inbox',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MessagesRoute = MessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyEventsRoute = MyEventsRouteImport.update({
+  id: '/my-events',
+  path: '/my-events',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PackingRoute = PackingRouteImport.update({
+  id: '/packing',
+  path: '/packing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResourcesRoute = ResourcesRouteImport.update({
+  id: '/resources',
+  path: '/resources',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RiderProgressRoute = RiderProgressRouteImport.update({
+  id: '/rider-progress',
+  path: '/rider-progress',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SigninRoute = SigninRouteImport.update({
+  id: '/signin',
+  path: '/signin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeamRoute = TeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeamEventsRoute = TeamEventsRouteImport.update({
+  id: '/team-events',
+  path: '/team-events',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -202,104 +179,9 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const VendorsNewRoute = VendorsNewRouteImport.update({
-  id: '/vendors/new',
-  path: '/vendors/new',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const VendorsIdRoute = VendorsIdRouteImport.update({
-  id: '/vendors/$id',
-  path: '/vendors/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResourcesIdRoute = ResourcesIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => ResourcesRoute,
-} as any)
-const MyFundraisersIdRoute = MyFundraisersIdRouteImport.update({
-  id: '/my-fundraisers/$id',
-  path: '/my-fundraisers/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminUsersRoute = AdminUsersRouteImport.update({
-  id: '/admin/users',
-  path: '/admin/users',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminTestEmailsRoute = AdminTestEmailsRouteImport.update({
-  id: '/admin/test-emails',
-  path: '/admin/test-emails',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRosterRoute = AdminRosterRouteImport.update({
-  id: '/admin/roster',
-  path: '/admin/roster',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminReadinessRoute = AdminReadinessRouteImport.update({
-  id: '/admin/readiness',
-  path: '/admin/readiness',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminParticipantsRoute = AdminParticipantsRouteImport.update({
-  id: '/admin/participants',
-  path: '/admin/participants',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminPackingRoute = AdminPackingRouteImport.update({
-  id: '/admin/packing',
-  path: '/admin/packing',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminNotificationsRoute = AdminNotificationsRouteImport.update({
-  id: '/admin/notifications',
-  path: '/admin/notifications',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminJourneyRoute = AdminJourneyRouteImport.update({
-  id: '/admin/journey',
-  path: '/admin/journey',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminGoalsRoute = AdminGoalsRouteImport.update({
-  id: '/admin/goals',
-  path: '/admin/goals',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminFundraisingRoute = AdminFundraisingRouteImport.update({
-  id: '/admin/fundraising',
-  path: '/admin/fundraising',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminFlagsRoute = AdminFlagsRouteImport.update({
-  id: '/admin/flags',
-  path: '/admin/flags',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminFaqsRoute = AdminFaqsRouteImport.update({
-  id: '/admin/faqs',
-  path: '/admin/faqs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminFamilyRoute = AdminFamilyRouteImport.update({
-  id: '/admin/family',
-  path: '/admin/family',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminContactsRoute = AdminContactsRouteImport.update({
-  id: '/admin/contacts',
-  path: '/admin/contacts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminConciergeRoute = AdminConciergeRouteImport.update({
-  id: '/admin/concierge',
-  path: '/admin/concierge',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminBrandingRoute = AdminBrandingRouteImport.update({
-  id: '/admin/branding',
-  path: '/admin/branding',
+const AdminAnnouncementsRoute = AdminAnnouncementsRouteImport.update({
+  id: '/admin/announcements',
+  path: '/admin/announcements',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminApprovalsRoute = AdminApprovalsRouteImport.update({
@@ -307,23 +189,141 @@ const AdminApprovalsRoute = AdminApprovalsRouteImport.update({
   path: '/admin/approvals',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminAnnouncementsRoute = AdminAnnouncementsRouteImport.update({
-  id: '/admin/announcements',
-  path: '/admin/announcements',
+const AdminBrandingRoute = AdminBrandingRouteImport.update({
+  id: '/admin/branding',
+  path: '/admin/branding',
   getParentRoute: () => rootRouteImport,
 } as any)
-const Char91DotwellKnownChar93OauthProtectedResourceRoute =
-  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
-    id: '/.well-known/oauth-protected-resource',
-    path: '/.well-known/oauth-protected-resource',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const Char91DotmcpChar93ListToolsRoute =
-  Char91DotmcpChar93ListToolsRouteImport.update({
-    id: '/.mcp/list-tools',
-    path: '/.mcp/list-tools',
-    getParentRoute: () => rootRouteImport,
-  } as any)
+const AdminConciergeRoute = AdminConciergeRouteImport.update({
+  id: '/admin/concierge',
+  path: '/admin/concierge',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminContactsRoute = AdminContactsRouteImport.update({
+  id: '/admin/contacts',
+  path: '/admin/contacts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminFamilyRoute = AdminFamilyRouteImport.update({
+  id: '/admin/family',
+  path: '/admin/family',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminFaqsRoute = AdminFaqsRouteImport.update({
+  id: '/admin/faqs',
+  path: '/admin/faqs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminFlagsRoute = AdminFlagsRouteImport.update({
+  id: '/admin/flags',
+  path: '/admin/flags',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminFundraisingRoute = AdminFundraisingRouteImport.update({
+  id: '/admin/fundraising',
+  path: '/admin/fundraising',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminGoalsRoute = AdminGoalsRouteImport.update({
+  id: '/admin/goals',
+  path: '/admin/goals',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminJourneyRoute = AdminJourneyRouteImport.update({
+  id: '/admin/journey',
+  path: '/admin/journey',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminNotificationsRoute = AdminNotificationsRouteImport.update({
+  id: '/admin/notifications',
+  path: '/admin/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPackingRoute = AdminPackingRouteImport.update({
+  id: '/admin/packing',
+  path: '/admin/packing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminParticipantsRoute = AdminParticipantsRouteImport.update({
+  id: '/admin/participants',
+  path: '/admin/participants',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminReadinessRoute = AdminReadinessRouteImport.update({
+  id: '/admin/readiness',
+  path: '/admin/readiness',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRosterRoute = AdminRosterRouteImport.update({
+  id: '/admin/roster',
+  path: '/admin/roster',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminTestEmailsRoute = AdminTestEmailsRouteImport.update({
+  id: '/admin/test-emails',
+  path: '/admin/test-emails',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/auth/login',
+  path: '/auth/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthLogoutRoute = AuthLogoutRouteImport.update({
+  id: '/auth/logout',
+  path: '/auth/logout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthMeRoute = AuthMeRouteImport.update({
+  id: '/auth/me',
+  path: '/auth/me',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FundraisersIndexRoute = FundraisersIndexRouteImport.update({
+  id: '/fundraisers/',
+  path: '/fundraisers/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyFundraisersIndexRoute = MyFundraisersIndexRouteImport.update({
+  id: '/my-fundraisers/',
+  path: '/my-fundraisers/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyFundraisersIdRoute = MyFundraisersIdRouteImport.update({
+  id: '/my-fundraisers/$id',
+  path: '/my-fundraisers/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResourcesIdRoute = ResourcesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ResourcesRoute,
+} as any)
+const VendorsIndexRoute = VendorsIndexRouteImport.update({
+  id: '/vendors/',
+  path: '/vendors/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VendorsIdRoute = VendorsIdRouteImport.update({
+  id: '/vendors/$id',
+  path: '/vendors/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VendorsNewRoute = VendorsNewRouteImport.update({
+  id: '/vendors/new',
+  path: '/vendors/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FundraisersSlugIndexRoute = FundraisersSlugIndexRouteImport.update({
   id: '/fundraisers/$slug/',
   path: '/fundraisers/$slug/',
@@ -334,48 +334,9 @@ const FundraisersSlugThanksRoute = FundraisersSlugThanksRouteImport.update({
   path: '/fundraisers/$slug/thanks',
   getParentRoute: () => rootRouteImport,
 } as any)
-const Char91DotmcpChar93InvokeToolToolRoute =
-  Char91DotmcpChar93InvokeToolToolRouteImport.update({
-    id: '/.mcp/invoke-tool/$tool',
-    path: '/.mcp/invoke-tool/$tool',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const LovableEmailTransactionalPreviewRoute =
-  LovableEmailTransactionalPreviewRouteImport.update({
-    id: '/lovable/email/transactional/preview',
-    path: '/lovable/email/transactional/preview',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
-  id: '/lovable/email/auth/webhook',
-  path: '/lovable/email/auth/webhook',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
-  id: '/lovable/email/auth/preview',
-  path: '/lovable/email/auth/preview',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicSbSplatRoute = ApiPublicSbSplatRouteImport.update({
-  id: '/api/public/sb/$',
-  path: '/api/public/sb/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicFundraisingAssetIdRoute =
-  ApiPublicFundraisingAssetIdRouteImport.update({
-    id: '/api/public/fundraising-asset/$id',
-    path: '/api/public/fundraising-asset/$id',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicFundraiserFlierIdRoute =
-  ApiPublicFundraiserFlierIdRouteImport.update({
-    id: '/api/public/fundraiser-flier/$id',
-    path: '/api/public/fundraiser-flier/$id',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicEventFlierIdRoute = ApiPublicEventFlierIdRouteImport.update({
-  id: '/api/public/event-flier/$id',
-  path: '/api/public/event-flier/$id',
+const ApiPublicAvatarUserIdRoute = ApiPublicAvatarUserIdRouteImport.update({
+  id: '/api/public/avatar/$userId',
+  path: '/api/public/avatar/$userId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicBrandingKindRoute = ApiPublicBrandingKindRouteImport.update({
@@ -383,9 +344,26 @@ const ApiPublicBrandingKindRoute = ApiPublicBrandingKindRouteImport.update({
   path: '/api/public/branding/$kind',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicAvatarUserIdRoute = ApiPublicAvatarUserIdRouteImport.update({
-  id: '/api/public/avatar/$userId',
-  path: '/api/public/avatar/$userId',
+const ApiPublicEventFlierIdRoute = ApiPublicEventFlierIdRouteImport.update({
+  id: '/api/public/event-flier/$id',
+  path: '/api/public/event-flier/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicFundraiserFlierIdRoute =
+  ApiPublicFundraiserFlierIdRouteImport.update({
+    id: '/api/public/fundraiser-flier/$id',
+    path: '/api/public/fundraiser-flier/$id',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicFundraisingAssetIdRoute =
+  ApiPublicFundraisingAssetIdRouteImport.update({
+    id: '/api/public/fundraising-asset/$id',
+    path: '/api/public/fundraising-asset/$id',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicSbSplatRoute = ApiPublicSbSplatRouteImport.update({
+  id: '/api/public/sb/$',
+  path: '/api/public/sb/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -401,7 +379,6 @@ export interface FileRoutesByFullPath {
   '/fundraiser-request': typeof FundraiserRequestRoute
   '/health': typeof HealthRoute
   '/inbox': typeof InboxRoute
-  '/mcp': typeof McpRoute
   '/messages': typeof MessagesRoute
   '/my-events': typeof MyEventsRoute
   '/packing': typeof PackingRoute
@@ -412,8 +389,6 @@ export interface FileRoutesByFullPath {
   '/signin': typeof SigninRoute
   '/team': typeof TeamRoute
   '/team-events': typeof TeamEventsRoute
-  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
-  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/branding': typeof AdminBrandingRoute
@@ -432,6 +407,10 @@ export interface FileRoutesByFullPath {
   '/admin/roster': typeof AdminRosterRoute
   '/admin/test-emails': typeof AdminTestEmailsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/logout': typeof AuthLogoutRoute
+  '/auth/me': typeof AuthMeRoute
   '/my-fundraisers/$id': typeof MyFundraisersIdRoute
   '/resources/$id': typeof ResourcesIdRoute
   '/vendors/$id': typeof VendorsIdRoute
@@ -440,7 +419,6 @@ export interface FileRoutesByFullPath {
   '/fundraisers/': typeof FundraisersIndexRoute
   '/my-fundraisers/': typeof MyFundraisersIndexRoute
   '/vendors/': typeof VendorsIndexRoute
-  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/fundraisers/$slug/thanks': typeof FundraisersSlugThanksRoute
   '/fundraisers/$slug/': typeof FundraisersSlugIndexRoute
   '/api/public/avatar/$userId': typeof ApiPublicAvatarUserIdRoute
@@ -449,9 +427,6 @@ export interface FileRoutesByFullPath {
   '/api/public/fundraiser-flier/$id': typeof ApiPublicFundraiserFlierIdRoute
   '/api/public/fundraising-asset/$id': typeof ApiPublicFundraisingAssetIdRoute
   '/api/public/sb/$': typeof ApiPublicSbSplatRoute
-  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
-  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
-  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -465,7 +440,6 @@ export interface FileRoutesByTo {
   '/fundraiser-request': typeof FundraiserRequestRoute
   '/health': typeof HealthRoute
   '/inbox': typeof InboxRoute
-  '/mcp': typeof McpRoute
   '/messages': typeof MessagesRoute
   '/my-events': typeof MyEventsRoute
   '/packing': typeof PackingRoute
@@ -476,8 +450,6 @@ export interface FileRoutesByTo {
   '/signin': typeof SigninRoute
   '/team': typeof TeamRoute
   '/team-events': typeof TeamEventsRoute
-  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
-  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/branding': typeof AdminBrandingRoute
@@ -496,6 +468,10 @@ export interface FileRoutesByTo {
   '/admin/roster': typeof AdminRosterRoute
   '/admin/test-emails': typeof AdminTestEmailsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/logout': typeof AuthLogoutRoute
+  '/auth/me': typeof AuthMeRoute
   '/my-fundraisers/$id': typeof MyFundraisersIdRoute
   '/resources/$id': typeof ResourcesIdRoute
   '/vendors/$id': typeof VendorsIdRoute
@@ -504,7 +480,6 @@ export interface FileRoutesByTo {
   '/fundraisers': typeof FundraisersIndexRoute
   '/my-fundraisers': typeof MyFundraisersIndexRoute
   '/vendors': typeof VendorsIndexRoute
-  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/fundraisers/$slug/thanks': typeof FundraisersSlugThanksRoute
   '/fundraisers/$slug': typeof FundraisersSlugIndexRoute
   '/api/public/avatar/$userId': typeof ApiPublicAvatarUserIdRoute
@@ -513,9 +488,6 @@ export interface FileRoutesByTo {
   '/api/public/fundraiser-flier/$id': typeof ApiPublicFundraiserFlierIdRoute
   '/api/public/fundraising-asset/$id': typeof ApiPublicFundraisingAssetIdRoute
   '/api/public/sb/$': typeof ApiPublicSbSplatRoute
-  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
-  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
-  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -530,7 +502,6 @@ export interface FileRoutesById {
   '/fundraiser-request': typeof FundraiserRequestRoute
   '/health': typeof HealthRoute
   '/inbox': typeof InboxRoute
-  '/mcp': typeof McpRoute
   '/messages': typeof MessagesRoute
   '/my-events': typeof MyEventsRoute
   '/packing': typeof PackingRoute
@@ -541,8 +512,6 @@ export interface FileRoutesById {
   '/signin': typeof SigninRoute
   '/team': typeof TeamRoute
   '/team-events': typeof TeamEventsRoute
-  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
-  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/branding': typeof AdminBrandingRoute
@@ -561,6 +530,10 @@ export interface FileRoutesById {
   '/admin/roster': typeof AdminRosterRoute
   '/admin/test-emails': typeof AdminTestEmailsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/logout': typeof AuthLogoutRoute
+  '/auth/me': typeof AuthMeRoute
   '/my-fundraisers/$id': typeof MyFundraisersIdRoute
   '/resources/$id': typeof ResourcesIdRoute
   '/vendors/$id': typeof VendorsIdRoute
@@ -569,7 +542,6 @@ export interface FileRoutesById {
   '/fundraisers/': typeof FundraisersIndexRoute
   '/my-fundraisers/': typeof MyFundraisersIndexRoute
   '/vendors/': typeof VendorsIndexRoute
-  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/fundraisers/$slug/thanks': typeof FundraisersSlugThanksRoute
   '/fundraisers/$slug/': typeof FundraisersSlugIndexRoute
   '/api/public/avatar/$userId': typeof ApiPublicAvatarUserIdRoute
@@ -578,9 +550,6 @@ export interface FileRoutesById {
   '/api/public/fundraiser-flier/$id': typeof ApiPublicFundraiserFlierIdRoute
   '/api/public/fundraising-asset/$id': typeof ApiPublicFundraisingAssetIdRoute
   '/api/public/sb/$': typeof ApiPublicSbSplatRoute
-  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
-  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
-  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -596,7 +565,6 @@ export interface FileRouteTypes {
     | '/fundraiser-request'
     | '/health'
     | '/inbox'
-    | '/mcp'
     | '/messages'
     | '/my-events'
     | '/packing'
@@ -607,8 +575,6 @@ export interface FileRouteTypes {
     | '/signin'
     | '/team'
     | '/team-events'
-    | '/.mcp/list-tools'
-    | '/.well-known/oauth-protected-resource'
     | '/admin/announcements'
     | '/admin/approvals'
     | '/admin/branding'
@@ -627,6 +593,10 @@ export interface FileRouteTypes {
     | '/admin/roster'
     | '/admin/test-emails'
     | '/admin/users'
+    | '/auth/callback'
+    | '/auth/login'
+    | '/auth/logout'
+    | '/auth/me'
     | '/my-fundraisers/$id'
     | '/resources/$id'
     | '/vendors/$id'
@@ -635,7 +605,6 @@ export interface FileRouteTypes {
     | '/fundraisers/'
     | '/my-fundraisers/'
     | '/vendors/'
-    | '/.mcp/invoke-tool/$tool'
     | '/fundraisers/$slug/thanks'
     | '/fundraisers/$slug/'
     | '/api/public/avatar/$userId'
@@ -644,9 +613,6 @@ export interface FileRouteTypes {
     | '/api/public/fundraiser-flier/$id'
     | '/api/public/fundraising-asset/$id'
     | '/api/public/sb/$'
-    | '/lovable/email/auth/preview'
-    | '/lovable/email/auth/webhook'
-    | '/lovable/email/transactional/preview'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -660,7 +626,6 @@ export interface FileRouteTypes {
     | '/fundraiser-request'
     | '/health'
     | '/inbox'
-    | '/mcp'
     | '/messages'
     | '/my-events'
     | '/packing'
@@ -671,8 +636,6 @@ export interface FileRouteTypes {
     | '/signin'
     | '/team'
     | '/team-events'
-    | '/.mcp/list-tools'
-    | '/.well-known/oauth-protected-resource'
     | '/admin/announcements'
     | '/admin/approvals'
     | '/admin/branding'
@@ -691,6 +654,10 @@ export interface FileRouteTypes {
     | '/admin/roster'
     | '/admin/test-emails'
     | '/admin/users'
+    | '/auth/callback'
+    | '/auth/login'
+    | '/auth/logout'
+    | '/auth/me'
     | '/my-fundraisers/$id'
     | '/resources/$id'
     | '/vendors/$id'
@@ -699,7 +666,6 @@ export interface FileRouteTypes {
     | '/fundraisers'
     | '/my-fundraisers'
     | '/vendors'
-    | '/.mcp/invoke-tool/$tool'
     | '/fundraisers/$slug/thanks'
     | '/fundraisers/$slug'
     | '/api/public/avatar/$userId'
@@ -708,9 +674,6 @@ export interface FileRouteTypes {
     | '/api/public/fundraiser-flier/$id'
     | '/api/public/fundraising-asset/$id'
     | '/api/public/sb/$'
-    | '/lovable/email/auth/preview'
-    | '/lovable/email/auth/webhook'
-    | '/lovable/email/transactional/preview'
   id:
     | '__root__'
     | '/'
@@ -724,7 +687,6 @@ export interface FileRouteTypes {
     | '/fundraiser-request'
     | '/health'
     | '/inbox'
-    | '/mcp'
     | '/messages'
     | '/my-events'
     | '/packing'
@@ -735,8 +697,6 @@ export interface FileRouteTypes {
     | '/signin'
     | '/team'
     | '/team-events'
-    | '/.mcp/list-tools'
-    | '/.well-known/oauth-protected-resource'
     | '/admin/announcements'
     | '/admin/approvals'
     | '/admin/branding'
@@ -755,6 +715,10 @@ export interface FileRouteTypes {
     | '/admin/roster'
     | '/admin/test-emails'
     | '/admin/users'
+    | '/auth/callback'
+    | '/auth/login'
+    | '/auth/logout'
+    | '/auth/me'
     | '/my-fundraisers/$id'
     | '/resources/$id'
     | '/vendors/$id'
@@ -763,7 +727,6 @@ export interface FileRouteTypes {
     | '/fundraisers/'
     | '/my-fundraisers/'
     | '/vendors/'
-    | '/.mcp/invoke-tool/$tool'
     | '/fundraisers/$slug/thanks'
     | '/fundraisers/$slug/'
     | '/api/public/avatar/$userId'
@@ -772,9 +735,6 @@ export interface FileRouteTypes {
     | '/api/public/fundraiser-flier/$id'
     | '/api/public/fundraising-asset/$id'
     | '/api/public/sb/$'
-    | '/lovable/email/auth/preview'
-    | '/lovable/email/auth/webhook'
-    | '/lovable/email/transactional/preview'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -789,7 +749,6 @@ export interface RootRouteChildren {
   FundraiserRequestRoute: typeof FundraiserRequestRoute
   HealthRoute: typeof HealthRoute
   InboxRoute: typeof InboxRoute
-  McpRoute: typeof McpRoute
   MessagesRoute: typeof MessagesRoute
   MyEventsRoute: typeof MyEventsRoute
   PackingRoute: typeof PackingRoute
@@ -800,8 +759,6 @@ export interface RootRouteChildren {
   SigninRoute: typeof SigninRoute
   TeamRoute: typeof TeamRoute
   TeamEventsRoute: typeof TeamEventsRoute
-  Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
-  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   AdminAnnouncementsRoute: typeof AdminAnnouncementsRoute
   AdminApprovalsRoute: typeof AdminApprovalsRoute
   AdminBrandingRoute: typeof AdminBrandingRoute
@@ -820,6 +777,10 @@ export interface RootRouteChildren {
   AdminRosterRoute: typeof AdminRosterRoute
   AdminTestEmailsRoute: typeof AdminTestEmailsRoute
   AdminUsersRoute: typeof AdminUsersRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthLogoutRoute: typeof AuthLogoutRoute
+  AuthMeRoute: typeof AuthMeRoute
   MyFundraisersIdRoute: typeof MyFundraisersIdRoute
   VendorsIdRoute: typeof VendorsIdRoute
   VendorsNewRoute: typeof VendorsNewRoute
@@ -827,7 +788,6 @@ export interface RootRouteChildren {
   FundraisersIndexRoute: typeof FundraisersIndexRoute
   MyFundraisersIndexRoute: typeof MyFundraisersIndexRoute
   VendorsIndexRoute: typeof VendorsIndexRoute
-  Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   FundraisersSlugThanksRoute: typeof FundraisersSlugThanksRoute
   FundraisersSlugIndexRoute: typeof FundraisersSlugIndexRoute
   ApiPublicAvatarUserIdRoute: typeof ApiPublicAvatarUserIdRoute
@@ -836,151 +796,15 @@ export interface RootRouteChildren {
   ApiPublicFundraiserFlierIdRoute: typeof ApiPublicFundraiserFlierIdRoute
   ApiPublicFundraisingAssetIdRoute: typeof ApiPublicFundraisingAssetIdRoute
   ApiPublicSbSplatRoute: typeof ApiPublicSbSplatRoute
-  LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
-  LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
-  LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/team-events': {
-      id: '/team-events'
-      path: '/team-events'
-      fullPath: '/team-events'
-      preLoaderRoute: typeof TeamEventsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/team': {
-      id: '/team'
-      path: '/team'
-      fullPath: '/team'
-      preLoaderRoute: typeof TeamRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/signin': {
-      id: '/signin'
-      path: '/signin'
-      fullPath: '/signin'
-      preLoaderRoute: typeof SigninRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/rider-progress': {
-      id: '/rider-progress'
-      path: '/rider-progress'
-      fullPath: '/rider-progress'
-      preLoaderRoute: typeof RiderProgressRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/resources': {
-      id: '/resources'
-      path: '/resources'
-      fullPath: '/resources'
-      preLoaderRoute: typeof ResourcesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/register': {
-      id: '/register'
-      path: '/register'
-      fullPath: '/register'
-      preLoaderRoute: typeof RegisterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/packing': {
-      id: '/packing'
-      path: '/packing'
-      fullPath: '/packing'
-      preLoaderRoute: typeof PackingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/my-events': {
-      id: '/my-events'
-      path: '/my-events'
-      fullPath: '/my-events'
-      preLoaderRoute: typeof MyEventsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/messages': {
-      id: '/messages'
-      path: '/messages'
-      fullPath: '/messages'
-      preLoaderRoute: typeof MessagesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mcp': {
-      id: '/mcp'
-      path: '/mcp'
-      fullPath: '/mcp'
-      preLoaderRoute: typeof McpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/inbox': {
-      id: '/inbox'
-      path: '/inbox'
-      fullPath: '/inbox'
-      preLoaderRoute: typeof InboxRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/health': {
-      id: '/health'
-      path: '/health'
-      fullPath: '/health'
-      preLoaderRoute: typeof HealthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/fundraiser-request': {
-      id: '/fundraiser-request'
-      path: '/fundraiser-request'
-      fullPath: '/fundraiser-request'
-      preLoaderRoute: typeof FundraiserRequestRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/family': {
-      id: '/family'
-      path: '/family'
-      fullPath: '/family'
-      preLoaderRoute: typeof FamilyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/expenses': {
-      id: '/expenses'
-      path: '/expenses'
-      fullPath: '/expenses'
-      preLoaderRoute: typeof ExpensesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/events': {
-      id: '/events'
-      path: '/events'
-      fullPath: '/events'
-      preLoaderRoute: typeof EventsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/confirmation': {
-      id: '/confirmation'
-      path: '/confirmation'
-      fullPath: '/confirmation'
-      preLoaderRoute: typeof ConfirmationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/captains-lounge': {
-      id: '/captains-lounge'
-      path: '/captains-lounge'
-      fullPath: '/captains-lounge'
-      preLoaderRoute: typeof CaptainsLoungeRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/analytics': {
@@ -990,32 +814,137 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnalyticsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/captains-lounge': {
+      id: '/captains-lounge'
+      path: '/captains-lounge'
+      fullPath: '/captains-lounge'
+      preLoaderRoute: typeof CaptainsLoungeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/vendors/': {
-      id: '/vendors/'
-      path: '/vendors'
-      fullPath: '/vendors/'
-      preLoaderRoute: typeof VendorsIndexRouteImport
+    '/confirmation': {
+      id: '/confirmation'
+      path: '/confirmation'
+      fullPath: '/confirmation'
+      preLoaderRoute: typeof ConfirmationRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/my-fundraisers/': {
-      id: '/my-fundraisers/'
-      path: '/my-fundraisers'
-      fullPath: '/my-fundraisers/'
-      preLoaderRoute: typeof MyFundraisersIndexRouteImport
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/fundraisers/': {
-      id: '/fundraisers/'
-      path: '/fundraisers'
-      fullPath: '/fundraisers/'
-      preLoaderRoute: typeof FundraisersIndexRouteImport
+    '/events': {
+      id: '/events'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof EventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/expenses': {
+      id: '/expenses'
+      path: '/expenses'
+      fullPath: '/expenses'
+      preLoaderRoute: typeof ExpensesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/family': {
+      id: '/family'
+      path: '/family'
+      fullPath: '/family'
+      preLoaderRoute: typeof FamilyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fundraiser-request': {
+      id: '/fundraiser-request'
+      path: '/fundraiser-request'
+      fullPath: '/fundraiser-request'
+      preLoaderRoute: typeof FundraiserRequestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/health': {
+      id: '/health'
+      path: '/health'
+      fullPath: '/health'
+      preLoaderRoute: typeof HealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inbox': {
+      id: '/inbox'
+      path: '/inbox'
+      fullPath: '/inbox'
+      preLoaderRoute: typeof InboxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/messages': {
+      id: '/messages'
+      path: '/messages'
+      fullPath: '/messages'
+      preLoaderRoute: typeof MessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-events': {
+      id: '/my-events'
+      path: '/my-events'
+      fullPath: '/my-events'
+      preLoaderRoute: typeof MyEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/packing': {
+      id: '/packing'
+      path: '/packing'
+      fullPath: '/packing'
+      preLoaderRoute: typeof PackingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resources': {
+      id: '/resources'
+      path: '/resources'
+      fullPath: '/resources'
+      preLoaderRoute: typeof ResourcesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rider-progress': {
+      id: '/rider-progress'
+      path: '/rider-progress'
+      fullPath: '/rider-progress'
+      preLoaderRoute: typeof RiderProgressRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signin': {
+      id: '/signin'
+      path: '/signin'
+      fullPath: '/signin'
+      preLoaderRoute: typeof SigninRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/team': {
+      id: '/team'
+      path: '/team'
+      fullPath: '/team'
+      preLoaderRoute: typeof TeamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/team-events': {
+      id: '/team-events'
+      path: '/team-events'
+      fullPath: '/team-events'
+      preLoaderRoute: typeof TeamEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -1025,144 +954,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/vendors/new': {
-      id: '/vendors/new'
-      path: '/vendors/new'
-      fullPath: '/vendors/new'
-      preLoaderRoute: typeof VendorsNewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/vendors/$id': {
-      id: '/vendors/$id'
-      path: '/vendors/$id'
-      fullPath: '/vendors/$id'
-      preLoaderRoute: typeof VendorsIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/resources/$id': {
-      id: '/resources/$id'
-      path: '/$id'
-      fullPath: '/resources/$id'
-      preLoaderRoute: typeof ResourcesIdRouteImport
-      parentRoute: typeof ResourcesRoute
-    }
-    '/my-fundraisers/$id': {
-      id: '/my-fundraisers/$id'
-      path: '/my-fundraisers/$id'
-      fullPath: '/my-fundraisers/$id'
-      preLoaderRoute: typeof MyFundraisersIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/users': {
-      id: '/admin/users'
-      path: '/admin/users'
-      fullPath: '/admin/users'
-      preLoaderRoute: typeof AdminUsersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/test-emails': {
-      id: '/admin/test-emails'
-      path: '/admin/test-emails'
-      fullPath: '/admin/test-emails'
-      preLoaderRoute: typeof AdminTestEmailsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/roster': {
-      id: '/admin/roster'
-      path: '/admin/roster'
-      fullPath: '/admin/roster'
-      preLoaderRoute: typeof AdminRosterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/readiness': {
-      id: '/admin/readiness'
-      path: '/admin/readiness'
-      fullPath: '/admin/readiness'
-      preLoaderRoute: typeof AdminReadinessRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/participants': {
-      id: '/admin/participants'
-      path: '/admin/participants'
-      fullPath: '/admin/participants'
-      preLoaderRoute: typeof AdminParticipantsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/packing': {
-      id: '/admin/packing'
-      path: '/admin/packing'
-      fullPath: '/admin/packing'
-      preLoaderRoute: typeof AdminPackingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/notifications': {
-      id: '/admin/notifications'
-      path: '/admin/notifications'
-      fullPath: '/admin/notifications'
-      preLoaderRoute: typeof AdminNotificationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/journey': {
-      id: '/admin/journey'
-      path: '/admin/journey'
-      fullPath: '/admin/journey'
-      preLoaderRoute: typeof AdminJourneyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/goals': {
-      id: '/admin/goals'
-      path: '/admin/goals'
-      fullPath: '/admin/goals'
-      preLoaderRoute: typeof AdminGoalsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/fundraising': {
-      id: '/admin/fundraising'
-      path: '/admin/fundraising'
-      fullPath: '/admin/fundraising'
-      preLoaderRoute: typeof AdminFundraisingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/flags': {
-      id: '/admin/flags'
-      path: '/admin/flags'
-      fullPath: '/admin/flags'
-      preLoaderRoute: typeof AdminFlagsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/faqs': {
-      id: '/admin/faqs'
-      path: '/admin/faqs'
-      fullPath: '/admin/faqs'
-      preLoaderRoute: typeof AdminFaqsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/family': {
-      id: '/admin/family'
-      path: '/admin/family'
-      fullPath: '/admin/family'
-      preLoaderRoute: typeof AdminFamilyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/contacts': {
-      id: '/admin/contacts'
-      path: '/admin/contacts'
-      fullPath: '/admin/contacts'
-      preLoaderRoute: typeof AdminContactsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/concierge': {
-      id: '/admin/concierge'
-      path: '/admin/concierge'
-      fullPath: '/admin/concierge'
-      preLoaderRoute: typeof AdminConciergeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/branding': {
-      id: '/admin/branding'
-      path: '/admin/branding'
-      fullPath: '/admin/branding'
-      preLoaderRoute: typeof AdminBrandingRouteImport
+    '/admin/announcements': {
+      id: '/admin/announcements'
+      path: '/admin/announcements'
+      fullPath: '/admin/announcements'
+      preLoaderRoute: typeof AdminAnnouncementsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/approvals': {
@@ -1172,25 +968,193 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminApprovalsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/announcements': {
-      id: '/admin/announcements'
-      path: '/admin/announcements'
-      fullPath: '/admin/announcements'
-      preLoaderRoute: typeof AdminAnnouncementsRouteImport
+    '/admin/branding': {
+      id: '/admin/branding'
+      path: '/admin/branding'
+      fullPath: '/admin/branding'
+      preLoaderRoute: typeof AdminBrandingRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/.well-known/oauth-protected-resource': {
-      id: '/.well-known/oauth-protected-resource'
-      path: '/.well-known/oauth-protected-resource'
-      fullPath: '/.well-known/oauth-protected-resource'
-      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+    '/admin/concierge': {
+      id: '/admin/concierge'
+      path: '/admin/concierge'
+      fullPath: '/admin/concierge'
+      preLoaderRoute: typeof AdminConciergeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/.mcp/list-tools': {
-      id: '/.mcp/list-tools'
-      path: '/.mcp/list-tools'
-      fullPath: '/.mcp/list-tools'
-      preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
+    '/admin/contacts': {
+      id: '/admin/contacts'
+      path: '/admin/contacts'
+      fullPath: '/admin/contacts'
+      preLoaderRoute: typeof AdminContactsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/family': {
+      id: '/admin/family'
+      path: '/admin/family'
+      fullPath: '/admin/family'
+      preLoaderRoute: typeof AdminFamilyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/faqs': {
+      id: '/admin/faqs'
+      path: '/admin/faqs'
+      fullPath: '/admin/faqs'
+      preLoaderRoute: typeof AdminFaqsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/flags': {
+      id: '/admin/flags'
+      path: '/admin/flags'
+      fullPath: '/admin/flags'
+      preLoaderRoute: typeof AdminFlagsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/fundraising': {
+      id: '/admin/fundraising'
+      path: '/admin/fundraising'
+      fullPath: '/admin/fundraising'
+      preLoaderRoute: typeof AdminFundraisingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/goals': {
+      id: '/admin/goals'
+      path: '/admin/goals'
+      fullPath: '/admin/goals'
+      preLoaderRoute: typeof AdminGoalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/journey': {
+      id: '/admin/journey'
+      path: '/admin/journey'
+      fullPath: '/admin/journey'
+      preLoaderRoute: typeof AdminJourneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/notifications': {
+      id: '/admin/notifications'
+      path: '/admin/notifications'
+      fullPath: '/admin/notifications'
+      preLoaderRoute: typeof AdminNotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/packing': {
+      id: '/admin/packing'
+      path: '/admin/packing'
+      fullPath: '/admin/packing'
+      preLoaderRoute: typeof AdminPackingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/participants': {
+      id: '/admin/participants'
+      path: '/admin/participants'
+      fullPath: '/admin/participants'
+      preLoaderRoute: typeof AdminParticipantsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/readiness': {
+      id: '/admin/readiness'
+      path: '/admin/readiness'
+      fullPath: '/admin/readiness'
+      preLoaderRoute: typeof AdminReadinessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/roster': {
+      id: '/admin/roster'
+      path: '/admin/roster'
+      fullPath: '/admin/roster'
+      preLoaderRoute: typeof AdminRosterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/test-emails': {
+      id: '/admin/test-emails'
+      path: '/admin/test-emails'
+      fullPath: '/admin/test-emails'
+      preLoaderRoute: typeof AdminTestEmailsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/auth/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/logout': {
+      id: '/auth/logout'
+      path: '/auth/logout'
+      fullPath: '/auth/logout'
+      preLoaderRoute: typeof AuthLogoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/me': {
+      id: '/auth/me'
+      path: '/auth/me'
+      fullPath: '/auth/me'
+      preLoaderRoute: typeof AuthMeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fundraisers/': {
+      id: '/fundraisers/'
+      path: '/fundraisers'
+      fullPath: '/fundraisers/'
+      preLoaderRoute: typeof FundraisersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-fundraisers/': {
+      id: '/my-fundraisers/'
+      path: '/my-fundraisers'
+      fullPath: '/my-fundraisers/'
+      preLoaderRoute: typeof MyFundraisersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-fundraisers/$id': {
+      id: '/my-fundraisers/$id'
+      path: '/my-fundraisers/$id'
+      fullPath: '/my-fundraisers/$id'
+      preLoaderRoute: typeof MyFundraisersIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resources/$id': {
+      id: '/resources/$id'
+      path: '/$id'
+      fullPath: '/resources/$id'
+      preLoaderRoute: typeof ResourcesIdRouteImport
+      parentRoute: typeof ResourcesRoute
+    }
+    '/vendors/': {
+      id: '/vendors/'
+      path: '/vendors'
+      fullPath: '/vendors/'
+      preLoaderRoute: typeof VendorsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vendors/$id': {
+      id: '/vendors/$id'
+      path: '/vendors/$id'
+      fullPath: '/vendors/$id'
+      preLoaderRoute: typeof VendorsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vendors/new': {
+      id: '/vendors/new'
+      path: '/vendors/new'
+      fullPath: '/vendors/new'
+      preLoaderRoute: typeof VendorsNewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/fundraisers/$slug/': {
@@ -1207,60 +1171,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FundraisersSlugThanksRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/.mcp/invoke-tool/$tool': {
-      id: '/.mcp/invoke-tool/$tool'
-      path: '/.mcp/invoke-tool/$tool'
-      fullPath: '/.mcp/invoke-tool/$tool'
-      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lovable/email/transactional/preview': {
-      id: '/lovable/email/transactional/preview'
-      path: '/lovable/email/transactional/preview'
-      fullPath: '/lovable/email/transactional/preview'
-      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lovable/email/auth/webhook': {
-      id: '/lovable/email/auth/webhook'
-      path: '/lovable/email/auth/webhook'
-      fullPath: '/lovable/email/auth/webhook'
-      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lovable/email/auth/preview': {
-      id: '/lovable/email/auth/preview'
-      path: '/lovable/email/auth/preview'
-      fullPath: '/lovable/email/auth/preview'
-      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/sb/$': {
-      id: '/api/public/sb/$'
-      path: '/api/public/sb/$'
-      fullPath: '/api/public/sb/$'
-      preLoaderRoute: typeof ApiPublicSbSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/fundraising-asset/$id': {
-      id: '/api/public/fundraising-asset/$id'
-      path: '/api/public/fundraising-asset/$id'
-      fullPath: '/api/public/fundraising-asset/$id'
-      preLoaderRoute: typeof ApiPublicFundraisingAssetIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/fundraiser-flier/$id': {
-      id: '/api/public/fundraiser-flier/$id'
-      path: '/api/public/fundraiser-flier/$id'
-      fullPath: '/api/public/fundraiser-flier/$id'
-      preLoaderRoute: typeof ApiPublicFundraiserFlierIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/event-flier/$id': {
-      id: '/api/public/event-flier/$id'
-      path: '/api/public/event-flier/$id'
-      fullPath: '/api/public/event-flier/$id'
-      preLoaderRoute: typeof ApiPublicEventFlierIdRouteImport
+    '/api/public/avatar/$userId': {
+      id: '/api/public/avatar/$userId'
+      path: '/api/public/avatar/$userId'
+      fullPath: '/api/public/avatar/$userId'
+      preLoaderRoute: typeof ApiPublicAvatarUserIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/branding/$kind': {
@@ -1270,11 +1185,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicBrandingKindRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/avatar/$userId': {
-      id: '/api/public/avatar/$userId'
-      path: '/api/public/avatar/$userId'
-      fullPath: '/api/public/avatar/$userId'
-      preLoaderRoute: typeof ApiPublicAvatarUserIdRouteImport
+    '/api/public/event-flier/$id': {
+      id: '/api/public/event-flier/$id'
+      path: '/api/public/event-flier/$id'
+      fullPath: '/api/public/event-flier/$id'
+      preLoaderRoute: typeof ApiPublicEventFlierIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/fundraiser-flier/$id': {
+      id: '/api/public/fundraiser-flier/$id'
+      path: '/api/public/fundraiser-flier/$id'
+      fullPath: '/api/public/fundraiser-flier/$id'
+      preLoaderRoute: typeof ApiPublicFundraiserFlierIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/fundraising-asset/$id': {
+      id: '/api/public/fundraising-asset/$id'
+      path: '/api/public/fundraising-asset/$id'
+      fullPath: '/api/public/fundraising-asset/$id'
+      preLoaderRoute: typeof ApiPublicFundraisingAssetIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/sb/$': {
+      id: '/api/public/sb/$'
+      path: '/api/public/sb/$'
+      fullPath: '/api/public/sb/$'
+      preLoaderRoute: typeof ApiPublicSbSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -1304,7 +1240,6 @@ const rootRouteChildren: RootRouteChildren = {
   FundraiserRequestRoute: FundraiserRequestRoute,
   HealthRoute: HealthRoute,
   InboxRoute: InboxRoute,
-  McpRoute: McpRoute,
   MessagesRoute: MessagesRoute,
   MyEventsRoute: MyEventsRoute,
   PackingRoute: PackingRoute,
@@ -1315,9 +1250,6 @@ const rootRouteChildren: RootRouteChildren = {
   SigninRoute: SigninRoute,
   TeamRoute: TeamRoute,
   TeamEventsRoute: TeamEventsRoute,
-  Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
-  Char91DotwellKnownChar93OauthProtectedResourceRoute:
-    Char91DotwellKnownChar93OauthProtectedResourceRoute,
   AdminAnnouncementsRoute: AdminAnnouncementsRoute,
   AdminApprovalsRoute: AdminApprovalsRoute,
   AdminBrandingRoute: AdminBrandingRoute,
@@ -1336,6 +1268,10 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRosterRoute: AdminRosterRoute,
   AdminTestEmailsRoute: AdminTestEmailsRoute,
   AdminUsersRoute: AdminUsersRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
+  AuthLoginRoute: AuthLoginRoute,
+  AuthLogoutRoute: AuthLogoutRoute,
+  AuthMeRoute: AuthMeRoute,
   MyFundraisersIdRoute: MyFundraisersIdRoute,
   VendorsIdRoute: VendorsIdRoute,
   VendorsNewRoute: VendorsNewRoute,
@@ -1343,7 +1279,6 @@ const rootRouteChildren: RootRouteChildren = {
   FundraisersIndexRoute: FundraisersIndexRoute,
   MyFundraisersIndexRoute: MyFundraisersIndexRoute,
   VendorsIndexRoute: VendorsIndexRoute,
-  Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   FundraisersSlugThanksRoute: FundraisersSlugThanksRoute,
   FundraisersSlugIndexRoute: FundraisersSlugIndexRoute,
   ApiPublicAvatarUserIdRoute: ApiPublicAvatarUserIdRoute,
@@ -1352,9 +1287,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicFundraiserFlierIdRoute: ApiPublicFundraiserFlierIdRoute,
   ApiPublicFundraisingAssetIdRoute: ApiPublicFundraisingAssetIdRoute,
   ApiPublicSbSplatRoute: ApiPublicSbSplatRoute,
-  LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
-  LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
-  LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
