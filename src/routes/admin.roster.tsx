@@ -44,7 +44,7 @@ function RosterPage() {
   const qc = useQueryClient();
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
-  const [participation, setParticipation] = useState<"rider" | "volunteer" | "both" | "unsure">("rider");
+  const [participation, setParticipation] = useState<"rider" | "volunteer" | "challenger" | "unsure">("rider");
   const [roles, setRoles] = useState<ExtraRole[]>([]);
   const [confirm, setConfirm] = useState("");
 
@@ -110,8 +110,8 @@ function RosterPage() {
                     <SelectContent>
                       <SelectItem value="rider">Rider</SelectItem>
                       <SelectItem value="volunteer">Volunteer</SelectItem>
-                      <SelectItem value="both">Both</SelectItem>
-                      <SelectItem value="unsure">Undecided</SelectItem>
+                      <SelectItem value="challenger">Challenger</SelectItem>
+                      <SelectItem value="unsure">Not sure</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

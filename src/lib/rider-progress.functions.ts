@@ -103,7 +103,8 @@ export const listRiderProgress = createServerFn({ method: "GET" })
     );
 
     // Live fundraising totals from Pelotonia, keyed by public/rider ID.
-    const { fetchRiders, normalizePublicId } = await import("@/lib/pelotonia-api.server");
+    const { normalizePublicId } = await import("@/lib/pelotonia-api.server");
+    const { ridersByPublicId: fetchRiders } = await import("@/lib/pelotonia-data.server");
     const fundraising = await fetchRiders(
       rows.map((r: { pelotonia?: unknown }) => ((r.pelotonia ?? {}) as Record<string, unknown>)["confirmation"]),
     );

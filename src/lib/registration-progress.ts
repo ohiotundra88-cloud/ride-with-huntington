@@ -10,8 +10,30 @@ import type { Registration, StepStatus } from "@/lib/store";
 
 const filled = (v?: string | null) => typeof v === "string" && v.trim() !== "";
 
+/*
+ * Participation choices: Rider, Volunteer, Challenger, Not sure. "both"
+ * (rider + volunteer) was an earlier choice; registrations that still carry
+ * it count as a rider and a volunteer.
+ */
+
+/** Rides a Pelotonia route, so the bike step applies. */
 export function isRiderParticipation(p: Registration["participation"]): boolean {
   return p === "rider" || p === "both";
+}
+
+/** Works a volunteer shift. */
+export function isVolunteerParticipation(p: Registration["participation"]): boolean {
+  return p === "volunteer" || p === "both";
+}
+
+/** Takes on their own Pelotonia challenge: fundraises, no route or bike. */
+export function isChallengerParticipation(p: Registration["participation"]): boolean {
+  return p === "challenger";
+}
+
+/** Riders and challengers carry a fundraising commitment and get a jersey. */
+export function isFundraisingParticipation(p: Registration["participation"]): boolean {
+  return isRiderParticipation(p) || isChallengerParticipation(p);
 }
 
 export function pelotoniaHasData(reg: Registration): boolean {
@@ -66,7 +88,7 @@ export function apparelHasData(reg: Registration): boolean {
 
 export function apparelStatus(reg: Registration): StepStatus {
   const a = reg.apparel;
-  const isRider = isRiderParticipation(reg.participation);
+  const isRider = isFundraisingParticipation(reg.participation);
   const complete = isRider
     ? filled(a.jerseySize) || filled(a.shirtSize)
     : filled(a.volunteerShirtSize) || filled(a.shirtSize);

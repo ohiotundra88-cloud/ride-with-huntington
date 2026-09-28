@@ -37,42 +37,14 @@ export interface PelotoniaTeamData {
 }
 
 /**
- * Live Team Huntington fundraising figures, read server-side from Pelotonia's
- * public data (so the browser stays same-origin and VPN friendly).
+ * Team Huntington fundraising figures: the nightly local copy of Pelotonia's
+ * public data, falling back to a live read (server-side, VPN friendly).
  */
 export const getPelotoniaTeamData = createServerFn({ method: "GET" }).handler(
   async (): Promise<PelotoniaTeamData | null> => {
-    const { fetchTeam } = await import("@/lib/pelotonia-api.server");
-    const team = await fetchTeam();
-    if (!team) return null;
-    return {
-      teamName: team.teamName,
-      raised: team.raised,
-      goal: team.goal,
-      allTimeRaised: team.allTimeRaised,
-      kidsRaised: null,
-      members: team.members,
-      riders: null,
-      challengers: null,
-      volunteers: null,
-      highRollers: null,
-      survivors: null,
-      donationsCount: null,
-      totalCommitted: null,
-      lastUpdated: team.fetchedAt,
-      subteams: team.subteams.map((s) => ({
-        name: s.name,
-        total: s.members,
-        raised: s.raised,
-        riders: null,
-        challengers: null,
-        volunteers: null,
-        committed: null,
-        highRollers: null,
-        survivors: null,
-      })),
-      recentDaily: [],
-    };
+    const { teamOverview } = await import("@/lib/pelotonia-data.server");
+    const team = await teamOverview();
+    return team ? { ...team, kidsRaised: null, donationsCount: null } : null;
   },
 );
 
@@ -99,8 +71,8 @@ export const getRiderFundraising = createServerFn({ method: "GET" })
   }))
   .handler(async ({ data }): Promise<RiderFundraising | null> => {
     if (!data.publicId) return null;
-    const { fetchRider } = await import("@/lib/pelotonia-api.server");
-    const rider = await fetchRider(data.publicId);
+    const { riderByPublicId } = await import("@/lib/pelotonia-data.server");
+    const rider = await riderByPublicId(data.publicId);
     if (!rider) return null;
     return {
       publicId: rider.publicId,

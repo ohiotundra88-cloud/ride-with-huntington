@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ShareFundraiserButton } from "@/components/ShareFundraiserButton";
+import { ConfirmDelete } from "@/components/ConfirmDelete";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -23,7 +24,7 @@ import { DemoPaymentBanner } from "@/components/DemoPaymentBanner";
 import {
   drawFundraiserWinner, getFundraiserAccess, getFundraiserApproval, getFundraiserDetail,
   recordFundraiserPayout, refundFundraiserOrder, removeFundraiserFlier, saveFundraiserPage,
-  seedFundraiserDemoSupporters, setFundraiserPublicVisibility, setFundraiserStatus, submitFundraiserForApproval, uploadFundraiserFlier,
+  deleteFundraiserPage, seedFundraiserDemoSupporters, setFundraiserPublicVisibility, setFundraiserStatus, submitFundraiserForApproval, uploadFundraiserFlier,
 } from "@/lib/fundraising-pages.functions";
 import {
   ALLOWED_FUNDRAISER_FLIER_TYPES, fundraiserFlierUrl, KIND_ITEM_NOUN, KIND_LABELS,
@@ -129,6 +130,16 @@ function ManageFundraiser() {
       invalidate();
     },
     onError: (e: any) => toast.error(e?.message ?? "Couldn't change the status."),
+  });
+
+  const remove = useMutation({
+    mutationFn: () => deleteFundraiserPage({ data: { id } }),
+    onSuccess: () => {
+      toast.success("Fundraiser deleted");
+      qc.invalidateQueries({ queryKey: ["my-fundraisers"] });
+      navigate({ to: "/my-fundraisers" });
+    },
+    onError: (e: any) => toast.error("Couldn't delete", { description: e?.message }),
   });
 
   const visibility = useMutation({
@@ -248,6 +259,15 @@ function ManageFundraiser() {
             >
               {f.public_hidden ? "Show on public site" : "Hide from public view"}
             </Button>
+          )}
+          {(canPublish || ["draft", "pending_approval", "cancelled"].includes(f.status)) && (
+            <ConfirmDelete
+              label="Delete"
+              title={`Delete "${f.title}"?`}
+              description="This permanently removes the fundraiser page, its items and its activity history. Pages that have taken payments can't be deleted; close or cancel them and hide them from public view instead."
+              onConfirm={() => remove.mutate()}
+              pending={remove.isPending}
+            />
           )}
         </div>
       </div>

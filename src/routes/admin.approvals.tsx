@@ -20,6 +20,7 @@ import {
   type ApprovalEntry, type FundraiserRequest, type StageKey,
 } from "@/lib/fundraiser-requests.shared";
 import { ApprovalTracker } from "@/components/ApprovalTracker";
+import { RequestAnswers } from "@/components/RequestAnswers";
 import { formatEventDate } from "@/lib/events.shared";
 import { StatusBadge } from "@/routes/fundraiser-request";
 
@@ -119,7 +120,8 @@ function ReviewCard({ request, roles, userId }: { request: FundraiserRequest; ro
           <div className="min-w-0">
             <CardTitle className="text-base">{request.title}</CardTitle>
             <p className="mt-1 text-xs text-muted-foreground">
-              {formatEventDate(request.event_date)} · {request.event_type === "virtual" ? "Virtual" : "In person"}
+              {formatEventDate(request.event_date)} ·{" "}
+              {request.event_type === "virtual" ? "Virtual" : request.event_type === "raffle" ? "Raffle" : "In person"}
               {request.location ? ` · ${request.location}` : ""} · Submitted by {request.submitter_name || request.submitter_email || "colleague"}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
@@ -142,6 +144,8 @@ function ReviewCard({ request, roles, userId }: { request: FundraiserRequest; ro
             </div>
           )}
         </dl>
+
+        <RequestAnswers request={request} />
 
         <ApprovalTracker request={request} />
 

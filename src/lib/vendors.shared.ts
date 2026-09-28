@@ -79,6 +79,7 @@ export const vendorDonationSchema = z.object({
   year: z.number().int().min(2000).max(BEYOND_YEAR),
   committed_amount: z.number().min(0, "Amount can't be negative"),
   actual_donated_amount: z.number().min(0, "Amount can't be negative"),
+  kids_amount: z.number().min(0, "Amount can't be negative").optional().default(0),
   recipient: z.string().trim().max(200).optional().default(""),
   notes: z.string().trim().max(2000).optional().default(""),
 });
@@ -147,6 +148,8 @@ export interface VendorDonationRow {
   year: number;
   committed_amount: number;
   actual_donated_amount: number;
+  /** Pelotonia Kids donations that year; counts toward the sponsorship tier. */
+  kids_amount: number;
   recipient: string;
   notes: string;
 }
@@ -204,6 +207,8 @@ export interface VendorListRow {
   updated_by_name: string | null;
   years: number[];
   rollup: VendorRollup;
+  /** Contribution per year (committed or donated, whichever is higher, plus Kids). */
+  year_totals: YearTotals;
 }
 
 export interface VendorDetail {
@@ -229,6 +234,7 @@ export interface VendorDetail {
   donations: VendorDonationRow[];
   activity: VendorActivityRow[];
   attachments: VendorAttachmentRow[];
+  rider_slots: VendorRiderSlotRow[];
 }
 
 export interface VendorAccess {
@@ -281,4 +287,112 @@ export function isSimilarName(a: string, b: string) {
   const nb = normalizeName(b);
   if (!na || !nb) return false;
   return na === nb || na.includes(nb) || nb.includes(na);
+}
+
+// ---------------------------------------------------------------- tiers
+
+export interface VendorTier {
+  key: "pinnacle" | "one_goal" | "gold_honeycomb" | "green_honeycomb";
+  label: string;
+  /** Lowest single-year contribution for this tier. */
+  min: number;
+  /** Sponsored rider slots that come with the tier. */
+  riderSlots: number;
+  /** Whether those slots include hotel details. */
+  slotHotel: boolean;
+  rank: number;
+}
+
+/** Highest first. Thresholds from Chris Kemper, 2026-09-28. */
+export const VENDOR_TIERS: readonly VendorTier[] = [
+  { key: "pinnacle", label: "Pinnacle Partner", min: 50000, riderSlots: 5, slotHotel: true, rank: 4 },
+  { key: "one_goal", label: "One Goal", min: 30000, riderSlots: 2, slotHotel: false, rank: 3 },
+  { key: "gold_honeycomb", label: "Gold Honeycomb", min: 15000, riderSlots: 0, slotHotel: false, rank: 2 },
+  { key: "green_honeycomb", label: "Green Honeycomb", min: 5000, riderSlots: 0, slotHotel: false, rank: 1 },
+];
+
+export type YearTotals = Record<number, { total: number; kids: number }>;
+
+/**
+ * A vendor's contribution in one year: for each donation row, the larger of
+ * what they committed and what they actually gave (a commitment counts as
+ * soon as it's made), plus that year's Pelotonia Kids donations.
+ */
+export function yearTotals(
+  donations: { year: number; committed_amount: number; actual_donated_amount: number; kids_amount?: number }[],
+): YearTotals {
+  const out: YearTotals = {};
+  for (const d of donations) {
+    const kids = Number(d.kids_amount || 0);
+    const main = Math.max(Number(d.committed_amount || 0), Number(d.actual_donated_amount || 0));
+    const cur = out[d.year] ?? { total: 0, kids: 0 };
+    out[d.year] = { total: cur.total + main + kids, kids: cur.kids + kids };
+  }
+  return out;
+}
+
+export function tierForAmount(amount: number): VendorTier | null {
+  return VENDOR_TIERS.find((t) => amount >= t.min) ?? null;
+}
+
+export function tierFor(totals: YearTotals, year: number): VendorTier | null {
+  return tierForAmount(totals[year]?.total ?? 0);
+}
+
+export function isKidsSupporter(totals: YearTotals, year: number): boolean {
+  return (totals[year]?.kids ?? 0) > 0;
+}
+
+/** The ride year the CRM defaults to (the next August ride once this one has passed). */
+export function currentRideYear(now = new Date()): number {
+  return now.getMonth() >= 8 ? now.getFullYear() + 1 : now.getFullYear();
+}
+
+// ---------------------------------------------------------------- rider slots
+
+export const BIKE_SIZES = ["XS", "S", "M", "L", "XL", "XXL"] as const;
+
+export const vendorRiderSlotSchema = z
+  .object({
+    slot_number: z.number().int().min(1).max(5),
+    rider_name: z.string().trim().max(160).optional().default(""),
+    pelotonia_id: z
+      .string()
+      .trim()
+      .toUpperCase()
+      .max(12)
+      .refine((v) => v === "" || /^[A-Z0-9]{3,12}$/.test(v), "Rider IDs are letters and numbers, like CK0132")
+      .optional()
+      .default(""),
+    bike_needed: z.boolean().optional().default(false),
+    bike_size: z.string().trim().max(20).optional().default(""),
+    hotel_needed: z.boolean().optional().default(false),
+    hotel_check_in: z.string().trim().optional().default(""),
+    hotel_check_out: z.string().trim().optional().default(""),
+  })
+  .refine((s) => !s.hotel_check_in || !s.hotel_check_out || s.hotel_check_out >= s.hotel_check_in, {
+    message: "Check-out must be on or after check-in",
+    path: ["hotel_check_out"],
+  });
+
+export const vendorRiderSlotsInputSchema = z.object({
+  vendor_id: z.string().uuid(),
+  year: z.number().int().min(2000).max(BEYOND_YEAR),
+  slots: z.array(vendorRiderSlotSchema).max(5),
+});
+
+export interface VendorRiderSlotRow {
+  id: string;
+  vendor_id: string;
+  year: number;
+  slot_number: number;
+  rider_name: string;
+  pelotonia_id: string;
+  bike_needed: boolean;
+  bike_size: string;
+  hotel_needed: boolean;
+  hotel_check_in: string | null;
+  hotel_check_out: string | null;
+  /** Filled in from the synced Pelotonia roster when the rider ID matches. */
+  pelotonia?: { name: string; raised: number; subTeam: string | null } | null;
 }

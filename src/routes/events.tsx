@@ -18,8 +18,9 @@ import {
 import { toast } from "sonner";
 import {
   CalendarDays, ChevronLeft, ChevronRight, MapPin, Clock, Mail, Phone, User as UserIcon,
-  Paperclip, Plus, Pencil, Trash2, EyeOff, Upload, X,
+  Paperclip, Plus, Pencil, Trash2, EyeOff, Upload, X, Ticket,
 } from "lucide-react";
+import { listActiveRaffles, type ActiveRaffle } from "@/lib/fundraiser-requests.functions";
 import {
   listPublicEvents, listEventsForColleague, listManageableEvents, saveEvent, deleteEvent,
   uploadEventFlier, removeEventFlier,
@@ -68,7 +69,7 @@ function EventsPage() {
   });
   const [selected, setSelected] = useState<string | null>(null);
   const [editing, setEditing] = useState<FundraisingEvent | null>(null);
-  const [creating, setCreating] = useState(false);
+
 
   const byDate = useMemo(() => {
     const map = new Map<string, FundraisingEvent[]>();
@@ -121,19 +122,15 @@ function EventsPage() {
             Fundraising events
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Team captains post rides, socials, bake sales and community nights here. Tap a date to see what's happening,
-            download the flier, and reach the captain hosting it.
+            Approved Team Huntington fundraisers: rides, socials, bake sales and community nights. Tap a date to see what's
+            happening, download the flier, and reach the person hosting it.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button asChild variant="outline">
-            <Link to="/fundraiser-request">Request approval for a fundraiser</Link>
+          {/* Every fundraiser goes through approval; approved events publish here automatically. */}
+          <Button asChild className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90">
+            <Link to="/fundraiser-request"><Plus className="mr-1 h-4 w-4" /> Request approval for a fundraiser</Link>
           </Button>
-          {canManage && (
-            <Button onClick={() => setCreating(true)} className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90">
-              <Plus className="mr-1 h-4 w-4" /> Post an event
-            </Button>
-          )}
         </div>
       </div>
 
@@ -224,12 +221,14 @@ function EventsPage() {
         </div>
       </div>
 
-      {(creating || editing) && (
+      <ActiveRaffles />
+
+      {editing && (
         <EventDialog
           key={editing?.id ?? "new"}
           event={editing}
           open
-          onClose={() => { setCreating(false); setEditing(null); }}
+          onClose={() => setEditing(null)}
         />
       )}
     </div>
@@ -502,5 +501,67 @@ function EventDialog({ event, open, onClose }: { event: FundraisingEvent | null;
         </form>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/** Approved raffles (never on the calendar), listed until their drawing date. */
+function ActiveRaffles() {
+  const { user } = useStore();
+  const { data: raffles = [], isLoading } = useQuery<ActiveRaffle[]>({
+    queryKey: ["active-raffles"],
+    queryFn: () => listActiveRaffles(),
+    enabled: user.signedIn,
+  });
+  if (!user.signedIn) return null;
+  return (
+    <section aria-labelledby="active-raffles" className="mt-8">
+      <h2 id="active-raffles" className="flex items-center gap-2 text-lg font-bold text-[var(--brand-dark)]">
+        <Ticket className="h-5 w-5 text-[var(--brand)]" aria-hidden="true" /> Active raffles
+      </h2>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Approved Team Huntington raffles. They aren't on the calendar; each one is listed here until its drawing date.
+      </p>
+      {isLoading ? (
+        <p className="mt-3 text-sm text-muted-foreground">Loading raffles…</p>
+      ) : raffles.length === 0 ? (
+        <p className="mt-3 rounded-md border border-dashed px-3 py-4 text-sm text-muted-foreground">
+          No active raffles right now. Planning one?{" "}
+          <Link to="/fundraiser-request" className="font-semibold underline">Request approval</Link> and choose "Raffle".
+        </p>
+      ) : (
+        <ul className="mt-3 grid gap-3 sm:grid-cols-2">
+          {raffles.map((r) => (
+            <li key={r.id}>
+              <Card className="h-full">
+                <CardContent className="space-y-2 pt-5">
+                  <div className="font-semibold text-[var(--brand-dark)]">{r.title}</div>
+                  <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" /> Drawing {formatEventDate(r.draw_date)}
+                    </span>
+                    {r.location && (
+                      <span className="flex items-center gap-1">
+                        <MapPin className="h-3.5 w-3.5" aria-hidden="true" /> {r.location}
+                      </span>
+                    )}
+                  </div>
+                  <p className="line-clamp-3 text-sm text-muted-foreground">{r.description}</p>
+                  {(r.contact_name || r.contact_email) && (
+                    <p className="flex items-center gap-1 text-xs">
+                      <Mail className="h-3.5 w-3.5" aria-hidden="true" />
+                      {r.contact_email ? (
+                        <a className="underline" href={`mailto:${r.contact_email}`}>{r.contact_name || r.contact_email}</a>
+                      ) : (
+                        r.contact_name
+                      )}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }

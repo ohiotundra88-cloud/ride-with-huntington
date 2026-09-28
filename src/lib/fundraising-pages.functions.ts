@@ -125,6 +125,14 @@ export const setFundraiserStatus = createServerFn({ method: "POST" })
     return setStatus(context as any, data.id, data.status);
   });
 
+export const deleteFundraiserPage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { deleteFundraiser } = await import("@/lib/fundraising-pages.server");
+    return deleteFundraiser(context as any, data.id);
+  });
+
 export const setFundraiserPublicVisibility = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => z.object({ id: z.string().uuid(), hidden: z.boolean() }).parse(d))

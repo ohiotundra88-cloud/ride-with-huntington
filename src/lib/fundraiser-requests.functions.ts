@@ -7,6 +7,7 @@ import {
   decisionSchema,
   requestFlierSchema,
   MAX_FLIER_BYTES,
+  initialMarketingStatus,
   type ApprovalEntry,
   type FundraiserRequest,
 } from "@/lib/fundraiser-requests.shared";
@@ -130,7 +131,7 @@ export const saveMyRequest = createServerFn({ method: "POST" })
           legal_status: "pending",
           risk_status: "pending",
           compliance_status: "pending",
-          marketing_status: "pending",
+          marketing_status: initialMarketingStatus(fields.uses_logos),
           cochair_status: "pending",
         })
         .eq("id", id)
@@ -144,7 +145,7 @@ export const saveMyRequest = createServerFn({ method: "POST" })
     }
     const { data: row, error } = await context.supabase
       .from("fundraiser_requests")
-      .insert({ ...fields, submitted_by: context.userId })
+      .insert({ ...fields, marketing_status: initialMarketingStatus(fields.uses_logos), submitted_by: context.userId })
       .select(REQUEST_COLUMNS)
       .single();
     if (error) throw new Error(error.message);
@@ -252,12 +253,34 @@ export const reassignRequestCaptain = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+/**
+ * Delete a fundraiser request (the submitter's own, or any for admins; the
+ * database's delete rule decides). Its calendar event and flier go with it so
+ * nothing orphaned stays on the calendar.
+ */
 export const deleteMyRequest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => idSchema.parse(d))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("fundraiser_requests").delete().eq("id", data.id);
+    const { data: row, error: rErr } = await context.supabase
+      .from("fundraiser_requests")
+      .select("id, event_id, flier_path")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (rErr) throw new Error(rErr.message);
+    if (!row) throw new Error("Request not found");
+
+    const { data: deleted, error } = await context.supabase
+      .from("fundraiser_requests")
+      .delete()
+      .eq("id", data.id)
+      .select("id");
     if (error) throw new Error(error.message);
+    if (!deleted?.length) throw new Error("You can only delete your own requests.");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (row.event_id) await supabaseAdmin.from("events").delete().eq("id", row.event_id);
+    if (row.flier_path) await supabaseAdmin.storage.from("event-fliers").remove([row.flier_path]);
     return { ok: true };
   });
 
@@ -348,11 +371,12 @@ export const decideOnRequest = createServerFn({ method: "POST" })
     const fresh = updated as unknown as FundraiserRequest;
     // Virtual/non-physical events go live once the captain approves; in-person
     // events only appear on the calendar after final co-chair sign-off.
+    // Raffles never go on the calendar; approved ones are listed under
+    // "Active raffles" straight from the request.
     const shouldPublish =
       fresh.status !== "declined" &&
-      (fresh.event_type === "virtual"
-        ? fresh.captain_status === "approved"
-        : STAGES.every((s) => fresh[`${s.key}_status` as const] === "approved"));
+      fresh.event_type !== "raffle" &&
+      (fresh.event_type === "virtual" ? fresh.captain_status === "approved" : isFullyApproved(fresh));
 
     if (shouldPublish && !fresh.event_id) {
       const { data: ev, error: eErr } = await supabaseAdmin
@@ -568,3 +592,42 @@ export const listPendingApprovalEventIds = createServerFn({ method: "GET" }).han
   if (error) return [] as string[];
   return (data ?? []).map((r) => r.event_id as string);
 });
+
+export interface ActiveRaffle {
+  id: string;
+  title: string;
+  description: string;
+  draw_date: string;
+  location: string | null;
+  contact_name: string | null;
+  contact_email: string | null;
+}
+
+/**
+ * Fully approved raffles whose date hasn't passed. Raffles stay off the event
+ * calendar by design; the Events page lists them in their own section.
+ * Only the fields a colleague needs to take part are returned.
+ */
+export const listActiveRaffles = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async (): Promise<ActiveRaffle[]> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const today = new Date().toISOString().slice(0, 10);
+    const { data, error } = await supabaseAdmin
+      .from("fundraiser_requests")
+      .select("id, title, description, event_date, location, contact_name, contact_email")
+      .eq("event_type", "raffle")
+      .eq("status", "approved")
+      .gte("event_date", today)
+      .order("event_date", { ascending: true });
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((r) => ({
+      id: r.id,
+      title: r.title,
+      description: r.description,
+      draw_date: r.event_date,
+      location: r.location,
+      contact_name: r.contact_name,
+      contact_email: r.contact_email,
+    }));
+  });

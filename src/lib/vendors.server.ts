@@ -1,12 +1,19 @@
 import {
   isSimilarName,
   rollup,
+  tierFor,
+  yearTotals,
   type VendorAccess,
   type VendorAuditRow,
   type VendorDetail,
   type VendorInput,
   type VendorListRow,
+  type VendorRiderSlotRow,
 } from "@/lib/vendors.shared";
+import type { z } from "zod";
+import type { vendorRiderSlotSchema } from "@/lib/vendors.shared";
+
+type VendorRiderSlotInput = z.input<typeof vendorRiderSlotSchema>;
 
 export type Ctx = { supabase: any; userId: string; claims?: Record<string, any> };
 
@@ -95,7 +102,7 @@ export async function listVendors(ctx: Ctx, includeArchived: boolean): Promise<V
       .eq("archived", includeArchived)
       .order("business_name", { ascending: true }),
     ctx.supabase.from("vendor_spend").select("vendor_id, year, amount"),
-    ctx.supabase.from("vendor_donations").select("vendor_id, year, committed_amount, actual_donated_amount"),
+    ctx.supabase.from("vendor_donations").select("vendor_id, year, committed_amount, actual_donated_amount, kids_amount"),
   ]);
   if (error) throw new Error(error.message);
 
@@ -118,6 +125,7 @@ export async function listVendors(ctx: Ctx, includeArchived: boolean): Promise<V
       updated_by_name: names.get(v.updated_by ?? v.created_by) ?? null,
       years,
       rollup: rollup(s as any, d as any),
+      year_totals: yearTotals(d as any),
     } satisfies VendorListRow;
   });
 }
@@ -129,8 +137,14 @@ export async function getVendor(ctx: Ctx, id: string): Promise<VendorDetail> {
   if (error) throw new Error(error.message);
   if (!v) throw new Error("Vendor not found");
 
-  const [{ data: contacts }, { data: spend }, { data: donations }, { data: activity }, { data: attachments }] =
-    await Promise.all([
+  const [
+    { data: contacts },
+    { data: spend },
+    { data: donations },
+    { data: activity },
+    { data: attachments },
+    { data: slots },
+  ] = await Promise.all([
       ctx.supabase.from("vendor_contacts").select("*").eq("vendor_id", id).order("sort_order"),
       ctx.supabase.from("vendor_spend").select("*").eq("vendor_id", id).order("year"),
       ctx.supabase.from("vendor_donations").select("*").eq("vendor_id", id).order("year"),
@@ -140,6 +154,7 @@ export async function getVendor(ctx: Ctx, id: string): Promise<VendorDetail> {
         .select("*")
         .eq("vendor_id", id)
         .order("created_at", { ascending: false }),
+      (ctx.supabase as any).from("vendor_rider_slots").select("*").eq("vendor_id", id).order("year").order("slot_number"),
     ]);
 
   const names = await nameMap([
@@ -158,7 +173,9 @@ export async function getVendor(ctx: Ctx, id: string): Promise<VendorDetail> {
       ...r,
       committed_amount: Number(r.committed_amount),
       actual_donated_amount: Number(r.actual_donated_amount),
+      kids_amount: Number(r.kids_amount ?? 0),
     })),
+    rider_slots: await withPelotonia((slots ?? []) as VendorRiderSlotRow[]),
     activity: (activity ?? []) as any,
     attachments: ((attachments ?? []) as any[]).map((a) => ({
       ...a,
@@ -266,6 +283,7 @@ export async function saveVendor(
       (r: any) =>
         Number(r.committed_amount) > 0 ||
         Number(r.actual_donated_amount) > 0 ||
+        Number(r.kids_amount) > 0 ||
         (r.recipient ?? "").trim() ||
         (r.notes ?? "").trim(),
     );
@@ -277,6 +295,7 @@ export async function saveVendor(
           year: r.year,
           committed_amount: r.committed_amount,
           actual_donated_amount: r.actual_donated_amount,
+          kids_amount: r.kids_amount ?? 0,
           recipient: r.recipient ?? "",
           notes: r.notes ?? "",
         })),
@@ -487,4 +506,71 @@ export async function vendorAccessFor(ctx: Parameters<typeof getAccess>[0] | nul
   } catch {
     return denied;
   }
+}
+
+// ---------------------------------------------------------------- rider slots
+
+/** Adds the rider's Pelotonia name and total when the rider ID is on the roster. */
+async function withPelotonia(slots: VendorRiderSlotRow[]): Promise<VendorRiderSlotRow[]> {
+  const ids = slots.map((s) => s.pelotonia_id).filter(Boolean);
+  if (!ids.length) return slots;
+  const { ridersByPublicId } = await import("@/lib/pelotonia-data.server");
+  const riders = await ridersByPublicId(ids).catch(() => new Map());
+  return slots.map((s) => {
+    const r = riders.get(s.pelotonia_id);
+    return { ...s, pelotonia: r ? { name: r.name, raised: r.raised, subTeam: r.subTeam } : null };
+  });
+}
+
+/**
+ * Replaces one year's sponsored rider slots for a vendor. Slot count and hotel
+ * details follow the vendor's tier for that year (Pinnacle: 5 with hotel;
+ * One Goal: 2 without); anything beyond that is rejected, not silently dropped.
+ */
+export async function saveRiderSlots(
+  ctx: Ctx,
+  input: { vendor_id: string; year: number; slots: VendorRiderSlotInput[] },
+) {
+  await assertVendorAccess(ctx);
+  const { data: donations, error: dErr } = await ctx.supabase
+    .from("vendor_donations")
+    .select("year, committed_amount, actual_donated_amount, kids_amount")
+    .eq("vendor_id", input.vendor_id);
+  if (dErr) throw new Error(dErr.message);
+  const tier = tierFor(yearTotals((donations ?? []) as any), input.year);
+  const allowed = tier?.riderSlots ?? 0;
+  const used = input.slots.filter((s) => s.slot_number > allowed);
+  if (used.length) {
+    throw new Error(
+      allowed
+        ? `${tier!.label} includes ${allowed} sponsored rider slot${allowed === 1 ? "" : "s"}.`
+        : "Sponsored rider slots come with the Pinnacle Partner and One Goal tiers.",
+    );
+  }
+
+  const rows = input.slots
+    .filter((s) => s.rider_name || s.pelotonia_id || s.bike_needed || s.hotel_needed)
+    .map((s) => ({
+      vendor_id: input.vendor_id,
+      year: input.year,
+      slot_number: s.slot_number,
+      rider_name: s.rider_name ?? "",
+      pelotonia_id: (s.pelotonia_id ?? "").toUpperCase(),
+      bike_needed: !!s.bike_needed,
+      bike_size: s.bike_needed ? s.bike_size ?? "" : "",
+      hotel_needed: tier?.slotHotel ? !!s.hotel_needed : false,
+      hotel_check_in: tier?.slotHotel && s.hotel_needed && s.hotel_check_in ? s.hotel_check_in : null,
+      hotel_check_out: tier?.slotHotel && s.hotel_needed && s.hotel_check_out ? s.hotel_check_out : null,
+      updated_by: ctx.userId,
+    }));
+
+  const sb = ctx.supabase as any;
+  const { error: delErr } = await sb.from("vendor_rider_slots").delete().eq("vendor_id", input.vendor_id).eq("year", input.year);
+  if (delErr) throw new Error(delErr.message);
+  if (rows.length) {
+    const { error } = await sb.from("vendor_rider_slots").insert(rows);
+    if (error) throw new Error(error.message);
+  }
+  await logAudit(ctx, input.vendor_id, "rider_slots_updated", { year: input.year, filled: rows.length });
+  return { ok: true as const, filled: rows.length };
 }

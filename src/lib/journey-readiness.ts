@@ -5,7 +5,7 @@ import { useStore, type Registration } from "@/lib/store";
 import { useAdmin, readinessScore, type EditableReadinessItem } from "@/lib/admin-store";
 import type { ReadinessStatus } from "@/lib/mock-data";
 import { getRiderFundraising } from "@/lib/pelotonia.functions";
-import { pelotoniaStatus, travelStatus, bikeStatus, apparelStatus } from "@/lib/registration-progress";
+import { pelotoniaStatus, travelStatus, bikeStatus, apparelStatus, isRiderParticipation, isVolunteerParticipation, isFundraisingParticipation } from "@/lib/registration-progress";
 
 /**
  * Presentation-only overlay: derive readiness card status/detail from the
@@ -18,8 +18,9 @@ export function mergeReadinessWithRegistration(
   fundraising?: { raised: number; committed: number; goal: number } | null
 ): EditableReadinessItem[] {
   const participation = reg.participation;
-  const isRider = participation === "rider" || participation === "both";
-  const isVolunteer = participation === "volunteer" || participation === "both";
+  const isRider = isRiderParticipation(participation);
+  const isVolunteer = isVolunteerParticipation(participation);
+  const fundraises = isFundraisingParticipation(participation);
 
   return items.map((item) => {
     const over = (status: ReadinessStatus, detail?: string, ctaLabel?: string): EditableReadinessItem => ({
@@ -84,7 +85,7 @@ export function mergeReadinessWithRegistration(
 
       case "fundraising": {
         // Score against the live Pelotonia commitment, not seeded demo values.
-        if (participation && !isRider) return over("not_applicable", "You're registered as a Volunteer — no fundraising commitment.", item.ctaLabel);
+        if (participation && !fundraises) return over("not_applicable", "You're registered as a Volunteer — no fundraising commitment.", item.ctaLabel);
         if (!fundraising) {
           // No live fundraising total yet — don't let seeded demo numbers drag
           // the readiness percentage down.

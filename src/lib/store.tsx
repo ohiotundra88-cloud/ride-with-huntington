@@ -4,10 +4,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import { upsertMyParticipant, getMyParticipant } from "@/lib/participants.functions";
 import { ensureMyProfile } from "@/lib/profile.functions";
 import { effectiveStatuses } from "@/lib/registration-progress";
+import { isRiderParticipation } from "@/lib/registration-progress";
 
 
 // ============ TYPES ============
-export type Participation = "rider" | "volunteer" | "both" | "unsure" | null;
+/** "both" is a legacy choice kept readable; new registrations can't pick it. */
+export type Participation = "rider" | "volunteer" | "challenger" | "both" | "unsure" | null;
 export type StepStatus = "not_started" | "pending" | "complete";
 
 export interface User {
@@ -499,7 +501,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
    * step) are excluded from the denominator rather than counted as done.
    */
   const completion = useMemo(() => {
-    const isRider = registration.participation === "rider" || registration.participation === "both";
+    const isRider = isRiderParticipation(registration.participation);
     const steps: string[] = [
       registration.participation ? "complete" : "not_started",
       effective.pelotonia,

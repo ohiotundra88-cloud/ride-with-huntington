@@ -29,7 +29,8 @@ export function AnnouncementBanner({ audience }: { audience?: Audience }) {
       return [...set];
     }
     const participation = String(registration?.participation ?? "").toLowerCase();
-    const isRider = participation.includes("rider") || participation === "both";
+    // Challengers get rider (fundraising) announcements.
+    const isRider = participation.includes("rider") || participation === "both" || participation === "challenger";
     const isVolunteer = participation.includes("volunteer") || participation === "both";
     if (isRider) set.add("riders");
     if (isVolunteer) set.add("volunteers");

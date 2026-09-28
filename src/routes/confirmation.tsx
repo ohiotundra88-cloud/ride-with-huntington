@@ -1,3 +1,4 @@
+import { isRiderParticipation } from "@/lib/registration-progress";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ function Confirmation() {
   const outstanding: string[] = [];
   if (registration.pelotonia.status !== "complete") outstanding.push("Confirm Pelotonia registration");
   if (registration.travel.status !== "complete") outstanding.push("Complete travel & hotel");
-  if ((registration.participation === "rider" || registration.participation === "both") && registration.bike.status !== "complete") outstanding.push("Finalize bike rental");
+  if (isRiderParticipation(registration.participation) && registration.bike.status !== "complete") outstanding.push("Finalize bike rental");
   if (registration.apparel.status !== "complete") outstanding.push("Confirm apparel & mailing address");
 
   return (

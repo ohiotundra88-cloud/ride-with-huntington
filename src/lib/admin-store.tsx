@@ -284,7 +284,7 @@ export const journeyCopyDefaults: Record<string, string> = {
   qaPacking: "View Packing List",
   qaFamily: "Family Guide",
   qaConcierge: "Ask the Concierge",
-  qaEvents: "View Team Events",
+  qaEvents: "Fundraising Event Calendar",
   qaFundraising: "Fundraising Resources",
 };
 

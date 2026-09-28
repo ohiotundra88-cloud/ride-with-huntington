@@ -48,7 +48,7 @@ export const createManualParticipant = createServerFn({ method: "POST" })
       .object({
         email: z.string().trim().toLowerCase().email(),
         full_name: z.string().trim().min(2).max(120),
-        participation: z.enum(["rider", "volunteer", "both", "unsure"]).default("rider"),
+        participation: z.enum(["rider", "volunteer", "challenger", "both", "unsure"]).default("rider"),
         roles: z.array(z.enum(["captain", "legal", "risk", "compliance", "marketing", "cochair", "admin"])).default([]),
       })
       .parse(d),

@@ -5,6 +5,7 @@ import {
   vendorActivitySchema,
   vendorFileSchema,
   vendorIdSchema,
+  vendorRiderSlotsInputSchema,
   vendorInputSchema,
   type VendorAccess,
   type VendorAuditRow,
@@ -44,6 +45,15 @@ export const saveVendorRecord = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ id: string; duplicates?: string[] }> => {
     const { saveVendor } = await import("@/lib/vendors.server");
     return saveVendor(context as any, data as any);
+  });
+
+/** Sponsored rider slots for one vendor and year (Pinnacle Partner / One Goal). */
+export const saveVendorRiderSlots = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => vendorRiderSlotsInputSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const { saveRiderSlots } = await import("@/lib/vendors.server");
+    return saveRiderSlots(context as any, data);
   });
 
 export const archiveVendorRecord = createServerFn({ method: "POST" })

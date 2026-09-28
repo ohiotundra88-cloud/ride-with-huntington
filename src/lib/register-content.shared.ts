@@ -159,7 +159,7 @@ export const DEFAULT_REGISTER_CONTENT: RegisterContent = {
     participation: [
       { value: "rider", label: "Rider", desc: "I'll ride in the Team Huntington peloton." },
       { value: "volunteer", label: "Volunteer", desc: "I'll support the event on the ground." },
-      { value: "both", label: "Both", desc: "Volunteering and riding at Team Huntington." },
+      { value: "challenger", label: "Challenger", desc: "I'll take on my own Pelotonia challenge and fundraise, without riding a route." },
       { value: "unsure", label: "Not sure yet", desc: "Explore first — you can change this later." },
     ],
     employmentTypes: [

@@ -27,6 +27,9 @@ type NavCtx = { signedIn: boolean; isReviewer: boolean; vendorAccess: boolean; r
 const topLinks: NavItem[] = [
   { to: "/", label: "Home" },
   { to: "/dashboard", label: "My Journey" },
+  // The fundraising calendar is a top-level destination (easier to find than
+  // inside the Team menu).
+  { to: "/events", label: "Event Calendar" },
   // Vendor CRM is a top-level destination for the few people who can reach it,
   // rather than buried inside the Fundraising dropdown.
   { to: "/vendors", label: "Vendor CRM", show: (c) => c.vendorAccess },
@@ -39,7 +42,6 @@ const groups: NavGroup[] = [
     items: [
       { to: "/team", label: "Team" },
       { to: "/family", label: "Family" },
-      { to: "/events", label: "Events" },
       { to: "/packing", label: "Packing" },
       { to: "/rider-progress", label: "Rider Progress", show: (c) => c.riderProgress },
       { to: "/my-events", label: "My Team Events", show: (c) => c.signedIn },

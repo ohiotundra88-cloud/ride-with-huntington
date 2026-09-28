@@ -31,7 +31,7 @@ const jsonRecord = z.record(z.string(), z.union([z.string(), z.number(), z.boole
 const saveSchema = z.object({
   user_id: z.string().uuid(),
   full_name: z.string().trim().min(2).max(120).optional(),
-  participation: z.enum(["rider", "volunteer", "both", "unsure"]).nullable().optional(),
+  participation: z.enum(["rider", "volunteer", "challenger", "both", "unsure"]).nullable().optional(),
   reg_id: z.string().trim().max(60).nullable().optional(),
   pelotonia: jsonRecord.optional(),
   travel: jsonRecord.optional(),
@@ -130,7 +130,7 @@ export const createColleague = createServerFn({ method: "POST" })
       .object({
         email: z.string().trim().toLowerCase().email(),
         full_name: z.string().trim().min(2).max(120),
-        participation: z.enum(["rider", "volunteer", "both", "unsure"]).default("rider"),
+        participation: z.enum(["rider", "volunteer", "challenger", "both", "unsure"]).default("rider"),
         season_locked: z.boolean().default(false),
       })
       .parse(d),

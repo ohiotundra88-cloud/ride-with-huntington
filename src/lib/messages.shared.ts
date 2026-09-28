@@ -49,7 +49,7 @@ export const LEADERSHIP_ONLY_ROLES = [
   "vendor_captain",
 ];
 
-export const PARTICIPATION_OPTIONS = ["rider", "volunteer", "both", "unsure"] as const;
+export const PARTICIPATION_OPTIONS = ["rider", "volunteer", "challenger", "unsure", "both"] as const;
 
 export const PELOTONIA_FLAGS = [
   { key: "highRoller", label: "High Roller" },

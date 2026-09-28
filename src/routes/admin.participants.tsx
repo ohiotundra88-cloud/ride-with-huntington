@@ -99,7 +99,7 @@ const FIELDS: Record<Section, FieldDef[]> = {
   ],
 };
 
-const PARTICIPATION = ["rider", "volunteer", "both", "unsure"] as const;
+const PARTICIPATION = ["rider", "volunteer", "challenger", "unsure", "both"] as const;
 
 /** Local date + time, or an em dash when the timestamp is missing. */
 function fmtWhen(iso: string | null) {
@@ -337,7 +337,7 @@ function EditDialog({ record, onClose, onSaved }: { record: ColleagueRecord; onC
         data: {
           user_id: record.user_id,
           full_name: name.trim() || undefined,
-          participation: participation as "rider" | "volunteer" | "both" | "unsure",
+          participation: participation as "rider" | "volunteer" | "challenger" | "both" | "unsure",
           reg_id: regId.trim() || null,
           season_locked: locked,
           ...sections,

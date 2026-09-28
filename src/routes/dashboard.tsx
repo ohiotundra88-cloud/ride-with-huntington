@@ -25,7 +25,7 @@ import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getRiderFundraising } from "@/lib/pelotonia.functions";
-import { pelotoniaStatus, travelStatus, bikeStatus, apparelStatus } from "@/lib/registration-progress";
+import { pelotoniaStatus, travelStatus, bikeStatus, apparelStatus, isRiderParticipation } from "@/lib/registration-progress";
 import { useJourneyReadiness } from "@/lib/journey-readiness";
 
 
@@ -403,7 +403,7 @@ function RiderView({ readiness }: { readiness: EditableReadinessItem[] }) {
           {state.flags.packingList && <QuickAction icon={ListChecks} copyKey="qaPacking" label={copy.qaPacking} onEdit={setCopy} to="/packing" />}
           {state.flags.familyMode && <QuickAction icon={Users} copyKey="qaFamily" label={copy.qaFamily} onEdit={setCopy} to="/family" />}
           {state.flags.concierge && <QuickAction icon={MessageSquare} copyKey="qaConcierge" label={copy.qaConcierge} onEdit={setCopy} onClick={openConcierge} />}
-          <QuickAction icon={CalendarDays} copyKey="qaEvents" label={copy.qaEvents} onEdit={setCopy} to="/team" />
+          <QuickAction icon={CalendarDays} copyKey="qaEvents" label={copy.qaEvents} onEdit={setCopy} to="/events" />
           {state.flags.fundraisingProgress && <QuickAction icon={DollarSign} copyKey="qaFundraising" label={copy.qaFundraising} onEdit={setCopy} to="/team" />}
 
         </div>
@@ -491,7 +491,7 @@ function mergeTimelineWithRegistration(
   items: EditableTimelineItem[],
   reg: Registration
 ): EditableTimelineItem[] {
-  const isRider = reg.participation === "rider" || reg.participation === "both";
+  const isRider = isRiderParticipation(reg.participation);
   const bikeTitle = /bike/i;
   const pelDone = pelotoniaStatus(reg) === "complete";
   return items.map((item) => {

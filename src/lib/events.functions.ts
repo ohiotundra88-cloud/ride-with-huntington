@@ -88,13 +88,9 @@ export const saveEvent = createServerFn({ method: "POST" })
       return row as unknown as FundraisingEvent;
     }
 
-    const { data: row, error } = await context.supabase
-      .from("events")
-      .insert({ ...payload, created_by: context.userId })
-      .select(EVENT_COLUMNS)
-      .single();
-    if (error) throw new Error(error.message);
-    return row as unknown as FundraisingEvent;
+    // New fundraisers reach the calendar only through the approval request
+    // (fundraiser-requests.functions.ts publishes them after sign-off).
+    throw new Error("New fundraisers are added through the fundraiser approval request.");
   });
 
 export const deleteEvent = createServerFn({ method: "POST" })

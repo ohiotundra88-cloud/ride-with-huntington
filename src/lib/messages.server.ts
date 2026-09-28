@@ -36,7 +36,8 @@ export async function buildAudienceRoster(): Promise<AudiencePerson[]> {
 
   // Live Pelotonia rider records keyed by public/rider ID (best effort; the
   // audience still builds from Hub data when Pelotonia is unreachable).
-  const { fetchRiders, normalizePublicId } = await import("@/lib/pelotonia-api.server");
+  const { normalizePublicId } = await import("@/lib/pelotonia-api.server");
+  const { ridersByPublicId: fetchRiders } = await import("@/lib/pelotonia-data.server");
   const members = await fetchRiders(
     (participants ?? []).map(
       (row) => ((row as Record<string, unknown>)["pelotonia"] as Record<string, unknown> | null)?.["confirmation"],

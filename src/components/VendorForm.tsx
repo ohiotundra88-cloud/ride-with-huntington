@@ -15,14 +15,24 @@ import {
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { saveVendorRecord } from "@/lib/vendors.functions";
+import { KidsSupporterBadge, VendorTierBadge } from "@/components/VendorTierBadge";
 import {
-  BUSINESS_SEGMENTS, DEFAULT_YEARS, MAX_ADDITIONAL_CONTACTS, VENDOR_STATUSES,
-  vendorInputSchema, yearLabel, type VendorDetail,
+  BUSINESS_SEGMENTS,
+  DEFAULT_YEARS,
+  MAX_ADDITIONAL_CONTACTS,
+  VENDOR_STATUSES,
+  vendorInputSchema,
+  yearLabel,
+  type VendorDetail,
+  BEYOND_YEAR,
+  isKidsSupporter,
+  tierFor,
+  yearTotals,
 } from "@/lib/vendors.shared";
 
 type ContactDraft = { name: string; email: string; title: string; phone: string };
 type SpendDraft = { year: number; amount: string; notes: string };
-type DonationDraft = { year: number; committed_amount: string; actual_donated_amount: string; recipient: string; notes: string };
+type DonationDraft = { year: number; committed_amount: string; actual_donated_amount: string; kids_amount: string; recipient: string; notes: string };
 
 function buildYearDrafts(vendor?: VendorDetail) {
   const years = Array.from(
@@ -38,6 +48,7 @@ function buildYearDrafts(vendor?: VendorDetail) {
       year: y,
       committed_amount: row ? String(row.committed_amount) : "",
       actual_donated_amount: row ? String(row.actual_donated_amount) : "",
+      kids_amount: row?.kids_amount ? String(row.kids_amount) : "",
       recipient: row?.recipient ?? "",
       notes: row?.notes ?? "",
     };
@@ -82,6 +93,7 @@ export function VendorForm({ vendor, onDone }: { vendor?: VendorDetail; onDone?:
       year: d.year,
       committed_amount: num(d.committed_amount),
       actual_donated_amount: num(d.actual_donated_amount),
+      kids_amount: num(d.kids_amount),
       recipient: d.recipient,
       notes: d.notes,
     })),
@@ -120,7 +132,7 @@ export function VendorForm({ vendor, onDone }: { vendor?: VendorDetail; onDone?:
     if (spend.some((s) => s.year === y)) return toast.error("That year is already listed");
     setSpend((rows) => [...rows, { year: y, amount: "", notes: "" }].sort((a, b) => a.year - b.year));
     setDonations((rows) =>
-      [...rows, { year: y, committed_amount: "", actual_donated_amount: "", recipient: "", notes: "" }].sort(
+      [...rows, { year: y, committed_amount: "", actual_donated_amount: "", kids_amount: "", recipient: "", notes: "" }].sort(
         (a, b) => a.year - b.year,
       ),
     );
@@ -261,6 +273,11 @@ export function VendorForm({ vendor, onDone }: { vendor?: VendorDetail; onDone?:
                       <Input type="number" min={0} step="0.01" value={d.actual_donated_amount} onChange={(e) => setDonations((rows) => rows.map((r, j) => (j === i ? { ...r, actual_donated_amount: e.target.value } : r)))} />
                     </div>
                     <div className="space-y-1.5">
+                      <Label>Pelotonia Kids donation ($)</Label>
+                      <Input type="number" min={0} step="0.01" value={d.kids_amount} onChange={(e) => setDonations((rows) => rows.map((r, j) => (j === i ? { ...r, kids_amount: e.target.value } : r)))} />
+                      <p className="text-[11px] text-muted-foreground">Counts toward the sponsorship tier and earns the Pelotonia Kids Supporter badge.</p>
+                    </div>
+                    <div className="space-y-1.5">
                       <Label>Recipient</Label>
                       <Input value={d.recipient} onChange={(e) => setDonations((rows) => rows.map((r, j) => (j === i ? { ...r, recipient: e.target.value } : r)))} />
                     </div>
@@ -273,6 +290,7 @@ export function VendorForm({ vendor, onDone }: { vendor?: VendorDetail; onDone?:
                     Outstanding commitment for {yearLabel(s.year)}:{" "}
                     <span className="font-semibold text-[var(--brand-dark)]">${outstanding.toLocaleString()}</span> (calculated)
                   </p>
+                  <TierPreview year={s.year} donation={d} />
                 </TabsContent>
               );
             })}
@@ -321,5 +339,30 @@ export function VendorForm({ vendor, onDone }: { vendor?: VendorDetail; onDone?:
         </AlertDialogContent>
       </AlertDialog>
     </form>
+  );
+}
+
+/** Live preview of the tier this year's numbers earn. */
+function TierPreview({ year, donation }: { year: number; donation: DonationDraft }) {
+  const amount = (v: string) => (v.trim() === "" || Number.isNaN(Number(v)) ? 0 : Number(v));
+  const totals = yearTotals([
+    {
+      year,
+      committed_amount: amount(donation.committed_amount),
+      actual_donated_amount: amount(donation.actual_donated_amount),
+      kids_amount: amount(donation.kids_amount),
+    },
+  ]);
+  const tier = tierFor(totals, year);
+  const total = totals[year]?.total ?? 0;
+  if (year === BEYOND_YEAR || total === 0) return null;
+  return (
+    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+      <span>
+        {yearLabel(year)} contribution: <span className="font-semibold text-[var(--brand-dark)]">${total.toLocaleString()}</span>
+      </span>
+      {tier ? <VendorTierBadge tier={tier} year={year} /> : <span>(below the $5,000 Green Honeycomb tier)</span>}
+      <KidsSupporterBadge show={isKidsSupporter(totals, year)} year={year} />
+    </div>
   );
 }

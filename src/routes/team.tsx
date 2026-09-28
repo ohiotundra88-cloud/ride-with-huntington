@@ -189,7 +189,7 @@ function TeamHub() {
                       <p className="text-sm font-semibold text-[var(--brand-dark)]">
                         {new Date(`${d.date}T12:00:00`).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}
                       </p>
-                      <p className="text-xs text-muted-foreground">{d.count.toLocaleString()} donations</p>
+                      <p className="text-xs text-muted-foreground">added to the team total</p>
                     </div>
                     <p className="text-sm font-bold tabular-nums">{formatCurrencyUSD(d.amount)}</p>
                   </div>

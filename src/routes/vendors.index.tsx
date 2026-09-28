@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { BarChart3, Download, Plus, Search, Building2 } from "lucide-react";
+import { BarChart3, Download, Plus, Search, Building2, Award } from "lucide-react";
+import { KidsSupporterBadge, VendorTierBadge } from "@/components/VendorTierBadge";
 import { VendorGate, useVendorAccess } from "@/components/VendorGate";
 
 import { Button } from "@/components/ui/button";
@@ -11,8 +12,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { listVendorRecords } from "@/lib/vendors.functions";
 import {
-  BUSINESS_SEGMENTS, DEFAULT_YEARS, HIGH_SPEND_THRESHOLD, VENDOR_STATUSES,
-  currency, isOpportunity, percent, rollup, yearLabel, type VendorListRow,
+  BEYOND_YEAR, BUSINESS_SEGMENTS, DEFAULT_YEARS, HIGH_SPEND_THRESHOLD, VENDOR_STATUSES, VENDOR_TIERS,
+  currency, currentRideYear, isKidsSupporter, isOpportunity, percent, rollup, tierFor, yearLabel,
+  type VendorListRow,
 } from "@/lib/vendors.shared";
 
 export const Route = createFileRoute("/vendors/")({
@@ -34,7 +36,9 @@ export const Route = createFileRoute("/vendors/")({
 
 type SortKey =
   | "name" | "status" | "segment" | "modified"
-  | "spend_desc" | "donated_desc" | "support_desc" | "support_asc";
+  | "spend_desc" | "donated_desc" | "support_desc" | "support_asc" | "tier";
+
+const TIER_YEARS = DEFAULT_YEARS.filter((y) => y !== BEYOND_YEAR);
 
 function VendorDashboard() {
   const { data: access } = useVendorAccess();
@@ -46,6 +50,9 @@ function VendorDashboard() {
   const [sort, setSort] = useState<SortKey>("name");
   const [opportunityOnly, setOpportunityOnly] = useState(false);
   const [dashYear, setDashYear] = useState(String(new Date().getFullYear()));
+  // Sponsorship tiers are earned per year; badges and tier sorting use this year.
+  const [tierYear, setTierYear] = useState(currentRideYear());
+  const [tierFilter, setTierFilter] = useState("all");
 
   const { data: vendors = [], isPending, error } = useQuery<VendorListRow[]>({
     queryKey: ["vendors", tab],
@@ -59,6 +66,11 @@ function VendorDashboard() {
       if (segment !== "all" && v.business_segment !== segment && v.internal_business_segment !== segment) return false;
       if (year !== "all" && !v.years.includes(Number(year))) return false;
       if (opportunityOnly && !isOpportunity(v.rollup)) return false;
+      if (tierFilter !== "all") {
+        const t = tierFor(v.year_totals, tierYear);
+        if (tierFilter === "kids" ? !isKidsSupporter(v.year_totals, tierYear) : tierFilter === "none" ? !!t : t?.key !== tierFilter)
+          return false;
+      }
       return true;
     });
     const by: Record<SortKey, (a: VendorListRow, b: VendorListRow) => number> = {
@@ -70,18 +82,25 @@ function VendorDashboard() {
       donated_desc: (a, b) => b.rollup.total_donated - a.rollup.total_donated,
       support_desc: (a, b) => (b.rollup.support_rate ?? -1) - (a.rollup.support_rate ?? -1),
       support_asc: (a, b) => (a.rollup.support_rate ?? 99) - (b.rollup.support_rate ?? 99),
+      tier: (a, b) =>
+        (tierFor(b.year_totals, tierYear)?.rank ?? 0) - (tierFor(a.year_totals, tierYear)?.rank ?? 0) ||
+        (b.year_totals[tierYear]?.total ?? 0) - (a.year_totals[tierYear]?.total ?? 0) ||
+        a.business_name.localeCompare(b.business_name),
     };
     return [...rows].sort(by[sort]);
-  }, [vendors, q, status, segment, year, sort, opportunityOnly]);
+  }, [vendors, q, status, segment, year, sort, opportunityOnly, tierFilter, tierYear]);
 
   const exportCsv = () => {
     const head = [
-      "Business Name", "Status", "Business Segment", "Internal Segment", "Relationship Owner",
+      "Business Name", `Tier (${tierYear})`, `Contribution ${tierYear}`, `Pelotonia Kids ${tierYear}`,
+      "Status", "Business Segment", "Internal Segment", "Relationship Owner",
       "Total Spend", "Total Committed", "Total Donated", "Outstanding", "Fulfillment %", "Support Rate %",
       "Years With Activity", "Last Modified", "Last Modified By",
     ];
     const rows = filtered.map((v) => [
-      v.business_name, v.status, v.business_segment ?? "", v.internal_business_segment ?? "", v.relationship_owner ?? "",
+      v.business_name, tierFor(v.year_totals, tierYear)?.label ?? "",
+      v.year_totals[tierYear]?.total ?? 0, v.year_totals[tierYear]?.kids ?? 0,
+      v.status, v.business_segment ?? "", v.internal_business_segment ?? "", v.relationship_owner ?? "",
       v.rollup.total_spend, v.rollup.total_committed, v.rollup.total_donated, v.rollup.outstanding,
       v.rollup.fulfillment === null ? "" : Math.round(v.rollup.fulfillment * 100),
       v.rollup.support_rate === null ? "" : Math.round(v.rollup.support_rate * 100),
@@ -113,6 +132,17 @@ function VendorDashboard() {
       </div>
 
       <ExecutiveSummary vendors={vendors} year={dashYear} setYear={setDashYear} onOpportunity={() => setOpportunityOnly(true)} />
+
+      <TierSummary
+        vendors={vendors}
+        year={tierYear}
+        setYear={setTierYear}
+        active={tierFilter}
+        onPick={(key) => {
+          setTierFilter((cur) => (cur === key ? "all" : key));
+          setSort("tier");
+        }}
+      />
 
       <Card className="mt-6">
         <CardHeader className="pb-3">
@@ -158,6 +188,7 @@ function VendorDashboard() {
             <Select value={sort} onValueChange={(v) => setSort(v as SortKey)}>
               <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
               <SelectContent>
+                <SelectItem value="tier">Sort: Sponsorship tier ({tierYear})</SelectItem>
                 <SelectItem value="name">Sort: Business name</SelectItem>
                 <SelectItem value="status">Sort: Status</SelectItem>
                 <SelectItem value="segment">Sort: Business segment</SelectItem>
@@ -166,6 +197,15 @@ function VendorDashboard() {
                 <SelectItem value="donated_desc">Sort: Highest donation</SelectItem>
                 <SelectItem value="support_desc">Sort: Highest support rate</SelectItem>
                 <SelectItem value="support_asc">Sort: Lowest support rate</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={tierFilter} onValueChange={setTierFilter}>
+              <SelectTrigger className="w-52" aria-label="Filter by tier"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All tiers</SelectItem>
+                {VENDOR_TIERS.map((t) => <SelectItem key={t.key} value={t.key}>{t.label}</SelectItem>)}
+                <SelectItem value="kids">Pelotonia Kids Supporters</SelectItem>
+                <SelectItem value="none">No tier yet</SelectItem>
               </SelectContent>
             </Select>
             <Button variant={opportunityOnly ? "default" : "outline"} size="sm" onClick={() => setOpportunityOnly((v) => !v)}>
@@ -189,8 +229,10 @@ function VendorDashboard() {
                   <Link to="/vendors/$id" params={{ id: v.id }} className="block rounded-md px-1 hover:bg-muted/50">
                     <div className="flex flex-wrap items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <span className="truncate font-semibold text-[var(--brand-dark)]">{v.business_name}</span>
+                          <VendorTierBadge tier={tierFor(v.year_totals, tierYear)} year={tierYear} />
+                          <KidsSupporterBadge show={isKidsSupporter(v.year_totals, tierYear)} year={tierYear} />
                           <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase">{v.status}</span>
                           {isOpportunity(v.rollup) && (
                             <span className="rounded-full bg-[var(--brand)]/20 px-2 py-0.5 text-[10px] font-semibold text-[var(--brand-dark)]">
@@ -265,6 +307,59 @@ function ExecutiveSummary({
           <div className="text-[11px] text-[var(--brand-dark)] underline">View opportunity list (spend ≥ {currency(HIGH_SPEND_THRESHOLD)})</div>
         </button>
       </CardContent>
+    </Card>
+  );
+}
+
+function TierSummary({
+  vendors, year, setYear, active, onPick,
+}: {
+  vendors: VendorListRow[];
+  year: number;
+  setYear: (y: number) => void;
+  active: string;
+  onPick: (key: string) => void;
+}) {
+  const count = (key: string) =>
+    vendors.filter((v) =>
+      key === "kids" ? isKidsSupporter(v.year_totals, year) : tierFor(v.year_totals, year)?.key === key,
+    ).length;
+  const tile = (key: string, label: string, detail: string) => (
+    <button
+      key={key}
+      type="button"
+      onClick={() => onPick(key)}
+      aria-pressed={active === key}
+      className={`rounded-lg border bg-card p-3 text-left transition hover:border-[var(--brand)] ${active === key ? "border-[var(--brand)] ring-1 ring-[var(--brand)]" : ""}`}
+    >
+      <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</div>
+      <div className="mt-1 text-lg font-bold text-[var(--brand-dark)]">{count(key)}</div>
+      <div className="text-[11px] text-muted-foreground">{detail}</div>
+    </button>
+  );
+  return (
+    <Card className="mt-6">
+      <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3 pb-3">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Award className="h-4 w-4 text-[var(--brand)]" /> Sponsorship tiers
+        </CardTitle>
+        <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
+          <SelectTrigger className="w-36" aria-label="Tier year"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {TIER_YEARS.map((y) => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </CardHeader>
+      <CardContent className="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        {VENDOR_TIERS.map((t) =>
+          tile(t.key, t.label, `${currency(t.min)}${t.key === "pinnacle" ? "+" : ` to ${currency((VENDOR_TIERS[VENDOR_TIERS.indexOf(t) - 1]?.min ?? 0) - 1)}`}`),
+        )}
+        {tile("kids", "Pelotonia Kids", "gave to Pelotonia Kids")}
+      </CardContent>
+      <p className="px-6 pb-4 text-[11px] text-muted-foreground">
+        A vendor's tier is its {year} contribution: the larger of what it committed or gave, plus Pelotonia Kids
+        donations. Tap a tier to list those vendors.
+      </p>
     </Card>
   );
 }

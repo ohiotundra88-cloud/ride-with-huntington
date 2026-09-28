@@ -113,6 +113,19 @@ SELECT pg_temp.expect_ok('submitter resubmits after changes (all stages reset)',
        compliance_status = 'pending', marketing_status = 'pending', cochair_status = 'pending'
      WHERE id = '00000000-0000-0000-0000-0000000000e1'$q$);
 
+SELECT pg_temp.expect_denied('submitter files an already-approved request',
+  $q$INSERT INTO public.fundraiser_requests (title, event_date, submitted_by, legal_status, uses_logos)
+     VALUES ('Sneaky', current_date, auth.uid(), 'approved', true)$q$);
+SELECT pg_temp.expect_denied('submitter skips Marketing while using logos',
+  $q$INSERT INTO public.fundraiser_requests (title, event_date, submitted_by, marketing_status, uses_logos)
+     VALUES ('Logo event', current_date, auth.uid(), 'not_required', true)$q$);
+SELECT pg_temp.expect_ok('submitter files a new request (uses logos)',
+  $q$INSERT INTO public.fundraiser_requests (title, event_date, submitted_by, uses_logos)
+     VALUES ('Bake sale', current_date, auth.uid(), true)$q$);
+SELECT pg_temp.expect_ok('submitter files a no-logo request (Marketing not required)',
+  $q$INSERT INTO public.fundraiser_requests (title, event_date, submitted_by, marketing_status, uses_logos)
+     VALUES ('Trivia night', current_date, auth.uid(), 'not_required', false)$q$);
+
 SELECT pg_temp.expect_denied('recipient re-points row at another message',
   $q$UPDATE public.message_recipients SET message_id = '00000000-0000-0000-0000-0000000000d2' WHERE user_id = auth.uid()$q$);
 SELECT pg_temp.expect_ok('recipient marks message read',

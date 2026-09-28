@@ -604,7 +604,8 @@ export async function setStatus(ctx: Ctx, id: string, status: FundraiserStatus) 
     if (!access.canManageAll) throw new Error("A captain or co-chair publishes the page once approvals are complete.");
     const state = await approvalState(ctx, record.request_id);
     const stages = ["captain_status", "legal_status", "risk_status", "compliance_status", "marketing_status", "cochair_status"];
-    if (!state || stages.some((s) => (state as any)[s] !== "approved")) {
+    // "not_required" (e.g. Marketing when no logos are used) counts as cleared.
+    if (!state || stages.some((s) => !["approved", "not_required"].includes((state as any)[s]))) {
       throw new Error("Every approval stage must be approved before this page can go live.");
     }
   }
@@ -865,4 +866,32 @@ export async function clearFlier(ctx: Ctx, id: string) {
   if (previous) await db.storage.from(FLIER_BUCKET).remove([previous]);
   await audit(id, "flier_removed", ctx, { file_name: (record as any).flier_name ?? null });
   return { ok: true };
+}
+
+/**
+ * Permanently delete a fundraising page. Organizers can delete their own
+ * drafts, pending or cancelled pages; captains, co-chairs, admins and super
+ * users can delete any. A page that has taken payments or recorded a payout
+ * is never deleted (its money records must be kept): cancel or hide it instead.
+ */
+export async function deleteFundraiser(ctx: Ctx, id: string) {
+  const { record, access, owned } = await assertManageable(ctx, id);
+  const deletableByOrganizer = ["draft", "pending_approval", "cancelled"].includes(record.status);
+  if (!access.canManageAll && !(owned && deletableByOrganizer)) {
+    throw new Error("Cancel the fundraiser first, or ask a captain or co-chair to remove it.");
+  }
+  const db = await admin();
+  const [{ count: moneyOrders }, { count: payouts }] = await Promise.all([
+    db.from("fundraiser_orders").select("id", { count: "exact", head: true }).eq("fundraiser_id", id).in("status", ["paid", "refunded"]),
+    db.from("fundraiser_payouts").select("id", { count: "exact", head: true }).eq("fundraiser_id", id),
+  ]);
+  if ((moneyOrders ?? 0) > 0 || (payouts ?? 0) > 0) {
+    throw new Error("This fundraiser has payment records, so it can't be deleted. Close or cancel it, then hide it from public view.");
+  }
+  const flier = (record as any).flier_path as string | null;
+  const { error } = await db.from("fundraisers").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  if (flier) await db.storage.from(FLIER_BUCKET).remove([flier]);
+  console.log(`[fundraisers] ${id} "${record.title}" deleted by ${ctx.userId}`);
+  return { ok: true as const };
 }

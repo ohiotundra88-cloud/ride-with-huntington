@@ -8,6 +8,8 @@ import {
 import { VendorGate, useVendorAccess } from "@/components/VendorGate";
 
 import { VendorForm } from "@/components/VendorForm";
+import { VendorRiderSlots } from "@/components/VendorRiderSlots";
+import { KidsSupporterBadge, VendorTierBadge } from "@/components/VendorTierBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,8 +27,8 @@ import {
   getVendorAttachment, getVendorRecord, listVendorAudit, logVendorActivity, uploadVendorAttachment,
 } from "@/lib/vendors.functions";
 import {
-  ALLOWED_VENDOR_FILE_TYPES, CONTACT_METHODS, MAX_VENDOR_FILE_BYTES, currency, percent, rollup,
-  yearLabel, type VendorDetail,
+  ALLOWED_VENDOR_FILE_TYPES, BEYOND_YEAR, CONTACT_METHODS, MAX_VENDOR_FILE_BYTES, currency, currentRideYear,
+  isKidsSupporter, percent, rollup, tierFor, yearLabel, yearTotals, type VendorDetail,
 } from "@/lib/vendors.shared";
 
 export const Route = createFileRoute("/vendors/$id")({
@@ -84,6 +86,12 @@ function VendorDetailPage() {
   const totals = rollup(vendor.spend, vendor.donations);
   const latest = vendor.activity[0];
   const years = Array.from(new Set([...vendor.spend.map((s) => s.year), ...vendor.donations.map((d) => d.year)])).sort((a, b) => a - b);
+  const contributions = yearTotals(vendor.donations);
+  // Header badges: this ride year's tier, or the most recent year that earned one.
+  const tierYear =
+    [currentRideYear(), ...Object.keys(contributions).map(Number).filter((y) => y !== BEYOND_YEAR).sort((a, b) => b - a)].find(
+      (y) => tierFor(contributions, y) || isKidsSupporter(contributions, y),
+    ) ?? currentRideYear();
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
@@ -94,6 +102,13 @@ function VendorDetailPage() {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-[var(--brand-dark)]">{vendor.business_name}</h1>
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
+            <VendorTierBadge tier={tierFor(contributions, tierYear)} year={tierYear} />
+            <KidsSupporterBadge show={isKidsSupporter(contributions, tierYear)} year={tierYear} />
+            {(tierFor(contributions, tierYear) || isKidsSupporter(contributions, tierYear)) && (
+              <span className="self-center text-[11px] text-muted-foreground">{tierYear}</span>
+            )}
+          </div>
           <p className="mt-1 text-sm text-muted-foreground">
             {vendor.status} · {vendor.business_segment || "No segment"}
             {vendor.archived && <span className="ml-2 rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase">Archived</span>}
@@ -205,6 +220,12 @@ function VendorDetailPage() {
                         <Field label="Committed donation" value={currency(d?.committed_amount ?? 0)} />
                         <Field label="Actually donated" value={currency(d?.actual_donated_amount ?? 0)} />
                         <Field label="Outstanding commitment (calculated)" value={currency(out)} />
+                        <Field label="Pelotonia Kids donation" value={currency(d?.kids_amount ?? 0)} />
+                        <div className="sm:col-span-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                          {yearLabel(y)} contribution toward tier: <span className="font-semibold text-[var(--brand-dark)]">{currency(contributions[y]?.total ?? 0)}</span>
+                          <VendorTierBadge tier={y === BEYOND_YEAR ? null : tierFor(contributions, y)} year={y} />
+                          <KidsSupporterBadge show={isKidsSupporter(contributions, y)} year={y} />
+                        </div>
                         <Field label="Recipient" value={d?.recipient} />
                         <Field className="sm:col-span-2" label="Donation notes" value={d?.notes} />
                       </TabsContent>
@@ -214,6 +235,8 @@ function VendorDetailPage() {
               )}
             </CardContent>
           </Card>
+
+          <VendorRiderSlots vendor={vendor} />
 
           <ActivityCard vendorId={id} latest={latest} history={vendor.activity.slice(1)} />
           <AttachmentsCard vendor={vendor} canArchive={!!access?.canArchive} canPurge={!!access?.canPurge} />

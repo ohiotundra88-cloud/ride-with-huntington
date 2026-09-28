@@ -580,6 +580,7 @@ export type Database = {
       }
       fundraiser_requests: {
         Row: {
+          alcohol_details: string
           captain_id: string | null
           captain_status: string
           cochair_status: string
@@ -587,6 +588,7 @@ export type Database = {
           contact_email: string | null
           contact_name: string | null
           contact_phone: string | null
+          contract_needed: boolean | null
           created_at: string
           description: string
           end_time: string | null
@@ -594,22 +596,30 @@ export type Database = {
           event_id: string | null
           event_type: string
           expected_attendance: number | null
+          facilities_approved: boolean | null
           flier_name: string | null
           flier_path: string | null
+          food_policy_acknowledged: boolean | null
           fundraising_method: string | null
           id: string
           legal_status: string
+          liability_waiver_needed: boolean | null
           location: string | null
           marketing_status: string
+          on_huntington_property: boolean | null
           risk_status: string
           season: string
+          serves_alcohol: boolean | null
+          serves_food: boolean | null
           start_time: string | null
           status: string
           submitted_by: string
           title: string
           updated_at: string
+          uses_logos: boolean | null
         }
         Insert: {
+          alcohol_details?: string
           captain_id?: string | null
           captain_status?: string
           cochair_status?: string
@@ -617,6 +627,7 @@ export type Database = {
           contact_email?: string | null
           contact_name?: string | null
           contact_phone?: string | null
+          contract_needed?: boolean | null
           created_at?: string
           description?: string
           end_time?: string | null
@@ -624,22 +635,30 @@ export type Database = {
           event_id?: string | null
           event_type?: string
           expected_attendance?: number | null
+          facilities_approved?: boolean | null
           flier_name?: string | null
           flier_path?: string | null
+          food_policy_acknowledged?: boolean | null
           fundraising_method?: string | null
           id?: string
           legal_status?: string
+          liability_waiver_needed?: boolean | null
           location?: string | null
           marketing_status?: string
+          on_huntington_property?: boolean | null
           risk_status?: string
           season?: string
+          serves_alcohol?: boolean | null
+          serves_food?: boolean | null
           start_time?: string | null
           status?: string
           submitted_by: string
           title: string
           updated_at?: string
+          uses_logos?: boolean | null
         }
         Update: {
+          alcohol_details?: string
           captain_id?: string | null
           captain_status?: string
           cochair_status?: string
@@ -647,6 +666,7 @@ export type Database = {
           contact_email?: string | null
           contact_name?: string | null
           contact_phone?: string | null
+          contract_needed?: boolean | null
           created_at?: string
           description?: string
           end_time?: string | null
@@ -654,20 +674,27 @@ export type Database = {
           event_id?: string | null
           event_type?: string
           expected_attendance?: number | null
+          facilities_approved?: boolean | null
           flier_name?: string | null
           flier_path?: string | null
+          food_policy_acknowledged?: boolean | null
           fundraising_method?: string | null
           id?: string
           legal_status?: string
+          liability_waiver_needed?: boolean | null
           location?: string | null
           marketing_status?: string
+          on_huntington_property?: boolean | null
           risk_status?: string
           season?: string
+          serves_alcohol?: boolean | null
+          serves_food?: boolean | null
           start_time?: string | null
           status?: string
           submitted_by?: string
           title?: string
           updated_at?: string
+          uses_logos?: boolean | null
         }
         Relationships: [
           {
@@ -843,6 +870,39 @@ export type Database = {
           suggested_caption?: string | null
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      hub_bootstrap_admins: {
+        Row: {
+          created_at: string
+          email: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+        }
+        Relationships: []
+      }
+      hub_email_allowlist: {
+        Row: {
+          created_at: string
+          email: string
+          note: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          note?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          note?: string
         }
         Relationships: []
       }
@@ -1045,6 +1105,363 @@ export type Database = {
           travel?: Json
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      pelotonia_pelotons: {
+        Row: {
+          all_time_raised: number
+          captain_name: string | null
+          current_event: string | null
+          general_peloton_funds: number
+          goal: number
+          id: string
+          level: string | null
+          members_count: number
+          name: string
+          parent_id: string | null
+          raised: number
+          raised_by_members: number
+          raw: Json
+          short_name: string
+          synced_at: string
+        }
+        Insert: {
+          all_time_raised?: number
+          captain_name?: string | null
+          current_event?: string | null
+          general_peloton_funds?: number
+          goal?: number
+          id: string
+          level?: string | null
+          members_count?: number
+          name: string
+          parent_id?: string | null
+          raised?: number
+          raised_by_members?: number
+          raw?: Json
+          short_name: string
+          synced_at?: string
+        }
+        Update: {
+          all_time_raised?: number
+          captain_name?: string | null
+          current_event?: string | null
+          general_peloton_funds?: number
+          goal?: number
+          id?: string
+          level?: string | null
+          members_count?: number
+          name?: string
+          parent_id?: string | null
+          raised?: number
+          raised_by_members?: number
+          raw?: Json
+          short_name?: string
+          synced_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pelotonia_pelotons_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "pelotonia_pelotons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pelotonia_riders: {
+        Row: {
+          all_time_raised: number
+          commitment: number
+          current_event: string | null
+          first_name: string | null
+          goal: number
+          is_captain: boolean
+          is_challenger: boolean
+          is_high_roller: boolean
+          is_peloton_admin: boolean
+          is_researcher: boolean
+          is_rider: boolean
+          is_survivor: boolean
+          is_volunteer: boolean
+          last_name: string | null
+          list_synced_at: string
+          name: string
+          peloton_id: string | null
+          profile_image_url: string | null
+          profile_synced_at: string | null
+          public_id: string
+          raised: number
+          raw_profile: Json | null
+          registration_types: string[]
+          ride_types: string[]
+          route_ids: string[]
+          route_names: string[]
+          tags: string[]
+        }
+        Insert: {
+          all_time_raised?: number
+          commitment?: number
+          current_event?: string | null
+          first_name?: string | null
+          goal?: number
+          is_captain?: boolean
+          is_challenger?: boolean
+          is_high_roller?: boolean
+          is_peloton_admin?: boolean
+          is_researcher?: boolean
+          is_rider?: boolean
+          is_survivor?: boolean
+          is_volunteer?: boolean
+          last_name?: string | null
+          list_synced_at?: string
+          name?: string
+          peloton_id?: string | null
+          profile_image_url?: string | null
+          profile_synced_at?: string | null
+          public_id: string
+          raised?: number
+          raw_profile?: Json | null
+          registration_types?: string[]
+          ride_types?: string[]
+          route_ids?: string[]
+          route_names?: string[]
+          tags?: string[]
+        }
+        Update: {
+          all_time_raised?: number
+          commitment?: number
+          current_event?: string | null
+          first_name?: string | null
+          goal?: number
+          is_captain?: boolean
+          is_challenger?: boolean
+          is_high_roller?: boolean
+          is_peloton_admin?: boolean
+          is_researcher?: boolean
+          is_rider?: boolean
+          is_survivor?: boolean
+          is_volunteer?: boolean
+          last_name?: string | null
+          list_synced_at?: string
+          name?: string
+          peloton_id?: string | null
+          profile_image_url?: string | null
+          profile_synced_at?: string | null
+          public_id?: string
+          raised?: number
+          raw_profile?: Json | null
+          registration_types?: string[]
+          ride_types?: string[]
+          route_ids?: string[]
+          route_names?: string[]
+          tags?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pelotonia_riders_peloton_id_fkey"
+            columns: ["peloton_id"]
+            isOneToOne: false
+            referencedRelation: "pelotonia_pelotons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pelotonia_rides: {
+        Row: {
+          id: string
+          is_signature: boolean
+          lower_distance_deadline: string | null
+          name: string
+          registration_end: string | null
+          registration_fees: Json
+          registration_start: string | null
+          status: string | null
+          synced_at: string
+          type: string | null
+          volunteer_registration_end: string | null
+          volunteer_registration_start: string | null
+          weekend_end: string | null
+          weekend_start: string | null
+          withdraw_deadline: string | null
+        }
+        Insert: {
+          id: string
+          is_signature?: boolean
+          lower_distance_deadline?: string | null
+          name: string
+          registration_end?: string | null
+          registration_fees?: Json
+          registration_start?: string | null
+          status?: string | null
+          synced_at?: string
+          type?: string | null
+          volunteer_registration_end?: string | null
+          volunteer_registration_start?: string | null
+          weekend_end?: string | null
+          weekend_start?: string | null
+          withdraw_deadline?: string | null
+        }
+        Update: {
+          id?: string
+          is_signature?: boolean
+          lower_distance_deadline?: string | null
+          name?: string
+          registration_end?: string | null
+          registration_fees?: Json
+          registration_start?: string | null
+          status?: string | null
+          synced_at?: string
+          type?: string | null
+          volunteer_registration_end?: string | null
+          volunteer_registration_start?: string | null
+          weekend_end?: string | null
+          weekend_start?: string | null
+          withdraw_deadline?: string | null
+        }
+        Relationships: []
+      }
+      pelotonia_routes: {
+        Row: {
+          capacity: number | null
+          description: string | null
+          difficulty: string | null
+          distance: number | null
+          duration: string | null
+          fundraising_commitment: number | null
+          highest_incline: number | null
+          id: string
+          image_url: string | null
+          map_url: string | null
+          name: string
+          registration_count: number | null
+          ride_id: string | null
+          start_date: string | null
+          synced_at: string
+          tags: string[]
+        }
+        Insert: {
+          capacity?: number | null
+          description?: string | null
+          difficulty?: string | null
+          distance?: number | null
+          duration?: string | null
+          fundraising_commitment?: number | null
+          highest_incline?: number | null
+          id: string
+          image_url?: string | null
+          map_url?: string | null
+          name: string
+          registration_count?: number | null
+          ride_id?: string | null
+          start_date?: string | null
+          synced_at?: string
+          tags?: string[]
+        }
+        Update: {
+          capacity?: number | null
+          description?: string | null
+          difficulty?: string | null
+          distance?: number | null
+          duration?: string | null
+          fundraising_commitment?: number | null
+          highest_incline?: number | null
+          id?: string
+          image_url?: string | null
+          map_url?: string | null
+          name?: string
+          registration_count?: number | null
+          ride_id?: string | null
+          start_date?: string | null
+          synced_at?: string
+          tags?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pelotonia_routes_ride_id_fkey"
+            columns: ["ride_id"]
+            isOneToOne: false
+            referencedRelation: "pelotonia_rides"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pelotonia_sync_runs: {
+        Row: {
+          errors: number
+          finished_at: string | null
+          id: number
+          note: string | null
+          pelotons: number
+          profiles_fetched: number
+          requests: number
+          riders_listed: number
+          started_at: string
+          status: string
+        }
+        Insert: {
+          errors?: number
+          finished_at?: string | null
+          id?: number
+          note?: string | null
+          pelotons?: number
+          profiles_fetched?: number
+          requests?: number
+          riders_listed?: number
+          started_at?: string
+          status?: string
+        }
+        Update: {
+          errors?: number
+          finished_at?: string | null
+          id?: number
+          note?: string | null
+          pelotons?: number
+          profiles_fetched?: number
+          requests?: number
+          riders_listed?: number
+          started_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      pelotonia_team_snapshots: {
+        Row: {
+          captured_at: string
+          challengers: number
+          goal: number
+          high_rollers: number
+          members_count: number
+          raised: number
+          riders: number
+          snapshot_date: string
+          survivors: number
+          volunteers: number
+        }
+        Insert: {
+          captured_at?: string
+          challengers?: number
+          goal: number
+          high_rollers?: number
+          members_count: number
+          raised: number
+          riders?: number
+          snapshot_date: string
+          survivors?: number
+          volunteers?: number
+        }
+        Update: {
+          captured_at?: string
+          challengers?: number
+          goal?: number
+          high_rollers?: number
+          members_count?: number
+          raised?: number
+          riders?: number
+          snapshot_date?: string
+          survivors?: number
+          volunteers?: number
         }
         Relationships: []
       }
@@ -1612,6 +2029,7 @@ export type Database = {
           committed_amount: number
           created_at: string
           id: string
+          kids_amount: number
           notes: string
           recipient: string
           updated_at: string
@@ -1623,6 +2041,7 @@ export type Database = {
           committed_amount?: number
           created_at?: string
           id?: string
+          kids_amount?: number
           notes?: string
           recipient?: string
           updated_at?: string
@@ -1634,6 +2053,7 @@ export type Database = {
           committed_amount?: number
           created_at?: string
           id?: string
+          kids_amount?: number
           notes?: string
           recipient?: string
           updated_at?: string
@@ -1643,6 +2063,65 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "vendor_donations_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_rider_slots: {
+        Row: {
+          bike_needed: boolean
+          bike_size: string
+          created_at: string
+          hotel_check_in: string | null
+          hotel_check_out: string | null
+          hotel_needed: boolean
+          id: string
+          pelotonia_id: string
+          rider_name: string
+          slot_number: number
+          updated_at: string
+          updated_by: string | null
+          vendor_id: string
+          year: number
+        }
+        Insert: {
+          bike_needed?: boolean
+          bike_size?: string
+          created_at?: string
+          hotel_check_in?: string | null
+          hotel_check_out?: string | null
+          hotel_needed?: boolean
+          id?: string
+          pelotonia_id?: string
+          rider_name?: string
+          slot_number: number
+          updated_at?: string
+          updated_by?: string | null
+          vendor_id: string
+          year: number
+        }
+        Update: {
+          bike_needed?: boolean
+          bike_size?: string
+          created_at?: string
+          hotel_check_in?: string | null
+          hotel_check_out?: string | null
+          hotel_needed?: boolean
+          id?: string
+          pelotonia_id?: string
+          rider_name?: string
+          slot_number?: number
+          updated_at?: string
+          updated_by?: string | null
+          vendor_id?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_rider_slots_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "vendors"
@@ -1753,7 +2232,35 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      pelotonia_subteam_stats: {
+        Row: {
+          challengers: number | null
+          committed: number | null
+          high_rollers: number | null
+          id: string | null
+          members_count: number | null
+          name: string | null
+          raised: number | null
+          riders: number | null
+          survivors: number | null
+          volunteers: number | null
+        }
+        Relationships: []
+      }
+      pelotonia_team_stats: {
+        Row: {
+          challengers: number | null
+          high_rollers: number | null
+          last_profile_sync: string | null
+          members: number | null
+          profiles_synced: number | null
+          riders: number | null
+          survivors: number | null
+          total_committed: number | null
+          volunteers: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       before_huntington_user_created: { Args: { event: Json }; Returns: Json }

@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { StatusBadge } from "@/components/StatusBadge";
 import { addAudit, genRegId, useStore, type Participation } from "@/lib/store";
+import { isRiderParticipation, isVolunteerParticipation, isFundraisingParticipation } from "@/lib/registration-progress";
 import { useAdmin } from "@/lib/admin-store";
 import {
   Copy,
@@ -161,7 +162,7 @@ function RegisterWizard() {
   const { step: stepKeyParam } = Route.useSearch();
   const [step, setStep] = useState(1);
 
-  const isRider = registration.participation === "rider" || registration.participation === "both";
+  const isRider = isRiderParticipation(registration.participation);
 
   const steps = useMemo(() => {
     const base = [
@@ -722,11 +723,11 @@ function StepApparel() {
   const { t, field, list } = useRegisterContent();
   const a = registration.apparel;
   const addr = registration.address;
-  // When participation isn't a definite rider/volunteer choice (null or "unsure"),
-  // show both apparel sections so options are always editable.
-  const undecided = registration.participation !== "rider" && registration.participation !== "volunteer" && registration.participation !== "both";
-  const isRider = undecided || registration.participation === "rider" || registration.participation === "both";
-  const isVol = undecided || registration.participation === "volunteer" || registration.participation === "both";
+  // When participation isn't a definite choice (null or "unsure"), show both
+  // apparel sections so options are always editable. Challengers get a jersey.
+  const undecided = !registration.participation || registration.participation === "unsure";
+  const isRider = undecided || isFundraisingParticipation(registration.participation);
+  const isVol = undecided || isVolunteerParticipation(registration.participation);
   const upd = (patch: Partial<typeof a>) => setRegistration((prev) => ({ ...prev, apparel: { ...prev.apparel, ...patch } }));
   const updA = (patch: Partial<typeof addr>) => setRegistration((prev) => ({ ...prev, address: { ...prev.address, ...patch } }));
 
@@ -894,7 +895,8 @@ function StepReview({ onEdit }: { onEdit: (n: number) => void }) {
   if (!registration.participation) missing.push(t("step.A"));
   if (registration.pelotonia.status !== "complete") missing.push(t("step.B"));
   if (registration.travel.status !== "complete") missing.push(t("step.C"));
-  const isRider = registration.participation === "rider" || registration.participation === "both";
+  const isRider = isRiderParticipation(registration.participation);
+  const wearsJersey = isFundraisingParticipation(registration.participation);
   if (isRider && registration.bike.status !== "complete") missing.push(t("step.D"));
   if (registration.apparel.status !== "complete") missing.push(t("step.E"));
 
@@ -969,7 +971,7 @@ function StepReview({ onEdit }: { onEdit: (n: number) => void }) {
       <Card>
         <CardHeader><CardTitle><Copy k="F.apparelTitle" /></CardTitle></CardHeader>
         <CardContent>
-          {isRider && <Row label="Jersey" value={[registration.apparel.jerseySize, registration.apparel.jerseyStyle, registration.apparel.cut].filter(Boolean).join(" · ")} editStep={isRider ? 5 : 4} />}
+          {wearsJersey && <Row label="Jersey" value={[registration.apparel.jerseySize, registration.apparel.jerseyStyle, registration.apparel.cut].filter(Boolean).join(" · ")} editStep={isRider ? 5 : 4} />}
           <Row label="Address" value={[registration.address.street, registration.address.city, registration.address.state, registration.address.zip].filter(Boolean).join(", ")} editStep={isRider ? 5 : 4} />
         </CardContent>
       </Card>
