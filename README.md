@@ -110,7 +110,7 @@ You need Node 22.18 or newer, npm, a PostgreSQL 17 server and client, PostgREST,
 What works locally without more setup: public pages, the database through the proxy, and the unit and database tests. Two things need extra setup:
 
 - **Signing in** needs an OpenID Connect client that accepts `http://localhost:5173/auth/callback` as a redirect URI. With Microsoft Entra ID, register that URI on a development app registration ([docs/ENTRA.md](docs/ENTRA.md)).
-- **File uploads** need object storage. On Node there is no storage adapter yet ([docs/DEPLOYMENT.md](docs/DEPLOYMENT.md#file-storage-on-azure)).
+- **File uploads** need object storage. On Node there is no storage adapter yet ([docs/DEPLOYMENT.md](docs/DEPLOYMENT.md#4-file-storage-on-azure)).
 
 ## Scripts
 
