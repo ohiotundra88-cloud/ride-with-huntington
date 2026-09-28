@@ -299,7 +299,7 @@ function SiteSwitchesCard() {
         res.fundraiserPagesEnabled ? "Fundraiser pages are live" : "Fundraiser pages paused",
       );
     },
-    onError: (e: any) => toast.error(e?.message ?? "Could not change that switch"),
+    onError: (e) => toast.error(e.message || "Could not change that switch"),
   });
 
   const saveVendor = useMutation({
@@ -316,7 +316,7 @@ function SiteSwitchesCard() {
       });
       toast.success(res.vendorCrmEnabled ? "Vendor CRM is live" : "Vendor CRM paused");
     },
-    onError: (e: any) => toast.error(e?.message ?? "Could not change that switch"),
+    onError: (e) => toast.error(e.message || "Could not change that switch"),
   });
 
   return (

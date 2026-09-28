@@ -1,14 +1,10 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import type { AuthContext } from "@/integrations/supabase/auth-middleware";
 
 export { supabaseAdmin };
 
 /** Admins and super users may manage colleague records. */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function assertManager(context: {
-  supabase: any;
-  userId: string;
-  claims?: { email?: string };
-}): Promise<string> {
+export async function assertManager(context: AuthContext): Promise<string> {
   const [{ data: isAdmin }, { data: isSuper }] = await Promise.all([
     context.supabase.rpc("is_admin_text", { _user_id: context.userId }),
     context.supabase.rpc("is_superuser", { _user_id: context.userId }),

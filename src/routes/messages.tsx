@@ -103,6 +103,16 @@ const download = (name: string, rows: (string | number)[][]) => {
 };
 
 /** Multi-select chip group used across every audience facet. */
+
+/** Up to eight people whose name or email contains the query. */
+function searchPeople<T extends { name: string; email: string }>(people: T[], query: string): T[] {
+  const needle = query.trim().toLowerCase();
+  if (!needle) return [];
+  return people
+    .filter((p) => p.name.toLowerCase().includes(needle) || p.email.toLowerCase().includes(needle))
+    .slice(0, 8);
+}
+
 function ChipGroup({
   options,
   selected,
@@ -395,27 +405,18 @@ function MessagesPage() {
     toast.success("Copied into the composer");
   };
 
-  const matchingPeople = useMemo(() => {
-    const needle = personQuery.trim().toLowerCase();
-    if (!needle) return [];
-    return (roster.data ?? [])
-      .filter(
-        (p) => p.name.toLowerCase().includes(needle) || p.email.toLowerCase().includes(needle),
-      )
-      .slice(0, 8);
-  }, [roster.data, personQuery]);
-
-  const searchRoster = (q: string) => {
-    const needle = q.trim().toLowerCase();
-    if (!needle) return [];
-    return (roster.data ?? [])
-      .filter(
-        (p) => p.name.toLowerCase().includes(needle) || p.email.toLowerCase().includes(needle),
-      )
-      .slice(0, 8);
-  };
-  const emailMatches = useMemo(() => searchRoster(emailQuery), [roster.data, emailQuery]);
-  const optOutMatches = useMemo(() => searchRoster(optOutQuery), [roster.data, optOutQuery]);
+  const matchingPeople = useMemo(
+    () => searchPeople(roster.data ?? [], personQuery),
+    [roster.data, personQuery],
+  );
+  const emailMatches = useMemo(
+    () => searchPeople(roster.data ?? [], emailQuery),
+    [roster.data, emailQuery],
+  );
+  const optOutMatches = useMemo(
+    () => searchPeople(roster.data ?? [], optOutQuery),
+    [roster.data, optOutQuery],
+  );
   const permanentOptOuts = optOuts.data ?? [];
 
   const nameFor = (userId: string) =>

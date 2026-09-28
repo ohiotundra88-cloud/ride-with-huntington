@@ -35,7 +35,8 @@ import {
 import { Label } from "@/components/ui/label";
 import { useAdmin } from "@/lib/admin-store";
 import { type Announcement, type Audience } from "@/lib/admin-content";
-import { AdminIcon, iconOptions } from "@/components/AdminIcon";
+import { AdminIcon } from "@/components/AdminIcon";
+import { iconOptions } from "@/components/admin-icons";
 import { Plus, Pencil, Trash2, Eye, Send, FileText, Pin, Copy } from "lucide-react";
 import { toast } from "sonner";
 

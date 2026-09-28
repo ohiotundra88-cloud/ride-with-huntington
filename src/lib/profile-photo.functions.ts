@@ -19,7 +19,7 @@ function matchesImageType(bytes: Buffer, contentType: string): boolean {
 export const getMyProfilePhoto = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await (context.supabase as any)
+    const { data, error } = await context.supabase
       .from("profiles")
       .select("avatar_path, avatar_updated_at")
       .eq("id", context.userId)
@@ -28,7 +28,7 @@ export const getMyProfilePhoto = createServerFn({ method: "GET" })
     return {
       userId: context.userId,
       hasPhoto: Boolean(data?.avatar_path),
-      version: (data?.avatar_updated_at as string | null) ?? null,
+      version: data?.avatar_updated_at ?? null,
     };
   });
 
@@ -78,7 +78,7 @@ export const uploadProfilePhoto = createServerFn({ method: "POST" })
 export const removeProfilePhoto = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data: row } = await (context.supabase as any)
+    const { data: row } = await context.supabase
       .from("profiles")
       .select("avatar_path")
       .eq("id", context.userId)

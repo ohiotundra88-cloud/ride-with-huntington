@@ -60,6 +60,7 @@ import {
   validationIssues,
   type FundraiserDetail,
   type FundraiserInput,
+  type FundraiserStatus,
   type ItemInput,
 } from "@/lib/fundraising-pages.shared";
 
@@ -151,7 +152,7 @@ function ManageFundraiser() {
       toast.success("Saved");
       invalidate();
     },
-    onError: (e: any) => toast.error(e?.message ?? "Couldn't save."),
+    onError: (e) => toast.error(e.message || "Couldn't save."),
   });
 
   const submit = useMutation({
@@ -160,16 +161,16 @@ function ManageFundraiser() {
       toast.success("Sent for approval");
       invalidate();
     },
-    onError: (e: any) => toast.error(e?.message ?? "Couldn't submit."),
+    onError: (e) => toast.error(e.message || "Couldn't submit."),
   });
 
   const status = useMutation({
-    mutationFn: (next: any) => setFundraiserStatus({ data: { id, status: next } }),
+    mutationFn: (next: FundraiserStatus) => setFundraiserStatus({ data: { id, status: next } }),
     onSuccess: () => {
       toast.success("Status updated");
       invalidate();
     },
-    onError: (e: any) => toast.error(e?.message ?? "Couldn't change the status."),
+    onError: (e) => toast.error(e.message || "Couldn't change the status."),
   });
 
   const remove = useMutation({
@@ -179,7 +180,7 @@ function ManageFundraiser() {
       qc.invalidateQueries({ queryKey: ["my-fundraisers"] });
       navigate({ to: "/my-fundraisers" });
     },
-    onError: (e: any) => toast.error("Couldn't delete", { description: e?.message }),
+    onError: (e) => toast.error("Couldn't delete", { description: e.message }),
   });
 
   const visibility = useMutation({
@@ -188,7 +189,7 @@ function ManageFundraiser() {
       toast.success(r.public_hidden ? "Hidden from public view" : "Back on the public site");
       invalidate();
     },
-    onError: (e: any) => toast.error(e?.message ?? "Couldn't change visibility."),
+    onError: (e) => toast.error(e.message || "Couldn't change visibility."),
   });
 
   const refund = useMutation({
@@ -197,7 +198,7 @@ function ManageFundraiser() {
       toast.success("Order refunded");
       invalidate();
     },
-    onError: (e: any) => toast.error(e?.message ?? "Couldn't refund that order."),
+    onError: (e) => toast.error(e.message || "Couldn't refund that order."),
   });
 
   const draw = useMutation({
@@ -206,7 +207,7 @@ function ManageFundraiser() {
       toast.success(`Winner: ${r.supporter_name} (entry ${r.entry_number})`);
       invalidate();
     },
-    onError: (e: any) => toast.error(e?.message ?? "Couldn't run the drawing."),
+    onError: (e) => toast.error(e.message || "Couldn't run the drawing."),
   });
 
   if (isPending || !form) {
@@ -378,9 +379,8 @@ function ManageFundraiser() {
                 "cochair_status",
               ] as const
             ).map((k) => (
-              <Badge key={k} variant={(approval as any)[k] === "approved" ? "default" : "outline"}>
-                {k.replace("_status", "").replace(/^\w/, (c) => c.toUpperCase())}:{" "}
-                {(approval as any)[k]}
+              <Badge key={k} variant={approval[k] === "approved" ? "default" : "outline"}>
+                {k.replace("_status", "").replace(/^\w/, (c) => c.toUpperCase())}: {approval[k]}
               </Badge>
             ))}
           </CardContent>
@@ -498,7 +498,7 @@ function ManageFundraiser() {
                     id="contact"
                     type="email"
                     value={form.contact_email ?? ""}
-                    onChange={(e) => set("contact_email", e.target.value as any)}
+                    onChange={(e) => set("contact_email", e.target.value)}
                   />
                 </div>
               </div>
@@ -873,7 +873,7 @@ function PayoutPanel({
       setNotes("");
       onDone();
     },
-    onError: (e: any) => toast.error(e?.message ?? "Couldn't record that payout."),
+    onError: (e) => toast.error(e.message || "Couldn't record that payout."),
   });
 
   return (

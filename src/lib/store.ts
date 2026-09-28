@@ -6,7 +6,6 @@ import {
   useRef,
   useState,
   type Context,
-  type ReactNode,
 } from "react";
 import { supabaseBrowser as supabase } from "@/integrations/supabase/proxy-client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -209,8 +208,13 @@ const guestUser: User = {
   userId: null,
 };
 
+/** A registration section saved as JSON; anything but a plain object reads as empty. */
+function storedSection<T extends object>(value: unknown): Partial<T> {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as Partial<T>) : {};
+}
+
 // ============ CONTEXT ============
-interface StoreCtx {
+export interface StoreCtx {
   /** False until the Supabase session has been resolved once. */
   authReady: boolean;
   user: User;
@@ -228,7 +232,7 @@ interface StoreCtx {
 // module never leaves consumers reading a different context than the mounted
 // provider ("useStore must be used within StoreProvider").
 const g = globalThis as unknown as { __appStoreCtx?: Context<StoreCtx | null> };
-const Ctx = (g.__appStoreCtx ??= createContext<StoreCtx | null>(null));
+export const StoreContext = (g.__appStoreCtx ??= createContext<StoreCtx | null>(null));
 const REG_KEY = "hh_reg_v2";
 
 /** Cache key is namespaced per person so one colleague's answers can never
@@ -247,7 +251,8 @@ function loadRegistrationFromStorage(userId: string | null): Registration | null
   }
 }
 
-export function StoreProvider({ children }: { children: ReactNode }) {
+/** All of the store's state and actions; rendered by <StoreProvider>. */
+export function useStoreState(): StoreCtx {
   const queryClient = useQueryClient();
   const [user, setUserState] = useState<User>(guestUser);
   const [registration, setRegState] = useState<Registration>(emptyReg);
@@ -361,11 +366,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           ...emptyReg,
           id: row.reg_id ?? null,
           participation: (row.participation as Participation) ?? null,
-          pelotonia: { ...emptyReg.pelotonia, ...((row.pelotonia as any) ?? {}) },
-          travel: { ...emptyReg.travel, ...((row.travel as any) ?? {}) },
-          bike: { ...emptyReg.bike, ...((row.bike as any) ?? {}) },
-          apparel: { ...emptyReg.apparel, ...((row.apparel as any) ?? {}) },
-          address: { ...emptyReg.address, ...((row.address as any) ?? {}) },
+          pelotonia: { ...emptyReg.pelotonia, ...storedSection<PelotoniaReg>(row.pelotonia) },
+          travel: { ...emptyReg.travel, ...storedSection<TravelInfo>(row.travel) },
+          bike: { ...emptyReg.bike, ...storedSection<BikeRental>(row.bike) },
+          apparel: { ...emptyReg.apparel, ...storedSection<Apparel>(row.apparel) },
+          address: { ...emptyReg.address, ...storedSection<MailingAddress>(row.address) },
           audit: Array.isArray(row.audit) ? (row.audit as unknown as AuditEvent[]) : [],
           submittedAt: row.submitted_at ?? null,
         });
@@ -393,7 +398,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [queryClient]);
 
   // Persist registration to localStorage (cache), namespaced per person
   useEffect(() => {
@@ -417,12 +422,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       upsertMyParticipant({
         data: {
           participation: registration.participation ?? null,
-          pelotonia: registration.pelotonia as any,
-          travel: registration.travel as any,
-          bike: registration.bike as any,
-          apparel: registration.apparel as any,
-          address: registration.address as any,
-          audit: registration.audit as any,
+          pelotonia: registration.pelotonia,
+          travel: registration.travel,
+          bike: registration.bike,
+          apparel: registration.apparel,
+          address: registration.address,
+          audit: registration.audit,
           submitted_at: registration.submittedAt,
           reg_id: registration.id,
         },
@@ -511,28 +516,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return 5;
   }, [registration.participation, effective]);
 
-  return (
-    <Ctx.Provider
-      value={{
-        authReady,
-        user,
-        setUser,
-        saveProfile,
-        registration,
-        setRegistration,
-        reset,
-        completion,
-        incompleteStep,
-        signOut,
-      }}
-    >
-      {children}
-    </Ctx.Provider>
-  );
+  return {
+    authReady,
+    user,
+    setUser,
+    saveProfile,
+    registration,
+    setRegistration,
+    reset,
+    completion,
+    incompleteStep,
+    signOut,
+  };
 }
 
 export function useStore() {
-  const c = useContext(Ctx);
+  const c = useContext(StoreContext);
   if (!c) throw new Error("useStore must be used within StoreProvider");
   return c;
 }

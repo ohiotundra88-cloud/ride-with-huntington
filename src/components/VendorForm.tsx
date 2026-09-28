@@ -130,7 +130,7 @@ export function VendorForm({ vendor, onDone }: { vendor?: VendorDetail; onDone?:
 
   const save = useMutation({
     mutationFn: (confirmDuplicate: boolean) =>
-      saveVendorRecord({ data: payload(confirmDuplicate) as any }),
+      saveVendorRecord({ data: payload(confirmDuplicate) }),
     onSuccess: (res) => {
       if (res.duplicates?.length) {
         setDupes(res.duplicates);

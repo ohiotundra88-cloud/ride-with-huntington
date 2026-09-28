@@ -1,5 +1,6 @@
 /** Server-only roster building and audience resolution for team messaging. */
 import { audienceIsEveryone, type AudiencePerson, type AudienceRules } from "./messages.shared";
+import type { Db } from "@/server/backend.server";
 
 const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : null);
 
@@ -221,9 +222,7 @@ import {
   type MessagingAccess,
 } from "./messages.shared";
 
-type AnySupabase = {
-  from: (table: string) => any;
-};
+type AnySupabase = Db;
 
 const SENDER_ROLES = ["captain", "cochair", "superuser", "admin"];
 

@@ -62,7 +62,7 @@ function ApprovalsPage() {
     queryKey: ["my-review-roles"],
     queryFn: () => getMyReviewRoles(),
   });
-  const roles = roleData?.roles ?? [];
+  const roles = useMemo(() => roleData?.roles ?? [], [roleData]);
   const {
     data: requests = [],
     isLoading,

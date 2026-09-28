@@ -1,4 +1,5 @@
 import { exactEmail } from "@/lib/email-match";
+import type { AuthContext } from "@/integrations/supabase/auth-middleware";
 
 export interface RoleMemberRow {
   user_id: string;
@@ -8,7 +9,7 @@ export interface RoleMemberRow {
   is_self: boolean;
 }
 
-type Ctx = { supabase: any; userId: string };
+type Ctx = Pick<AuthContext, "supabase" | "userId">;
 
 export async function assertAdmin(context: Ctx) {
   const { data, error } = await context.supabase.rpc("has_role", {

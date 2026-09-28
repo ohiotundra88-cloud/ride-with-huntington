@@ -29,7 +29,7 @@ export const Route = createFileRoute("/inbox")({
   component: InboxPage,
 });
 
-export function priorityBadge(priority: InboxMessage["priority"]) {
+function priorityBadge(priority: InboxMessage["priority"]) {
   if (priority === "urgent") return <Badge className="bg-red-600 text-white">Urgent</Badge>;
   if (priority === "important") return <Badge className="bg-amber-500 text-black">Important</Badge>;
   return null;

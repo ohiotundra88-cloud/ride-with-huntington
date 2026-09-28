@@ -57,8 +57,8 @@ import {
   LinkSettings,
   ListSettings,
   RegisterContentProvider,
-  useRegisterContent,
 } from "@/components/RegisterEditor";
+import { useRegisterContent } from "@/lib/register-content-context";
 import { DEFAULT_REGISTER_CONTENT, type RegisterContent } from "@/lib/register-content.shared";
 import { getRegisterContent, saveRegisterContent } from "@/lib/register-content.functions";
 import { REGIONS } from "@/lib/regions.shared";

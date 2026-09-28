@@ -14,6 +14,12 @@ export const FUNDRAISER_KINDS = [
 ] as const;
 export type FundraiserKind = (typeof FUNDRAISER_KINDS)[number];
 
+/** Narrows a kind read from the database (a CHECK-constrained text column). */
+export function asFundraiserKind(value: string): FundraiserKind {
+  if ((FUNDRAISER_KINDS as readonly string[]).includes(value)) return value as FundraiserKind;
+  throw new Error(`Unknown fundraiser kind: ${value}`);
+}
+
 export const KIND_LABELS: Record<FundraiserKind, string> = {
   donation: "Donations",
   raffle: "Raffle",
@@ -47,6 +53,12 @@ export const FUNDRAISER_STATUSES = [
   "cancelled",
 ] as const;
 export type FundraiserStatus = (typeof FUNDRAISER_STATUSES)[number];
+
+/** Narrows a status read from the database (a CHECK-constrained text column). */
+export function asFundraiserStatus(value: string): FundraiserStatus {
+  if ((FUNDRAISER_STATUSES as readonly string[]).includes(value)) return value as FundraiserStatus;
+  throw new Error(`Unknown fundraiser status: ${value}`);
+}
 
 export const STATUS_LABELS: Record<FundraiserStatus, string> = {
   draft: "Draft",
@@ -280,11 +292,14 @@ export interface FundraiserAccess {
 // ------------------------------------------------------------------ math
 
 export function totalsFromOrders(
+  // `status` is a plain string here so database rows can be passed directly.
   orders: Array<
     Pick<
       FundraiserOrderRow,
-      "amount" | "fee_amount" | "net_amount" | "status" | "quantity" | "supporter_email"
-    >
+      "amount" | "fee_amount" | "net_amount" | "quantity" | "supporter_email"
+    > & {
+      status: string;
+    }
   >,
   goal: number,
 ): FundraiserTotals {
@@ -319,7 +334,7 @@ export function totalsFromOrders(
 }
 
 export function isOpenForOrders(
-  f: Pick<FundraiserRecord, "status" | "opens_at" | "closes_at">,
+  f: Pick<FundraiserRecord, "opens_at" | "closes_at"> & { status: string },
   now = new Date(),
 ) {
   if (f.status !== "live") return false;

@@ -100,7 +100,7 @@ function AdminFaqs() {
         toast.success(isNew ? "FAQ created" : "FAQ updated");
         setEditing(null);
       },
-      onError: (e: any) => toast.error("Save failed", { description: e.message }),
+      onError: (e) => toast.error("Save failed", { description: e.message }),
     });
   };
 
@@ -213,8 +213,7 @@ function AdminFaqs() {
                         if (!confirm("Delete this FAQ permanently?")) return;
                         remove.mutate(a.id, {
                           onSuccess: () => toast.success("Deleted"),
-                          onError: (e: any) =>
-                            toast.error("Delete failed", { description: e.message }),
+                          onError: (e) => toast.error("Delete failed", { description: e.message }),
                         });
                       }}
                     >

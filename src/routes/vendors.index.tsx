@@ -3,7 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { BarChart3, Download, Plus, Search, Building2, Award } from "lucide-react";
 import { KidsSupporterBadge, VendorTierBadge } from "@/components/VendorTierBadge";
-import { VendorGate, useVendorAccess } from "@/components/VendorGate";
+import { VendorGate } from "@/components/VendorGate";
+import { useVendorAccess } from "@/lib/useVendorAccess";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -95,7 +96,7 @@ function VendorDashboard() {
   });
 
   const filtered = useMemo(() => {
-    let rows = vendors.filter((v) => {
+    const rows = vendors.filter((v) => {
       if (q && !v.business_name.toLowerCase().includes(q.toLowerCase())) return false;
       if (status !== "all" && v.status !== status) return false;
       if (
@@ -231,7 +232,7 @@ function VendorDashboard() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
+          <Tabs value={tab} onValueChange={(v) => setTab(v === "archived" ? "archived" : "active")}>
             <TabsList>
               <TabsTrigger value="active">Active list</TabsTrigger>
               <TabsTrigger value="archived" disabled={!access?.canArchive}>

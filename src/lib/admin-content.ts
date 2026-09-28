@@ -1,7 +1,7 @@
 // Super User editable content for the Team Huntington Hub: types, default
 // content, and the pure helpers that read it.
 //
-// Where this content lives: the admin store (src/lib/admin-store.tsx) keeps it
+// Where this content lives: the admin store (src/lib/admin-store.ts) keeps it
 // in each browser's localStorage. Edits a Super User makes are saved in their
 // own browser only and are not shared with other colleagues until this content
 // moves to a server-backed table.

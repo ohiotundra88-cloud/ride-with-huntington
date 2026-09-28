@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CalendarDays, Car, Tent, MessageSquare } from "lucide-react";
-import { openConcierge } from "@/components/Concierge";
+import { openConcierge } from "@/lib/concierge";
 import { useAdmin } from "@/lib/admin-store";
 import { AdminIcon } from "@/components/AdminIcon";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";

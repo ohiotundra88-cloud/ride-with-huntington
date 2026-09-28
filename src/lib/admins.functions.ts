@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { exactEmail } from "@/lib/email-match";
+import type { AuthContext } from "@/integrations/supabase/auth-middleware";
 
 export interface AdminUserRow {
   user_id: string;
@@ -11,7 +12,7 @@ export interface AdminUserRow {
   is_self: boolean;
 }
 
-type Ctx = { supabase: any; userId: string };
+type Ctx = Pick<AuthContext, "supabase" | "userId">;
 
 /** Viewing the admin list is fine for admins and super users. */
 async function assertCallerIsAdmin(context: Ctx) {

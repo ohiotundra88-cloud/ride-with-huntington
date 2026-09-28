@@ -20,6 +20,8 @@ export type FAQArticle = {
   body: string;
   hidden?: boolean;
   is_builtin?: boolean;
+  /** Stable id of a built-in article, used by older /resources/<id> links. */
+  source_id?: string | null;
 };
 export { faqCategories };
 export type { FAQCategory };
@@ -33,6 +35,7 @@ function toArticle(row: FaqRow): FAQArticle {
     body: row.body,
     hidden: row.hidden,
     is_builtin: row.is_builtin,
+    source_id: row.source_id,
   };
 }
 

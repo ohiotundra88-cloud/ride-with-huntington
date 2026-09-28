@@ -9,6 +9,7 @@ import {
   MAX_BRANDING_BYTES,
   type SiteBranding,
 } from "@/lib/branding.shared";
+import type { AuthContext } from "@/integrations/supabase/auth-middleware";
 
 /** Public read — used by the landing page and header. */
 export const getBranding = createServerFn({ method: "GET" }).handler(
@@ -25,7 +26,7 @@ export const getBranding = createServerFn({ method: "GET" }).handler(
   },
 );
 
-async function assertBrandingManager(context: { supabase: any; userId: string }) {
+async function assertBrandingManager(context: Pick<AuthContext, "supabase" | "userId">) {
   const [{ data: isAdmin }, { data: isSuper }] = await Promise.all([
     context.supabase.rpc("is_admin_text", { _user_id: context.userId }),
     context.supabase.rpc("is_superuser", { _user_id: context.userId }),
@@ -38,7 +39,7 @@ export const saveBrandingSettings = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((d) => brandingSettingsSchema.parse(d))
   .handler(async ({ data, context }): Promise<SiteBranding> => {
-    await assertBrandingManager(context as any);
+    await assertBrandingManager(context);
     const { data: row, error } = await context.supabase
       .from("site_branding")
       .update({
@@ -62,7 +63,7 @@ export const uploadBrandingImage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((d) => brandingUploadSchema.parse(d))
   .handler(async ({ data, context }): Promise<SiteBranding> => {
-    await assertBrandingManager(context as any);
+    await assertBrandingManager(context);
     if (!data.contentType.startsWith("image/")) throw new Error("Please choose an image file.");
 
     const bytes = Buffer.from(data.base64, "base64");
@@ -82,7 +83,7 @@ export const uploadBrandingImage = createServerFn({ method: "POST" })
       .select(BRANDING_COLUMNS)
       .eq("id", 1)
       .maybeSingle();
-    const oldPath = data.kind === "hero" ? (prev as any)?.hero_path : (prev as any)?.logo_path;
+    const oldPath = data.kind === "hero" ? prev?.hero_path : prev?.logo_path;
 
     const patch =
       data.kind === "hero"
@@ -105,13 +106,13 @@ export const removeBrandingImage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((d) => brandingRemoveSchema.parse(d))
   .handler(async ({ data, context }): Promise<SiteBranding> => {
-    await assertBrandingManager(context as any);
+    await assertBrandingManager(context);
     const { data: prev } = await context.supabase
       .from("site_branding")
       .select(BRANDING_COLUMNS)
       .eq("id", 1)
       .maybeSingle();
-    const oldPath = data.kind === "hero" ? (prev as any)?.hero_path : (prev as any)?.logo_path;
+    const oldPath = data.kind === "hero" ? prev?.hero_path : prev?.logo_path;
 
     const patch =
       data.kind === "hero"

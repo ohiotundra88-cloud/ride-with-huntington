@@ -18,12 +18,13 @@ import {
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { toast } from "sonner";
 import { useApprovalNotifications } from "@/lib/useApprovalNotifications";
-import { useVendorAccess } from "@/components/VendorGate";
+import { useVendorAccess } from "@/lib/useVendorAccess";
 import { useQuery } from "@tanstack/react-query";
 import { getRiderProgressAccess } from "@/lib/rider-progress.functions";
 import { getMessagingAccess } from "@/lib/messages.functions";
+import type { FileRoutesByTo } from "@/routeTree.gen";
 
-type NavItem = { to: any; label: string; show?: (c: NavCtx) => boolean };
+type NavItem = { to: keyof FileRoutesByTo; label: string; show?: (c: NavCtx) => boolean };
 type NavGroup = { label: string; items: NavItem[] };
 type NavCtx = {
   signedIn: boolean;

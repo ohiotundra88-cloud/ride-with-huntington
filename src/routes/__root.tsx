@@ -11,8 +11,8 @@ import {
 import type { ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { StoreProvider } from "@/lib/store";
-import { AdminStoreProvider } from "@/lib/admin-store";
+import { StoreProvider } from "@/components/StoreProvider";
+import { AdminStoreProvider } from "@/components/AdminStoreProvider";
 import { AppNav } from "@/components/AppNav";
 import { SuperUserBar } from "@/components/AdminShell";
 import { Toaster } from "@/components/ui/sonner";

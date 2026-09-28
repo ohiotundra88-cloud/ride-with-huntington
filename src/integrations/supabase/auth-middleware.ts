@@ -1,5 +1,14 @@
 import { createMiddleware } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
+import type { Db } from "@/server/backend.server";
+
+/** What requireSupabaseAuth gives a server-function handler as `context`. */
+export interface AuthContext {
+  /** Database client acting as the signed-in person (row-level security applies). */
+  supabase: Db;
+  userId: string;
+  claims: { sub: string; email: string; name?: string };
+}
 
 /**
  * Server-function middleware: requires a signed-in person and gives the
@@ -18,12 +27,11 @@ export const requireSupabaseAuth = createMiddleware({ type: "function" }).server
     const { createDbClient } = await import("@/server/backend.server");
     const supabase = createDbClient("authenticated", { id: user.id, email: user.email });
 
-    return next({
-      context: {
-        supabase,
-        userId: user.id,
-        claims: { sub: user.id, email: user.email, name: user.name },
-      },
-    });
+    const context: AuthContext = {
+      supabase,
+      userId: user.id,
+      claims: { sub: user.id, email: user.email, name: user.name },
+    };
+    return next({ context });
   },
 );

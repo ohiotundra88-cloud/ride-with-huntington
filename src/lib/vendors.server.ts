@@ -6,18 +6,27 @@ import {
   type VendorAccess,
   type VendorAuditRow,
   type VendorDetail,
-  type VendorInput,
   type VendorListRow,
   type VendorRiderSlotRow,
 } from "@/lib/vendors.shared";
 import type { z } from "zod";
-import type { vendorRiderSlotSchema } from "@/lib/vendors.shared";
+import type {
+  vendorActivitySchema,
+  vendorFileSchema,
+  vendorInputSchema,
+  vendorRiderSlotSchema,
+} from "@/lib/vendors.shared";
+import type { AuthContext } from "@/integrations/supabase/auth-middleware";
+import type { Json } from "@/integrations/supabase/types";
 
 type VendorRiderSlotInput = z.input<typeof vendorRiderSlotSchema>;
+type VendorSaveInput = z.output<typeof vendorInputSchema>;
+type VendorActivityInput = z.output<typeof vendorActivitySchema>;
+type VendorFileInput = z.output<typeof vendorFileSchema>;
 
-export type Ctx = { supabase: any; userId: string; claims?: Record<string, any> };
+export type Ctx = AuthContext;
 
-const actorEmail = (ctx: Ctx) => (ctx.claims?.email as string | undefined) ?? null;
+const actorEmail = (ctx: Ctx) => ctx.claims?.email ?? null;
 
 // ------------------------------------------------------------------ guards
 
@@ -36,7 +45,7 @@ export async function getAccess(ctx: Ctx): Promise<VendorAccess> {
       .select("has_vendor_dashboard_access")
       .eq("id", ctx.userId)
       .maybeSingle();
-    flag = Boolean((prof as any)?.has_vendor_dashboard_access);
+    flag = Boolean(prof?.has_vendor_dashboard_access);
   }
 
   const isSuper = roles.includes("superuser");
@@ -85,12 +94,12 @@ async function nameMap(ids: string[]) {
   const clean = Array.from(new Set(ids.filter(Boolean)));
   if (!clean.length) return new Map<string, string>();
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data } = await (supabaseAdmin as any)
+  const { data } = await supabaseAdmin
     .from("profiles")
     .select("id, full_name, email")
     .in("id", clean);
   return new Map<string, string>(
-    (data ?? []).map((p: any) => [p.id, p.full_name || p.email || "Unknown"]),
+    (data ?? []).map((p) => [p.id, p.full_name || p.email || "Unknown"]),
   );
 }
 
@@ -98,7 +107,7 @@ async function logAudit(
   ctx: Ctx,
   vendorId: string,
   action: string,
-  details: Record<string, unknown> = {},
+  details: { [key: string]: Json | undefined } = {},
 ) {
   await ctx.supabase.from("vendor_audit").insert({
     vendor_id: vendorId,
@@ -129,15 +138,13 @@ export async function listVendors(ctx: Ctx, includeArchived: boolean): Promise<V
   ]);
   if (error) throw new Error(error.message);
 
-  const rows = (vendors ?? []) as any[];
-  const names = await nameMap(rows.flatMap((v) => [v.updated_by, v.created_by]));
+  const rows = vendors ?? [];
+  const names = await nameMap(rows.flatMap((v) => [v.updated_by ?? "", v.created_by ?? ""]));
 
   return rows.map((v) => {
-    const s = (spend ?? []).filter((r: any) => r.vendor_id === v.id);
-    const d = (donations ?? []).filter((r: any) => r.vendor_id === v.id);
-    const years = Array.from(
-      new Set([...s.map((r: any) => r.year), ...d.map((r: any) => r.year)]),
-    ).sort();
+    const s = (spend ?? []).filter((r) => r.vendor_id === v.id);
+    const d = (donations ?? []).filter((r) => r.vendor_id === v.id);
+    const years = Array.from(new Set([...s.map((r) => r.year), ...d.map((r) => r.year)])).sort();
     return {
       id: v.id,
       business_name: v.business_name,
@@ -149,8 +156,8 @@ export async function listVendors(ctx: Ctx, includeArchived: boolean): Promise<V
       updated_at: v.updated_at,
       updated_by_name: names.get(v.updated_by ?? v.created_by) ?? null,
       years,
-      rollup: rollup(s as any, d as any),
-      year_totals: yearTotals(d as any),
+      rollup: rollup(s, d),
+      year_totals: yearTotals(d),
     } satisfies VendorListRow;
   });
 }
@@ -187,7 +194,7 @@ export async function getVendor(ctx: Ctx, id: string): Promise<VendorDetail> {
       .select("*")
       .eq("vendor_id", id)
       .order("created_at", { ascending: false }),
-    (ctx.supabase as any)
+    ctx.supabase
       .from("vendor_rider_slots")
       .select("*")
       .eq("vendor_id", id)
@@ -196,30 +203,30 @@ export async function getVendor(ctx: Ctx, id: string): Promise<VendorDetail> {
   ]);
 
   const names = await nameMap([
-    (v as any).created_by,
-    (v as any).updated_by,
-    ...((attachments ?? []) as any[]).map((a) => a.uploaded_by),
+    v.created_by ?? "",
+    v.updated_by ?? "",
+    ...(attachments ?? []).map((a) => a.uploaded_by),
   ]);
 
   return {
-    ...(v as any),
-    created_by_name: names.get((v as any).created_by) ?? null,
-    updated_by_name: names.get((v as any).updated_by ?? (v as any).created_by) ?? null,
-    contacts: (contacts ?? []) as any,
-    spend: ((spend ?? []) as any[]).map((r) => ({ ...r, amount: Number(r.amount) })),
-    donations: ((donations ?? []) as any[]).map((r) => ({
+    ...v,
+    created_by_name: names.get(v.created_by ?? "") ?? null,
+    updated_by_name: names.get(v.updated_by ?? v.created_by ?? "") ?? null,
+    contacts: contacts ?? [],
+    spend: (spend ?? []).map((r) => ({ ...r, amount: Number(r.amount) })),
+    donations: (donations ?? []).map((r) => ({
       ...r,
       committed_amount: Number(r.committed_amount),
       actual_donated_amount: Number(r.actual_donated_amount),
       kids_amount: Number(r.kids_amount ?? 0),
     })),
     rider_slots: await withPelotonia((slots ?? []) as VendorRiderSlotRow[]),
-    activity: (activity ?? []) as any,
-    attachments: ((attachments ?? []) as any[]).map((a) => ({
+    activity: activity ?? [],
+    attachments: (attachments ?? []).map((a) => ({
       ...a,
       uploader_name: names.get(a.uploaded_by) ?? null,
     })),
-  } as VendorDetail;
+  };
 }
 
 export async function listAudit(ctx: Ctx, vendorId: string): Promise<VendorAuditRow[]> {
@@ -250,25 +257,34 @@ const CORE_FIELDS = [
 
 export async function saveVendor(
   ctx: Ctx,
-  input: VendorInput & { contacts?: any[]; spend?: any[]; donations?: any[] },
+  data: VendorSaveInput,
 ): Promise<{ id: string; duplicates?: string[] }> {
   await assertVendorAccess(ctx);
-  const data = input as any;
 
   // Duplicate-name guard on create.
   if (!data.id && !data.confirmDuplicate) {
     const { data: existing } = await ctx.supabase.from("vendors").select("business_name");
-    const dupes = ((existing ?? []) as any[])
-      .map((r) => r.business_name as string)
+    const dupes = (existing ?? [])
+      .map((r) => r.business_name)
       .filter((n) => isSimilarName(n, data.business_name));
     if (dupes.length) return { id: "", duplicates: dupes };
   }
 
-  const payload: Record<string, unknown> = {};
-  for (const f of CORE_FIELDS) payload[f] = data[f] ?? "";
-  payload["updated_by"] = ctx.userId;
+  const payload = {
+    business_name: data.business_name,
+    status: data.status,
+    business_segment: data.business_segment ?? "",
+    internal_business_segment: data.internal_business_segment ?? "",
+    relationship_owner: data.relationship_owner ?? "",
+    secondary_relationship_owner: data.secondary_relationship_owner ?? "",
+    internal_notes: data.internal_notes ?? "",
+    primary_contact_name: data.primary_contact_name,
+    primary_contact_phone: data.primary_contact_phone ?? "",
+    general_notes: data.general_notes ?? "",
+    updated_by: ctx.userId,
+  } satisfies Record<(typeof CORE_FIELDS)[number] | "updated_by", string>;
 
-  let vendorId = data.id as string | undefined;
+  let vendorId = data.id;
   let changed: string[] = [];
 
   if (vendorId) {
@@ -277,9 +293,7 @@ export async function saveVendor(
       .select("*")
       .eq("id", vendorId)
       .maybeSingle();
-    changed = CORE_FIELDS.filter(
-      (f) => String((before as any)?.[f] ?? "") !== String(payload[f] ?? ""),
-    );
+    changed = CORE_FIELDS.filter((f) => String(before?.[f] ?? "") !== String(payload[f] ?? ""));
     const { error } = await ctx.supabase.from("vendors").update(payload).eq("id", vendorId);
     if (error) throw new Error(error.message);
   } else {
@@ -289,15 +303,15 @@ export async function saveVendor(
       .select("id")
       .single();
     if (error) throw new Error(error.message);
-    vendorId = (row as any).id as string;
+    vendorId = row.id;
   }
 
   // Additional contacts — replace the set.
   if (Array.isArray(data.contacts)) {
     await ctx.supabase.from("vendor_contacts").delete().eq("vendor_id", vendorId);
     const rows = data.contacts
-      .filter((c: any) => c.name?.trim())
-      .map((c: any, i: number) => ({
+      .filter((c) => c.name?.trim())
+      .map((c, i) => ({
         vendor_id: vendorId,
         name: c.name.trim(),
         email: c.email || null,
@@ -313,25 +327,23 @@ export async function saveVendor(
 
   // Year rows — upsert supplied years, drop the rest.
   if (Array.isArray(data.spend)) {
-    const keep = data.spend.filter((r: any) => Number(r.amount) > 0 || (r.notes ?? "").trim());
+    const keep = data.spend.filter((r) => Number(r.amount) > 0 || (r.notes ?? "").trim());
     await ctx.supabase.from("vendor_spend").delete().eq("vendor_id", vendorId);
     if (keep.length) {
-      const { error } = await ctx.supabase
-        .from("vendor_spend")
-        .insert(
-          keep.map((r: any) => ({
-            vendor_id: vendorId,
-            year: r.year,
-            amount: r.amount,
-            notes: r.notes ?? "",
-          })),
-        );
+      const { error } = await ctx.supabase.from("vendor_spend").insert(
+        keep.map((r) => ({
+          vendor_id: vendorId,
+          year: r.year,
+          amount: r.amount,
+          notes: r.notes ?? "",
+        })),
+      );
       if (error) throw new Error(error.message);
     }
   }
   if (Array.isArray(data.donations)) {
     const keep = data.donations.filter(
-      (r: any) =>
+      (r) =>
         Number(r.committed_amount) > 0 ||
         Number(r.actual_donated_amount) > 0 ||
         Number(r.kids_amount) > 0 ||
@@ -341,7 +353,7 @@ export async function saveVendor(
     await ctx.supabase.from("vendor_donations").delete().eq("vendor_id", vendorId);
     if (keep.length) {
       const { error } = await ctx.supabase.from("vendor_donations").insert(
-        keep.map((r: any) => ({
+        keep.map((r) => ({
           vendor_id: vendorId,
           year: r.year,
           committed_amount: r.committed_amount,
@@ -388,7 +400,7 @@ export async function purgeVendor(ctx: Ctx, id: string) {
     .eq("id", id)
     .maybeSingle();
   if (!v) throw new Error("Vendor not found");
-  if (!(v as any).archived)
+  if (!v.archived)
     throw new Error(
       "Archive the vendor first — permanent deletion is only allowed after archiving.",
     );
@@ -398,7 +410,7 @@ export async function purgeVendor(ctx: Ctx, id: string) {
     .select("file_path")
     .eq("vendor_id", id);
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const paths = ((files ?? []) as any[]).map((f) => f.file_path).filter(Boolean);
+  const paths = (files ?? []).map((f) => f.file_path).filter(Boolean);
   if (paths.length) await supabaseAdmin.storage.from("vendor-files").remove(paths);
 
   const { error } = await ctx.supabase.from("vendors").delete().eq("id", id);
@@ -406,7 +418,7 @@ export async function purgeVendor(ctx: Ctx, id: string) {
   return { ok: true };
 }
 
-export async function addActivity(ctx: Ctx, input: any) {
+export async function addActivity(ctx: Ctx, input: VendorActivityInput) {
   await assertVendorAccess(ctx);
   const { error } = await ctx.supabase.from("vendor_activity").insert({
     vendor_id: input.vendor_id,
@@ -426,7 +438,7 @@ export async function addActivity(ctx: Ctx, input: any) {
 
 const BUCKET = "vendor-files";
 
-export async function uploadAttachment(ctx: Ctx, data: any) {
+export async function uploadAttachment(ctx: Ctx, data: VendorFileInput) {
   await assertVendorAccess(ctx);
   const bytes = Buffer.from(data.base64, "base64");
   if (bytes.byteLength > 15 * 1024 * 1024) throw new Error("File must be 15 MB or smaller.");
@@ -469,14 +481,9 @@ export async function setAttachmentArchived(ctx: Ctx, id: string, archived: bool
     .select("vendor_id, file_name")
     .single();
   if (error) throw new Error(error.message);
-  await logAudit(
-    ctx,
-    (row as any).vendor_id,
-    archived ? "attachment_archived" : "attachment_restored",
-    {
-      file: (row as any).file_name,
-    },
-  );
+  await logAudit(ctx, row.vendor_id, archived ? "attachment_archived" : "attachment_restored", {
+    file: row.file_name,
+  });
   return { ok: true };
 }
 
@@ -488,7 +495,7 @@ export async function purgeAttachment(ctx: Ctx, id: string) {
     .eq("id", id)
     .maybeSingle();
   if (!row) throw new Error("Attachment not found");
-  if (!(row as any).archived)
+  if (!row.archived)
     throw new Error(
       "Archive the attachment first — permanent deletion is only allowed after archiving.",
     );
@@ -496,9 +503,9 @@ export async function purgeAttachment(ctx: Ctx, id: string) {
   const { error } = await ctx.supabase.from("vendor_attachments").delete().eq("id", id);
   if (error) throw new Error(error.message);
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  await supabaseAdmin.storage.from(BUCKET).remove([(row as any).file_path]);
-  await logAudit(ctx, (row as any).vendor_id, "attachment_deleted", {
-    file: (row as any).file_name,
+  await supabaseAdmin.storage.from(BUCKET).remove([row.file_path]);
+  await logAudit(ctx, row.vendor_id, "attachment_deleted", {
+    file: row.file_name,
   });
   return { ok: true };
 }
@@ -513,14 +520,12 @@ export async function readAttachment(ctx: Ctx, id: string) {
     .maybeSingle();
   if (!row) throw new Error("Attachment not found");
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data: file, error } = await supabaseAdmin.storage
-    .from(BUCKET)
-    .download((row as any).file_path);
+  const { data: file, error } = await supabaseAdmin.storage.from(BUCKET).download(row.file_path);
   if (error || !file) throw new Error("File could not be read.");
   const buf = Buffer.from(await file.arrayBuffer());
   return {
-    fileName: (row as any).file_name as string,
-    contentType: ((row as any).content_type as string) ?? "application/octet-stream",
+    fileName: row.file_name,
+    contentType: row.content_type ?? "application/octet-stream",
     base64: buf.toString("base64"),
   };
 }
@@ -543,20 +548,20 @@ async function assertSuper(ctx: Ctx) {
 export async function listVendorCaptains(ctx: Ctx): Promise<VendorCaptainRow[]> {
   await assertSuper(ctx);
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data: roles, error } = await (supabaseAdmin as any)
+  const { data: roles, error } = await supabaseAdmin
     .from("user_roles")
     .select("user_id, created_at")
     .eq("role", "vendor_captain")
     .order("created_at");
   if (error) throw new Error(error.message);
-  const ids = ((roles ?? []) as any[]).map((r) => r.user_id);
+  const ids = (roles ?? []).map((r) => r.user_id);
   if (!ids.length) return [];
-  const { data: profiles } = await (supabaseAdmin as any)
+  const { data: profiles } = await supabaseAdmin
     .from("profiles")
     .select("id, email, full_name, has_vendor_dashboard_access")
     .in("id", ids);
-  const byId = new Map(((profiles ?? []) as any[]).map((p) => [p.id, p]));
-  return ids.map((id: string) => {
+  const byId = new Map((profiles ?? []).map((p) => [p.id, p]));
+  return ids.map((id) => {
     const p = byId.get(id);
     return {
       user_id: id,
@@ -570,7 +575,7 @@ export async function listVendorCaptains(ctx: Ctx): Promise<VendorCaptainRow[]> 
 export async function setVendorAccessFlag(ctx: Ctx, userId: string, value: boolean) {
   await assertSuper(ctx);
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { error } = await (supabaseAdmin as any)
+  const { error } = await supabaseAdmin
     .from("profiles")
     .update({ has_vendor_dashboard_access: value })
     .eq("id", userId);
@@ -621,7 +626,7 @@ export async function saveRiderSlots(
     .select("year, committed_amount, actual_donated_amount, kids_amount")
     .eq("vendor_id", input.vendor_id);
   if (dErr) throw new Error(dErr.message);
-  const tier = tierFor(yearTotals((donations ?? []) as any), input.year);
+  const tier = tierFor(yearTotals(donations ?? []), input.year);
   const allowed = tier?.riderSlots ?? 0;
   const used = input.slots.filter((s) => s.slot_number > allowed);
   if (used.length) {
@@ -650,15 +655,14 @@ export async function saveRiderSlots(
       updated_by: ctx.userId,
     }));
 
-  const sb = ctx.supabase as any;
-  const { error: delErr } = await sb
+  const { error: delErr } = await ctx.supabase
     .from("vendor_rider_slots")
     .delete()
     .eq("vendor_id", input.vendor_id)
     .eq("year", input.year);
   if (delErr) throw new Error(delErr.message);
   if (rows.length) {
-    const { error } = await sb.from("vendor_rider_slots").insert(rows);
+    const { error } = await ctx.supabase.from("vendor_rider_slots").insert(rows);
     if (error) throw new Error(error.message);
   }
   await logAudit(ctx, input.vendor_id, "rider_slots_updated", {

@@ -8,10 +8,11 @@ import {
   postInputSchema,
   type CaptainPost,
 } from "@/lib/captain-lounge.shared";
+import type { AuthContext } from "@/integrations/supabase/auth-middleware";
 
 const BUCKET = "captain-docs";
 
-async function assertLeader(context: { supabase: any; userId: string }) {
+async function assertLeader(context: Pick<AuthContext, "supabase" | "userId">) {
   const { data, error } = await context.supabase.rpc("is_leadership", { _user_id: context.userId });
   if (error) throw new Error(error.message);
   if (!data) throw new Error("The Captains Lounge is limited to captains and team leadership.");
@@ -45,7 +46,7 @@ export const getLoungeAccess = createServerFn({ method: "GET" })
 export const listLoungePosts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<CaptainPost[]> => {
-    await assertLeader(context as any);
+    await assertLeader(context);
     const { data, error } = await context.supabase
       .from("captain_posts")
       .select(POST_COLUMNS)
@@ -56,13 +57,13 @@ export const listLoungePosts = createServerFn({ method: "GET" })
     const ids = Array.from(new Set(posts.map((p) => p.created_by).filter(Boolean)));
     if (ids.length) {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { data: profiles } = await (supabaseAdmin as any)
+      const { data: profiles } = await supabaseAdmin
         .from("profiles")
         .select("id, full_name, email, avatar_path, avatar_updated_at")
         .in("id", ids);
-      const byId = new Map((profiles ?? []).map((p: any) => [p.id, p]));
+      const byId = new Map((profiles ?? []).map((p) => [p.id, p]));
       for (const post of posts) {
-        const prof = byId.get(post.created_by) as any;
+        const prof = byId.get(post.created_by);
         post.author_name = prof?.full_name ?? null;
         post.author_email = prof?.email ?? null;
         post.author_avatar_version = prof?.avatar_path ? (prof.avatar_updated_at ?? "1") : null;
@@ -75,7 +76,7 @@ export const saveLoungePost = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((d) => postInputSchema.parse(d))
   .handler(async ({ data, context }): Promise<CaptainPost> => {
-    await assertLeader(context as any);
+    await assertLeader(context);
     const payload = {
       title: data.title,
       body: data.body,
@@ -106,7 +107,7 @@ export const deleteLoungePost = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((d) => postIdSchema.parse(d))
   .handler(async ({ data, context }) => {
-    await assertLeader(context as any);
+    await assertLeader(context);
     const { data: row } = await context.supabase
       .from("captain_posts")
       .select("id, file_path")
@@ -125,7 +126,7 @@ export const uploadLoungeFile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((d) => postFileSchema.parse(d))
   .handler(async ({ data, context }) => {
-    await assertLeader(context as any);
+    await assertLeader(context);
     const { data: row, error } = await context.supabase
       .from("captain_posts")
       .select("id, file_path")
@@ -160,7 +161,7 @@ export const removeLoungeFile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((d) => postIdSchema.parse(d))
   .handler(async ({ data, context }) => {
-    await assertLeader(context as any);
+    await assertLeader(context);
     const { data: row, error } = await context.supabase
       .from("captain_posts")
       .select("id, file_path")
@@ -185,7 +186,7 @@ export const getLoungeFile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((d) => postIdSchema.parse(d))
   .handler(async ({ data, context }) => {
-    await assertLeader(context as any);
+    await assertLeader(context);
     const { data: row, error } = await context.supabase
       .from("captain_posts")
       .select("file_path, file_name, content_type")

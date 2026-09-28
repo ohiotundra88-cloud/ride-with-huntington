@@ -107,7 +107,7 @@ function FundraiserPublicPage() {
         search: { order: res.order_id },
       });
     },
-    onError: (e: any) => toast.error(e?.message ?? "We couldn't complete that contribution."),
+    onError: (e) => toast.error(e.message || "We couldn't complete that contribution."),
   });
 
   if (isPending)

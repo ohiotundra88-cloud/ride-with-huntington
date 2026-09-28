@@ -23,7 +23,7 @@ function Article() {
       <div className="mx-auto max-w-3xl px-4 py-12 text-center text-muted-foreground">Loading…</div>
     );
   }
-  const a = faqs.find((f) => f.id === id || (f as any).source_id === id);
+  const a = faqs.find((f) => f.id === id || f.source_id === id);
   if (!a) throw notFound();
   const related = faqs.filter((f) => f.category === a.category && f.id !== a.id).slice(0, 4);
 

@@ -13,7 +13,6 @@ import {
   useState,
   type Context,
   type Dispatch,
-  type ReactNode,
   type SetStateAction,
 } from "react";
 import {
@@ -40,7 +39,7 @@ function load(): AdminState {
 
 // ============ CONTEXT ============
 
-interface AdminCtx {
+export interface AdminCtx {
   state: AdminState;
   setState: Dispatch<SetStateAction<AdminState>>;
   audit: (entry: Omit<AuditEntry, "id" | "at" | "user">) => void;
@@ -54,9 +53,10 @@ interface AdminCtx {
 // read while the mounted provider still uses the old one — which surfaced as
 // "useAdmin must be used inside AdminStoreProvider" with a blank screen.
 const g = globalThis as unknown as { __adminStoreCtx?: Context<AdminCtx | null> };
-const Ctx = (g.__adminStoreCtx ??= createContext<AdminCtx | null>(null));
+export const AdminStoreContext = (g.__adminStoreCtx ??= createContext<AdminCtx | null>(null));
 
-export function AdminStoreProvider({ children }: { children: ReactNode }) {
+/** All of the admin store's state and actions; rendered by <AdminStoreProvider>. */
+export function useAdminStoreState(): AdminCtx {
   const [state, setState] = useState<AdminState>(() => defaultAdminState());
   const [hydrated, setHydrated] = useState(false);
 
@@ -101,16 +101,14 @@ export function AdminStoreProvider({ children }: { children: ReactNode }) {
     [state.apiManaged],
   );
 
-  const value = useMemo<AdminCtx>(
+  return useMemo<AdminCtx>(
     () => ({ state, setState, audit, resetSection, resetAll, isApiManaged }),
     [state, audit, resetSection, resetAll, isApiManaged],
   );
-
-  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
 export function useAdmin() {
-  const c = useContext(Ctx);
+  const c = useContext(AdminStoreContext);
   if (!c) throw new Error("useAdmin must be used inside AdminStoreProvider");
   return c;
 }

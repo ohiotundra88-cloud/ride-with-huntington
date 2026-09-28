@@ -548,7 +548,7 @@ function FileControls({ post, onChanged }: { post: CaptainPost; onChanged: () =>
         reader.readAsDataURL(file);
       });
       return uploadLoungeFile({
-        data: { id: post.id, fileName: file.name, contentType: file.type as any, base64 },
+        data: { id: post.id, fileName: file.name, contentType: file.type, base64 },
       });
     },
     onSuccess: () => {

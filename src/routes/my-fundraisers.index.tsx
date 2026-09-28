@@ -283,13 +283,13 @@ function NewFundraiserDialog() {
           items: [],
         },
       }),
-    onSuccess: (res: any) => {
+    onSuccess: (res) => {
       toast.success("Draft created");
       qc.invalidateQueries({ queryKey: ["my-fundraisers"] });
       setOpen(false);
       navigate({ to: "/my-fundraisers/$id", params: { id: res.id } });
     },
-    onError: (e: any) => toast.error(e?.message ?? "Couldn't create that page."),
+    onError: (e) => toast.error(e.message || "Couldn't create that page."),
   });
 
   return (

@@ -21,7 +21,7 @@ export const listPublicEvents = createServerFn({ method: "GET" }).handler(
       .eq("published", true)
       .order("event_date", { ascending: true });
     if (error) throw new Error(error.message);
-    return (data ?? []).map((e: any) => ({
+    return (data ?? []).map((e) => ({
       ...e,
       contact_email: null,
       contact_phone: null,

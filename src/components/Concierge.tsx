@@ -11,20 +11,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAdmin } from "@/lib/admin-store";
-import { type ConciergeIntent } from "@/lib/admin-content";
+import { CONCIERGE_OPEN_EVENT, matchIntent } from "@/lib/concierge";
 
 interface ChatMsg {
   id: string;
   role: "user" | "assistant";
   text: string;
   links?: { label: string; href: string }[];
-}
-
-export function matchIntent(input: string, intents: ConciergeIntent[]): ConciergeIntent | null {
-  const q = input.toLowerCase();
-  const active = intents.filter((i) => i.active).sort((a, b) => a.order - b.order);
-  for (const r of active) if (r.keywords.some((k) => q.includes(k.toLowerCase()))) return r;
-  return null;
 }
 
 export function Concierge({
@@ -174,8 +167,8 @@ export function ConciergeLauncher() {
   const [open, setOpen] = useState(false);
   useEffect(() => {
     const handler = () => setOpen(true);
-    window.addEventListener("open-concierge", handler);
-    return () => window.removeEventListener("open-concierge", handler);
+    window.addEventListener(CONCIERGE_OPEN_EVENT, handler);
+    return () => window.removeEventListener(CONCIERGE_OPEN_EVENT, handler);
   }, []);
   if (!state.flags.concierge) return null;
   return (
@@ -192,8 +185,4 @@ export function ConciergeLauncher() {
       <Concierge open={open} onOpenChange={setOpen} />
     </>
   );
-}
-
-export function openConcierge() {
-  if (typeof window !== "undefined") window.dispatchEvent(new Event("open-concierge"));
 }

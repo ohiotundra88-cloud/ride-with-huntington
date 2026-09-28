@@ -154,7 +154,7 @@ export function AdminShell({
   title: string;
   description?: string;
   actions?: React.ReactNode;
-  /** The page edits content kept in this browser only (src/lib/admin-store.tsx). */
+  /** The page edits content kept in this browser only (src/lib/admin-store.ts). */
   browserOnly?: boolean;
   children: React.ReactNode;
 }) {

@@ -11,10 +11,11 @@ import {
   type ApprovalEntry,
   type FundraiserRequest,
 } from "@/lib/fundraiser-requests.shared";
+import type { AuthContext } from "@/integrations/supabase/auth-middleware";
 
 const idSchema = z.object({ id: z.string().uuid() });
 
-async function myRoles(context: { supabase: any; userId: string }): Promise<string[]> {
+async function myRoles(context: Pick<AuthContext, "supabase" | "userId">): Promise<string[]> {
   const { data, error } = await context.supabase
     .from("user_roles")
     .select("role")
@@ -201,9 +202,7 @@ async function notifyAssignedCaptain(request: FundraiserRequest, reassigned: boo
 /** Admins and super users can move a request to a different captain. */
 export const reassignRequestCaptain = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d) =>
-    z.object({ id: z.string().uuid(), captain_id: z.string().uuid() }).parse(d),
-  )
+  .validator((d) => z.object({ id: z.string().uuid(), captain_id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { assertAdminOrSuperUser } = await import("@/lib/roles-admin.server");
     await assertAdminOrSuperUser(context);

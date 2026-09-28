@@ -11,7 +11,7 @@ import {
   Section,
   Text,
 } from "@react-email/components";
-import type { TemplateEntry } from "./registry";
+import { defineTemplate, type TemplateData } from "./define-template";
 import { brandMark, button, container, footer, h1, header, main, text } from "./brand";
 
 interface Props {
@@ -99,9 +99,9 @@ const AnnouncementEmail = ({
   );
 };
 
-export const template = {
+export const template = defineTemplate({
   component: AnnouncementEmail,
-  subject: (data: Record<string, any>) =>
+  subject: (data: TemplateData) =>
     String(data?.["title"] ?? "").trim() || "A new Team Huntington update",
   displayName: "Team announcement",
   previewData: {
@@ -113,4 +113,4 @@ export const template = {
     priority: "important",
     fromEmail: "captain@huntington.com",
   },
-} satisfies TemplateEntry;
+});

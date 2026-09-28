@@ -34,7 +34,8 @@ import {
 } from "@/components/ui/select";
 import { useAdmin } from "@/lib/admin-store";
 import { type FamilySection, type PublishState } from "@/lib/admin-content";
-import { AdminIcon, iconOptions } from "@/components/AdminIcon";
+import { AdminIcon } from "@/components/AdminIcon";
+import { iconOptions } from "@/components/admin-icons";
 import { Plus, Pencil, Trash2, ArrowUp, ArrowDown, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 

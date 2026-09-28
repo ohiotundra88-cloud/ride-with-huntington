@@ -14,7 +14,8 @@ import {
   Trash2,
   Upload,
 } from "lucide-react";
-import { VendorGate, useVendorAccess } from "@/components/VendorGate";
+import { VendorGate } from "@/components/VendorGate";
+import { useVendorAccess } from "@/lib/useVendorAccess";
 
 import { VendorForm } from "@/components/VendorForm";
 import { VendorRiderSlots } from "@/components/VendorRiderSlots";
@@ -510,7 +511,7 @@ function ActivityCard({
   });
 
   const add = useMutation({
-    mutationFn: () => logVendorActivity({ data: { vendor_id: vendorId, ...form } as any }),
+    mutationFn: () => logVendorActivity({ data: { vendor_id: vendorId, ...form } }),
     onSuccess: () => {
       toast.success("Touchpoint logged");
       setForm((f) => ({ ...f, interaction_notes: "", next_step: "" }));
@@ -680,7 +681,7 @@ function AttachmentsCard({
         data: {
           vendor_id: vendor.id,
           fileName: file.name,
-          contentType: file.type as any,
+          contentType: file.type,
           base64: btoa(binary),
         },
       });

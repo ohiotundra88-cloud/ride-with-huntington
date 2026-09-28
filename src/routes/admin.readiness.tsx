@@ -35,7 +35,7 @@ import {
 } from "@/components/ui/select";
 import { useAdmin } from "@/lib/admin-store";
 import { readinessScore, type EditableReadinessItem, type Audience } from "@/lib/admin-content";
-import { iconOptions } from "@/components/AdminIcon";
+import { iconOptions } from "@/components/admin-icons";
 import { Plus, Pencil, Trash2, RotateCcw, Scale } from "lucide-react";
 import { toast } from "sonner";
 

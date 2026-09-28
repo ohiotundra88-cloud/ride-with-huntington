@@ -10,7 +10,7 @@ import {
   Section,
   Text,
 } from "@react-email/components";
-import type { TemplateEntry } from "./registry";
+import { defineTemplate, type TemplateData } from "./define-template";
 import { brandMark, container, footer, h1, header, main, text } from "./brand";
 
 interface Props {
@@ -57,9 +57,9 @@ const EventCancelledEmail = ({ eventTitle, whenWhere, recipientName, organizerNa
   );
 };
 
-export const template = {
+export const template = defineTemplate({
   component: EventCancelledEmail,
-  subject: (data: Record<string, any>) =>
+  subject: (data: TemplateData) =>
     `Cancelled: ${String(data?.["eventTitle"] ?? "").trim() || "a Team Huntington event"}`,
   displayName: "Event cancelled",
   previewData: {
@@ -68,4 +68,4 @@ export const template = {
     recipientName: "Jordan",
     organizerName: "Chris Kemper",
   },
-} satisfies TemplateEntry;
+});

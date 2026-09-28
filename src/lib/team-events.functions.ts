@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { emptyAudience, type MessagingAccess } from "@/lib/messages.shared";
+import { emptyAudience, normalizeAudience, type MessagingAccess } from "@/lib/messages.shared";
 import {
   accessFromRoles,
   assertAudienceAllowed,
@@ -16,6 +16,7 @@ import {
   type TeamEventInviteeRow,
   type TeamEventSummary,
 } from "@/lib/team-events.shared";
+import type { Db } from "@/server/backend.server";
 
 const idInput = z.object({ id: z.string().uuid() });
 
@@ -26,7 +27,7 @@ export const getTeamEventAccess = createServerFn({ method: "GET" })
     accessFromRoles(await loadRoles(context.supabase, context.userId)),
   );
 
-async function requireOrganizer(supabase: any, userId: string): Promise<MessagingAccess> {
+async function requireOrganizer(supabase: Db, userId: string): Promise<MessagingAccess> {
   const access = accessFromRoles(await loadRoles(supabase, userId));
   if (!access.allowed) {
     throw new Error("Forbidden — captain, co-chair, admin or super user access required.");
@@ -60,7 +61,7 @@ export const listManageableTeamEvents = createServerFn({ method: "GET" })
       tallies.set(row.event_id, t);
     }
 
-    return (data ?? []).map((row: any) => mapTeamEventRow(row, tallies.get(String(row.id))));
+    return (data ?? []).map((row) => mapTeamEventRow(row, tallies.get(row.id)));
   });
 
 /** Creates or updates a team event. Audience changes take effect on publish. */
@@ -90,14 +91,12 @@ export const saveTeamEvent = createServerFn({ method: "POST" })
         .update(payload)
         .eq("id", data.id);
       if (error) throw new Error(error.message);
-      await context.supabase
-        .from("team_event_audit")
-        .insert({
-          event_id: data.id,
-          action: "updated",
-          actor_id: context.userId,
-          actor_email: email,
-        });
+      await context.supabase.from("team_event_audit").insert({
+        event_id: data.id,
+        action: "updated",
+        actor_id: context.userId,
+        actor_email: email,
+      });
       return { id: data.id };
     }
 
@@ -107,14 +106,12 @@ export const saveTeamEvent = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (error) throw new Error(error.message);
-    await context.supabase
-      .from("team_event_audit")
-      .insert({
-        event_id: created.id,
-        action: "created",
-        actor_id: context.userId,
-        actor_email: email,
-      });
+    await context.supabase.from("team_event_audit").insert({
+      event_id: created.id,
+      action: "created",
+      actor_id: context.userId,
+      actor_email: email,
+    });
     return { id: String(created.id) };
   });
 
@@ -138,7 +135,7 @@ export const publishTeamEvent = createServerFn({ method: "POST" })
     if (!row) throw new Error("Event not found.");
     if (row.status === "cancelled") throw new Error("This event was cancelled.");
 
-    assertAudienceAllowed(access, ((row.audience as any)?.roles ?? []) as string[]);
+    assertAudienceAllowed(access, normalizeAudience(row.audience).roles);
 
     const people = resolveAudience(await buildAudienceRoster(), row.audience as never);
     if (!people.length) throw new Error("That audience has no one in it right now.");
@@ -305,7 +302,7 @@ export const listTeamEventInvitees = createServerFn({ method: "POST" })
       .eq("event_id", data.id)
       .order("name");
     if (error) throw new Error(error.message);
-    return (rows ?? []).map((r: any) => ({
+    return (rows ?? []).map((r) => ({
       userId: String(r.user_id),
       name: String(r.name ?? ""),
       email: String(r.email ?? ""),
@@ -327,7 +324,7 @@ export const listMyTeamEvents = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
 
     return (data ?? [])
-      .map((row: any) => {
+      .map((row) => {
         const e = row.team_events;
         return {
           id: String(e.id),

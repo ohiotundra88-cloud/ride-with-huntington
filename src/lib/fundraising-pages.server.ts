@@ -18,13 +18,18 @@ import {
   type FundraiserRecord,
   type FundraiserYearRow,
   type FundraiserStatus,
+  asFundraiserKind,
+  asFundraiserStatus,
   type PayoutInput,
   type PublicFundraiser,
   type PublicSupporter,
 } from "@/lib/fundraising-pages.shared";
 import { activeProvider } from "@/lib/payments/demo.server";
+import type { AuthContext } from "@/integrations/supabase/auth-middleware";
+import type { Db } from "@/server/backend.server";
+import type { Json, Tables, TablesUpdate } from "@/integrations/supabase/types";
 
-export type Ctx = { supabase: any; userId: string; claims?: Record<string, any> };
+export type Ctx = AuthContext;
 
 const LEADERSHIP = [
   "admin",
@@ -38,17 +43,17 @@ const LEADERSHIP = [
 ];
 const PAYOUT_ROLES = ["cochair", "superuser", "admin"];
 
-const actorEmail = (ctx: Ctx) => (ctx.claims?.email as string | undefined) ?? null;
+const actorEmail = (ctx: Ctx) => ctx.claims?.email ?? null;
 
-async function admin() {
+async function admin(): Promise<Db> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  return supabaseAdmin as any;
+  return supabaseAdmin;
 }
 
 /** Anonymous client for public reads (RLS applies as anon). */
 async function publicClient() {
   const { createDbClient } = await import("@/server/backend.server");
-  return createDbClient("anon") as any;
+  return createDbClient("anon");
 }
 
 // ------------------------------------------------------------------ access
@@ -87,7 +92,7 @@ async function audit(
   fundraiserId: string,
   action: string,
   ctx: Ctx | null,
-  details: Record<string, unknown> = {},
+  details: { [key: string]: Json | undefined } = {},
 ) {
   const db = await admin();
   await db.from("fundraiser_audit").insert({
@@ -111,7 +116,7 @@ async function uniqueSlug(base: string, ignoreId?: string) {
   return `${root}-${Date.now()}`;
 }
 
-async function ordersFor(db: any, fundraiserId: string) {
+async function ordersFor(db: Db, fundraiserId: string) {
   const { data } = await db
     .from("fundraiser_orders")
     .select(
@@ -159,7 +164,7 @@ export async function listPublic(): Promise<FundraiserListRow[]> {
   return rows.map((r) => ({
     ...r,
     totals: totalsFromOrders(
-      ((orders ?? []) as any[]).filter((o) => o.fundraiser_id === r.id),
+      (orders ?? []).filter((o) => o.fundraiser_id === r.id),
       Number(r.goal_amount),
     ),
     paid_out_amount: 0,
@@ -203,7 +208,7 @@ export async function getPublic(slug: string): Promise<PublicFundraiser> {
     fundraiser: {
       id: f.id,
       slug: f.slug,
-      kind: f.kind,
+      kind: asFundraiserKind(f.kind),
       title: f.title,
       summary: f.summary,
       story: f.story,
@@ -213,7 +218,7 @@ export async function getPublic(slug: string): Promise<PublicFundraiser> {
       goal_amount: Number(f.goal_amount),
       closes_at: f.closes_at,
       draw_at: f.draw_at,
-      status: f.status,
+      status: asFundraiserStatus(f.status),
       is_demo: f.is_demo,
       allow_custom_amount: f.allow_custom_amount,
       min_custom_amount: Number(f.min_custom_amount),
@@ -343,7 +348,7 @@ export async function settleOrder(orderId: string) {
     .eq("id", order.fundraiser_id)
     .maybeSingle();
 
-  let item: any = null;
+  let item: Tables<"fundraiser_items"> | null = null;
   if (order.item_id) {
     const { data: it } = await db
       .from("fundraiser_items")
@@ -432,7 +437,7 @@ export async function getReceipt(orderId: string) {
       .select("entry_number")
       .eq("order_id", order.id)
       .order("entry_number", { ascending: true });
-    entryNumbers = ((entries ?? []) as any[]).map((e) => Number(e.entry_number)).filter(Boolean);
+    entryNumbers = (entries ?? []).map((e) => Number(e.entry_number)).filter(Boolean);
   }
   return {
     order: {
@@ -475,11 +480,11 @@ export async function listMine(ctx: Ctx, all: boolean): Promise<FundraiserListRo
     ...r,
     goal_amount: Number(r.goal_amount),
     totals: totalsFromOrders(
-      ((orders ?? []) as any[]).filter((o) => o.fundraiser_id === r.id),
+      (orders ?? []).filter((o) => o.fundraiser_id === r.id),
       Number(r.goal_amount),
     ),
     paid_out_amount: round2(
-      ((payouts ?? []) as any[])
+      (payouts ?? [])
         .filter((p) => p.fundraiser_id === r.id)
         .reduce((s, p) => s + Number(p.net_amount), 0),
     ),
@@ -523,7 +528,7 @@ export async function getDetail(ctx: Ctx, id: string): Promise<FundraiserDetail>
 
   return {
     fundraiser: { ...record, goal_amount: Number(record.goal_amount) },
-    items: ((items ?? []) as any[]).map((i) => ({
+    items: (items ?? []).map((i) => ({
       ...i,
       unit_price: Number(i.unit_price),
     })) as FundraiserItem[],
@@ -595,9 +600,7 @@ export async function saveFundraiser(ctx: Ctx, input: FundraiserInput) {
   // Items: upsert the submitted set, remove the ones dropped from the form.
   const { data: existing } = await db.from("fundraiser_items").select("id").eq("fundraiser_id", id);
   const keep = new Set(input.items.map((i) => i.id).filter(Boolean) as string[]);
-  const remove = ((existing ?? []) as any[])
-    .map((e) => e.id)
-    .filter((eid: string) => !keep.has(eid));
+  const remove = (existing ?? []).map((e) => e.id).filter((eid) => !keep.has(eid));
   if (remove.length > 0) await db.from("fundraiser_items").delete().in("id", remove);
 
   for (const [idx, item] of input.items.entries()) {
@@ -683,16 +686,16 @@ export async function setStatus(ctx: Ctx, id: string, status: FundraiserStatus) 
       "compliance_status",
       "marketing_status",
       "cochair_status",
-    ];
+    ] as const;
     // "not_required" (e.g. Marketing when no logos are used) counts as cleared.
-    if (!state || stages.some((s) => !["approved", "not_required"].includes((state as any)[s]))) {
+    if (!state || stages.some((s) => !["approved", "not_required"].includes(state[s]))) {
       throw new Error("Every approval stage must be approved before this page can go live.");
     }
   }
   if (status === "paid_out" && !access.canPayout)
     throw new Error("Only co-chairs and super users can close out payouts.");
 
-  const patch: Record<string, unknown> = { status };
+  const patch: TablesUpdate<"fundraisers"> = { status };
   if (status === "live") patch.published_at = new Date().toISOString();
   if (status === "closed") patch.closed_at = new Date().toISOString();
 
@@ -748,9 +751,7 @@ export async function yearlySummary(ctx: Ctx): Promise<FundraiserYearRow[]> {
       ),
   ]);
 
-  const titles = new Map<string, string>(
-    ((fundraisers ?? []) as any[]).map((f) => [f.id, f.title as string]),
-  );
+  const titles = new Map<string, string>((fundraisers ?? []).map((f) => [f.id, f.title]));
   const buckets = new Map<
     string,
     {
@@ -763,7 +764,7 @@ export async function yearlySummary(ctx: Ctx): Promise<FundraiserYearRow[]> {
     }
   >();
 
-  for (const o of (orders ?? []) as any[]) {
+  for (const o of orders ?? []) {
     const stamp = o.paid_at ?? o.created_at;
     if (!stamp) continue;
     const year = String(new Date(stamp).getUTCFullYear());
@@ -874,7 +875,7 @@ export async function drawRaffleWinner(ctx: Ctx, id: string) {
     .select("id, entry_number, supporter_name, supporter_email")
     .eq("fundraiser_id", id)
     .eq("kind", "raffle_entry");
-  const pool = (entries ?? []) as any[];
+  const pool = entries ?? [];
   if (pool.length === 0) throw new Error("There are no entries to draw from yet.");
   const winner = pool[Math.floor(Math.random() * pool.length)];
   await db.from("fundraiser_entries").update({ is_winner: false }).eq("fundraiser_id", id);
@@ -916,7 +917,7 @@ export async function setFlier(
     .eq("id", input.id);
   if (error) throw new Error(error.message);
 
-  const previous = (record as any).flier_path as string | null;
+  const previous = record.flier_path;
   if (previous && previous !== path) await db.storage.from(FLIER_BUCKET).remove([previous]);
   await audit(input.id, "flier_uploaded", ctx, { file_name: input.fileName });
   return { ok: true, flier_path: path, flier_name: input.fileName };
@@ -930,9 +931,9 @@ export async function clearFlier(ctx: Ctx, id: string) {
     .update({ flier_path: null, flier_name: null, flier_content_type: null })
     .eq("id", id);
   if (error) throw new Error(error.message);
-  const previous = (record as any).flier_path as string | null;
+  const previous = record.flier_path;
   if (previous) await db.storage.from(FLIER_BUCKET).remove([previous]);
-  await audit(id, "flier_removed", ctx, { file_name: (record as any).flier_name ?? null });
+  await audit(id, "flier_removed", ctx, { file_name: record.flier_name ?? null });
   return { ok: true };
 }
 
@@ -965,7 +966,7 @@ export async function deleteFundraiser(ctx: Ctx, id: string) {
       "This fundraiser has payment records, so it can't be deleted. Close or cancel it, then hide it from public view.",
     );
   }
-  const flier = (record as any).flier_path as string | null;
+  const flier = record.flier_path;
   const { error } = await db.from("fundraisers").delete().eq("id", id);
   if (error) throw new Error(error.message);
   if (flier) await db.storage.from(FLIER_BUCKET).remove([flier]);

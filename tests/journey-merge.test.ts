@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import type { Registration } from "../src/lib/store.tsx";
+import type { Registration } from "../src/lib/store.ts";
 import { defaultAdminState } from "../src/lib/admin-content.ts";
 import {
   formatDeadline,

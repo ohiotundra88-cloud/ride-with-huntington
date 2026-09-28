@@ -24,7 +24,7 @@ import {
   Check,
   RotateCcw,
 } from "lucide-react";
-import { openConcierge } from "@/components/Concierge";
+import { openConcierge } from "@/lib/concierge";
 import { RIDE_WEEKEND_DATE, timelineSections } from "@/lib/ride-weekend";
 import { mergeTimelineWithRegistration } from "@/lib/journey-merge";
 import { useAdmin } from "@/lib/admin-store";

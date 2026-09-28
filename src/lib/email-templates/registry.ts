@@ -1,4 +1,4 @@
-import type { ComponentType } from "react";
+import type { TemplateEntry } from "./define-template";
 import { template as teamAnnouncementTemplate } from "./team-announcement";
 import { template as eventInvitationTemplate } from "./event-invitation";
 import { template as eventCancelledTemplate } from "./event-cancelled";
@@ -6,14 +6,7 @@ import { template as fundraiserDecisionTemplate } from "./fundraiser-decision";
 import { template as fundraiserRequestAssignedTemplate } from "./fundraiser-request-assigned";
 import { template as fundraiserReviewNeededTemplate } from "./fundraiser-review-needed";
 
-export interface TemplateEntry {
-  component: ComponentType<any>;
-  subject: string | ((data: Record<string, any>) => string);
-  displayName?: string;
-  previewData?: Record<string, any>;
-  /** Fixed recipient — overrides caller-provided recipientEmail when set. */
-  to?: string;
-}
+export type { TemplateEntry, TemplateData } from "./define-template";
 
 /**
  * Template registry — maps template names to their React Email components.

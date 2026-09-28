@@ -1,4 +1,9 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
+import {
+  RegisterContentCtx,
+  useRegisterContent,
+  type EditCtx,
+} from "@/lib/register-content-context";
 import { ArrowDown, ArrowUp, Eye, EyeOff, Plus, Settings2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,14 +17,6 @@ import {
   type RegisterOption,
 } from "@/lib/register-content.shared";
 
-interface EditCtx {
-  content: RegisterContent;
-  editing: boolean;
-  setContent: (next: RegisterContent) => void;
-}
-
-const Ctx = createContext<EditCtx | null>(null);
-
 export function RegisterContentProvider({
   content,
   editing,
@@ -27,44 +24,7 @@ export function RegisterContentProvider({
   children,
 }: EditCtx & { children: ReactNode }) {
   const value = useMemo(() => ({ content, editing, setContent }), [content, editing, setContent]);
-  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
-}
-
-export function useRegisterContent() {
-  const c = useContext(Ctx);
-  if (!c) throw new Error("useRegisterContent must be used inside RegisterContentProvider");
-  const { content, editing, setContent } = c;
-
-  const t = (key: string) => content.text[key] ?? DEFAULT_REGISTER_CONTENT.text[key] ?? "";
-  const field = (key: string) =>
-    content.fields[key] ??
-    DEFAULT_REGISTER_CONTENT.fields[key] ?? { label: key, visible: true, required: false };
-  const list = (key: string) => content.lists[key] ?? DEFAULT_REGISTER_CONTENT.lists[key] ?? [];
-  const link = (key: string) =>
-    content.links[key] ?? DEFAULT_REGISTER_CONTENT.links[key] ?? { label: key, url: "about:blank" };
-
-  const setText = (key: string, next: string) =>
-    setContent({ ...content, text: { ...content.text, [key]: next } });
-  const setField = (key: string, patch: Partial<RegisterContent["fields"][string]>) =>
-    setContent({ ...content, fields: { ...content.fields, [key]: { ...field(key), ...patch } } });
-  const setList = (key: string, next: RegisterOption[]) =>
-    setContent({ ...content, lists: { ...content.lists, [key]: next } });
-  const setLink = (key: string, patch: Partial<RegisterContent["links"][string]>) =>
-    setContent({ ...content, links: { ...content.links, [key]: { ...link(key), ...patch } } });
-
-  return {
-    content,
-    editing,
-    setContent,
-    t,
-    field,
-    list,
-    link,
-    setText,
-    setField,
-    setList,
-    setLink,
-  };
+  return <RegisterContentCtx.Provider value={value}>{children}</RegisterContentCtx.Provider>;
 }
 
 /** Editable piece of copy. Renders plain text for everyone else. */

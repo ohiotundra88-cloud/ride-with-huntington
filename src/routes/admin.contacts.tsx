@@ -89,7 +89,7 @@ function ContactsAdmin() {
       setEditingId(null);
       invalidate();
     },
-    onError: (e: any) => toast.error(e?.message ?? "Couldn't save that contact."),
+    onError: (e) => toast.error(e.message || "Couldn't save that contact."),
   });
 
   const remove = useMutation({
@@ -98,7 +98,7 @@ function ContactsAdmin() {
       toast.success("Deleted");
       invalidate();
     },
-    onError: (e: any) => toast.error(e?.message ?? "Couldn't delete that contact."),
+    onError: (e) => toast.error(e.message || "Couldn't delete that contact."),
   });
 
   const startEdit = (c: DirectoryContact) => {

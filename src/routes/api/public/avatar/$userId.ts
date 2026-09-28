@@ -12,7 +12,7 @@ export const Route = createFileRoute("/api/public/avatar/$userId")({
         if (!UUID.test(userId)) return new Response("Not found", { status: 404 });
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { data: row, error } = await (supabaseAdmin as any)
+        const { data: row, error } = await supabaseAdmin
           .from("profiles")
           .select("avatar_path, avatar_content_type")
           .eq("id", userId)
