@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { containsPattern } from "@/lib/email-match";
 
 export interface AuthEmailLogEntry {
   id: string;
@@ -41,7 +42,7 @@ export const listAuthEmailLog = createServerFn({ method: "POST" })
       .order("sent_at", { ascending: false })
       .limit(data.limit);
 
-    if (data.email) query = query.ilike("email", `%${data.email.toLowerCase()}%`);
+    if (data.email) query = query.ilike("email", containsPattern(data.email));
 
     const { data: rows, error } = await query;
     if (error) throw new Error(error.message);

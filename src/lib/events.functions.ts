@@ -117,6 +117,13 @@ export const deleteEvent = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+const FLIER_EXTENSIONS: Record<string, string> = {
+  "image/png": "png",
+  "image/jpeg": "jpg",
+  "image/webp": "webp",
+  "application/pdf": "pdf",
+};
+
 /** Upload (or replace) the flier attachment on an event the caller can edit. */
 export const uploadEventFlier = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -133,7 +140,8 @@ export const uploadEventFlier = createServerFn({ method: "POST" })
     const bytes = Buffer.from(data.base64, "base64");
     if (bytes.byteLength > MAX_FLIER_BYTES) throw new Error("Flier must be 5 MB or smaller.");
 
-    const ext = data.fileName.includes(".") ? data.fileName.split(".").pop()!.toLowerCase() : "bin";
+    // Extension comes from the validated content type, never the uploaded file name.
+    const ext = FLIER_EXTENSIONS[data.contentType];
     const path = `${data.id}/flier-${Date.now()}.${ext}`;
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -142,11 +150,17 @@ export const uploadEventFlier = createServerFn({ method: "POST" })
       .upload(path, bytes, { contentType: data.contentType, upsert: true });
     if (upErr) throw new Error(upErr.message);
 
-    const { error: updErr } = await context.supabase
+    // RLS silently matches zero rows when the caller can't edit this event, so
+    // check that the update landed before touching the existing file.
+    const { data: updated, error: updErr } = await context.supabase
       .from("events")
       .update({ flier_path: path, flier_name: data.fileName })
-      .eq("id", data.id);
-    if (updErr) throw new Error(updErr.message);
+      .eq("id", data.id)
+      .select("id");
+    if (updErr || !updated?.length) {
+      await supabaseAdmin.storage.from("event-fliers").remove([path]);
+      throw new Error(updErr?.message ?? "You can't edit this event.");
+    }
 
     if (row.flier_path) await supabaseAdmin.storage.from("event-fliers").remove([row.flier_path]);
     return { ok: true, flier_path: path };
@@ -163,11 +177,13 @@ export const removeEventFlier = createServerFn({ method: "POST" })
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!row) throw new Error("Event not found");
-    const { error: updErr } = await context.supabase
+    const { data: updated, error: updErr } = await context.supabase
       .from("events")
       .update({ flier_path: null, flier_name: null })
-      .eq("id", data.id);
+      .eq("id", data.id)
+      .select("id");
     if (updErr) throw new Error(updErr.message);
+    if (!updated?.length) throw new Error("You can't edit this event.");
     if (row.flier_path) {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       await supabaseAdmin.storage.from("event-fliers").remove([row.flier_path]);

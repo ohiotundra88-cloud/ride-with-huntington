@@ -1,3 +1,5 @@
+import { exactEmail } from "@/lib/email-match";
+
 export interface RoleMemberRow {
   user_id: string;
   email: string;
@@ -64,7 +66,7 @@ export async function grantRole(context: Ctx, email: string, role: string) {
   const { data: profile, error } = await supabaseAdmin
     .from("profiles")
     .select("id, email, full_name")
-    .ilike("email", normalized)
+    .ilike("email", exactEmail(normalized))
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!profile) {

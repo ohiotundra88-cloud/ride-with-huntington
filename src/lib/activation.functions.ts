@@ -3,6 +3,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
 import { isHuntingtonEmail, requireConfirmedHuntingtonUser } from "@/lib/huntington-email";
+import { exactEmail } from "@/lib/email-match";
 
 const MAX_FAILURES = 6;
 const LOCK_MINUTES = 15;
@@ -68,7 +69,7 @@ export const startSignIn = createServerFn({ method: "POST" })
     const { data: row, error } = await supabaseAdmin
       .from("profiles")
       .select("activated_at, password_set_at")
-      .ilike("email", email)
+      .ilike("email", exactEmail(email))
       .maybeSingle();
     if (error) throw new Error(error.message);
 
@@ -103,11 +104,18 @@ export const noteSignInFailure = createServerFn({ method: "POST" })
     return { locked, remaining: Math.max(0, MAX_FAILURES - failures) };
   });
 
-/** Clears the failure counter after a successful sign-in. */
+/**
+ * Clears the failure counter after a successful sign-in. Requires the new
+ * session and only ever clears the caller's own address, so it can't be used
+ * to reset someone else's lockout.
+ */
 export const clearSignInFailures = createServerFn({ method: "POST" })
-  .inputValidator((data) => z.object({ email: z.string().email() }).parse(data))
-  .handler(async ({ data }) => {
-    const email = normalizeEmail(data.email);
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) => z.object({ email: z.string().email().optional() }).parse(data ?? {}))
+  .handler(async ({ context }) => {
+    const claimed = String((context.claims as { email?: string } | undefined)?.email ?? "");
+    if (!claimed) return { ok: true as const };
+    const email = normalizeEmail(claimed);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin.from("signin_attempts").delete().eq("email_key", email);
     return { ok: true as const };
@@ -128,7 +136,7 @@ export const startLegacyPasswordReset = createServerFn({ method: "POST" })
     const { data: row } = await supabaseAdmin
       .from("profiles")
       .select("id, password_set_at")
-      .ilike("email", email)
+      .ilike("email", exactEmail(email))
       .maybeSingle();
     if (!row || row.password_set_at) return { ok: true as const };
 
@@ -151,7 +159,7 @@ export const checkActivation = createServerFn({ method: "POST" })
     const { data: row, error } = await supabaseAdmin
       .from("profiles")
       .select("activated_at, password_set_at")
-      .ilike("email", email)
+      .ilike("email", exactEmail(email))
       .maybeSingle();
     if (error) throw new Error(error.message);
 

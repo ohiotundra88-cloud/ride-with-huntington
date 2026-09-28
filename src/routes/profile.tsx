@@ -52,7 +52,6 @@ function ProfilePage() {
   const save = async () => {
     const e: Record<string, string> = {};
     if (!form.name) e.name = "Required";
-    if (!/.+@.+\..+/.test(form.email)) e.email = "Valid email required";
     if (!form.consent) e.consent = "Please confirm the privacy notice";
     setErrors(e);
     if (Object.keys(e).length) return;
@@ -89,8 +88,8 @@ function ProfilePage() {
           </div>
           <div className="space-y-2">
             <Label>Work email</Label>
-            <Input type="email" value={form.email} onChange={(e) => update({ email: e.target.value })} />
-            {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
+            <Input type="email" value={form.email} readOnly aria-readonly="true" className="bg-muted" />
+            <p className="text-xs text-muted-foreground">This is your sign-in address and can't be changed here.</p>
           </div>
           <div className="space-y-2">
             <Label>Mobile number</Label>

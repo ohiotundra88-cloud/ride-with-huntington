@@ -1,3 +1,4 @@
+import { safeFileHeaders, typeFromPath } from "@/lib/safe-file.server";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/api/public/event-flier/$id")({
@@ -22,22 +23,11 @@ export const Route = createFileRoute("/api/public/event-flier/$id")({
           .download(row.flier_path);
         if (dErr || !file) return new Response("Not found", { status: 404 });
 
-        const ext = row.flier_path.split(".").pop()?.toLowerCase();
-        const type =
-          ext === "pdf"
-            ? "application/pdf"
-            : ext === "png"
-              ? "image/png"
-              : ext === "webp"
-                ? "image/webp"
-                : "image/jpeg";
-
         return new Response(await file.arrayBuffer(), {
-          headers: {
-            "Content-Type": type,
-            "Cache-Control": "public, max-age=300",
-            "Content-Disposition": `inline; filename="${(row.flier_name ?? "flier").replace(/"/g, "")}"`,
-          },
+          headers: safeFileHeaders({
+            contentType: typeFromPath(row.flier_path) ?? "image/jpeg",
+            fileName: row.flier_name ?? "flier",
+          }),
         });
       },
     },

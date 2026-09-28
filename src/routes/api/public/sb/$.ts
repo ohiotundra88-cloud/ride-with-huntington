@@ -33,8 +33,13 @@ function upstreamBase(): string {
   return String(base).replace(/\/+$/, "");
 }
 
-// Only proxy the Supabase HTTP surfaces the browser client uses.
-const ALLOWED_PREFIXES = ["auth/", "rest/", "storage/", "functions/", "realtime/"];
+// Only proxy the Supabase HTTP surfaces the browser client uses. Storage,
+// functions and realtime are server-side only; proxying storage would serve
+// uploaded files from this origin with their stored content type.
+const ALLOWED_PREFIXES = ["auth/", "rest/"];
+
+// Client-supplied forwarding headers are never trusted.
+const SPOOFABLE = new Set(["x-forwarded-for", "x-real-ip", "forwarded", "x-client-ip"]);
 
 async function proxy({ request, params }: { request: Request; params: Record<string, string | undefined> }) {
   const splat = (params["_splat"] ?? "").replace(/^\/+/, "");
@@ -47,9 +52,14 @@ async function proxy({ request, params }: { request: Request; params: Record<str
 
   const headers = new Headers();
   request.headers.forEach((value, key) => {
-    if (!HOP_BY_HOP.has(key.toLowerCase())) headers.set(key, value);
+    const k = key.toLowerCase();
+    if (!HOP_BY_HOP.has(k) && !SPOOFABLE.has(k)) headers.set(key, value);
   });
   headers.set("accept-encoding", "identity");
+  // Pass the real client IP (set by Cloudflare, not the browser) so Supabase's
+  // per-IP auth rate limits apply per colleague rather than to this proxy.
+  const clientIp = request.headers.get("cf-connecting-ip");
+  if (clientIp) headers.set("x-forwarded-for", clientIp);
 
   const method = request.method.toUpperCase();
   const body = method === "GET" || method === "HEAD" ? undefined : await request.arrayBuffer();
@@ -74,6 +84,7 @@ async function proxy({ request, params }: { request: Request; params: Record<str
     if (!HOP_BY_HOP.has(key.toLowerCase())) outHeaders.set(key, value);
   });
   outHeaders.set("cache-control", "no-store");
+  outHeaders.set("x-content-type-options", "nosniff");
 
   return new Response(upstream.body, {
     status: upstream.status,

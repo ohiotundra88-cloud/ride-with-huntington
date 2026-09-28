@@ -68,20 +68,6 @@ export const getRiderProgressAccess = createServerFn({ method: "GET" })
   });
 
 const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : null);
-const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
-/** Pelotonia sends tags / registration types as JSON-encoded strings. */
-const jsonList = (v: unknown): string[] => {
-  if (Array.isArray(v)) return v.map((x) => String(x)).filter(Boolean);
-  const raw = typeof v === "string" ? v.trim() : "";
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.map((x) => String(x)).filter(Boolean) : [raw];
-  } catch {
-    return raw.split(/\s*[,;|]\s*/).filter(Boolean);
-  }
-};
-const flag = (v: unknown) => v === true || v === 1 || v === "1" || v === "true";
 
 /**
  * Roster-wide readiness snapshot (registration, travel/hotel, bike, apparel)
@@ -116,23 +102,11 @@ export const listRiderProgress = createServerFn({ method: "GET" })
       (profiles ?? []).map((p: { id: string; email: string | null; full_name: string | null; region?: string | null }) => [p.id, p] as const),
     );
 
-    // Live fundraising totals, keyed by Pelotonia public/rider ID.
-    const fundraising = new Map<string, Record<string, unknown>>();
-    try {
-      const res = await fetch(
-        "https://pelotonia-dashboard-401340053598.us-central1.run.app/api/members",
-        { headers: { Accept: "application/json" } },
-      );
-      if (res.ok) {
-        const members = (await res.json()) as Record<string, unknown>[];
-        for (const m of members) {
-          const id = String(m["public_id"] ?? "").trim().toLowerCase();
-          if (id) fundraising.set(id, m);
-        }
-      }
-    } catch {
-      // Fundraising is best-effort; readiness data still renders.
-    }
+    // Live fundraising totals from Pelotonia, keyed by public/rider ID.
+    const { fetchRiders, normalizePublicId } = await import("@/lib/pelotonia-api.server");
+    const fundraising = await fetchRiders(
+      rows.map((r: { pelotonia?: unknown }) => ((r.pelotonia ?? {}) as Record<string, unknown>)["confirmation"]),
+    );
 
     return rows.map((r): RiderProgressRow => {
       const p = (r.pelotonia ?? {}) as Record<string, unknown>;
@@ -141,7 +115,8 @@ export const listRiderProgress = createServerFn({ method: "GET" })
       const a = (r.apparel ?? {}) as Record<string, unknown>;
       const statuses = [p["status"], t["status"], b["status"], a["status"]];
       const riderId = str(p["confirmation"]);
-      const member = riderId ? fundraising.get(riderId.toLowerCase()) : undefined;
+      const riderKey = normalizePublicId(riderId);
+      const member = riderKey ? fundraising.get(riderKey) : undefined;
       const profile = people.get(r.user_id);
 
       return {
@@ -170,25 +145,29 @@ export const listRiderProgress = createServerFn({ method: "GET" })
         jerseyStyle: str(a["jerseyStyle"]),
         jerseySize: str(a["jerseySize"]),
         completion: Math.round((statuses.filter((s) => s === "complete").length / 4) * 100),
-        raised: member ? num(member["raised"]) : null,
-        goal: member ? num(member["fundraising_goal"]) || num(member["personal_goal"]) : null,
-        committed: member ? num(member["committed_amount"]) || num(member["commitment_amount"]) : null,
-        allTimeRaised: member ? num(member["all_time_raised"]) : null,
+        raised: member ? member.raised : null,
+        goal: member ? member.goal : null,
+        committed: member ? member.committed : null,
+        allTimeRaised: member ? member.allTimeRaised : null,
         updatedAt: r.updated_at,
         submittedAt: r.submitted_at,
-        pelotoniaName: member ? str(member["name"]) : null,
-        subPeloton: member ? str(member["team_name"]) : null,
-        rideRoute: member ? str(member["route_names"]) : null,
-        rideType: member ? str(member["ride_type"]) : null,
-        registrationTypes: member ? jsonList(member["registration_types"]) : [],
-        tags: member ? jsonList(member["tags"]) : [],
-        isCaptain: !!member && flag(member["is_captain"]),
-        isChallenger: !!member && flag(member["is_challenger"]),
-        isRiderOnPelotonia: !!member && flag(member["is_rider"]),
-        isVolunteerOnPelotonia: !!member && flag(member["is_volunteer"]),
-        isSurvivor: !!member && flag(member["is_cancer_survivor"]),
-        highRoller: !!member && flag(member["committed_high_roller"]),
-        personalGoal: member ? num(member["personal_goal"]) || null : null,
+        pelotoniaName: member ? member.name || null : null,
+        subPeloton: member?.subTeam ?? null,
+        rideRoute: member && member.routes.length ? member.routes.join(", ") : null,
+        rideType: member && member.rideTypes.length ? member.rideTypes.join(", ") : null,
+        registrationTypes: member
+          ? [member.isRider && "Rider", member.isChallenger && "Challenger", member.isVolunteer && "Volunteer"].filter(
+              (v): v is string => !!v,
+            )
+          : [],
+        tags: member?.tags ?? [],
+        isCaptain: !!member?.isCaptain,
+        isChallenger: !!member?.isChallenger,
+        isRiderOnPelotonia: !!member?.isRider,
+        isVolunteerOnPelotonia: !!member?.isVolunteer,
+        isSurvivor: !!member?.isSurvivor,
+        highRoller: !!member?.isHighRoller,
+        personalGoal: member ? member.goal || null : null,
       };
     });
   });

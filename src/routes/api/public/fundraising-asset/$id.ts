@@ -1,3 +1,4 @@
+import { safeFileHeaders, typeFromPath } from "@/lib/safe-file.server";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/api/public/fundraising-asset/$id")({
@@ -23,11 +24,10 @@ export const Route = createFileRoute("/api/public/fundraising-asset/$id")({
         if (dErr || !file) return new Response("Not found", { status: 404 });
 
         return new Response(await file.arrayBuffer(), {
-          headers: {
-            "Content-Type": row.content_type ?? "application/octet-stream",
-            "Cache-Control": "public, max-age=300",
-            "Content-Disposition": `inline; filename="${(row.file_name ?? "resource").replace(/"/g, "")}"`,
-          },
+          headers: safeFileHeaders({
+            contentType: row.content_type ?? typeFromPath(row.file_path),
+            fileName: row.file_name ?? "resource",
+          }),
         });
       },
     },

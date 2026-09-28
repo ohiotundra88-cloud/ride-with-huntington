@@ -1,100 +1,78 @@
 import { createServerFn } from "@tanstack/react-start";
 
-const DASHBOARD_BASE = "https://pelotonia-dashboard-401340053598.us-central1.run.app";
-
 export interface PelotoniaSubteam {
   name: string;
-  riders: number;
-  challengers: number;
-  volunteers: number;
   total: number;
   raised: number;
-  committed: number;
-  highRollers: number;
-  survivors: number;
+  /** Not published per sub-team by Pelotonia; kept for layout compatibility. */
+  riders: number | null;
+  challengers: number | null;
+  volunteers: number | null;
+  committed: number | null;
+  highRollers: number | null;
+  survivors: number | null;
 }
 
+/**
+ * Team Huntington totals. Fields Pelotonia's public data doesn't provide are
+ * null, and the pages hide them rather than show a wrong number.
+ */
 export interface PelotoniaTeamData {
   teamName: string;
   raised: number;
   goal: number;
   allTimeRaised: number;
-  kidsRaised: number;
+  kidsRaised: number | null;
   members: number;
-  riders: number;
-  challengers: number;
-  volunteers: number;
-  highRollers: number;
-  survivors: number;
-  donationsCount: number;
-  totalCommitted: number;
+  riders: number | null;
+  challengers: number | null;
+  volunteers: number | null;
+  highRollers: number | null;
+  survivors: number | null;
+  donationsCount: number | null;
+  totalCommitted: number | null;
   lastUpdated: string | null;
   subteams: PelotoniaSubteam[];
   recentDaily: { date: string; amount: number; count: number }[];
 }
 
 /**
- * Live Team Huntington fundraising figures from the Pelotonia dashboard.
- * Source data refreshes at 7 AM, 1 PM and 7 PM daily.
- * Fetched server-side so the browser stays same-origin (VPN friendly).
+ * Live Team Huntington fundraising figures, read server-side from Pelotonia's
+ * public data (so the browser stays same-origin and VPN friendly).
  */
 export const getPelotoniaTeamData = createServerFn({ method: "GET" }).handler(
   async (): Promise<PelotoniaTeamData | null> => {
-    try {
-      const res = await fetch(`${DASHBOARD_BASE}/api/bundle/core`, {
-        headers: { Accept: "application/json" },
-      });
-      if (!res.ok) return null;
-      const json = (await res.json()) as {
-        overview?: Record<string, number | string | null>;
-        teamBreakdown?: Record<string, number | string | null>[];
-        timeline?: { date: string; daily_amount: number; daily_count: number }[];
-      };
-      const o = json.overview;
-      if (!o) return null;
-      const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
-
-      const subteams: PelotoniaSubteam[] = (json.teamBreakdown ?? [])
-        .map((t) => ({
-          name: String(t["name"] ?? "").replace(/^Team Huntington Bank\s*-\s*/, ""),
-          riders: num(t["riders"]),
-          challengers: num(t["challengers"]),
-          volunteers: num(t["volunteers"]),
-          total: num(t["total"]),
-          raised: num(t["official_raised"]) || num(t["total_raised"]),
-          committed: num(t["total_committed"]),
-          highRollers: num(t["high_rollers"]),
-          survivors: num(t["survivors"]),
-        }))
-        .sort((a, b) => b.raised - a.raised);
-
-      const recentDaily = (json.timeline ?? [])
-        .slice(-7)
-        .reverse()
-        .map((d) => ({ date: d.date, amount: num(d.daily_amount), count: num(d.daily_count) }));
-
-      return {
-        teamName: String(o["team_name"] ?? "Team Huntington Bank"),
-        // Dashboard headline total includes Pelotonia Kids funds
-        raised: num(o["raised"]) + num(o["kids_raised"]),
-        goal: num(o["goal"]),
-        allTimeRaised: num(o["all_time_raised"]) + num(o["kids_raised"]),
-        kidsRaised: num(o["kids_raised"]),
-        members: num(o["members_count"]),
-        riders: num(o["riders"]),
-        challengers: num(o["challengers"]),
-        volunteers: num(o["volunteers"]),
-        highRollers: num(o["high_rollers"]),
-        survivors: num(o["cancer_survivors"]),
-        donationsCount: num(o["donations_count"]),
-        totalCommitted: num(o["total_committed"]),
-        lastUpdated: typeof o["last_scraped"] === "string" ? o["last_scraped"] : null,
-        subteams,
-        recentDaily,
-      };
-    } catch {
-      return null;
-    }
+    const { fetchTeam } = await import("@/lib/pelotonia-api.server");
+    const team = await fetchTeam();
+    if (!team) return null;
+    return {
+      teamName: team.teamName,
+      raised: team.raised,
+      goal: team.goal,
+      allTimeRaised: team.allTimeRaised,
+      kidsRaised: null,
+      members: team.members,
+      riders: null,
+      challengers: null,
+      volunteers: null,
+      highRollers: null,
+      survivors: null,
+      donationsCount: null,
+      totalCommitted: null,
+      lastUpdated: team.fetchedAt,
+      subteams: team.subteams.map((s) => ({
+        name: s.name,
+        total: s.members,
+        raised: s.raised,
+        riders: null,
+        challengers: null,
+        volunteers: null,
+        committed: null,
+        highRollers: null,
+        survivors: null,
+      })),
+      recentDaily: [],
+    };
   },
 );
 
@@ -121,31 +99,19 @@ export const getRiderFundraising = createServerFn({ method: "GET" })
   }))
   .handler(async ({ data }): Promise<RiderFundraising | null> => {
     if (!data.publicId) return null;
-    try {
-      const res = await fetch(`${DASHBOARD_BASE}/api/members`, {
-        headers: { Accept: "application/json" },
-      });
-      if (!res.ok) return null;
-      const rows = (await res.json()) as Record<string, unknown>[];
-      const wanted = data.publicId.toLowerCase();
-      const row = rows.find(
-        (r) => String(r["public_id"] ?? "").trim().toLowerCase() === wanted,
-      );
-      if (!row) return null;
-      const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
-      return {
-        publicId: String(row["public_id"] ?? data.publicId),
-        name: String(row["name"] ?? ""),
-        raised: num(row["raised"]),
-        goal: num(row["fundraising_goal"]) || num(row["personal_goal"]),
-        committed: num(row["commitment_amount"]) || num(row["committed_amount"]),
-        allTimeRaised: num(row["all_time_raised"]),
-        teamName: String(row["team_name"] ?? ""),
-        isHighRoller: num(row["committed_high_roller"]) === 1,
-        isSurvivor: num(row["is_cancer_survivor"]) === 1,
-        lastUpdated: typeof row["last_scraped"] === "string" ? (row["last_scraped"] as string) : null,
-      };
-    } catch {
-      return null;
-    }
+    const { fetchRider } = await import("@/lib/pelotonia-api.server");
+    const rider = await fetchRider(data.publicId);
+    if (!rider) return null;
+    return {
+      publicId: rider.publicId,
+      name: rider.name,
+      raised: rider.raised,
+      goal: rider.goal,
+      committed: rider.committed,
+      allTimeRaised: rider.allTimeRaised,
+      teamName: rider.subTeam ? `Team Huntington Bank - ${rider.subTeam}` : "",
+      isHighRoller: rider.isHighRoller,
+      isSurvivor: rider.isSurvivor,
+      lastUpdated: rider.fetchedAt,
+    };
   });

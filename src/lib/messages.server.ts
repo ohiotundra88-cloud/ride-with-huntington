@@ -5,24 +5,8 @@ import {
   type AudienceRules,
 } from "./messages.shared";
 
-const PELOTONIA_MEMBERS =
-  "https://pelotonia-dashboard-401340053598.us-central1.run.app/api/members";
 
 const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : null);
-const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
-const flag = (v: unknown) => v === true || v === 1 || v === "1" || v === "true";
-
-const jsonList = (v: unknown): string[] => {
-  if (Array.isArray(v)) return v.map((x) => String(x)).filter(Boolean);
-  const raw = typeof v === "string" ? v.trim() : "";
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.map((x) => String(x)).filter(Boolean) : [raw];
-  } catch {
-    return raw.split(/\s*[,;|]\s*/).filter(Boolean);
-  }
-};
 
 /**
  * Everyone with an account, enriched with app roles, registration readiness and
@@ -50,20 +34,14 @@ export async function buildAudienceRoster(): Promise<AudiencePerson[]> {
     rolesByUser.set(r.user_id, list);
   }
 
-  // Live Pelotonia member records keyed by public/rider ID (best effort).
-  const members = new Map<string, Record<string, unknown>>();
-  try {
-    const res = await fetch(PELOTONIA_MEMBERS, { headers: { Accept: "application/json" } });
-    if (res.ok) {
-      const list = (await res.json()) as Record<string, unknown>[];
-      for (const m of list) {
-        const id = String(m["public_id"] ?? "").trim().toLowerCase();
-        if (id) members.set(id, m);
-      }
-    }
-  } catch {
-    // Tag/fundraising targeting degrades gracefully when the API is unreachable.
-  }
+  // Live Pelotonia rider records keyed by public/rider ID (best effort; the
+  // audience still builds from Hub data when Pelotonia is unreachable).
+  const { fetchRiders, normalizePublicId } = await import("@/lib/pelotonia-api.server");
+  const members = await fetchRiders(
+    (participants ?? []).map(
+      (row) => ((row as Record<string, unknown>)["pelotonia"] as Record<string, unknown> | null)?.["confirmation"],
+    ),
+  );
 
   return (profiles ?? []).map((profile): AudiencePerson => {
     const row = byUser.get(profile.id) ?? {};
@@ -73,7 +51,8 @@ export async function buildAudienceRoster(): Promise<AudiencePerson[]> {
     const a = (row["apparel"] ?? {}) as Record<string, unknown>;
     const addr = (row["address"] ?? {}) as Record<string, unknown>;
     const riderId = str(p["confirmation"]);
-    const member = riderId ? members.get(riderId.toLowerCase()) : undefined;
+    const riderKey = normalizePublicId(riderId);
+    const member = riderKey ? members.get(riderKey) : undefined;
 
     return {
       userId: profile.id,
@@ -89,16 +68,16 @@ export async function buildAudienceRoster(): Promise<AudiencePerson[]> {
       bikeSettled: b["needs"] === "no" || b["status"] === "complete",
       hasAddress: !!str(addr["street"]) && !!str(addr["city"]) && !!str(addr["zip"]),
       hasJersey: !!str(a["jerseySize"]),
-      subPeloton: member ? str(member["team_name"]) : null,
-      route: member ? str(member["route_names"]) : null,
-      tags: member ? jsonList(member["tags"]) : [],
-      highRoller: !!member && flag(member["committed_high_roller"]),
-      survivor: !!member && flag(member["is_cancer_survivor"]),
-      pelotoniaCaptain: !!member && flag(member["is_captain"]),
-      challenger: !!member && flag(member["is_challenger"]),
-      riderOnPelotonia: !!member && flag(member["is_rider"]),
-      volunteerOnPelotonia: !!member && flag(member["is_volunteer"]),
-      raised: member ? num(member["raised"]) : null,
+      subPeloton: member?.subTeam ? `Team Huntington Bank - ${member.subTeam}` : null,
+      route: member && member.routes.length ? member.routes.join(", ") : null,
+      tags: member?.tags ?? [],
+      highRoller: !!member?.isHighRoller,
+      survivor: !!member?.isSurvivor,
+      pelotoniaCaptain: !!member?.isCaptain,
+      challenger: !!member?.isChallenger,
+      riderOnPelotonia: !!member?.isRider,
+      volunteerOnPelotonia: !!member?.isVolunteer,
+      raised: member ? member.raised : null,
       emailOptOut: (profile as { email_opt_out?: boolean }).email_opt_out === true,
     };
   });

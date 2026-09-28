@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { exactEmail } from "@/lib/email-match";
 
 export interface AdminUserRow {
   user_id: string;
@@ -65,7 +66,7 @@ export const grantAdminByEmail = createServerFn({ method: "POST" })
     const { data: profile, error: pErr } = await supabaseAdmin
       .from("profiles")
       .select("id, email, full_name")
-      .ilike("email", normalized)
+      .ilike("email", exactEmail(normalized))
       .maybeSingle();
     if (pErr) throw new Error(pErr.message);
     if (!profile) {

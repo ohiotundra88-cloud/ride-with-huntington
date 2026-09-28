@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { exactEmail } from "@/lib/email-match";
 
 export type JsonLike = Record<string, string | number | boolean | null>;
 
@@ -142,7 +143,7 @@ export const createColleague = createServerFn({ method: "POST" })
     const { data: existing } = await supabaseAdmin
       .from("profiles")
       .select("id")
-      .ilike("email", data.email)
+      .ilike("email", exactEmail(data.email))
       .maybeSingle();
     if (existing) {
       userId = existing.id;

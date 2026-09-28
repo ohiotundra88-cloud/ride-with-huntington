@@ -37,15 +37,18 @@ function TeamHub() {
   const goal = live?.goal || team.goalTarget;
   const pct = goal > 0 ? Math.round((raised / goal) * 100) : 0;
 
+  // Pelotonia's public data doesn't break out every count; show only what it has.
+  const metric = (id: string, label: string, value: number | null) =>
+    value === null ? null : { id, label, value: value.toLocaleString(), note: "live" };
   const liveMetrics = live
     ? [
-        { id: "members", label: "Team members", value: live.members.toLocaleString(), note: "live" },
-        { id: "riders", label: "Riders", value: live.riders.toLocaleString(), note: "live" },
-        { id: "challengers", label: "Challengers", value: live.challengers.toLocaleString(), note: "live" },
-        { id: "volunteers", label: "Volunteers", value: live.volunteers.toLocaleString(), note: "live" },
-        { id: "hr", label: "High rollers", value: live.highRollers.toLocaleString(), note: "live" },
-        { id: "survivors", label: "Survivors", value: live.survivors.toLocaleString(), note: "live" },
-      ]
+        metric("members", "Team members", live.members),
+        metric("riders", "Riders", live.riders),
+        metric("challengers", "Challengers", live.challengers),
+        metric("volunteers", "Volunteers", live.volunteers),
+        metric("hr", "High rollers", live.highRollers),
+        metric("survivors", "Survivors", live.survivors),
+      ].filter((m): m is NonNullable<typeof m> => m !== null)
     : null;
 
   const updatedLabel = live?.lastUpdated ? new Date(live.lastUpdated).toLocaleString() : null;
@@ -117,7 +120,14 @@ function TeamHub() {
                     </p>
                     <p className="mt-1 text-sm text-muted-foreground">
                       {live
-                        ? `${live.donationsCount.toLocaleString()} donations · incl. ${formatCurrencyUSD(live.kidsRaised)} Pelotonia Kids · ${formatCurrencyUSD(live.totalCommitted)} committed · ${formatCurrencyUSD(live.allTimeRaised)} all-time`
+                        ? [
+                            live.donationsCount !== null && `${live.donationsCount.toLocaleString()} donations`,
+                            live.kidsRaised !== null && `incl. ${formatCurrencyUSD(live.kidsRaised)} Pelotonia Kids`,
+                            live.totalCommitted !== null && `${formatCurrencyUSD(live.totalCommitted)} committed`,
+                            `${formatCurrencyUSD(live.allTimeRaised)} all-time`,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")
                         : "Sample data — live totals unavailable right now."}
                     </p>
                   </div>
@@ -146,7 +156,15 @@ function TeamHub() {
                     <p className="text-sm font-bold tabular-nums">{formatCurrencyUSD(s.raised)}</p>
                   </div>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    {s.total.toLocaleString()} members · {s.riders.toLocaleString()} riders · {s.challengers.toLocaleString()} challengers · {s.volunteers.toLocaleString()} volunteers · {s.highRollers} high rollers
+                    {[
+                      `${s.total.toLocaleString()} members`,
+                      s.riders !== null && `${s.riders.toLocaleString()} riders`,
+                      s.challengers !== null && `${s.challengers.toLocaleString()} challengers`,
+                      s.volunteers !== null && `${s.volunteers.toLocaleString()} volunteers`,
+                      s.highRollers !== null && `${s.highRollers} high rollers`,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
                   </p>
                   <Progress value={share} className="mt-2 h-1.5 [&>div]:bg-[var(--brand-dark)]" />
                 </div>

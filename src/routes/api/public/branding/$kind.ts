@@ -1,3 +1,4 @@
+import { safeFileHeaders, typeFromPath } from "@/lib/safe-file.server";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/api/public/branding/$kind")({
@@ -26,10 +27,11 @@ export const Route = createFileRoute("/api/public/branding/$kind")({
           if (dErr || !file) return new Response("Not found", { status: 404 });
 
           return new Response(await file.arrayBuffer(), {
-            headers: {
-              "Content-Type": contentType ?? "image/png",
-              "Cache-Control": "public, max-age=3600",
-            },
+            headers: safeFileHeaders({
+              contentType: contentType ?? typeFromPath(path) ?? "image/png",
+              fileName: kind,
+              cacheSeconds: 3600,
+            }),
           });
         } catch (err) {
           // Missing server credentials or storage outage: behave like "no image"

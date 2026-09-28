@@ -1,7 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { assertSuper, demoPassword } from "@/lib/season.server";
+import { assertSuper, placeholderPassword } from "@/lib/season.server";
+import { exactEmail } from "@/lib/email-match";
 
 export interface ManualParticipantRow {
   user_id: string;
@@ -60,14 +61,14 @@ export const createManualParticipant = createServerFn({ method: "POST" })
     const { data: existing } = await supabaseAdmin
       .from("profiles")
       .select("id")
-      .ilike("email", data.email)
+      .ilike("email", exactEmail(data.email))
       .maybeSingle();
     if (existing) {
       userId = existing.id;
     } else {
       const { data: created, error: cErr } = await supabaseAdmin.auth.admin.createUser({
         email: data.email,
-        password: demoPassword(data.email),
+        password: placeholderPassword(),
         email_confirm: true,
         user_metadata: { full_name: data.full_name },
       });

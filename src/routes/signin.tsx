@@ -131,7 +131,8 @@ function SignIn() {
         });
         return;
       }
-      await clearFailures({ data: { email: addr } });
+      // Best effort: a failed reset must never block a successful sign-in.
+      await clearFailures({ data: {} }).catch(() => undefined);
       toast.success("Signed in");
       nav({ to: "/dashboard" });
     } catch (err) {

@@ -436,7 +436,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const id = user.userId;
     if (!id) return;
     const payload: {
-      email?: string;
       full_name?: string;
       mobile?: string;
       segment?: string;
@@ -445,7 +444,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       manager?: string;
       consent?: boolean;
     } = {};
-    if (u.email !== undefined) payload.email = u.email;
     if (u.name !== undefined) payload.full_name = u.name;
     if (u.mobile !== undefined) payload.mobile = u.mobile;
     if (u.segment !== undefined) payload.segment = u.segment;
