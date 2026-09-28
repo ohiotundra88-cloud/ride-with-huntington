@@ -1,44 +1,38 @@
-# Team Huntington Hub — IT / Network allowlist request
+# Team Huntington Hub: IT and network allowlist request
 
-**Request:** allow the following site for Huntington colleagues on the corporate network and VPN.
+**Request:** allow the Team Huntington Hub site for Huntington colleagues on the corporate network and VPN.
 
-| Item                          | Value                                                             |
-| ----------------------------- | ----------------------------------------------------------------- |
-| Domains                       | `ridewithhuntington.com`, `www.ridewithhuntington.com`            |
-| Protocol / port               | HTTPS / 443                                                       |
-| Suggested category            | Business / Productivity (internal Huntington Pelotonia team site) |
-| API paths                     | `/api/public/sb/*` on the same domain (sign-in and data)          |
-| Other external hosts required | None                                                              |
-| SSL inspection                | Bypass/decrypt exception required in iBoss for both domains       |
-| Transport                     | Allow HTTPS over TCP 443 and HTTP/2                               |
+| Item                 | Value                                                                                                              |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Domains              | The Hub's hostname. Planned: `ridewithhuntington.com` and `www.ridewithhuntington.com`                             |
+| Protocol / port      | HTTPS / 443, HTTP/2                                                                                                |
+| Suggested category   | Business / Productivity (internal Huntington Pelotonia team site)                                                  |
+| API paths            | `/api/public/*` and `/auth/*` on the same domain (data, files and sign-in)                                         |
+| Sign-in              | The sign-in provider's host. With Microsoft Entra ID that is `login.microsoftonline.com`, normally already allowed |
+| Other external hosts | None for the site to work                                                                                          |
+| SSL inspection       | Bypass or decryption exception may be needed in iBoss for the Hub's domains (see below)                            |
 
 ## Why the request is limited to one domain
 
-All application traffic — page loads, sign-in, and data reads/writes — is served from
-`ridewithhuntington.com`. The browser does not contact any third-party host: there are no
-external fonts, analytics, CDNs, or remote images, and backend calls are proxied through the
-site's own domain at `/api/public/sb/*`.
+Page loads, data reads and writes, and uploaded files are all served from the Hub's own domain. The browser does not load anything from a third-party host: there are no external fonts, analytics, CDNs or remote images, and database calls are proxied through the site itself at `/api/public/sb/*`. Signing in briefly redirects the browser to the identity provider and back.
 
-## How to confirm the block
+A few links open other sites when a colleague clicks them (for example pelotonia.org or "add to Outlook calendar"). They are ordinary links, not something the Hub needs in order to load.
 
-Open **https://ridewithhuntington.com/health** on the affected machine while connected to the
-VPN. That page reports, in plain language, whether the HTML, styles, scripts, and sign-in/data
-services are reachable, and includes the details above for a ticket.
+## How to confirm a block
 
-Symptom seen when the filter intercepts the site: a blank white page (sometimes showing only the
-word "reset") instead of the Hub.
+Open `https://<hub domain>/health` on the affected machine while connected to the VPN. The page reports, in plain language, whether the HTML, styles, scripts, and sign-in and data services are reachable, and includes the details above for a ticket.
+
+While the Hub runs as a private preview (`HUB_REQUIRE_SIGN_IN=true`), `/health` also requires sign-in. If sign-in itself is blocked, test with `curl -I https://<hub domain>/auth/login`: a `302` response means the site is reachable.
+
+Symptom seen when the filter intercepts the site: a blank white page (sometimes showing only the word "reset") instead of the Hub.
 
 ## iBoss / WireGuard-specific action
 
-The site and its same-origin API return valid HTTPS responses outside the tunnel. If iBoss returns
-only `reset`, add both FQDNs to the tenant's SSL decryption bypass and web allowlist policies:
+If iBoss returns only `reset` while the site works outside the tunnel, add the Hub's domains to the tenant's SSL decryption bypass and web allowlist policies:
 
-- `ridewithhuntington.com`
-- `www.ridewithhuntington.com`
-- URL scope: `https://ridewithhuntington.com/*` and `https://www.ridewithhuntington.com/*`
-- Permit HTTPS over TCP 443 and HTTP/2 in the applicable user/location policy
-- Do not use fixed destination IPs; the public CDN addresses can change
+- `ridewithhuntington.com` and `www.ridewithhuntington.com` (or the final hostname)
+- URL scope: `https://<hub domain>/*`
+- Permit HTTPS over TCP 443 and HTTP/2 in the applicable user and location policy
+- Do not use fixed destination IPs; hosting addresses can change
 
-After policy propagation, disconnect and reconnect the WireGuard tunnel, clear the browser's DNS
-cache, and open `https://ridewithhuntington.com/health` in a private window. The "Page delivered",
-"Styles loaded", "App scripts running", and "Sign-in & data" checks should all pass.
+After policy propagation, disconnect and reconnect the WireGuard tunnel, clear the browser's DNS cache, and open `https://<hub domain>/health` in a private window. The "Page delivered", "Styles loaded", "App scripts running" and "Sign-in & data" checks should all pass.

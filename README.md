@@ -1,170 +1,173 @@
 # Team Huntington Hub
 
-Build a polished, mobile-first full-stack prototype called “Team Huntington Hub” for Huntington colleagues participating in Pelotonia. Use React, TypeScript, Tailwind and shadcn/ui. Brand colors: Huntington bright green #7ECF1C, dark green #002D2A, white, charcoal, and light gray. The tone should feel premium, executive, optimistic, and simple. Do not use copyrighted logos; use clean text branding and abstract geometric placeholders that can later be replaced with approved Huntington and Pelotonia assets.
+The Team Huntington Hub is the internal web app for Huntington colleagues who ride, volunteer or fundraise with Team Huntington in Pelotonia. It gives colleagues one place to register and track their ride weekend, and gives captains, co-chairs and reviewers the tools to run the team's fundraising.
 
-PRIMARY GOAL
-Create one guided digital front door that helps colleagues register as a Rider or Volunteer, complete related travel, hotel, bike rental, apparel and mailing steps, access expense-report instructions, search FAQs, receive confirmation, and return later to update information.
+It was prototyped in Lovable by Chris Kemper (Huntington, Pelotonia co-chair), then moved off Lovable to standard, self-hostable tooling. It currently runs as a private preview. The expected long-term home is Azure with Microsoft Entra ID sign-in.
 
-BUILD THESE PAGES AND FLOWS
+**New to the codebase? Read in this order:** this README, [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/CONFIGURATION.md](docs/CONFIGURATION.md), then [docs/VISUAL-STUDIO.md](docs/VISUAL-STUDIO.md).
 
-1. LANDING PAGE
+## Features
 
-- Hero title: “Your Team Huntington Pelotonia Journey Starts Here”
-- Supporting copy explaining the portal guides colleagues through registration, travel, bike rental, apparel and support resources.
-- Primary CTA: “Let’s Go”
-- Secondary CTA: “View My Registration”
-- Show a simple 5-step visual: Register, Travel, Bike, Apparel, Complete.
-- Include a Resources & Support section with links to FAQ, Expense Guide, Ride Weekend Checklist and Contact Support.
+For colleagues
 
-2. SIGN-IN / PROFILE
+- **Registration journey**: rider, volunteer or challenger; Pelotonia registration, travel and hotel, bike rental, apparel and mailing address, with progress and a readiness checklist (`/register`, `/dashboard`).
+- **Team snapshot and rider progress**: Team Huntington's live Pelotonia fundraising, sub-teams, riders and Pelotonia Kids, from a nightly sync (`/team`, `/rider-progress`).
+- **Fundraiser approval requests**: file a fundraiser, pick your captain, answer the policy questions (property, food, alcohol, logos), attach a flier, and track approval (`/fundraiser-request`).
+- **Fundraiser pages**: a public, shareable page per approved fundraiser with a demo checkout, raffle draws, payouts and a year summary (`/fundraisers/:slug`, `/my-fundraisers`). The payment provider is a demo; no real money moves.
+- **Events**: the fundraising events calendar and invite-only team events with RSVP (`/events`, `/team-events`, `/my-events`).
+- **Inbox and messages**: targeted team announcements with email delivery and opt-out (`/inbox`, `/messages`).
+- **Resources**: searchable FAQ, fundraising resources, expense guide, packing list, family guide (`/resources`, `/expenses`, `/packing`, `/family`).
+- **Network self-check** for corporate VPN and web filter problems (`/health`, see [docs/IT-ALLOWLIST.md](docs/IT-ALLOWLIST.md)).
 
-- Prototype login using work email and a “Continue with Huntington SSO” simulated button.
-- After sign-in, prefill a profile form with name, work email, mobile number, business segment, market/location and manager.
-- Allow editable mobile number, segment, market and manager.
-- Add privacy notice and consent checkbox.
+For leaders and reviewers
 
-3. MULTI-STEP REGISTRATION WIZARD
-   Use a persistent progress bar, autosave behavior and ability to go back.
+- **Approval queue**: Peloton Captain, then Legal, Risk, Compliance and Marketing in parallel, then Co-Chair sign-off, with emails at each step (`/admin/approvals`).
+- **Vendor CRM**: vendors, contacts, donations, spend, sponsorship tiers, Pelotonia Kids gifts, sponsored rider slots, attachments and an audit log (`/vendors`).
+- **Captains Lounge**: posts and documents for team leadership (`/captains-lounge`).
+- **Super User console**: roles and admins, participants and permanent roster, season reset, FAQs, branding, test emails, site switches (`/admin/*`).
 
-Step A: Participation
+Some Super User console screens and `/analytics` still use browser-only demo data from the prototype. See "Parts that are still prototype-only" in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-- Choose Rider, Volunteer, Both, or Not Sure Yet.
-- Conditionally change downstream steps.
+## Stack
 
-Step B: Pelotonia Registration
+| Layer         | Technology                                                                                                      |
+| ------------- | --------------------------------------------------------------------------------------------------------------- |
+| UI            | React 19, TypeScript, Tailwind CSS 4, shadcn/ui (Radix), TanStack Router and Query, react-hook-form, zod        |
+| App framework | TanStack Start (file-based routes, SSR, server functions) on Vite 8 and Nitro 3                                 |
+| Server target | Cloudflare Workers (`npm run build`) or a plain Node 22 server (`npm run build:node`)                           |
+| Data          | PostgreSQL 17 with row-level security, reached through PostgREST; supabase-js is used only as the query builder |
+| Sign-in       | OpenID Connect (Aspire Identity today; designed to swap to Microsoft Entra ID in one file)                      |
+| Files         | Object storage adapter (Cloudflare R2 today; Azure Blob adapter to be added)                                    |
+| Email         | React Email templates; Resend today, provider adapter for others                                                |
+| Background    | `jobs/pelotonia-sync`, a zero-dependency Node job that copies public Pelotonia data nightly                     |
 
-- Display configurable instructions for correct Team Huntington peloton, event type and discount code.
-- Show discount code in a copyable field.
-- CTA: “Open Pelotonia Registration” that opens a placeholder external URL in a new tab.
-- On return, allow user to enter a confirmation number or check “I completed registration.”
-- Show status badge: Not Started, Pending Verification, Complete.
-
-Step C: Travel & Hotel
-
-- Ask if travel or hotel is needed.
-- Options: None, Hotel Only, Air/Rail Only, Travel + Hotel, Not Sure Yet.
-- Fields: departure city, arrival date, departure date, hotel check-in, hotel check-out, accessibility/travel notes.
-- CTA: “Open Concur / ATG” with placeholder external link.
-- On return, capture travel confirmation number, hotel confirmation number, hotel name, arrival time and departure time.
-- Allow “Book Later.”
-
-Step D: Bike Rental
-
-- Only show for Riders or Both.
-- Ask Yes, No, Not Sure.
-- Fields: height, preferred bike size, bike type, pedal preference, helmet needed, pickup date, return date.
-- CTA: “Open Unlimited Biking” with placeholder external link.
-- Capture rental confirmation number and completion status.
-
-Step E: Apparel & Mailing
-
-- Riders: jersey size, shirt size, cut preference.
-- Volunteers: volunteer shirt size and cut preference.
-- Both: show all applicable fields.
-- Sizes: XS through 4XL.
-- Include size-guide modal.
-- Mailing address fields with basic validation: name, street, unit, city, state, ZIP, country, residential/business.
-- Checkbox confirming address is current.
-
-Step F: Review & Submit
-
-- Show a complete summary of all entered information.
-- Flag missing required fields.
-- Allow edit links for each section.
-- Final button: “Complete My Team Huntington Registration.”
-- On submit, generate a mock registration ID and show a success page.
-
-4. PARTICIPANT DASHBOARD
-
-- Welcome card with completion percentage.
-- Status cards for Pelotonia, Travel, Bike Rental, Apparel and Mailing.
-- Show deadlines and outstanding actions.
-- Button to resume first incomplete step.
-- Button to edit registration.
-- Recent activity timeline.
-- Confirmation summary card.
-
-5. ADMIN DASHBOARD
-   Create a separate admin route with demo data and role toggle.
-
-- KPI cards: Total Registrations, Riders, Volunteers, Complete, Incomplete, Travel Needed, Hotel Rooms, Bike Rentals.
-- Registration table with search, filters and status chips.
-- Columns: name, role, market, Pelotonia status, travel status, bike status, apparel status, overall completion.
-- Detail drawer for a selected colleague.
-- Apparel summary by item and size.
-- Travel summary including hotel nights and arrival dates.
-- Export buttons for CSV placeholders.
-- Ability to resend confirmation, send reminder, reopen a locked step and add internal notes.
-
-6. SEARCHABLE RESOURCE CENTER
-
-- Global search bar: “Search Team Huntington…”
-- Categories: Registration, Travel, Bike Rental, Apparel, Fundraising, Ride Weekend, Volunteers, Expense Reports.
-- Seed at least 25 realistic FAQ articles.
-- Search should filter by title, keywords and article body.
-- Article detail pages with related articles and contact support link.
-
-7. EXPENSE REPORT GUIDE
-   Create a step-by-step “How to Submit Pelotonia Expenses” page.
-
-- Sections: Before You Start, Open Concur Expense, Create Report, Select Expense Type, Enter Cost Center, Attach Receipts, Add Business Purpose, Submit for Approval, Track Status.
-- Include callout boxes for common mistakes, receipt requirements and deadlines.
-- Add a printable checklist button and “Open Concur Expense” placeholder link.
-- Include a short FAQ section specific to mileage, hotel, airfare, meals and missing receipts.
-
-8. EMAIL / CONFIRMATION PREVIEWS
-
-- Create a page or modal showing mock confirmation and reminder emails.
-- Confirmation includes registration ID, participation type, status summary, outstanding actions, deadlines and secure return button.
-- Update confirmation email after modifications.
-
-DATA & STATE
-
-- Use Supabase-ready architecture, but first build with realistic seeded local data and clear interfaces so Supabase can be connected later.
-- Persist participant progress in localStorage for the prototype.
-- Model entities for User, Registration, Travel, BikeRental, Apparel, MailingAddress, FAQArticle, AuditEvent and AdminNote.
-- Include an audit trail timeline.
-
-DESIGN REQUIREMENTS
-
-- Mobile-first, fully responsive.
-- Use large touch targets, clear typography and accessible contrast.
-- Use cards, progress indicators, badges and stepper components.
-- Avoid clutter. Keep the interface warm, professional and easy for nontechnical colleagues.
-- Add subtle motion and polished empty/loading states.
-- Include a dark-green top navigation and bright-green primary actions.
-- Create a tasteful abstract arrow motif as a background accent.
-
-PROTOTYPE BEHAVIOR
-
-- All external links should be placeholders and clearly labeled as demo links.
-- Include a demo user and demo admin mode switch in the top-right menu.
-- Make all major flows clickable and functional.
-- Seed realistic demo data for at least 20 participants.
-- Include validation, error states, success toasts and confirmation dialogs.
-
-FINAL DELIVERABLE
-Produce a complete, navigable prototype with polished UI, realistic data and working local interactions. Include a README section in the app or code comments listing future enterprise integrations: Microsoft Entra ID, Pelotonia API/deep link, Concur/ATG, Unlimited Biking, Microsoft email service, approved Huntington database and Power BI.
-
-This project was built with [Lovable](https://lovable.dev).
-
-**Live app**: https://ride-with-huntington.lovable.app
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/c7a28345-07d8-44a0-8b84-8ffdb66ff0de).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+```mermaid
+flowchart LR
+  B[Browser] -->|same origin only| HUB[Hub web app<br/>TanStack Start + Nitro]
+  HUB <-->|OIDC| IDP[(Identity provider)]
+  HUB -->|signed JWT per request| GW["/rest/v1 gateway"] --> PGRST[PostgREST] --> PG[(PostgreSQL 17<br/>RLS)]
+  HUB --> FILES[(Object storage)]
+  HUB --> MAIL[Email provider]
+  JOB[Pelotonia sync job] --> PGRST
+  JOB --> PEL[(Pelotonia public data)]
 ```
+
+## Quick start (local development)
+
+You need Node 22.18 or newer, npm, a PostgreSQL 17 server and client, PostgREST, and nginx (or any reverse proxy). On macOS: `brew install postgresql@17 postgrest nginx`. On Windows, use WSL2 (see [docs/VISUAL-STUDIO.md](docs/VISUAL-STUDIO.md)).
+
+1. **Install dependencies.**
+
+   ```sh
+   npm ci
+   ```
+
+2. **Build a local database from the migrations.** `reset.sh` drops and recreates the database named by `PGDATABASE_TEST`, applies a small shim that stands in for the Supabase platform objects (roles, `auth.users`, `auth.uid()`), then every migration. Use a separate name for your dev database so the test run does not wipe it.
+
+   ```sh
+   # Scripts default to a Unix socket in /tmp on port 54329. For a server on
+   # localhost:5432 (Homebrew default or Docker) export:
+   export PGHOST=localhost PGPORT=5432
+   PGDATABASE_TEST=rwh_dev supabase/tests/local/reset.sh
+   # -> ok: 50 migrations applied to rwh_dev
+   ```
+
+   Docker alternative: `docker run -d --name rwh-pg -p 5432:5432 -e POSTGRES_HOST_AUTH_METHOD=trust postgres:17` (local only).
+
+3. **Let PostgREST log in.** The shim creates the `authenticator` role without a password. Give it one locally and let it switch to the three API roles:
+
+   ```sh
+   psql -h "$PGHOST" -p "$PGPORT" -U postgres -d rwh_dev -c \
+     "ALTER ROLE authenticator WITH LOGIN PASSWORD 'local-only'; GRANT anon, authenticated, service_role TO authenticator;"
+   ```
+
+4. **Run PostgREST and the `/rest/v1` gateway.** The Hub calls `<HUB_DB_URL>/rest/v1/...`; PostgREST serves at its root, so a proxy strips the prefix.
+
+   ```sh
+   PGRST_DB_URI="postgres://authenticator:local-only@localhost:5432/rwh_dev" \
+   PGRST_DB_SCHEMAS=public PGRST_DB_ANON_ROLE=anon \
+   PGRST_JWT_SECRET=local-dev-jwt-secret-at-least-32-characters-long \
+   PGRST_SERVER_PORT=3000 postgrest
+   ```
+
+   In another terminal, run nginx on port 3001 with the gateway config from [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md#the-database-gateway).
+
+5. **Configure the app.**
+
+   ```sh
+   cp .env.example .env.local
+   ```
+
+   Set `HUB_DB_URL=http://localhost:3001` and `HUB_DB_JWT_SECRET` to the same value as `PGRST_JWT_SECRET`. Keep `EMAIL_PROVIDER=log`. Every variable is explained in [docs/CONFIGURATION.md](docs/CONFIGURATION.md).
+
+6. **Start the app.**
+
+   ```sh
+   npm run dev
+   # http://localhost:5173
+   ```
+
+What works locally without more setup: public pages, the database through the proxy, and the unit and database tests. Two things need extra setup:
+
+- **Signing in** needs an OpenID Connect client that accepts `http://localhost:5173/auth/callback` as a redirect URI. With Microsoft Entra ID, register that URI on a development app registration ([docs/ENTRA.md](docs/ENTRA.md)).
+- **File uploads** need object storage. On Node there is no storage adapter yet ([docs/DEPLOYMENT.md](docs/DEPLOYMENT.md#4-file-storage-on-azure)).
+
+## Scripts
+
+| Command                             | What it does                                                                                                                           |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run dev`                       | Vite dev server with hot reload on http://localhost:5173. Loads `.env.local`.                                                          |
+| `npm run build`                     | Production build for Cloudflare Workers (`NITRO_PRESET=cloudflare-module`, the default).                                               |
+| `npm run build:node`                | Production build for a plain Node server. Output in `.output/`; run `node .output/server/index.mjs`.                                   |
+| `npm run preview`                   | Serves the last build locally.                                                                                                         |
+| `npm run typecheck`                 | `tsc --noEmit`.                                                                                                                        |
+| `npm run lint`                      | ESLint, including Prettier formatting.                                                                                                 |
+| `npm run format`                    | Prettier on the whole repo.                                                                                                            |
+| `npm test`                          | Unit tests (`node --test tests/*.test.ts`, Node's built-in runner with TypeScript type stripping).                                     |
+| `npm run test:db`                   | Rebuilds the test database (`rwh_test` by default) from every migration and runs `supabase/tests/security_hardening.sql`.              |
+| `npm run check`                     | typecheck, lint, unit tests and build in one go.                                                                                       |
+| `node scripts/gen-db-types.mjs`     | Regenerates the Tables and Views in `src/integrations/supabase/types.ts` from the local database. Run Prettier on the file afterwards. |
+| `node jobs/pelotonia-sync/sync.mjs` | One Pelotonia sync run (needs `HUB_REST_URL` and `HUB_DB_JWT_SECRET`).                                                                 |
+
+CI (`.github/workflows/ci.yml`) runs lint, typecheck, unit tests, both builds, and the database tests against PostgreSQL 17 on every push and pull request.
+
+## Project layout
+
+```
+.
+├── src/
+│   ├── routes/                 pages (*.tsx) and server routes (auth/*, api/public/*)
+│   ├── lib/                    *.functions.ts (server functions), *.server.ts, *.shared.ts, email templates
+│   ├── server/                 runtime settings, sign-in (session.server.ts), database + storage (backend.server.ts)
+│   ├── integrations/supabase/  auth middleware, service client, browser client, generated DB types
+│   ├── components/             app components; ui/ holds shadcn/ui primitives
+│   ├── start.ts                request middleware (error page, sign-in wall, CSRF)
+│   └── server.ts               server entry
+├── supabase/
+│   ├── migrations/             50 SQL migrations, the schema's single source of truth
+│   └── tests/                  SQL security tests; local/ holds reset.sh and the platform shim
+├── jobs/pelotonia-sync/        nightly Pelotonia and PledgeIt sync
+├── tests/                      unit tests (node --test)
+├── scripts/gen-db-types.mjs    database type generator
+├── deploy/cloudflare/          D1 session table for the temporary preview
+├── docs/                       the documentation below
+├── wrangler.jsonc              Cloudflare Workers config (temporary preview)
+└── vite.config.ts              build config; NITRO_PRESET picks Workers or Node
+```
+
+## Documentation
+
+| Document                                       | Read it for                                                                                   |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)   | Request flow, sign-in, data access and RLS, server functions, storage, email, sync, approvals |
+| [docs/CONFIGURATION.md](docs/CONFIGURATION.md) | Every environment variable, secret and binding                                                |
+| [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)       | The temporary preview, and the recommended Azure deployment                                   |
+| [docs/ENTRA.md](docs/ENTRA.md)                 | Replacing Aspire Identity with Microsoft Entra ID                                             |
+| [docs/DATA-EXPORT.md](docs/DATA-EXPORT.md)     | Exporting all data and files, restoring into Azure, and a note on SQL Server                  |
+| [docs/VISUAL-STUDIO.md](docs/VISUAL-STUDIO.md) | VS Code and Visual Studio setup, debugging, and using GitHub Copilot on this codebase         |
+| [docs/IT-ALLOWLIST.md](docs/IT-ALLOWLIST.md)   | Network allowlist request for Huntington IT                                                   |
+| [src/routes/README.md](src/routes/README.md)   | File-based routing conventions                                                                |
+
+## A note on names
+
+The code still says "supabase" in places (`requireSupabaseAuth`, `supabaseAdmin`, `supabase/migrations/`). There is no Supabase service any more. The names were kept so the Lovable-era handlers did not need rewriting: supabase-js is the PostgREST query builder, and `supabase/` is where migrations live.
