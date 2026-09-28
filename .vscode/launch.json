@@ -1,0 +1,68 @@
+{
+  // Run and debug configurations. See docs/VISUAL-STUDIO.md.
+  // Settings come from .env.local (copy .env.example).
+  "version": "0.2.0",
+  "configurations": [
+    {
+      // Starts `npm run dev` in a debug terminal. Breakpoints work in server code
+      // (server functions, src/server, server routes) because it runs in this Node process.
+      "name": "Hub: dev server (server breakpoints)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm run dev",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      // Browser-side breakpoints (React components). Start the dev server first.
+      "name": "Hub: browser (Edge)",
+      "type": "msedge",
+      "request": "launch",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Hub: browser (Chrome)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      // The production Node build, as Azure runs it. Run `npm run build:node` first.
+      // PORT 5173 keeps PUBLIC_ORIGIN from .env.local valid for sign-in.
+      "name": "Hub: production Node build (.output)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/.output/server/index.mjs",
+      "envFile": "${workspaceFolder}/.env.local",
+      "env": { "PORT": "5173" },
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Unit tests (node --test)",
+      "type": "node",
+      "request": "launch",
+      "runtimeArgs": ["--test", "tests/*.test.ts"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      // One Pelotonia sync run against your local PostgREST (HUB_REST_URL in .env.local).
+      // Capped at 25 rider profiles so it finishes quickly.
+      "name": "Pelotonia sync (one small run)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/jobs/pelotonia-sync/sync.mjs",
+      "envFile": "${workspaceFolder}/.env.local",
+      "env": { "SYNC_MAX_PROFILES": "25" },
+      "console": "integratedTerminal"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Hub: full stack (dev server + Edge)",
+      "configurations": ["Hub: dev server (server breakpoints)", "Hub: browser (Edge)"],
+      "stopAll": true
+    }
+  ]
+}
