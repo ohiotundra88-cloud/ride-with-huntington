@@ -49,7 +49,7 @@ function VendorDashboard() {
   const [year, setYear] = useState("all");
   const [sort, setSort] = useState<SortKey>("name");
   const [opportunityOnly, setOpportunityOnly] = useState(false);
-  const [dashYear, setDashYear] = useState(String(new Date().getFullYear()));
+  const [dashYear, setDashYear] = useState(String(currentRideYear()));
   // Sponsorship tiers are earned per year; badges and tier sorting use this year.
   const [tierYear, setTierYear] = useState(currentRideYear());
   const [tierFilter, setTierFilter] = useState("all");

@@ -149,18 +149,18 @@ export function VendorForm({ vendor, onDone }: { vendor?: VendorDetail; onDone?:
             <Input id="business_name" value={core.business_name} onChange={(e) => set("business_name", e.target.value)} required />
           </div>
           <div className="space-y-1.5">
-            <Label>Status *</Label>
+            <Label htmlFor="vendor-status">Status *</Label>
             <Select value={core.status} onValueChange={(v) => set("status", v)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger id="vendor-status"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {VENDOR_STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label>Business segment (vendor serves)</Label>
+            <Label htmlFor="vendor-segment">Business segment (vendor serves)</Label>
             <Select value={core.business_segment || "none"} onValueChange={(v) => set("business_segment", v === "none" ? "" : v)}>
-              <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+              <SelectTrigger id="vendor-segment"><SelectValue placeholder="Select" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">Not specified</SelectItem>
                 {BUSINESS_SEGMENTS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
@@ -182,12 +182,12 @@ export function VendorForm({ vendor, onDone }: { vendor?: VendorDetail; onDone?:
             <Input id="owner2" value={core.secondary_relationship_owner} onChange={(e) => set("secondary_relationship_owner", e.target.value)} />
           </div>
           <div className="space-y-1.5">
-            <Label>Internal business segment (owns relationship)</Label>
+            <Label htmlFor="vendor-internal-segment">Internal business segment (owns relationship)</Label>
             <Select
               value={core.internal_business_segment || "none"}
               onValueChange={(v) => set("internal_business_segment", v === "none" ? "" : v)}
             >
-              <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+              <SelectTrigger id="vendor-internal-segment"><SelectValue placeholder="Select" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">Not specified</SelectItem>
                 {BUSINESS_SEGMENTS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
@@ -257,33 +257,33 @@ export function VendorForm({ vendor, onDone }: { vendor?: VendorDetail; onDone?:
                 <TabsContent key={s.year} value={String(s.year)} className="space-y-4 pt-4">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-1.5">
-                      <Label>Huntington spend ($)</Label>
-                      <Input type="number" min={0} step="0.01" value={s.amount} onChange={(e) => setSpend((rows) => rows.map((r, j) => (j === i ? { ...r, amount: e.target.value } : r)))} />
+                      <Label htmlFor={`spend-amount-${s.year}`}>Huntington spend ($)</Label>
+                      <Input id={`spend-amount-${s.year}`} type="number" min={0} step="0.01" value={s.amount} onChange={(e) => setSpend((rows) => rows.map((r, j) => (j === i ? { ...r, amount: e.target.value } : r)))} />
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Spend notes</Label>
-                      <Input value={s.notes} onChange={(e) => setSpend((rows) => rows.map((r, j) => (j === i ? { ...r, notes: e.target.value } : r)))} />
+                      <Label htmlFor={`spend-notes-${s.year}`}>Spend notes</Label>
+                      <Input id={`spend-notes-${s.year}`} value={s.notes} onChange={(e) => setSpend((rows) => rows.map((r, j) => (j === i ? { ...r, notes: e.target.value } : r)))} />
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Committed donation ($)</Label>
-                      <Input type="number" min={0} step="0.01" value={d.committed_amount} onChange={(e) => setDonations((rows) => rows.map((r, j) => (j === i ? { ...r, committed_amount: e.target.value } : r)))} />
+                      <Label htmlFor={`don-committed-${s.year}`}>Committed donation ($)</Label>
+                      <Input id={`don-committed-${s.year}`} type="number" min={0} step="0.01" value={d.committed_amount} onChange={(e) => setDonations((rows) => rows.map((r, j) => (j === i ? { ...r, committed_amount: e.target.value } : r)))} />
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Actually donated ($)</Label>
-                      <Input type="number" min={0} step="0.01" value={d.actual_donated_amount} onChange={(e) => setDonations((rows) => rows.map((r, j) => (j === i ? { ...r, actual_donated_amount: e.target.value } : r)))} />
+                      <Label htmlFor={`don-actual-${s.year}`}>Actually donated ($)</Label>
+                      <Input id={`don-actual-${s.year}`} type="number" min={0} step="0.01" value={d.actual_donated_amount} onChange={(e) => setDonations((rows) => rows.map((r, j) => (j === i ? { ...r, actual_donated_amount: e.target.value } : r)))} />
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Pelotonia Kids donation ($)</Label>
-                      <Input type="number" min={0} step="0.01" value={d.kids_amount} onChange={(e) => setDonations((rows) => rows.map((r, j) => (j === i ? { ...r, kids_amount: e.target.value } : r)))} />
+                      <Label htmlFor={`don-kids-${s.year}`}>Pelotonia Kids donation ($)</Label>
+                      <Input id={`don-kids-${s.year}`} type="number" min={0} step="0.01" value={d.kids_amount} onChange={(e) => setDonations((rows) => rows.map((r, j) => (j === i ? { ...r, kids_amount: e.target.value } : r)))} />
                       <p className="text-[11px] text-muted-foreground">Counts toward the sponsorship tier and earns the Pelotonia Kids Supporter badge.</p>
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Recipient</Label>
-                      <Input value={d.recipient} onChange={(e) => setDonations((rows) => rows.map((r, j) => (j === i ? { ...r, recipient: e.target.value } : r)))} />
+                      <Label htmlFor={`don-recipient-${s.year}`}>Recipient</Label>
+                      <Input id={`don-recipient-${s.year}`} value={d.recipient} onChange={(e) => setDonations((rows) => rows.map((r, j) => (j === i ? { ...r, recipient: e.target.value } : r)))} />
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Donation notes</Label>
-                      <Input value={d.notes} onChange={(e) => setDonations((rows) => rows.map((r, j) => (j === i ? { ...r, notes: e.target.value } : r)))} />
+                      <Label htmlFor={`don-notes-${s.year}`}>Donation notes</Label>
+                      <Input id={`don-notes-${s.year}`} value={d.notes} onChange={(e) => setDonations((rows) => rows.map((r, j) => (j === i ? { ...r, notes: e.target.value } : r)))} />
                     </div>
                   </div>
                   <p className="text-xs text-muted-foreground">
