@@ -13,19 +13,8 @@ export { DEFAULT_REGISTER_CONTENT, type RegisterContent } from "@/lib/register-c
 export const getRegisterContent = createServerFn({ method: "GET" }).handler(
   async (): Promise<RegisterContent> => {
     try {
-      const { createClient } = await import("@supabase/supabase-js");
-      const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
-      const client = createClient(process.env["SUPABASE_URL"]!, key, {
-        auth: { persistSession: false, autoRefreshToken: false },
-        global: {
-          fetch: (input: any, init: any) => {
-            const h = new Headers(init?.headers);
-            if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`) h.delete("Authorization");
-            h.set("apikey", key);
-            return fetch(input, { ...init, headers: h });
-          },
-        },
-      });
+      const { createDbClient } = await import("@/server/backend.server");
+      const client = createDbClient("anon");
       const { data, error } = await client
         .from("register_content")
         .select("content")

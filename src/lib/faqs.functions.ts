@@ -1,5 +1,4 @@
 import { createServerFn } from "@tanstack/react-start";
-import { createClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
@@ -15,26 +14,13 @@ export interface FaqRow {
   updated_at: string;
 }
 
-function serverPublicClient() {
-  const url = process.env.SUPABASE_URL!;
-  const key = process.env.SUPABASE_PUBLISHABLE_KEY!;
-  return createClient(url, key, {
-    auth: { persistSession: false, autoRefreshToken: false, storage: undefined },
-    global: {
-      fetch: (input, init) => {
-        const h = new Headers(init?.headers);
-        if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`) {
-          h.delete("Authorization");
-        }
-        h.set("apikey", key);
-        return fetch(input, { ...init, headers: h });
-      },
-    },
-  });
+async function serverPublicClient() {
+  const { createDbClient } = await import("@/server/backend.server");
+  return createDbClient("anon");
 }
 
 export const listFaqsPublic = createServerFn({ method: "GET" }).handler(async () => {
-  const sb = serverPublicClient();
+  const sb = await serverPublicClient();
   const { data, error } = await sb
     .from("faqs")
     .select("id, source_id, title, category, keywords, body, hidden, is_builtin, updated_at")

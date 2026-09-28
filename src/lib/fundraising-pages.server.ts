@@ -36,21 +36,10 @@ async function admin() {
   return supabaseAdmin as any;
 }
 
-/** Publishable-key client for public reads (RLS applies as anon). */
+/** Anonymous client for public reads (RLS applies as anon). */
 async function publicClient() {
-  const { createClient } = await import("@supabase/supabase-js");
-  const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
-  return createClient(process.env["SUPABASE_URL"]!, key, {
-    auth: { persistSession: false, autoRefreshToken: false },
-    global: {
-      fetch: (input: any, init: any) => {
-        const h = new Headers(init?.headers);
-        if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`) h.delete("Authorization");
-        h.set("apikey", key);
-        return fetch(input, { ...init, headers: h });
-      },
-    },
-  }) as any;
+  const { createDbClient } = await import("@/server/backend.server");
+  return createDbClient("anon") as any;
 }
 
 // ------------------------------------------------------------------ access

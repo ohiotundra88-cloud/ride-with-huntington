@@ -17,11 +17,9 @@ export type { VendorCaptainRow };
 
 export const getVendorAccess = createServerFn({ method: "GET" })
   .handler(async (): Promise<VendorAccess> => {
-    const { getRequestHeader } = await import("@tanstack/react-start/server");
-    const header = getRequestHeader("authorization") ?? "";
-    const token = header.startsWith("Bearer ") ? header.slice(7) : null;
-    const { getAccessFromToken } = await import("@/lib/vendors.server");
-    return getAccessFromToken(token);
+    const { optionalAuthContext } = await import("@/server/auth-context");
+    const { vendorAccessFor } = await import("@/lib/vendors.server");
+    return vendorAccessFor(await optionalAuthContext());
   });
 
 export const listVendorRecords = createServerFn({ method: "POST" })

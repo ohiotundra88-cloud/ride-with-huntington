@@ -31,27 +31,11 @@ export const getPaymentMode = createServerFn({ method: "GET" }).handler(async ()
 
 /** Role snapshot; returns a denied shape for signed-out visitors instead of throwing. */
 export const getFundraiserAccess = createServerFn({ method: "GET" }).handler(async (): Promise<FundraiserAccess> => {
-  const { getRequestHeader } = await import("@tanstack/react-start/server");
-  const header = getRequestHeader("authorization") ?? "";
-  const token = header.startsWith("Bearer ") ? header.slice(7) : null;
   const { DENIED_ACCESS, getAccess } = await import("@/lib/fundraising-pages.server");
-  if (!token) return DENIED_ACCESS;
-  const { createClient } = await import("@supabase/supabase-js");
-  const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
-  const client = createClient(process.env["SUPABASE_URL"]!, key, {
-    auth: { persistSession: false, autoRefreshToken: false },
-    global: {
-      fetch: (input: any, init: any) => {
-        const h = new Headers(init?.headers);
-        h.set("apikey", key);
-        h.set("Authorization", `Bearer ${token}`);
-        return fetch(input, { ...init, headers: h });
-      },
-    },
-  });
-  const { data, error } = await client.auth.getUser(token);
-  if (error || !data.user) return DENIED_ACCESS;
-  return getAccess({ supabase: client, userId: data.user.id, claims: { email: data.user.email } } as any);
+  const { optionalAuthContext } = await import("@/server/auth-context");
+  const ctx = await optionalAuthContext();
+  if (!ctx) return DENIED_ACCESS;
+  return getAccess(ctx as never);
 });
 
 // ------------------------------------------------------------------ public

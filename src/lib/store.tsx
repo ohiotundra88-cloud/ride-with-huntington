@@ -370,26 +370,24 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
     }
 
-    supabase.auth.getSession().then(({ data }) => {
-      applySession(data.session?.user ? { id: data.session.user.id, email: data.session.user.email } : null)
-        .finally(() => { if (!cancelled) setAuthReady(true); });
-    }).catch(() => { if (!cancelled) setAuthReady(true); });
-
-    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED") {
-        applySession(session?.user ? { id: session.user.id, email: session.user.email } : null);
+    // Sign-in happens on the Aspire Identity page (full-page redirects), so the
+    // session is read once per page load from the server.
+    fetch("/auth/me", { credentials: "same-origin", cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : { user: null }))
+      .then(({ user: me }: { user: { id: string; email: string } | null }) => applySession(me))
+      .catch(() => applySession(null))
+      .finally(() => {
+        if (cancelled) return;
+        setAuthReady(true);
         // Menu entries (Vendor CRM, Rider Progress, Team Messages) come from
-        // access checks cached per session — refetch them straight away so the
-        // nav is right without a page refresh.
+        // access checks cached per session.
         queryClient.invalidateQueries({ queryKey: ["vendor-access"] });
         queryClient.invalidateQueries({ queryKey: ["rider-progress-access"] });
         queryClient.invalidateQueries({ queryKey: ["messaging-access"] });
-      }
-    });
+      });
 
     return () => {
       cancelled = true;
-      sub.subscription.unsubscribe();
     };
   }, []);
 
@@ -477,13 +475,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     const id = user.userId;
-    await supabase.auth.signOut();
     setUserState(guestUser);
     setRegState(emptyReg);
     loadedFor.current = null;
     localStorage.removeItem(REG_KEY);
     localStorage.removeItem(regKeyFor(null));
     if (id) localStorage.removeItem(regKeyFor(id));
+    // Ends the Hub session and the Aspire Identity session.
+    window.location.assign("/auth/logout");
   };
 
   /**

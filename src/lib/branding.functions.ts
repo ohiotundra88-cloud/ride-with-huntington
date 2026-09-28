@@ -12,19 +12,8 @@ import {
 
 /** Public read — used by the landing page and header. */
 export const getBranding = createServerFn({ method: "GET" }).handler(async (): Promise<SiteBranding> => {
-  const { createClient } = await import("@supabase/supabase-js");
-  const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
-  const client = createClient(process.env["SUPABASE_URL"]!, key, {
-    auth: { persistSession: false, autoRefreshToken: false },
-    global: {
-      fetch: (input: any, init: any) => {
-        const h = new Headers(init?.headers);
-        if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`) h.delete("Authorization");
-        h.set("apikey", key);
-        return fetch(input, { ...init, headers: h });
-      },
-    },
-  });
+  const { createDbClient } = await import("@/server/backend.server");
+  const client = createDbClient("anon");
   const { data, error } = await client.from("site_branding").select(BRANDING_COLUMNS).eq("id", 1).maybeSingle();
   if (error) return defaultBranding;
   return (data as SiteBranding | null) ?? defaultBranding;

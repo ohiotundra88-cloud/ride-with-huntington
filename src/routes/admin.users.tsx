@@ -15,8 +15,6 @@ import { Flag, Scale, ShieldAlert, BadgeCheck, Megaphone, Crown, Briefcase } fro
 import { RoleMembersCard } from "@/components/RoleMembersCard";
 import { UserSearchPicker } from "@/components/UserSearchPicker";
 import { VendorAccessCard } from "@/components/VendorAccessCard";
-import { ActivationCard } from "@/components/ActivationCard";
-import { AuthEmailTimeline } from "@/components/AuthEmailTimeline";
 import { useStore } from "@/lib/store";
 
 
@@ -155,10 +153,6 @@ function AdminUsersPage() {
       />
 
       <VendorAccessCard />
-
-      <ActivationCard />
-
-      <AuthEmailTimeline />
 
 
       <RoleMembersCard
