@@ -12,6 +12,7 @@ import {
   Text,
 } from "@react-email/components";
 import { defineTemplate, type TemplateData } from "./define-template";
+import { siteUrl } from "./site";
 import { brandMark, button, container, footer, h1, header, main, text } from "./brand";
 
 interface Props {
@@ -25,9 +26,6 @@ interface Props {
   /** true for the final co-chair sign-off stage */
   finalStage?: boolean;
 }
-
-const SITE = "https://www.ridewithhuntington.com";
-const LINK = `${SITE}/admin/approvals`;
 
 function headline(title: string, stageLabel: string) {
   return `${stageLabel} review needed: “${title}”`;
@@ -82,14 +80,15 @@ const FundraiserReviewNeededEmail = ({
           </Text>
 
           <Section style={{ margin: "0 0 22px" }}>
-            <Button href={LINK} style={button}>
+            <Button href={`${siteUrl()}/admin/approvals`} style={button}>
               Review the request
             </Button>
           </Section>
 
           <Hr style={{ borderColor: "#e4e8e6", margin: "4px 0 16px" }} />
           <Text style={{ ...text, margin: "0" }}>
-            You can approve, request changes, or deny with a comment: {LINK}
+            You can approve, request changes, or deny with a comment:{" "}
+            {`${siteUrl()}/admin/approvals`}
           </Text>
           <Text style={footer}>Fundraiser approvals · Internal colleague resource</Text>
         </Container>

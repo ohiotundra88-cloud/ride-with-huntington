@@ -12,6 +12,7 @@ import {
   Text,
 } from "@react-email/components";
 import { defineTemplate, type TemplateData } from "./define-template";
+import { siteUrl } from "./site";
 import { brandMark, button, container, footer, h1, header, main, text } from "./brand";
 
 interface Props {
@@ -23,9 +24,6 @@ interface Props {
   recipientName?: string;
   reviewerEmail?: string;
 }
-
-const SITE = "https://www.ridewithhuntington.com";
-const LINK = `${SITE}/fundraiser-request`;
 
 function headline(decision: string, stageLabel: string, title: string) {
   if (decision === "fully_approved") return `“${title}” is fully approved`;
@@ -94,13 +92,15 @@ const FundraiserDecisionEmail = ({
           ) : null}
 
           <Section style={{ margin: "0 0 22px" }}>
-            <Button href={LINK} style={button}>
+            <Button href={`${siteUrl()}/fundraiser-request`} style={button}>
               {attention ? "Edit & resubmit" : "View request status"}
             </Button>
           </Section>
 
           <Hr style={{ borderColor: "#e4e8e6", margin: "4px 0 16px" }} />
-          <Text style={{ ...text, margin: "0" }}>You can track every stage in the Hub: {LINK}</Text>
+          <Text style={{ ...text, margin: "0" }}>
+            You can track every stage in the Hub: {`${siteUrl()}/fundraiser-request`}
+          </Text>
           <Text style={footer}>
             Fundraiser approvals{reviewerEmail ? ` · reviewed by ${reviewerEmail}` : ""} · Internal
             colleague resource

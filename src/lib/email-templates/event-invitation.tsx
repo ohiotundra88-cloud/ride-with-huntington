@@ -12,6 +12,7 @@ import {
   Text,
 } from "@react-email/components";
 import { defineTemplate, type TemplateData } from "./define-template";
+import { siteUrl } from "./site";
 import { brandMark, button, container, footer, h1, header, main, text } from "./brand";
 
 interface Props {
@@ -22,8 +23,6 @@ interface Props {
   recipientName?: string;
   ctaHref?: string;
 }
-
-const SITE = "https://www.ridewithhuntington.com";
 
 const EventInvitationEmail = ({
   eventTitle,
@@ -37,8 +36,8 @@ const EventInvitationEmail = ({
   const href = ctaHref?.trim()
     ? ctaHref.startsWith("http")
       ? ctaHref
-      : `${SITE}${ctaHref.startsWith("/") ? "" : "/"}${ctaHref}`
-    : `${SITE}/my-events`;
+      : `${siteUrl()}${ctaHref.startsWith("/") ? "" : "/"}${ctaHref}`
+    : `${siteUrl()}/my-events`;
 
   return (
     <Html lang="en" dir="ltr">
