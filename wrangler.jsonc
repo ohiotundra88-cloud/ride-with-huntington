@@ -10,11 +10,17 @@
   "compatibility_flags": ["nodejs_compat"],
   "assets": { "directory": ".output/public", "binding": "ASSETS" },
   "observability": { "enabled": true },
-  "routes": [{ "pattern": "ridewithhuntington.madebyotten.com", "custom_domain": true }],
+  // www is the public address; the bare domain and the old preview host
+  // redirect there (src/server.ts).
+  "routes": [
+    { "pattern": "www.ridewithhuntington.com", "custom_domain": true },
+    { "pattern": "ridewithhuntington.com", "custom_domain": true },
+    { "pattern": "ridewithhuntington.madebyotten.com", "custom_domain": true },
+  ],
   "workers_dev": false,
   "preview_urls": false,
   "vars": {
-    "PUBLIC_ORIGIN": "https://ridewithhuntington.madebyotten.com",
+    "PUBLIC_ORIGIN": "https://www.ridewithhuntington.com",
     "AUTH_BASE_URL": "https://auth.madebyaspire.com",
     "AUTH_CLIENT_ID": "team-huntington-hub",
     "AUTH_ORG_SLUG": "team-huntington",
