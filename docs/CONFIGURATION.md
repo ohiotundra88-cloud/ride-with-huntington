@@ -24,15 +24,15 @@ Other configuration errors you may see:
 
 ## Summary
 
-| Group                           |  Count | Where                                                            |
-| ------------------------------- | -----: | ---------------------------------------------------------------- |
-| Web app settings and secrets    |     17 | `setting()` calls in `src/`, plus two direct `process.env` reads |
-| Cloudflare bindings             |      3 | `wrangler.jsonc` (`HUB_SESSIONS`, `HUB_FILES`, `ASSETS`)         |
-| Build and Node runtime          |      3 | `vite.config.ts`, Nitro's Node server                            |
-| Pelotonia sync job              |      6 | `jobs/pelotonia-sync/` (plus shared ones listed there)           |
-| Local database tooling          |      6 | `supabase/tests/local/reset.sh`, `scripts/gen-db-types.mjs`      |
-| **Total read by this repo**     | **35** |                                                                  |
-| PostgREST (not read by the app) |      4 | the PostgREST container                                          |
+| Group                           |  Count | Where                                                              |
+| ------------------------------- | -----: | ------------------------------------------------------------------ |
+| Web app settings and secrets    |     18 | `setting()` calls in `src/`, plus three direct `process.env` reads |
+| Cloudflare bindings             |      3 | `wrangler.jsonc` (`HUB_SESSIONS`, `HUB_FILES`, `ASSETS`)           |
+| Build and Node runtime          |      3 | `vite.config.ts`, Nitro's Node server                              |
+| Pelotonia sync job              |      6 | `jobs/pelotonia-sync/` (plus shared ones listed there)             |
+| Local database tooling          |      6 | `supabase/tests/local/reset.sh`, `scripts/gen-db-types.mjs`        |
+| **Total read by this repo**     | **36** |                                                                    |
+| PostgREST (not read by the app) |      4 | the PostgREST container                                            |
 
 No `VITE_*` variable is read anywhere in `src/`. The `VITE_SUPABASE_*` and `SUPABASE_*` values in the committed `.env` are leftovers from the Lovable-hosted version and are unused.
 
@@ -81,12 +81,13 @@ Read in `src/lib/email-templates/send-email.ts`.
 
 ## Web app: Pelotonia public data
 
-Read with `process.env` at module load in `src/lib/pelotonia-api.server.ts` (live fallback when the synced copy lacks a rider). The sync job reads the same two names.
+The web app reads Team Huntington numbers from the Pelotonia team dashboard first (`src/lib/pelotonia-dashboard.server.ts`), the source the original Hub used and the one the team reports from. If the dashboard is down or doesn't list a rider, it falls back to the nightly synced copy, then to Pelotonia's public data service (`src/lib/pelotonia-api.server.ts`). All three are read with `process.env` at module load. The sync job reads only the last two names.
 
-| Name                        | Required | Example                                                            | What it does                                                                              |
-| --------------------------- | -------- | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
-| `PELOTONIA_API_BASE`        | No       | `https://pelotonia-p3-middleware-production.azurewebsites.net/api` | Pelotonia's public data service (the one my.pelotonia.org uses). That URL is the default. |
-| `PELOTONIA_TEAM_PELOTON_ID` | No       | `a0s3t00000BKX8sAAH`                                               | Team Huntington Bank's top-level peloton. That id is the default.                         |
+| Name                        | Required | Example                                                            | What it does                                                                                           |
+| --------------------------- | -------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| `PELOTONIA_DASHBOARD_BASE`  | No       | `https://pelotonia-dashboard-401340053598.us-central1.run.app`     | The Team Huntington Pelotonia dashboard (`/api/bundle/core`, `/api/members`). That URL is the default. |
+| `PELOTONIA_API_BASE`        | No       | `https://pelotonia-p3-middleware-production.azurewebsites.net/api` | Pelotonia's public data service (the one my.pelotonia.org uses). That URL is the default.              |
+| `PELOTONIA_TEAM_PELOTON_ID` | No       | `a0s3t00000BKX8sAAH`                                               | Team Huntington Bank's top-level peloton. That id is the default.                                      |
 
 ## Cloudflare bindings (temporary preview only)
 

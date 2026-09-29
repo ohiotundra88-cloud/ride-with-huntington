@@ -31,6 +31,7 @@ flowchart LR
   MAIL[Email provider<br/>Resend today]
   SYNC[Pelotonia sync job<br/>jobs/pelotonia-sync]
   PEL[(Pelotonia public API<br/>and PledgeIt page)]
+  DASH[(Pelotonia team dashboard<br/>Cloud Run)]
 
   UI -->|HTML, server function calls, data| SSR & SF & Proxy & Files
   UI -->|redirects| Auth
@@ -40,7 +41,8 @@ flowchart LR
   SF --> MAIL
   SYNC -->|service_role JWT| PGRST
   SYNC --> PEL
-  SF -.->|live fallback| PEL
+  SF -->|team and rider numbers| DASH
+  SF -.->|fallback| PEL
 ```
 
 ## Where the code lives
@@ -260,7 +262,13 @@ flowchart TD
 
 ## Pelotonia and PledgeIt sync
 
-Team pages (`/team`, rider progress, vendor rider slots) show Team Huntington's public Pelotonia numbers.
+Team pages (`/team`, analytics, admin goals, rider progress, vendor tiers and rider slots, messages) show Team Huntington's Pelotonia numbers.
+
+**Where the numbers come from, in order:**
+
+1. **The Pelotonia team dashboard** (`src/lib/pelotonia-dashboard.server.ts`): `/api/bundle/core` for the team, sub-teams and daily timeline, `/api/members` for each rider. This is the source the original Hub used and the one the team reports from, so the Hub matches it. Its team total is Pelotonia's raised amount (rider-level plus team-level donations) plus Pelotonia Kids. Cached 10 minutes per server instance.
+2. **The nightly synced copy** below, if the dashboard is down or doesn't list a rider.
+3. **Pelotonia's public data service**, live, for a rider neither of the above has yet.
 
 ```mermaid
 flowchart LR
@@ -270,8 +278,9 @@ flowchart LR
   SY -->|team, 14 sub-teams, riders, routes| PAPI[(Pelotonia public API)]
   SY -->|__NEXT_DATA__ on the campaign page| PL[(PledgeIt: Pelotonia Kids)]
   SY -->|upsert as service_role| PG[(pelotonia_* tables<br/>pelotonia_kids_campaigns<br/>pelotonia_sync_runs)]
-  APP[Hub server<br/>src/lib/pelotonia-data.server.ts] -->|read| PG
-  APP -.->|only for riders missing locally| PAPI
+  APP[Hub server<br/>src/lib/pelotonia-data.server.ts] -->|1. team + riders| DASH[(Pelotonia team dashboard)]
+  APP -.->|2. if the dashboard is down| PG
+  APP -.->|3. riders missing from both| PAPI
 ```
 
 - `sync.mjs` reads Pelotonia's public data service (no key) and one public PledgeIt page per slug, and upserts into the `pelotonia_*` tables through PostgREST as `service_role`. Every run is recorded in `pelotonia_sync_runs`.

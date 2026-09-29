@@ -1,11 +1,13 @@
 /**
  * Team Huntington Pelotonia data for the Hub's pages.
  *
- * Reads the local copy kept fresh by jobs/pelotonia-sync (nightly), and falls
- * back to Pelotonia's live public data for anything the copy doesn't have yet
- * (a rider who registered today, or before the first sync has finished).
+ * Numbers come first from the Pelotonia team dashboard (the source the
+ * original Hub used and the team reports from), so the Hub matches it. If the
+ * dashboard is down or doesn't know a rider, the Hub falls back to its own
+ * nightly copy (jobs/pelotonia-sync), then to Pelotonia's live public data.
  */
 import { createDbClient } from "@/server/backend.server";
+import { fetchDashboardRiders, fetchDashboardTeam } from "@/lib/pelotonia-dashboard.server";
 import {
   fetchRiders,
   fetchTeam,
@@ -28,6 +30,8 @@ export interface TeamOverview {
   highRollers: number | null;
   survivors: number | null;
   totalCommitted: number | null;
+  /** Only the dashboard publishes a donation count. */
+  donationsCount?: number | null;
   lastUpdated: string | null;
   subteams: {
     name: string;
@@ -67,6 +71,9 @@ function db() {
 const MIN_PROFILE_SHARE = 0.9;
 
 export async function teamOverview(): Promise<TeamOverview | null> {
+  const dashboard = await fetchDashboardTeam();
+  if (dashboard) return dashboard;
+
   try {
     const client = db();
     const [
@@ -188,17 +195,24 @@ function fromRow(r: Row): PelotoniaRider {
   };
 }
 
-/** Riders by Pelotonia public ID: local copy first, live lookups for the rest. */
+/** Riders by Pelotonia public ID: dashboard first, then the local copy, then live lookups. */
 export async function ridersByPublicId(publicIds: unknown[]): Promise<Map<string, PelotoniaRider>> {
   const ids = [...new Set(publicIds.map(normalizePublicId).filter((v): v is string => !!v))];
   const out = new Map<string, PelotoniaRider>();
   if (!ids.length) return out;
+  const dashboard = await fetchDashboardRiders();
+  if (dashboard)
+    for (const id of ids) {
+      const r = dashboard.get(id);
+      if (r) out.set(id, r);
+    }
+  const notOnDashboard = ids.filter((id) => !out.has(id));
   try {
-    for (let i = 0; i < ids.length; i += 200) {
+    for (let i = 0; i < notOnDashboard.length; i += 200) {
       const { data } = await db()
         .from("pelotonia_riders")
         .select("*, pelotonia_pelotons(short_name)")
-        .in("public_id", ids.slice(i, i + 200));
+        .in("public_id", notOnDashboard.slice(i, i + 200));
       for (const r of data ?? []) if (r.profile_synced_at) out.set(String(r.public_id), fromRow(r));
     }
   } catch (e) {

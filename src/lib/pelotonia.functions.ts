@@ -37,14 +37,14 @@ export interface PelotoniaTeamData {
 }
 
 /**
- * Team Huntington fundraising figures: the nightly local copy of Pelotonia's
- * public data, falling back to a live read (server-side, VPN friendly).
+ * Team Huntington fundraising figures from the Pelotonia team dashboard,
+ * falling back to the Hub's nightly copy, then a live read (server-side, VPN friendly).
  */
 export const getPelotoniaTeamData = createServerFn({ method: "GET" }).handler(
   async (): Promise<PelotoniaTeamData | null> => {
     const { teamOverview } = await import("@/lib/pelotonia-data.server");
     const team = await teamOverview();
-    return team ? { ...team, donationsCount: null } : null;
+    return team ? { ...team, donationsCount: team.donationsCount ?? null } : null;
   },
 );
 
