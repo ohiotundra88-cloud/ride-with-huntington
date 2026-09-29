@@ -12,6 +12,7 @@ import {
   Text,
 } from "@react-email/components";
 import { defineTemplate, type TemplateData } from "./define-template";
+import { siteUrl } from "./site";
 import { brandMark, button, container, footer, h1, header, main, text } from "./brand";
 
 interface Props {
@@ -24,8 +25,6 @@ interface Props {
   fromEmail?: string;
   hubUrl?: string;
 }
-
-const SITE = "https://www.ridewithhuntington.com";
 
 const priorityStyle = (priority?: string) => {
   if (priority === "urgent")
@@ -50,9 +49,9 @@ const AnnouncementEmail = ({
   const link = ctaHref?.trim()
     ? ctaHref.startsWith("http")
       ? ctaHref
-      : `${SITE}${ctaHref.startsWith("/") ? "" : "/"}${ctaHref}`
+      : `${siteUrl()}${ctaHref.startsWith("/") ? "" : "/"}${ctaHref}`
     : "";
-  const inbox = hubUrl?.trim() || `${SITE}/inbox`;
+  const inbox = hubUrl?.trim() || `${siteUrl()}/inbox`;
   const badge = priorityStyle(priority);
 
   return (
