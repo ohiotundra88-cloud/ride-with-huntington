@@ -14,6 +14,7 @@ import {
 } from "./vendor/portal-auth/index.js";
 import { binding, setting } from "./runtime";
 import { createDbClient } from "./backend.server";
+import { recoverSignIn } from "./sign-in-recovery";
 
 export interface HubUser {
   /** Hub user id (auth.users.id) used throughout the database. */
@@ -49,7 +50,8 @@ function portalAuth(): PortalAuth {
 }
 
 export const signIn = (request: Request) => portalAuth().login(request);
-export const completeSignIn = (request: Request) => portalAuth().callback(request);
+export const completeSignIn = async (request: Request) =>
+  recoverSignIn(request, await portalAuth().callback(request));
 export const signOut = (request: Request) => portalAuth().logout(request);
 
 // Provider subject -> Hub user id, remembered for the life of the isolate.
