@@ -2,6 +2,7 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+import { canonicalRedirect } from "./server/canonical";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -42,22 +43,6 @@ function isH3SwallowedErrorBody(body: string): boolean {
   } catch {
     return false;
   }
-}
-
-/**
- * One public address. Any other host that reaches this Worker (the bare
- * domain, an old preview hostname) is sent to PUBLIC_ORIGIN with the same
- * path, so sign-in cookies and links always belong to one origin.
- */
-function canonicalRedirect(request: Request, env: unknown): Response | null {
-  const origin = (env as { PUBLIC_ORIGIN?: unknown } | null)?.PUBLIC_ORIGIN;
-  if (typeof origin !== "string" || !origin) return null;
-  const url = new URL(request.url);
-  const canonical = new URL(origin);
-  if (url.host === canonical.host || url.hostname === "localhost") return null;
-  const target = new URL(url.pathname + url.search, canonical);
-  const status = request.method === "GET" || request.method === "HEAD" ? 301 : 308;
-  return Response.redirect(target.toString(), status);
 }
 
 export default {
