@@ -1664,6 +1664,7 @@ export type Database = {
         Row: {
           fundraiser_pages_enabled: boolean;
           id: number;
+          ride_weekend_date: string;
           updated_at: string;
           updated_by: string | null;
           vendor_crm_enabled: boolean;
@@ -1671,6 +1672,7 @@ export type Database = {
         Insert: {
           fundraiser_pages_enabled?: boolean;
           id?: number;
+          ride_weekend_date?: string;
           updated_at?: string;
           updated_by?: string | null;
           vendor_crm_enabled?: boolean;
@@ -1678,6 +1680,7 @@ export type Database = {
         Update: {
           fundraiser_pages_enabled?: boolean;
           id?: number;
+          ride_weekend_date?: string;
           updated_at?: string;
           updated_by?: string | null;
           vendor_crm_enabled?: boolean;
@@ -2309,6 +2312,7 @@ export type Database = {
       is_fundraiser_reviewer: { Args: { _user_id: string }; Returns: boolean };
       is_leadership: { Args: { _user_id: string }; Returns: boolean };
       is_superuser: { Args: { _user_id: string }; Returns: boolean };
+      set_ride_weekend_date: { Args: { _date: string }; Returns: string };
       profile_privileged_unchanged: {
         Args: { _id: string; _vendor_access: boolean };
         Returns: boolean;

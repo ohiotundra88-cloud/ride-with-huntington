@@ -1,9 +1,17 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import type { SiteSettings } from "@/lib/site-settings.shared";
+import {
+  rideWeekendDateFromInput,
+  siteSettingsAfterRideWeekendDateSave,
+  type SiteSettings,
+} from "@/lib/site-settings.shared";
 
-export { DEFAULT_SITE_SETTINGS, type SiteSettings } from "@/lib/site-settings.shared";
+export {
+  DEFAULT_SITE_SETTINGS,
+  UNAVAILABLE_SITE_SETTINGS,
+  type SiteSettings,
+} from "@/lib/site-settings.shared";
 
 /** Readable by everyone (including signed-out visitors and SSR). */
 export const getSiteSettings = createServerFn({ method: "GET" }).handler(
@@ -51,4 +59,20 @@ export const setVendorCrmEnabled = createServerFn({ method: "POST" })
 
     const { readSiteSettings } = await import("@/lib/site-settings.server");
     return readSiteSettings();
+  });
+
+export const setRideWeekendDate = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((d) => z.object({ date: z.string() }).parse(d))
+  .handler(async ({ data, context }): Promise<SiteSettings> => {
+    const rideWeekendDate = rideWeekendDateFromInput(data.date);
+    const { data: savedDate, error } = await context.supabase.rpc("set_ride_weekend_date", {
+      _date: rideWeekendDate,
+    });
+    if (error) throw new Error(error.message);
+    if (!savedDate) throw new Error("The Ride Weekend countdown date was not updated.");
+
+    const { readSiteSettings } = await import("@/lib/site-settings.server");
+    const settings = await readSiteSettings();
+    return siteSettingsAfterRideWeekendDateSave(settings, savedDate, rideWeekendDate);
   });

@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   getSiteSettings,
   DEFAULT_SITE_SETTINGS,
+  UNAVAILABLE_SITE_SETTINGS,
   type SiteSettings,
 } from "@/lib/site-settings.functions";
 
@@ -15,11 +16,14 @@ export function useSiteSettings() {
     staleTime: 30_000,
     retry: false,
   });
+  const settings = q.isError ? UNAVAILABLE_SITE_SETTINGS : (q.data ?? DEFAULT_SITE_SETTINGS);
   return {
     ...q,
-    settings: q.data ?? DEFAULT_SITE_SETTINGS,
-    fundraiserPagesEnabled: (q.data ?? DEFAULT_SITE_SETTINGS).fundraiserPagesEnabled,
+    settings,
+    fundraiserPagesEnabled: settings.fundraiserPagesEnabled,
+    rideWeekendDate: settings.rideWeekendDate,
+    rideWeekendDateAvailable: settings.rideWeekendDateAvailable,
     /** True only once we know the switch is off. */
-    fundraiserPagesPaused: q.data ? !q.data.fundraiserPagesEnabled : false,
+    fundraiserPagesPaused: q.isError || (q.data ? !q.data.fundraiserPagesEnabled : false),
   };
 }

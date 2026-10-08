@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +26,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { openConcierge } from "@/lib/concierge";
-import { RIDE_WEEKEND_DATE, timelineSections } from "@/lib/ride-weekend";
+import { timelineSections } from "@/lib/ride-weekend";
 import { mergeTimelineWithRegistration } from "@/lib/journey-merge";
 import { useAdmin } from "@/lib/admin-store";
 import {
@@ -40,10 +41,20 @@ import { MyEventsCard } from "@/components/MyEventsCard";
 
 import { InlineEditText } from "@/components/InlineEditText";
 import { toast } from "sonner";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getRiderFundraising } from "@/lib/pelotonia.functions";
 import { useJourneyReadiness } from "@/lib/journey-readiness";
+import { setRideWeekendDate } from "@/lib/site-settings.functions";
+import { SITE_SETTINGS_KEY, useSiteSettings } from "@/lib/useSiteSettings";
+import {
+  canManageRideWeekendDate,
+  discardRideWeekendDateDraft,
+  rideWeekendDateDraftDirty,
+  rideWeekendDateFromInput,
+  rideWeekendDateInput,
+  syncRideWeekendDateDraft,
+} from "@/lib/site-settings.shared";
 
 /** True when the signed-in Super User has switched on inline text editing. */
 const EditCtx = createContext(false);
@@ -176,11 +187,52 @@ function DashboardPage() {
   const { user, registration } = useStore();
   const { state, resetSection, setState } = useAdmin();
   const { copy, setCopy } = useJourneyEdits();
+  const queryClient = useQueryClient();
+  const { settings } = useSiteSettings();
   const [view, setView] = useState<"rider" | "family">("rider");
   const [editing, setEditing] = useState(false);
-  const cd = useCountdown(RIDE_WEEKEND_DATE);
+  const configuredDate = rideWeekendDateInput(settings.rideWeekendDate);
+  const [countdownDraft, setCountdownDraft] = useState(() => ({
+    date: configuredDate,
+    configuredDate: settings.rideWeekendDateAvailable ? configuredDate : null,
+    ready: settings.rideWeekendDateAvailable,
+    touched: false,
+  }));
+  useEffect(() => {
+    setCountdownDraft((draft) =>
+      syncRideWeekendDateDraft(draft, configuredDate, settings.rideWeekendDateAvailable, editing),
+    );
+  }, [configuredDate, editing, settings.rideWeekendDateAvailable]);
+
+  const saveCountdownDate = useMutation({
+    mutationFn: () => setRideWeekendDate({ data: { date: countdownDraft.date } }),
+    onSuccess: (saved) => {
+      queryClient.setQueryData(SITE_SETTINGS_KEY, saved);
+      setCountdownDraft({
+        date: rideWeekendDateInput(saved.rideWeekendDate),
+        configuredDate: rideWeekendDateInput(saved.rideWeekendDate),
+        ready: true,
+        touched: false,
+      });
+      toast.success("Countdown date updated");
+    },
+    onError: (error) =>
+      toast.error(error instanceof Error ? error.message : "Could not update the countdown date."),
+  });
+
+  const countdownTarget = settings.rideWeekendDateAvailable
+    ? settings.rideWeekendDate
+    : countdownDraft.configuredDate
+      ? rideWeekendDateFromInput(countdownDraft.configuredDate)
+      : settings.rideWeekendDate;
+  const cd = useCountdown(countdownTarget);
   const firstName = user.name.split(" ")[0];
-  const canEdit = user.isSuperUser;
+  const canEditText = user.isSuperUser;
+  const mayEditCountdown = canManageRideWeekendDate(user.roles);
+  const canEditCountdown =
+    mayEditCountdown && countdownDraft.ready && countdownDraft.configuredDate !== null;
+  const countdownDateDirty = rideWeekendDateDraftDirty(countdownDraft);
+  const canEdit = canEditText || canEditCountdown;
 
   const { merged, score, riderFundraising } = useJourneyReadiness();
   const readiness = useMemo(
@@ -189,7 +241,7 @@ function DashboardPage() {
   );
 
   return (
-    <EditCtx.Provider value={canEdit && editing}>
+    <EditCtx.Provider value={canEditText && editing}>
       <div className="mx-auto max-w-6xl px-4 py-8 space-y-6">
         <AnnouncementBanner />
 
@@ -197,11 +249,19 @@ function DashboardPage() {
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-dashed border-[var(--brand)]/60 bg-[var(--brand)]/5 px-4 py-3">
             <p className="text-sm text-muted-foreground">
               {editing
-                ? "Edit mode on — click any highlighted text to change it. Changes save as you go."
-                : "Super User: you can edit the text on this page."}
+                ? canEditText
+                  ? canEditCountdown
+                    ? "Edit mode on — update highlighted text or the countdown date."
+                    : "Edit mode on — update highlighted text."
+                  : "Edit mode on — update the Ride Weekend countdown date."
+                : canEditText
+                  ? canEditCountdown
+                    ? "Admin: you can edit page text and the countdown date."
+                    : "Admin: you can edit page text."
+                  : "Admin: you can edit the Ride Weekend countdown date."}
             </p>
             <div className="flex gap-2">
-              {editing && (
+              {editing && canEditText && (
                 <Button
                   size="sm"
                   variant="ghost"
@@ -222,8 +282,12 @@ function DashboardPage() {
                   editing ? "bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90" : ""
                 }
                 onClick={() => {
+                  if (editing && countdownDateDirty) {
+                    toast.error("Save or discard the countdown date before leaving edit mode.");
+                    return;
+                  }
                   setEditing((v) => !v);
-                  if (editing) toast.success("Edits saved");
+                  if (editing && canEditText) toast.success("Text edits saved");
                 }}
               >
                 {editing ? (
@@ -232,7 +296,7 @@ function DashboardPage() {
                   </>
                 ) : (
                   <>
-                    <Pencil className="mr-1 h-3.5 w-3.5" /> Edit text
+                    <Pencil className="mr-1 h-3.5 w-3.5" /> Edit journey
                   </>
                 )}
               </Button>
@@ -246,7 +310,7 @@ function DashboardPage() {
               <div className="min-w-0 flex-1">
                 <p className="text-xs uppercase tracking-wider text-white/60">
                   <InlineEditText
-                    editing={canEdit && editing}
+                    editing={canEditText && editing}
                     value={copy.heroEyebrow}
                     onCommit={(v) => setCopy("heroEyebrow", v)}
                   />
@@ -256,13 +320,13 @@ function DashboardPage() {
                 </h1>
                 <p className="mt-2 text-white/85 text-base sm:text-lg">
                   <InlineEditText
-                    editing={canEdit && editing}
+                    editing={canEditText && editing}
                     value={copy.heroReadyPrefix}
                     onCommit={(v) => setCopy("heroReadyPrefix", v)}
                   />{" "}
                   <span className="font-bold text-[var(--brand)]">{score}%</span>{" "}
                   <InlineEditText
-                    editing={canEdit && editing}
+                    editing={canEditText && editing}
                     value={copy.heroReadySuffix}
                     onCommit={(v) => setCopy("heroReadySuffix", v)}
                   />
@@ -279,7 +343,7 @@ function DashboardPage() {
                 <div className="flex items-center gap-2 text-white/70 text-xs uppercase tracking-wider">
                   <CalendarClock className="h-3.5 w-3.5" />
                   <InlineEditText
-                    editing={canEdit && editing}
+                    editing={canEditText && editing}
                     value={copy.countdownLabel}
                     onCommit={(v) => setCopy("countdownLabel", v)}
                   />
@@ -296,9 +360,62 @@ function DashboardPage() {
                     </>
                   )}
                 </p>
+                {canEditCountdown && editing && (
+                  <div className="mt-3 space-y-2 border-t border-white/15 pt-3">
+                    <label
+                      htmlFor="journey-countdown-date"
+                      className="block text-[10px] font-semibold uppercase tracking-wide text-white/70"
+                    >
+                      Countdown date
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      <Input
+                        id="journey-countdown-date"
+                        type="date"
+                        value={countdownDraft.date}
+                        onChange={(event) =>
+                          setCountdownDraft({
+                            date: event.target.value,
+                            configuredDate: countdownDraft.configuredDate,
+                            ready: true,
+                            touched: true,
+                          })
+                        }
+                        className="h-8 min-w-40 flex-1 border-white/20 bg-white text-foreground"
+                        disabled={saveCountdownDate.isPending}
+                      />
+                      {countdownDateDirty && (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 text-white hover:bg-white/10 hover:text-white"
+                          disabled={saveCountdownDate.isPending}
+                          onClick={() =>
+                            setCountdownDraft(discardRideWeekendDateDraft(countdownDraft))
+                          }
+                        >
+                          Discard
+                        </Button>
+                      )}
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        className="h-8"
+                        disabled={
+                          !countdownDraft.date || !countdownDateDirty || saveCountdownDate.isPending
+                        }
+                        onClick={() => saveCountdownDate.mutate()}
+                      >
+                        {saveCountdownDate.isPending ? "Saving…" : "Save date"}
+                      </Button>
+                    </div>
+                  </div>
+                )}
                 <p className="mt-1 text-[10px] uppercase tracking-wide text-white/60">
                   <InlineEditText
-                    editing={canEdit && editing}
+                    editing={canEditText && editing}
                     value={copy.countdownCaption}
                     onCommit={(v) => setCopy("countdownCaption", v)}
                   />
@@ -327,7 +444,7 @@ function DashboardPage() {
             </Tabs>
             <p className="text-xs text-muted-foreground">
               <InlineEditText
-                editing={canEdit && editing}
+                editing={canEditText && editing}
                 value={copy.viewSwitchNote}
                 onCommit={(v) => setCopy("viewSwitchNote", v)}
               />
