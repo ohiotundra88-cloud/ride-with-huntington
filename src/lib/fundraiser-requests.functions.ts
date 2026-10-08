@@ -333,48 +333,68 @@ export const decideOnRequest = createServerFn({ method: "POST" })
   .validator((d) => decisionSchema.parse(d))
   .handler(async ({ data, context }) => {
     const roles = await myRoles(context);
-    const { STAGES, actionableStages, canActOnStage, isFullyApproved } =
+    const { STAGES, actionableStages, applyStageDecision, canActOnStage, isFullyApproved } =
       await import("@/lib/fundraiser-requests.shared");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: current, error: cErr } = await supabaseAdmin
-      .from("fundraiser_requests")
-      .select(REQUEST_COLUMNS)
-      .eq("id", data.id)
-      .maybeSingle();
-    if (cErr) throw new Error(cErr.message);
-    if (!current) throw new Error("Request not found");
-    const request = current as unknown as FundraiserRequest;
+    let previous: FundraiserRequest | null = null;
+    let fresh: FundraiserRequest | null = null;
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const { data: current, error: cErr } = await supabaseAdmin
+        .from("fundraiser_requests")
+        .select(REQUEST_COLUMNS)
+        .eq("id", data.id)
+        .maybeSingle();
+      if (cErr) throw new Error(cErr.message);
+      if (!current) throw new Error("Request not found");
+      const request = current as unknown as FundraiserRequest;
 
-    if (!canActOnStage(roles, data.stage, { request, userId: context.userId })) {
-      throw new Error(
-        data.stage === "captain"
-          ? "This request was routed to a different captain. Ask an admin to reassign it."
-          : "You don't hold the designation required for this approval stage.",
-      );
+      if (!canActOnStage(roles, data.stage, { request, userId: context.userId })) {
+        throw new Error(
+          data.stage === "captain"
+            ? "This request was routed to a different captain. Ask an admin to reassign it."
+            : "You don't hold the designation required for this approval stage.",
+        );
+      }
+
+      if (!actionableStages(request).includes(data.stage)) {
+        throw new Error("This stage isn't open yet — an earlier approval is still outstanding.");
+      }
+
+      const next = applyStageDecision(request, data.stage, data.decision);
+      const patch = {
+        [`${data.stage}_status`]: data.decision,
+        status: next.status,
+      } as Record<string, string>;
+
+      // Compare every approval field used to derive the new status. If another
+      // reviewer saved first, retry against that new state rather than
+      // overwriting it with a status calculated from a stale snapshot.
+      const { data: updated, error: uErr } = await supabaseAdmin
+        .from("fundraiser_requests")
+        .update(patch as never)
+        .eq("id", data.id)
+        .match({
+          status: request.status,
+          captain_status: request.captain_status,
+          legal_status: request.legal_status,
+          risk_status: request.risk_status,
+          compliance_status: request.compliance_status,
+          marketing_status: request.marketing_status,
+          cochair_status: request.cochair_status,
+        })
+        .select(REQUEST_COLUMNS)
+        .maybeSingle();
+      if (uErr) throw new Error(uErr.message);
+      if (updated) {
+        previous = request;
+        fresh = updated as unknown as FundraiserRequest;
+        break;
+      }
     }
 
-    if (!actionableStages(request).includes(data.stage)) {
-      throw new Error("This stage isn't open yet — an earlier approval is still outstanding.");
-    }
-
-    const patch: Record<string, string> = { [`${data.stage}_status`]: data.decision };
-    const next = { ...request, [`${data.stage}_status`]: data.decision } as FundraiserRequest;
-
-    if (data.decision === "declined") patch.status = "declined";
-    else if (data.decision === "changes_requested") patch.status = "changes_requested";
-    else if (isFullyApproved(next)) patch.status = "approved";
-    else patch.status = "in_review";
-
-    const { data: updated, error: uErr } = await supabaseAdmin
-      .from("fundraiser_requests")
-      .update(patch as never)
-      .eq("id", data.id)
-      .select(REQUEST_COLUMNS)
-      .single();
-    if (uErr) throw new Error(uErr.message);
+    if (!previous || !fresh)
+      throw new Error("Another reviewer changed this request. Please try again.");
     await logDecision(data.id, data.stage, data.decision, data.note, context.userId);
-
-    const fresh = updated as unknown as FundraiserRequest;
     // Virtual/non-physical events go live once the captain approves; in-person
     // events only appear on the calendar after final co-chair sign-off.
     // Raffles never go on the calendar; approved ones are listed under
@@ -471,7 +491,7 @@ export const decideOnRequest = createServerFn({ method: "POST" })
 
     // Email whoever the request now waits on, so each stage hears about it
     // rather than having to watch the queue.
-    const opened = actionableStages(fresh).filter((s) => !actionableStages(request).includes(s));
+    const opened = actionableStages(fresh).filter((s) => !actionableStages(previous).includes(s));
     await notifyStageReviewers(fresh, opened);
 
     return { ok: true };

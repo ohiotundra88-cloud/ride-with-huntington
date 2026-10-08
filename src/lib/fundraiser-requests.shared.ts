@@ -114,6 +114,25 @@ export function isFullyApproved(r: FundraiserRequest) {
   return STAGES.every((s) => isStageCleared(stageStatus(r, s.key)));
 }
 
+/** Derive the request's overall state from the latest stored stage decisions. */
+export function requestStatusFromStages(r: FundraiserRequest): RequestStatus {
+  const statuses = STAGES.map((stage) => stageStatus(r, stage.key));
+  if (statuses.includes("declined")) return "declined";
+  if (statuses.includes("changes_requested")) return "changes_requested";
+  if (statuses.every(isStageCleared)) return "approved";
+  return "in_review";
+}
+
+/** Apply one reviewer decision to a fresh request snapshot. */
+export function applyStageDecision(
+  request: FundraiserRequest,
+  stage: StageKey,
+  decision: "approved" | "changes_requested" | "declined",
+): FundraiserRequest {
+  const next = { ...request, [`${stage}_status`]: decision } as FundraiserRequest;
+  return { ...next, status: requestStatusFromStages(next) };
+}
+
 export function statusLabel(status: RequestStatus) {
   switch (status) {
     case "submitted":
