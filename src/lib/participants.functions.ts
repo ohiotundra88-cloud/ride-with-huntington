@@ -42,15 +42,12 @@ const upsertSchema = z.object({
 });
 
 export const upsertMyParticipant = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => upsertSchema.parse(input))
+  .validator((input: unknown) => upsertSchema.parse(input))
   .middleware([requireSupabaseAuth])
   .handler(async ({ data, context }) => {
     const { error, data: row } = await context.supabase
       .from("participants")
-      .upsert(
-        { user_id: context.userId, ...data },
-        { onConflict: "user_id" },
-      )
+      .upsert({ user_id: context.userId, ...data }, { onConflict: "user_id" })
       .select()
       .single();
     if (error) throw error;

@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { exactEmail } from "@/lib/email-match";
+import type { AuthContext } from "@/integrations/supabase/auth-middleware";
 
 export interface AdminUserRow {
   user_id: string;
@@ -10,7 +12,7 @@ export interface AdminUserRow {
   is_self: boolean;
 }
 
-type Ctx = { supabase: any; userId: string };
+type Ctx = Pick<AuthContext, "supabase" | "userId">;
 
 /** Viewing the admin list is fine for admins and super users. */
 async function assertCallerIsAdmin(context: Ctx) {
@@ -57,7 +59,7 @@ export const listAdmins = createServerFn({ method: "GET" })
 
 export const grantAdminByEmail = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ email: z.string().email() }).parse(d))
+  .validator((d) => z.object({ email: z.string().email() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertCallerIsSuperUser(context);
     const normalized = data.email.trim().toLowerCase();
@@ -65,11 +67,13 @@ export const grantAdminByEmail = createServerFn({ method: "POST" })
     const { data: profile, error: pErr } = await supabaseAdmin
       .from("profiles")
       .select("id, email, full_name")
-      .ilike("email", normalized)
+      .ilike("email", exactEmail(normalized))
       .maybeSingle();
     if (pErr) throw new Error(pErr.message);
     if (!profile) {
-      throw new Error(`No colleague with email ${normalized} has signed in yet. Ask them to sign in once, then grant admin.`);
+      throw new Error(
+        `No colleague with email ${normalized} has signed in yet. Ask them to sign in once, then grant admin.`,
+      );
     }
     const { error: iErr } = await supabaseAdmin
       .from("user_roles")
@@ -80,7 +84,7 @@ export const grantAdminByEmail = createServerFn({ method: "POST" })
 
 export const revokeAdmin = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ user_id: z.string().uuid() }).parse(d))
+  .validator((d) => z.object({ user_id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertCallerIsSuperUser(context);
     if (data.user_id === context.userId) {

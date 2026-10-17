@@ -1,13 +1,8 @@
 import { createStart, createCsrfMiddleware, createMiddleware } from "@tanstack/react-start";
 
 import { renderErrorPage } from "./lib/error-page";
-// Replaces generated attachSupabaseAuth: reads the session from the
-// same-origin proxied client so no browser request hits the backend host.
-import { attachSupabaseAuthSameOrigin } from "@/lib/supabase-auth-attacher";
 
-const errorMiddleware = createMiddleware().server(async ({ next, request }) => {
-  // Email/webhook routes must never be redirected or wrapped.
-  if (new URL(request.url).pathname.startsWith("/lovable/")) return next();
+const errorMiddleware = createMiddleware().server(async ({ next }) => {
   try {
     return await next();
   } catch (error) {
@@ -22,6 +17,14 @@ const errorMiddleware = createMiddleware().server(async ({ next, request }) => {
   }
 });
 
+// Private-preview sign-in wall (no-op unless HUB_REQUIRE_SIGN_IN=true).
+const siteGateMiddleware = createMiddleware().server(async ({ next, request }) => {
+  const { siteGateResponse } = await import("@/server/site-gate");
+  const blocked = await siteGateResponse(request);
+  if (blocked) return blocked;
+  return next();
+});
+
 // Start installs this automatically when src/start.ts is absent; defining the
 // file opts out, so re-add it explicitly to keep server functions protected
 // from cross-site requests.
@@ -30,6 +33,5 @@ const csrfMiddleware = createCsrfMiddleware({
 });
 
 export const startInstance = createStart(() => ({
-  functionMiddleware: [attachSupabaseAuthSameOrigin],
-  requestMiddleware: [errorMiddleware, csrfMiddleware],
+  requestMiddleware: [errorMiddleware, siteGateMiddleware, csrfMiddleware],
 }));

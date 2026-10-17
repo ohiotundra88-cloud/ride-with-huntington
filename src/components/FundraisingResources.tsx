@@ -81,13 +81,17 @@ function AssetCard({ asset: a }: { asset: FundraisingAsset }) {
         />
       )}
       <CardContent className="p-5">
-        <Badge variant="outline" className="text-xs">{a.category}</Badge>
+        <Badge variant="outline" className="text-xs">
+          {a.category}
+        </Badge>
         <h3 className="mt-2 font-bold text-[var(--brand-dark)]">{a.title}</h3>
         {a.description && <p className="mt-1 text-sm text-muted-foreground">{a.description}</p>}
 
         {a.suggested_caption && (
           <div className="mt-3 rounded-lg bg-muted/60 p-3 text-sm">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Suggested caption</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Suggested caption
+            </p>
             <p className="mt-1 whitespace-pre-wrap">{a.suggested_caption}</p>
           </div>
         )}
@@ -96,18 +100,25 @@ function AssetCard({ asset: a }: { asset: FundraisingAsset }) {
           {fileHref && (
             <>
               <a href={fileHref} download={a.file_name ?? undefined}>
-                <Button size="sm" className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90">
+                <Button
+                  size="sm"
+                  className="bg-[var(--brand-dark)] text-white hover:bg-[var(--brand-dark)]/90"
+                >
                   <Download className="mr-1 h-4 w-4" /> Download
                 </Button>
               </a>
               <a href={fileHref} target="_blank" rel="noreferrer">
-                <Button size="sm" variant="outline"><Share2 className="mr-1 h-4 w-4" /> Preview</Button>
+                <Button size="sm" variant="outline">
+                  <Share2 className="mr-1 h-4 w-4" /> Preview
+                </Button>
               </a>
             </>
           )}
           {a.link_url && (
             <a href={a.link_url} target="_blank" rel="noreferrer">
-              <Button size="sm" variant="outline"><ExternalLink className="mr-1 h-4 w-4" /> Open link</Button>
+              <Button size="sm" variant="outline">
+                <ExternalLink className="mr-1 h-4 w-4" /> Open link
+              </Button>
             </a>
           )}
           {a.suggested_caption && (

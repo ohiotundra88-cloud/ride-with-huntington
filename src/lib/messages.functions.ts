@@ -42,7 +42,7 @@ export const getAudienceOptions = createServerFn({ method: "GET" })
 /** Live recipient count and preview list for a set of audience rules. */
 export const previewAudience = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { audience: unknown }) => ({
+  .validator((input: { audience: unknown }) => ({
     audience: normalizeAudience(input?.audience),
   }))
   .handler(async ({ data, context }): Promise<{ count: number; people: AudiencePerson[] }> => {
@@ -87,7 +87,7 @@ export const listMessages = createServerFn({ method: "GET" })
 
 /** Creates or updates a draft/scheduled message. Sent messages are immutable. */
 export const saveMessage = createServerFn({ method: "POST" })
-  .inputValidator(
+  .validator(
     (input: {
       id?: string | null;
       title: string;
@@ -185,21 +185,26 @@ export const saveMessage = createServerFn({ method: "POST" })
 
 /** Resolves the audience and writes recipient rows immediately. */
 export const sendMessageNow = createServerFn({ method: "POST" })
-  .inputValidator((input: { id: string }) => {
+  .validator((input: { id: string }) => {
     const id = String(input?.id ?? "").trim();
     if (!id) throw new Error("A message is required.");
     return { id };
   })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ data, context }): Promise<{
-    recipientCount: number;
-    emailsSent: number;
-    emailsSkipped: number;
-  }> => {
-    await requireSender(context.supabase, context.userId);
-    const email = String((context.claims as { email?: string } | null)?.email ?? "");
-    return deliverMessage(context.supabase, data.id, email);
-  });
+  .handler(
+    async ({
+      data,
+      context,
+    }): Promise<{
+      recipientCount: number;
+      emailsSent: number;
+      emailsSkipped: number;
+    }> => {
+      await requireSender(context.supabase, context.userId);
+      const email = String((context.claims as { email?: string } | null)?.email ?? "");
+      return deliverMessage(context.supabase, data.id, email);
+    },
+  );
 
 /** Colleagues permanently excluded from announcement emails. */
 export const listEmailOptOuts = createServerFn({ method: "GET" })
@@ -214,7 +219,7 @@ export const listEmailOptOuts = createServerFn({ method: "GET" })
 
 /** Adds or removes someone from the permanent no-email list (leadership only). */
 export const setEmailOptOut = createServerFn({ method: "POST" })
-  .inputValidator((input: { userId: string; optOut: boolean }) => {
+  .validator((input: { userId: string; optOut: boolean }) => {
     const userId = String(input?.userId ?? "").trim();
     if (!userId) throw new Error("A person is required.");
     return { userId, optOut: input?.optOut === true };
@@ -261,7 +266,7 @@ export const processDueMessages = createServerFn({ method: "POST" })
 
 /** Super-user-only removal of a message and its recipient rows. */
 export const deleteMessage = createServerFn({ method: "POST" })
-  .inputValidator((input: { id: string }) => {
+  .validator((input: { id: string }) => {
     const id = String(input?.id ?? "").trim();
     if (!id) throw new Error("A message is required.");
     return { id };
@@ -277,7 +282,7 @@ export const deleteMessage = createServerFn({ method: "POST" })
 
 /** Who received a message and whether they've read it. */
 export const listMessageRecipients = createServerFn({ method: "POST" })
-  .inputValidator((input: { id: string }) => {
+  .validator((input: { id: string }) => {
     const id = String(input?.id ?? "").trim();
     if (!id) throw new Error("A message is required.");
     return { id };
@@ -324,8 +329,8 @@ export const listMyMessages = createServerFn({ method: "GET" })
           priority: String(m["priority"] ?? "info") as InboxMessage["priority"],
           category: String(m["category"] ?? "general") as InboxMessage["category"],
           sentAt: (m["sent_at"] as string | null) ?? null,
-          readAt: ((row as { read_at: string | null }).read_at) ?? null,
-          dismissedAt: ((row as { dismissed_at: string | null }).dismissed_at) ?? null,
+          readAt: (row as { read_at: string | null }).read_at ?? null,
+          dismissedAt: (row as { dismissed_at: string | null }).dismissed_at ?? null,
           fromEmail: String(m["created_by_email"] ?? ""),
           status: String(m["status"] ?? "sent"),
         };
@@ -336,7 +341,7 @@ export const listMyMessages = createServerFn({ method: "GET" })
 
 /** Marks or dismisses the caller's own copy of a message. */
 export const updateMyMessageState = createServerFn({ method: "POST" })
-  .inputValidator((input: { id: string; read?: boolean; dismissed?: boolean }) => {
+  .validator((input: { id: string; read?: boolean; dismissed?: boolean }) => {
     const id = String(input?.id ?? "").trim();
     if (!id) throw new Error("A message is required.");
     return { id, read: input?.read === true, dismissed: input?.dismissed === true };

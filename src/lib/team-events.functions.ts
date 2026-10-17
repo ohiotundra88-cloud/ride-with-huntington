@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { emptyAudience, type MessagingAccess } from "@/lib/messages.shared";
+import { emptyAudience, normalizeAudience, type MessagingAccess } from "@/lib/messages.shared";
 import {
   accessFromRoles,
   assertAudienceAllowed,
@@ -16,6 +16,7 @@ import {
   type TeamEventInviteeRow,
   type TeamEventSummary,
 } from "@/lib/team-events.shared";
+import type { Db } from "@/server/backend.server";
 
 const idInput = z.object({ id: z.string().uuid() });
 
@@ -26,7 +27,7 @@ export const getTeamEventAccess = createServerFn({ method: "GET" })
     accessFromRoles(await loadRoles(context.supabase, context.userId)),
   );
 
-async function requireOrganizer(supabase: any, userId: string): Promise<MessagingAccess> {
+async function requireOrganizer(supabase: Db, userId: string): Promise<MessagingAccess> {
   const access = accessFromRoles(await loadRoles(supabase, userId));
   if (!access.allowed) {
     throw new Error("Forbidden — captain, co-chair, admin or super user access required.");
@@ -60,12 +61,12 @@ export const listManageableTeamEvents = createServerFn({ method: "GET" })
       tallies.set(row.event_id, t);
     }
 
-    return (data ?? []).map((row: any) => mapTeamEventRow(row, tallies.get(String(row.id))));
+    return (data ?? []).map((row) => mapTeamEventRow(row, tallies.get(row.id)));
   });
 
 /** Creates or updates a team event. Audience changes take effect on publish. */
 export const saveTeamEvent = createServerFn({ method: "POST" })
-  .inputValidator((d) => teamEventInputSchema.parse(d))
+  .validator((d) => teamEventInputSchema.parse(d))
   .middleware([requireSupabaseAuth])
   .handler(async ({ data, context }): Promise<{ id: string }> => {
     const access = await requireOrganizer(context.supabase, context.userId);
@@ -90,9 +91,12 @@ export const saveTeamEvent = createServerFn({ method: "POST" })
         .update(payload)
         .eq("id", data.id);
       if (error) throw new Error(error.message);
-      await context.supabase
-        .from("team_event_audit")
-        .insert({ event_id: data.id, action: "updated", actor_id: context.userId, actor_email: email });
+      await context.supabase.from("team_event_audit").insert({
+        event_id: data.id,
+        action: "updated",
+        actor_id: context.userId,
+        actor_email: email,
+      });
       return { id: data.id };
     }
 
@@ -102,9 +106,12 @@ export const saveTeamEvent = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (error) throw new Error(error.message);
-    await context.supabase
-      .from("team_event_audit")
-      .insert({ event_id: created.id, action: "created", actor_id: context.userId, actor_email: email });
+    await context.supabase.from("team_event_audit").insert({
+      event_id: created.id,
+      action: "created",
+      actor_id: context.userId,
+      actor_email: email,
+    });
     return { id: String(created.id) };
   });
 
@@ -113,7 +120,7 @@ export const saveTeamEvent = createServerFn({ method: "POST" })
  * publish) sends every invitee an inbox invitation with an RSVP link.
  */
 export const publishTeamEvent = createServerFn({ method: "POST" })
-  .inputValidator((d) => idInput.parse(d))
+  .validator((d) => idInput.parse(d))
   .middleware([requireSupabaseAuth])
   .handler(async ({ data, context }): Promise<{ invitedCount: number; added: number }> => {
     const access = await requireOrganizer(context.supabase, context.userId);
@@ -128,7 +135,7 @@ export const publishTeamEvent = createServerFn({ method: "POST" })
     if (!row) throw new Error("Event not found.");
     if (row.status === "cancelled") throw new Error("This event was cancelled.");
 
-    assertAudienceAllowed(access, ((row.audience as any)?.roles ?? []) as string[]);
+    assertAudienceAllowed(access, normalizeAudience(row.audience).roles);
 
     const people = resolveAudience(await buildAudienceRoster(), row.audience as never);
     if (!people.length) throw new Error("That audience has no one in it right now.");
@@ -206,7 +213,7 @@ export const publishTeamEvent = createServerFn({ method: "POST" })
 
 /** Marks an event cancelled and tells everyone who was invited. */
 export const cancelTeamEvent = createServerFn({ method: "POST" })
-  .inputValidator((d) => idInput.parse(d))
+  .validator((d) => idInput.parse(d))
   .middleware([requireSupabaseAuth])
   .handler(async ({ data, context }): Promise<{ notified: number }> => {
     await requireOrganizer(context.supabase, context.userId);
@@ -273,7 +280,7 @@ export const cancelTeamEvent = createServerFn({ method: "POST" })
 
 /** Super-user-only removal of an event and its invitee rows. */
 export const deleteTeamEvent = createServerFn({ method: "POST" })
-  .inputValidator((d) => idInput.parse(d))
+  .validator((d) => idInput.parse(d))
   .middleware([requireSupabaseAuth])
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
     const access = await requireOrganizer(context.supabase, context.userId);
@@ -285,7 +292,7 @@ export const deleteTeamEvent = createServerFn({ method: "POST" })
 
 /** Who was invited to an event and how they replied. */
 export const listTeamEventInvitees = createServerFn({ method: "POST" })
-  .inputValidator((d) => idInput.parse(d))
+  .validator((d) => idInput.parse(d))
   .middleware([requireSupabaseAuth])
   .handler(async ({ data, context }): Promise<TeamEventInviteeRow[]> => {
     await requireOrganizer(context.supabase, context.userId);
@@ -295,7 +302,7 @@ export const listTeamEventInvitees = createServerFn({ method: "POST" })
       .eq("event_id", data.id)
       .order("name");
     if (error) throw new Error(error.message);
-    return (rows ?? []).map((r: any) => ({
+    return (rows ?? []).map((r) => ({
       userId: String(r.user_id),
       name: String(r.name ?? ""),
       email: String(r.email ?? ""),
@@ -317,7 +324,7 @@ export const listMyTeamEvents = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
 
     return (data ?? [])
-      .map((row: any) => {
+      .map((row) => {
         const e = row.team_events;
         return {
           id: String(e.id),
@@ -341,9 +348,7 @@ export const listMyTeamEvents = createServerFn({ method: "GET" })
 
 /** Sets the caller's own RSVP on an event they were invited to. */
 export const setMyRsvp = createServerFn({ method: "POST" })
-  .inputValidator((d) =>
-    z.object({ id: z.string().uuid(), rsvp: z.enum(RSVP_VALUES) }).parse(d),
-  )
+  .validator((d) => z.object({ id: z.string().uuid(), rsvp: z.enum(RSVP_VALUES) }).parse(d))
   .middleware([requireSupabaseAuth])
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
     const { error } = await context.supabase

@@ -1,13 +1,17 @@
 import { Check, X, AlertCircle, PartyPopper } from "lucide-react";
 import {
-  trackerPhases, type FundraiserRequest, type TrackerPhase,
+  trackerPhases,
+  type FundraiserRequest,
+  type TrackerPhase,
 } from "@/lib/fundraiser-requests.shared";
 
 function dotClasses(p: TrackerPhase) {
-  if (p.state === "declined") return "bg-destructive text-destructive-foreground border-destructive";
+  if (p.state === "declined")
+    return "bg-destructive text-destructive-foreground border-destructive";
   if (p.state === "changes") return "bg-amber-500 text-white border-amber-500";
   if (p.state === "done") return "bg-[var(--brand)] text-[var(--brand-dark)] border-[var(--brand)]";
-  if (p.state === "current") return "bg-background text-[var(--brand-dark)] border-[var(--brand)] ring-4 ring-[var(--brand)]/25 animate-pulse";
+  if (p.state === "current")
+    return "bg-background text-[var(--brand-dark)] border-[var(--brand)] ring-4 ring-[var(--brand)]/25 animate-pulse";
   return "bg-muted text-muted-foreground border-border";
 }
 
@@ -34,7 +38,10 @@ export function ApprovalTracker({ request }: { request: FundraiserRequest }) {
       {/* Horizontal rail (sm and up) */}
       <ol className="hidden sm:flex sm:items-start">
         {phases.map((p, i) => (
-          <li key={p.key} className="relative flex flex-1 flex-col items-center last:flex-none last:w-24">
+          <li
+            key={p.key}
+            className="relative flex flex-1 flex-col items-center last:flex-none last:w-24"
+          >
             {i < phases.length - 1 && (
               <span
                 aria-hidden
@@ -49,7 +56,9 @@ export function ApprovalTracker({ request }: { request: FundraiserRequest }) {
             <span className="mt-2 text-center text-[11px] font-semibold leading-tight text-[var(--brand-dark)]">
               {p.label}
             </span>
-            {p.detail && <span className="text-center text-[10px] text-muted-foreground">{p.detail}</span>}
+            {p.detail && (
+              <span className="text-center text-[10px] text-muted-foreground">{p.detail}</span>
+            )}
             {p.chips && (
               <span className="mt-1.5 flex flex-wrap justify-center gap-1">
                 {p.chips.map((c) => (
@@ -79,14 +88,23 @@ export function ApprovalTracker({ request }: { request: FundraiserRequest }) {
         {phases.map((p, i) => (
           <li key={p.key} className="relative flex gap-3 pb-1">
             {i < phases.length - 1 && (
-              <span aria-hidden className={`absolute left-3.5 top-7 h-[calc(100%-1rem)] w-1 -translate-x-1/2 rounded-full ${railClasses(p)}`} />
+              <span
+                aria-hidden
+                className={`absolute left-3.5 top-7 h-[calc(100%-1rem)] w-1 -translate-x-1/2 rounded-full ${railClasses(p)}`}
+              />
             )}
-            <span className={`relative z-10 grid h-7 w-7 shrink-0 place-items-center rounded-full border-2 ${dotClasses(p)}`}>
+            <span
+              className={`relative z-10 grid h-7 w-7 shrink-0 place-items-center rounded-full border-2 ${dotClasses(p)}`}
+            >
               <DotIcon phase={p} />
             </span>
             <span className="min-w-0">
-              <span className="block text-xs font-semibold text-[var(--brand-dark)]">{p.label}</span>
-              {p.detail && <span className="block text-[11px] text-muted-foreground">{p.detail}</span>}
+              <span className="block text-xs font-semibold text-[var(--brand-dark)]">
+                {p.label}
+              </span>
+              {p.detail && (
+                <span className="block text-[11px] text-muted-foreground">{p.detail}</span>
+              )}
               {p.chips && (
                 <span className="mt-1 flex flex-wrap gap-1">
                   {p.chips.map((c) => (
@@ -113,7 +131,9 @@ export function ApprovalTracker({ request }: { request: FundraiserRequest }) {
       </ol>
 
       <p className="mt-4 text-sm font-medium text-[var(--brand-dark)]">{message}</p>
-      {updatedLabel && <p className="mt-0.5 text-[11px] text-muted-foreground">Updated {updatedLabel}</p>}
+      {updatedLabel && (
+        <p className="mt-0.5 text-[11px] text-muted-foreground">Updated {updatedLabel}</p>
+      )}
     </div>
   );
 }

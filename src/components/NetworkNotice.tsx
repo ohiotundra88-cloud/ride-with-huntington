@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { WifiOff } from "lucide-react";
 
-const KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
-
 /**
  * Silent connectivity probe. If this network (VPN / web filter) blocks the
  * same-origin backend path, show a slim inline notice instead of letting
@@ -21,8 +19,7 @@ export function NetworkNotice() {
       ctl.abort();
     }, 6000);
 
-    fetch(`${window.location.origin}/api/public/sb/auth/v1/health`, {
-      headers: KEY ? { apikey: KEY } : undefined,
+    fetch(`${window.location.origin}/api/public/sb/rest/v1/site_settings?select=id&limit=1`, {
       cache: "no-store",
       signal: ctl.signal,
     })
@@ -43,7 +40,6 @@ export function NetworkNotice() {
       ctl.abort();
     };
   }, []);
-
 
   if (!blocked) return null;
 

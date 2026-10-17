@@ -4,11 +4,21 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
-  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
-  listRoleMembers, grantRoleByEmail, revokeRoleFromUser, type RoleMemberRow,
+  listRoleMembers,
+  grantRoleByEmail,
+  revokeRoleFromUser,
+  type RoleMemberRow,
 } from "@/lib/roles-manage.functions";
 import { UserSearchPicker } from "@/components/UserSearchPicker";
 import type { ManageableRole } from "@/lib/roles.shared";
@@ -26,7 +36,11 @@ export function RoleMembersCard({
 }) {
   const qc = useQueryClient();
 
-  const { data: members = [], isLoading, error } = useQuery<RoleMemberRow[]>({
+  const {
+    data: members = [],
+    isLoading,
+    error,
+  } = useQuery<RoleMemberRow[]>({
     queryKey: ["role-members", role],
     queryFn: () => listRoleMembers({ data: { role } }),
   });
@@ -52,7 +66,9 @@ export function RoleMembersCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2">{icon} {title}</CardTitle>
+        <CardTitle className="text-base flex items-center gap-2">
+          {icon} {title}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <p className="text-sm text-muted-foreground">{description}</p>
@@ -85,7 +101,9 @@ export function RoleMembersCard({
                     <div className="truncate text-xs text-muted-foreground">
                       {m.email}
                       {m.is_self && (
-                        <span className="ml-2 rounded bg-[var(--brand)]/20 px-1.5 py-0.5 text-[10px] font-semibold text-[var(--brand-dark)]">YOU</span>
+                        <span className="ml-2 rounded bg-[var(--brand)]/20 px-1.5 py-0.5 text-[10px] font-semibold text-[var(--brand-dark)]">
+                          YOU
+                        </span>
                       )}
                     </div>
                   </div>
@@ -105,7 +123,8 @@ export function RoleMembersCard({
                       <AlertDialogHeader>
                         <AlertDialogTitle>Remove this designation?</AlertDialogTitle>
                         <AlertDialogDescription>
-                          {m.full_name || m.email} will no longer act as {title}. Their participant account stays intact.
+                          {m.full_name || m.email} will no longer act as {title}. Their participant
+                          account stays intact.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>

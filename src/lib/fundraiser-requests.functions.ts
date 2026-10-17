@@ -7,13 +7,15 @@ import {
   decisionSchema,
   requestFlierSchema,
   MAX_FLIER_BYTES,
+  initialMarketingStatus,
   type ApprovalEntry,
   type FundraiserRequest,
 } from "@/lib/fundraiser-requests.shared";
+import type { AuthContext } from "@/integrations/supabase/auth-middleware";
 
 const idSchema = z.object({ id: z.string().uuid() });
 
-async function myRoles(context: { supabase: any; userId: string }): Promise<string[]> {
+async function myRoles(context: Pick<AuthContext, "supabase" | "userId">): Promise<string[]> {
   const { data, error } = await context.supabase
     .from("user_roles")
     .select("role")
@@ -46,8 +48,8 @@ async function hydratePeople(rows: FundraiserRequest[]): Promise<FundraiserReque
     ...r,
     submitter_email: map.get(r.submitted_by)?.email ?? null,
     submitter_name: map.get(r.submitted_by)?.full_name ?? null,
-    captain_email: r.captain_id ? map.get(r.captain_id)?.email ?? null : null,
-    captain_name: r.captain_id ? map.get(r.captain_id)?.full_name ?? null : null,
+    captain_email: r.captain_id ? (map.get(r.captain_id)?.email ?? null) : null,
+    captain_name: r.captain_id ? (map.get(r.captain_id)?.full_name ?? null) : null,
   }));
 }
 
@@ -109,7 +111,8 @@ export const listReviewRequests = createServerFn({ method: "GET" })
     );
     if (!seesEverything && roles.includes("captain")) {
       rows = rows.filter(
-        (r) => r.captain_id === context.userId || !r.captain_id || r.submitted_by === context.userId,
+        (r) =>
+          r.captain_id === context.userId || !r.captain_id || r.submitted_by === context.userId,
       );
     }
     return hydratePeople(rows);
@@ -117,7 +120,7 @@ export const listReviewRequests = createServerFn({ method: "GET" })
 
 export const saveMyRequest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => requestInputSchema.parse(d))
+  .validator((d) => requestInputSchema.parse(d))
   .handler(async ({ data, context }): Promise<FundraiserRequest> => {
     const { id, ...fields } = data;
     if (id) {
@@ -130,7 +133,7 @@ export const saveMyRequest = createServerFn({ method: "POST" })
           legal_status: "pending",
           risk_status: "pending",
           compliance_status: "pending",
-          marketing_status: "pending",
+          marketing_status: initialMarketingStatus(fields.uses_logos),
           cochair_status: "pending",
         })
         .eq("id", id)
@@ -144,7 +147,11 @@ export const saveMyRequest = createServerFn({ method: "POST" })
     }
     const { data: row, error } = await context.supabase
       .from("fundraiser_requests")
-      .insert({ ...fields, submitted_by: context.userId })
+      .insert({
+        ...fields,
+        marketing_status: initialMarketingStatus(fields.uses_logos),
+        submitted_by: context.userId,
+      })
       .select(REQUEST_COLUMNS)
       .single();
     if (error) throw new Error(error.message);
@@ -195,9 +202,7 @@ async function notifyAssignedCaptain(request: FundraiserRequest, reassigned: boo
 /** Admins and super users can move a request to a different captain. */
 export const reassignRequestCaptain = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
-    z.object({ id: z.string().uuid(), captain_id: z.string().uuid() }).parse(d),
-  )
+  .validator((d) => z.object({ id: z.string().uuid(), captain_id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { assertAdminOrSuperUser } = await import("@/lib/roles-admin.server");
     await assertAdminOrSuperUser(context);
@@ -236,7 +241,10 @@ export const reassignRequestCaptain = createServerFn({ method: "POST" })
     const { data: people } = await supabaseAdmin
       .from("profiles")
       .select("id, email, full_name")
-      .in("id", [data.captain_id, request.captain_id].filter((v): v is string => !!v));
+      .in(
+        "id",
+        [data.captain_id, request.captain_id].filter((v): v is string => !!v),
+      );
     const label = (id: string | null) => {
       const p = (people ?? []).find((x) => x.id === id);
       return p?.full_name || p?.email || "unassigned";
@@ -252,18 +260,40 @@ export const reassignRequestCaptain = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+/**
+ * Delete a fundraiser request (the submitter's own, or any for admins; the
+ * database's delete rule decides). Its calendar event and flier go with it so
+ * nothing orphaned stays on the calendar.
+ */
 export const deleteMyRequest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => idSchema.parse(d))
+  .validator((d) => idSchema.parse(d))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("fundraiser_requests").delete().eq("id", data.id);
+    const { data: row, error: rErr } = await context.supabase
+      .from("fundraiser_requests")
+      .select("id, event_id, flier_path")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (rErr) throw new Error(rErr.message);
+    if (!row) throw new Error("Request not found");
+
+    const { data: deleted, error } = await context.supabase
+      .from("fundraiser_requests")
+      .delete()
+      .eq("id", data.id)
+      .select("id");
     if (error) throw new Error(error.message);
+    if (!deleted?.length) throw new Error("You can only delete your own requests.");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (row.event_id) await supabaseAdmin.from("events").delete().eq("id", row.event_id);
+    if (row.flier_path) await supabaseAdmin.storage.from("event-fliers").remove([row.flier_path]);
     return { ok: true };
   });
 
 export const listRequestApprovals = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => idSchema.parse(d))
+  .validator((d) => idSchema.parse(d))
   .handler(async ({ data, context }): Promise<ApprovalEntry[]> => {
     const { data: rows, error } = await context.supabase
       .from("fundraiser_approvals")
@@ -300,59 +330,81 @@ async function logDecision(
 /** Record a stage decision. Stage gating and role checks are enforced here. */
 export const decideOnRequest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => decisionSchema.parse(d))
+  .validator((d) => decisionSchema.parse(d))
   .handler(async ({ data, context }) => {
     const roles = await myRoles(context);
-    const { STAGES, actionableStages, canActOnStage, isFullyApproved } = await import(
-      "@/lib/fundraiser-requests.shared"
-    );
+    const { STAGES, actionableStages, applyStageDecision, canActOnStage, isFullyApproved } =
+      await import("@/lib/fundraiser-requests.shared");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: current, error: cErr } = await supabaseAdmin
-      .from("fundraiser_requests")
-      .select(REQUEST_COLUMNS)
-      .eq("id", data.id)
-      .maybeSingle();
-    if (cErr) throw new Error(cErr.message);
-    if (!current) throw new Error("Request not found");
-    const request = current as unknown as FundraiserRequest;
+    let previous: FundraiserRequest | null = null;
+    let fresh: FundraiserRequest | null = null;
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const { data: current, error: cErr } = await supabaseAdmin
+        .from("fundraiser_requests")
+        .select(REQUEST_COLUMNS)
+        .eq("id", data.id)
+        .maybeSingle();
+      if (cErr) throw new Error(cErr.message);
+      if (!current) throw new Error("Request not found");
+      const request = current as unknown as FundraiserRequest;
 
-    if (!canActOnStage(roles, data.stage, { request, userId: context.userId })) {
-      throw new Error(
-        data.stage === "captain"
-          ? "This request was routed to a different captain. Ask an admin to reassign it."
-          : "You don't hold the designation required for this approval stage.",
-      );
+      if (!canActOnStage(roles, data.stage, { request, userId: context.userId })) {
+        throw new Error(
+          data.stage === "captain"
+            ? "This request was routed to a different captain. Ask an admin to reassign it."
+            : "You don't hold the designation required for this approval stage.",
+        );
+      }
+
+      if (!actionableStages(request).includes(data.stage)) {
+        throw new Error("This stage isn't open yet — an earlier approval is still outstanding.");
+      }
+
+      const next = applyStageDecision(request, data.stage, data.decision);
+      const patch = {
+        [`${data.stage}_status`]: data.decision,
+        status: next.status,
+      } as Record<string, string>;
+
+      // Compare every approval field used to derive the new status. If another
+      // reviewer saved first, retry against that new state rather than
+      // overwriting it with a status calculated from a stale snapshot.
+      const { data: updated, error: uErr } = await supabaseAdmin
+        .from("fundraiser_requests")
+        .update(patch as never)
+        .eq("id", data.id)
+        .match({
+          status: request.status,
+          captain_status: request.captain_status,
+          legal_status: request.legal_status,
+          risk_status: request.risk_status,
+          compliance_status: request.compliance_status,
+          marketing_status: request.marketing_status,
+          cochair_status: request.cochair_status,
+        })
+        .select(REQUEST_COLUMNS)
+        .maybeSingle();
+      if (uErr) throw new Error(uErr.message);
+      if (updated) {
+        previous = request;
+        fresh = updated as unknown as FundraiserRequest;
+        break;
+      }
     }
 
-    if (!actionableStages(request).includes(data.stage)) {
-      throw new Error("This stage isn't open yet — an earlier approval is still outstanding.");
-    }
-
-    const patch: Record<string, string> = { [`${data.stage}_status`]: data.decision };
-    const next = { ...request, [`${data.stage}_status`]: data.decision } as FundraiserRequest;
-
-    if (data.decision === "declined") patch.status = "declined";
-    else if (data.decision === "changes_requested") patch.status = "changes_requested";
-    else if (isFullyApproved(next)) patch.status = "approved";
-    else patch.status = "in_review";
-
-    const { data: updated, error: uErr } = await supabaseAdmin
-      .from("fundraiser_requests")
-      .update(patch as never)
-      .eq("id", data.id)
-      .select(REQUEST_COLUMNS)
-      .single();
-    if (uErr) throw new Error(uErr.message);
+    if (!previous || !fresh)
+      throw new Error("Another reviewer changed this request. Please try again.");
     await logDecision(data.id, data.stage, data.decision, data.note, context.userId);
-
-    const fresh = updated as unknown as FundraiserRequest;
     // Virtual/non-physical events go live once the captain approves; in-person
     // events only appear on the calendar after final co-chair sign-off.
+    // Raffles never go on the calendar; approved ones are listed under
+    // "Active raffles" straight from the request.
     const shouldPublish =
       fresh.status !== "declined" &&
+      fresh.event_type !== "raffle" &&
       (fresh.event_type === "virtual"
         ? fresh.captain_status === "approved"
-        : STAGES.every((s) => fresh[`${s.key}_status` as const] === "approved"));
+        : isFullyApproved(fresh));
 
     if (shouldPublish && !fresh.event_id) {
       const { data: ev, error: eErr } = await supabaseAdmin
@@ -376,7 +428,13 @@ export const decideOnRequest = createServerFn({ method: "POST" })
         .single();
       if (eErr) throw new Error(eErr.message);
       await supabaseAdmin.from("fundraiser_requests").update({ event_id: ev.id }).eq("id", data.id);
-      await logDecision(data.id, "published", "published", "Added to the fundraising calendar", context.userId);
+      await logDecision(
+        data.id,
+        "published",
+        "published",
+        "Added to the fundraising calendar",
+        context.userId,
+      );
     }
 
     // A fundraising page linked to this request goes live as soon as every
@@ -433,11 +491,10 @@ export const decideOnRequest = createServerFn({ method: "POST" })
 
     // Email whoever the request now waits on, so each stage hears about it
     // rather than having to watch the queue.
-    const opened = actionableStages(fresh).filter((s) => !actionableStages(request).includes(s));
+    const opened = actionableStages(fresh).filter((s) => !actionableStages(previous).includes(s));
     await notifyStageReviewers(fresh, opened);
 
     return { ok: true };
-
   });
 
 /**
@@ -503,7 +560,7 @@ async function notifyStageReviewers(request: FundraiserRequest, stages: string[]
 
 export const uploadRequestFlier = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => requestFlierSchema.parse(d))
+  .validator((d) => requestFlierSchema.parse(d))
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
       .from("fundraiser_requests")
@@ -536,7 +593,7 @@ export const uploadRequestFlier = createServerFn({ method: "POST" })
 /** Returns the flier as a data URL for anyone allowed to read the request. */
 export const getRequestFlier = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => idSchema.parse(d))
+  .validator((d) => idSchema.parse(d))
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
       .from("fundraiser_requests")
@@ -552,7 +609,13 @@ export const getRequestFlier = createServerFn({ method: "POST" })
     if (dErr || !file) throw new Error("Flier could not be loaded");
     const ext = row.flier_path.split(".").pop()?.toLowerCase();
     const type =
-      ext === "pdf" ? "application/pdf" : ext === "png" ? "image/png" : ext === "webp" ? "image/webp" : "image/jpeg";
+      ext === "pdf"
+        ? "application/pdf"
+        : ext === "png"
+          ? "image/png"
+          : ext === "webp"
+            ? "image/webp"
+            : "image/jpeg";
     const base64 = Buffer.from(await file.arrayBuffer()).toString("base64");
     return { name: row.flier_name ?? "flier", dataUrl: `data:${type};base64,${base64}` };
   });
@@ -568,3 +631,42 @@ export const listPendingApprovalEventIds = createServerFn({ method: "GET" }).han
   if (error) return [] as string[];
   return (data ?? []).map((r) => r.event_id as string);
 });
+
+export interface ActiveRaffle {
+  id: string;
+  title: string;
+  description: string;
+  draw_date: string;
+  location: string | null;
+  contact_name: string | null;
+  contact_email: string | null;
+}
+
+/**
+ * Fully approved raffles whose date hasn't passed. Raffles stay off the event
+ * calendar by design; the Events page lists them in their own section.
+ * Only the fields a colleague needs to take part are returned.
+ */
+export const listActiveRaffles = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async (): Promise<ActiveRaffle[]> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const today = new Date().toISOString().slice(0, 10);
+    const { data, error } = await supabaseAdmin
+      .from("fundraiser_requests")
+      .select("id, title, description, event_date, location, contact_name, contact_email")
+      .eq("event_type", "raffle")
+      .eq("status", "approved")
+      .gte("event_date", today)
+      .order("event_date", { ascending: true });
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((r) => ({
+      id: r.id,
+      title: r.title,
+      description: r.description,
+      draw_date: r.event_date,
+      location: r.location,
+      contact_name: r.contact_name,
+      contact_email: r.contact_email,
+    }));
+  });

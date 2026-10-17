@@ -1,28 +1,8 @@
 /** Server-only roster building and audience resolution for team messaging. */
-import {
-  audienceIsEveryone,
-  type AudiencePerson,
-  type AudienceRules,
-} from "./messages.shared";
-
-const PELOTONIA_MEMBERS =
-  "https://pelotonia-dashboard-401340053598.us-central1.run.app/api/members";
+import { audienceIsEveryone, type AudiencePerson, type AudienceRules } from "./messages.shared";
+import type { Db } from "@/server/backend.server";
 
 const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : null);
-const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
-const flag = (v: unknown) => v === true || v === 1 || v === "1" || v === "true";
-
-const jsonList = (v: unknown): string[] => {
-  if (Array.isArray(v)) return v.map((x) => String(x)).filter(Boolean);
-  const raw = typeof v === "string" ? v.trim() : "";
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.map((x) => String(x)).filter(Boolean) : [raw];
-  } catch {
-    return raw.split(/\s*[,;|]\s*/).filter(Boolean);
-  }
-};
 
 /**
  * Everyone with an account, enriched with app roles, registration readiness and
@@ -50,20 +30,18 @@ export async function buildAudienceRoster(): Promise<AudiencePerson[]> {
     rolesByUser.set(r.user_id, list);
   }
 
-  // Live Pelotonia member records keyed by public/rider ID (best effort).
-  const members = new Map<string, Record<string, unknown>>();
-  try {
-    const res = await fetch(PELOTONIA_MEMBERS, { headers: { Accept: "application/json" } });
-    if (res.ok) {
-      const list = (await res.json()) as Record<string, unknown>[];
-      for (const m of list) {
-        const id = String(m["public_id"] ?? "").trim().toLowerCase();
-        if (id) members.set(id, m);
-      }
-    }
-  } catch {
-    // Tag/fundraising targeting degrades gracefully when the API is unreachable.
-  }
+  // Live Pelotonia rider records keyed by public/rider ID (best effort; the
+  // audience still builds from Hub data when Pelotonia is unreachable).
+  const { normalizePublicId } = await import("@/lib/pelotonia-api.server");
+  const { ridersByPublicId: fetchRiders } = await import("@/lib/pelotonia-data.server");
+  const members = await fetchRiders(
+    (participants ?? []).map(
+      (row) =>
+        ((row as Record<string, unknown>)["pelotonia"] as Record<string, unknown> | null)?.[
+          "confirmation"
+        ],
+    ),
+  );
 
   return (profiles ?? []).map((profile): AudiencePerson => {
     const row = byUser.get(profile.id) ?? {};
@@ -73,7 +51,8 @@ export async function buildAudienceRoster(): Promise<AudiencePerson[]> {
     const a = (row["apparel"] ?? {}) as Record<string, unknown>;
     const addr = (row["address"] ?? {}) as Record<string, unknown>;
     const riderId = str(p["confirmation"]);
-    const member = riderId ? members.get(riderId.toLowerCase()) : undefined;
+    const riderKey = normalizePublicId(riderId);
+    const member = riderKey ? members.get(riderKey) : undefined;
 
     return {
       userId: profile.id,
@@ -89,16 +68,16 @@ export async function buildAudienceRoster(): Promise<AudiencePerson[]> {
       bikeSettled: b["needs"] === "no" || b["status"] === "complete",
       hasAddress: !!str(addr["street"]) && !!str(addr["city"]) && !!str(addr["zip"]),
       hasJersey: !!str(a["jerseySize"]),
-      subPeloton: member ? str(member["team_name"]) : null,
-      route: member ? str(member["route_names"]) : null,
-      tags: member ? jsonList(member["tags"]) : [],
-      highRoller: !!member && flag(member["committed_high_roller"]),
-      survivor: !!member && flag(member["is_cancer_survivor"]),
-      pelotoniaCaptain: !!member && flag(member["is_captain"]),
-      challenger: !!member && flag(member["is_challenger"]),
-      riderOnPelotonia: !!member && flag(member["is_rider"]),
-      volunteerOnPelotonia: !!member && flag(member["is_volunteer"]),
-      raised: member ? num(member["raised"]) : null,
+      subPeloton: member?.subTeam ? `Team Huntington Bank - ${member.subTeam}` : null,
+      route: member && member.routes.length ? member.routes.join(", ") : null,
+      tags: member?.tags ?? [],
+      highRoller: !!member?.isHighRoller,
+      survivor: !!member?.isSurvivor,
+      pelotoniaCaptain: !!member?.isCaptain,
+      challenger: !!member?.isChallenger,
+      riderOnPelotonia: !!member?.isRider,
+      volunteerOnPelotonia: !!member?.isVolunteer,
+      raised: member ? member.raised : null,
       emailOptOut: (profile as { email_opt_out?: boolean }).email_opt_out === true,
     };
   });
@@ -148,17 +127,22 @@ function matchesGap(person: AudiencePerson, key: string, raisedBelow: number | n
  * Applies the audience rules: AND across categories, OR within a category.
  * Explicit includes always win; explicit excludes always lose.
  */
-export function resolveAudience(
-  roster: AudiencePerson[],
-  rules: AudienceRules,
-): AudiencePerson[] {
+export function resolveAudience(roster: AudiencePerson[], rules: AudienceRules): AudiencePerson[] {
   const excluded = new Set(rules.excludeUserIds);
   const included = new Set(rules.includeUserIds);
   const everyone = audienceIsEveryone(rules);
   // Hand-picking people with no group rule means only those people.
-  const individualsOnly = !everyone && included.size > 0 &&
-    !rules.roles.length && !rules.regions.length && !rules.participation.length && !rules.tags.length &&
-    !rules.subPelotons.length && !rules.routes.length && !rules.flags.length && !rules.gaps.length;
+  const individualsOnly =
+    !everyone &&
+    included.size > 0 &&
+    !rules.roles.length &&
+    !rules.regions.length &&
+    !rules.participation.length &&
+    !rules.tags.length &&
+    !rules.subPelotons.length &&
+    !rules.routes.length &&
+    !rules.flags.length &&
+    !rules.gaps.length;
 
   const matched = roster.filter((person) => {
     if (excluded.has(person.userId)) return false;
@@ -166,21 +150,28 @@ export function resolveAudience(
     if (individualsOnly) return false;
     if (everyone) return true;
 
-
     if (rules.roles.length) {
       const has = rules.roles.some((r) =>
-        r === "user" ? person.roles.length === 0 || person.roles.includes("user") : person.roles.includes(r),
+        r === "user"
+          ? person.roles.length === 0 || person.roles.includes("user")
+          : person.roles.includes(r),
       );
       if (!has) return false;
     }
     if (rules.regions.length && !(person.region && rules.regions.includes(person.region))) {
       return false;
     }
-    if (rules.participation.length && !rules.participation.includes(person.participation ?? "unsure")) {
+    if (
+      rules.participation.length &&
+      !rules.participation.includes(person.participation ?? "unsure")
+    ) {
       return false;
     }
     if (rules.tags.length && !rules.tags.some((t) => person.tags.includes(t))) return false;
-    if (rules.subPelotons.length && !(person.subPeloton && rules.subPelotons.includes(person.subPeloton))) {
+    if (
+      rules.subPelotons.length &&
+      !(person.subPeloton && rules.subPelotons.includes(person.subPeloton))
+    ) {
       return false;
     }
     if (rules.routes.length && !(person.route && rules.routes.includes(person.route))) return false;
@@ -191,9 +182,7 @@ export function resolveAudience(
     return true;
   });
 
-  return matched
-    .filter((p) => !!p.userId)
-    .sort((a, b) => a.name.localeCompare(b.name));
+  return matched.filter((p) => !!p.userId).sort((a, b) => a.name.localeCompare(b.name));
 }
 
 /** Distinct filter values present in the roster, for the audience builder UI. */
@@ -233,9 +222,7 @@ import {
   type MessagingAccess,
 } from "./messages.shared";
 
-type AnySupabase = {
-  from: (table: string) => any;
-};
+type AnySupabase = Db;
 
 const SENDER_ROLES = ["captain", "cochair", "superuser", "admin"];
 

@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import type { AuthContext } from "@/integrations/supabase/auth-middleware";
 
 export const TEST_EMAIL_TEMPLATES = [
   { name: "team-announcement", label: "Team announcement" },
@@ -11,7 +12,7 @@ export const TEST_EMAIL_TEMPLATES = [
 
 export type TestEmailTemplateName = (typeof TEST_EMAIL_TEMPLATES)[number]["name"];
 
-async function resolveCallerEmail(context: { supabase: any; userId: string; claims?: Record<string, unknown> }): Promise<string> {
+async function resolveCallerEmail(context: AuthContext): Promise<string> {
   const claimEmail = context.claims?.["email"];
   if (typeof claimEmail === "string" && claimEmail.includes("@")) return claimEmail;
   const { data, error } = await context.supabase
@@ -24,7 +25,7 @@ async function resolveCallerEmail(context: { supabase: any; userId: string; clai
   return data.email;
 }
 
-async function sendOne(context: { supabase: any; userId: string; claims?: Record<string, unknown> }, templateName: string) {
+async function sendOne(context: AuthContext, templateName: string) {
   const { assertSuperUser } = await import("@/lib/roles-admin.server");
   await assertSuperUser(context);
   const { TEMPLATES } = await import("@/lib/email-templates/registry");
@@ -41,7 +42,7 @@ async function sendOne(context: { supabase: any; userId: string; claims?: Record
 
 export const sendTestEmail = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input) => z.object({ template: z.string().min(1) }).parse(input))
+  .validator((input) => z.object({ template: z.string().min(1) }).parse(input))
   .handler(async ({ data, context }) => sendOne(context, data.template));
 
 export const sendAllTestEmails = createServerFn({ method: "POST" })

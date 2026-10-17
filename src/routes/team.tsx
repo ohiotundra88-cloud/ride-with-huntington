@@ -5,8 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Award, CalendarDays, Users, HandHeart, Megaphone, DollarSign, RefreshCw } from "lucide-react";
-import { useAdmin, formatCurrencyUSD } from "@/lib/admin-store";
+import {
+  Award,
+  CalendarDays,
+  Users,
+  HandHeart,
+  Megaphone,
+  DollarSign,
+  RefreshCw,
+} from "lucide-react";
+import { useAdmin } from "@/lib/admin-store";
+import { formatCurrencyUSD } from "@/lib/admin-content";
 import { ApiManagedField } from "@/components/ApiManagedField";
 import { getPelotoniaTeamData } from "@/lib/pelotonia.functions";
 
@@ -14,9 +23,16 @@ export const Route = createFileRoute("/team")({
   head: () => ({
     meta: [
       { title: "Team Huntington Hub — Team snapshot" },
-      { name: "description", content: "Team Huntington roster, live fundraising progress, and recent activity for Pelotonia." },
+      {
+        name: "description",
+        content:
+          "Team Huntington roster, live fundraising progress, and recent activity for Pelotonia.",
+      },
       { property: "og:title", content: "Team Huntington Hub" },
-      { property: "og:description", content: "Live team fundraising totals, subteam breakdown, and recent activity." },
+      {
+        property: "og:description",
+        content: "Live team fundraising totals, subteam breakdown, and recent activity.",
+      },
     ],
   }),
   component: TeamHub,
@@ -24,28 +40,37 @@ export const Route = createFileRoute("/team")({
 
 function TeamHub() {
   const { state } = useAdmin();
-  const { team, flags } = state;
+  const { flags } = state;
   const fetchLive = useServerFn(getPelotoniaTeamData);
-  const { data: live, isLoading, isFetching, refetch } = useQuery({
+  const {
+    data: live,
+    isLoading,
+    isFetching,
+    refetch,
+  } = useQuery({
     queryKey: ["pelotonia-team-data"],
     queryFn: () => fetchLive(),
     staleTime: 5 * 60 * 1000,
     refetchInterval: 15 * 60 * 1000,
   });
 
-  const raised = live?.raised ?? team.goalCurrent;
-  const goal = live?.goal || team.goalTarget;
+  const raised = live?.raised ?? 0;
+  const goal = live?.goal ?? 0;
   const pct = goal > 0 ? Math.round((raised / goal) * 100) : 0;
+  const unavailable = !live && !isLoading;
 
+  // Pelotonia's public data doesn't break out every count; show only what it has.
+  const metric = (id: string, label: string, value: number | null) =>
+    value === null ? null : { id, label, value: value.toLocaleString(), note: "live" };
   const liveMetrics = live
     ? [
-        { id: "members", label: "Team members", value: live.members.toLocaleString(), note: "live" },
-        { id: "riders", label: "Riders", value: live.riders.toLocaleString(), note: "live" },
-        { id: "challengers", label: "Challengers", value: live.challengers.toLocaleString(), note: "live" },
-        { id: "volunteers", label: "Volunteers", value: live.volunteers.toLocaleString(), note: "live" },
-        { id: "hr", label: "High rollers", value: live.highRollers.toLocaleString(), note: "live" },
-        { id: "survivors", label: "Survivors", value: live.survivors.toLocaleString(), note: "live" },
-      ]
+        metric("members", "Team members", live.members),
+        metric("riders", "Riders", live.riders),
+        metric("challengers", "Challengers", live.challengers),
+        metric("volunteers", "Volunteers", live.volunteers),
+        metric("hr", "High rollers", live.highRollers),
+        metric("survivors", "Survivors", live.survivors),
+      ].filter((m): m is NonNullable<typeof m> => m !== null)
     : null;
 
   const updatedLabel = live?.lastUpdated ? new Date(live.lastUpdated).toLocaleString() : null;
@@ -61,14 +86,17 @@ function TeamHub() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <div className="rounded-2xl bg-[var(--brand-dark)] p-6 sm:p-8 text-white">
-        <p className="text-xs uppercase tracking-wider text-white/60">{live?.teamName ?? "Team Huntington"}</p>
+        <p className="text-xs uppercase tracking-wider text-white/60">
+          {live?.teamName ?? "Team Huntington"}
+        </p>
         <h1 className="mt-1 text-3xl sm:text-4xl font-black">Team Huntington Hub</h1>
         <p className="mt-3 max-w-2xl text-white/80 leading-relaxed">
-          Live roster and fundraising figures from the Pelotonia team dashboard, refreshed at 7 AM, 1 PM, and 7 PM daily.
+          Live roster and fundraising figures from the Pelotonia team dashboard, refreshed at 7 AM,
+          1 PM, and 7 PM daily.
         </p>
         <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-white/70">
           <Badge className="bg-[var(--brand)] text-[var(--brand-foreground)]">
-            {live ? "Live data" : isLoading ? "Loading…" : "Cached sample data"}
+            {live ? "Live data" : isLoading ? "Loading…" : "Live data unavailable"}
           </Badge>
           {updatedLabel && <span>Source updated {updatedLabel}</span>}
           <Button
@@ -83,21 +111,35 @@ function TeamHub() {
         </div>
       </div>
 
-      {flags.teamMetrics && (
+      {unavailable && (
+        <Card className="mt-6">
+          <CardContent className="p-5 text-sm text-muted-foreground">
+            Live team figures from Pelotonia are unavailable right now. Use Refresh to try again.
+          </CardContent>
+        </Card>
+      )}
+
+      {flags.teamMetrics && liveMetrics && liveMetrics.length > 0 && (
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {(liveMetrics ?? team.metrics).map((m) => (
+          {liveMetrics.map((m) => (
             <Card key={m.id}>
               <CardContent className="p-5">
                 <p className="text-xs text-muted-foreground">{m.label}</p>
-                <p className="mt-1 text-2xl sm:text-3xl font-black text-[var(--brand-dark)]">{m.value}</p>
-                {m.note && <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">{m.note}</p>}
+                <p className="mt-1 text-2xl sm:text-3xl font-black text-[var(--brand-dark)]">
+                  {m.value}
+                </p>
+                {m.note && (
+                  <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">
+                    {m.note}
+                  </p>
+                )}
               </CardContent>
             </Card>
           ))}
         </div>
       )}
 
-      {flags.fundraisingProgress && (
+      {flags.fundraisingProgress && live && (
         <Card className="mt-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -108,17 +150,29 @@ function TeamHub() {
             <ApiManagedField
               fieldKey="team.goal.current"
               label="Cumulative team raised"
+              updatedAt={live.lastUpdated}
               value={
                 <div className="flex flex-wrap items-end justify-between gap-3">
                   <div>
                     <p className="text-3xl font-black text-[var(--brand-dark)]">
                       {formatCurrencyUSD(raised)}
-                      <span className="text-base font-semibold text-muted-foreground"> / {formatCurrencyUSD(goal)} goal</span>
+                      <span className="text-base font-semibold text-muted-foreground">
+                        {" "}
+                        / {formatCurrencyUSD(goal)} goal
+                      </span>
                     </p>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      {live
-                        ? `${live.donationsCount.toLocaleString()} donations · incl. ${formatCurrencyUSD(live.kidsRaised)} Pelotonia Kids · ${formatCurrencyUSD(live.totalCommitted)} committed · ${formatCurrencyUSD(live.allTimeRaised)} all-time`
-                        : "Sample data — live totals unavailable right now."}
+                      {[
+                        live.donationsCount !== null &&
+                          `${live.donationsCount.toLocaleString()} donations`,
+                        live.kidsRaised !== null &&
+                          `incl. ${formatCurrencyUSD(live.kidsRaised)} Pelotonia Kids`,
+                        live.totalCommitted !== null &&
+                          `${formatCurrencyUSD(live.totalCommitted)} committed`,
+                        `${formatCurrencyUSD(live.allTimeRaised)} all-time`,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
                     </p>
                   </div>
                   <div className="text-right">
@@ -128,14 +182,20 @@ function TeamHub() {
                 </div>
               }
             />
-            <Progress value={Math.min(pct, 100)} className="mt-3 h-2.5 [&>div]:bg-[var(--brand)]" aria-label={`Team fundraising ${pct}%`} />
+            <Progress
+              value={Math.min(pct, 100)}
+              className="mt-3 h-2.5 [&>div]:bg-[var(--brand)]"
+              aria-label={`Team fundraising ${pct}%`}
+            />
           </CardContent>
         </Card>
       )}
 
       {live && live.subteams.length > 0 && (
         <Card className="mt-6">
-          <CardHeader><CardTitle>Subteam breakdown</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle>Subteam breakdown</CardTitle>
+          </CardHeader>
           <CardContent className="space-y-2">
             {live.subteams.map((s) => {
               const share = live.raised > 0 ? Math.round((s.raised / live.raised) * 100) : 0;
@@ -146,9 +206,21 @@ function TeamHub() {
                     <p className="text-sm font-bold tabular-nums">{formatCurrencyUSD(s.raised)}</p>
                   </div>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    {s.total.toLocaleString()} members · {s.riders.toLocaleString()} riders · {s.challengers.toLocaleString()} challengers · {s.volunteers.toLocaleString()} volunteers · {s.highRollers} high rollers
+                    {[
+                      `${s.total.toLocaleString()} members`,
+                      s.riders !== null && `${s.riders.toLocaleString()} riders`,
+                      s.challengers !== null && `${s.challengers.toLocaleString()} challengers`,
+                      s.volunteers !== null && `${s.volunteers.toLocaleString()} volunteers`,
+                      s.highRollers !== null && `${s.highRollers} high rollers`,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
                   </p>
-                  <Progress value={share} className="mt-2 h-1.5 [&>div]:bg-[var(--brand-dark)]" />
+                  <Progress
+                    value={share}
+                    className="mt-2 h-1.5 [&>div]:bg-[var(--brand-dark)]"
+                    aria-label={`${s.name}: ${share}% of team total`}
+                  />
                 </div>
               );
             })}
@@ -166,35 +238,41 @@ function TeamHub() {
           <CardContent className="space-y-3">
             {live && live.recentDaily.length > 0
               ? live.recentDaily.map((d) => (
-                  <div key={d.date} className="flex items-center justify-between rounded-lg border p-3">
+                  <div
+                    key={d.date}
+                    className="flex items-center justify-between rounded-lg border p-3"
+                  >
                     <div>
                       <p className="text-sm font-semibold text-[var(--brand-dark)]">
-                        {new Date(`${d.date}T12:00:00`).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}
+                        {new Date(`${d.date}T12:00:00`).toLocaleDateString(undefined, {
+                          weekday: "short",
+                          month: "short",
+                          day: "numeric",
+                        })}
                       </p>
-                      <p className="text-xs text-muted-foreground">{d.count.toLocaleString()} donations</p>
+                      <p className="text-xs text-muted-foreground">added to the team total</p>
                     </div>
                     <p className="text-sm font-bold tabular-nums">{formatCurrencyUSD(d.amount)}</p>
                   </div>
                 ))
-              : team.activity.map((a) => (
-                  <div key={a.id} className="flex gap-3 rounded-lg border p-3">
-                    <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[var(--brand)]" />
-                    <div className="flex-1">
-                      <p className="text-sm font-semibold text-[var(--brand-dark)]">{a.title}</p>
-                      <p className="text-sm text-muted-foreground">{a.body}</p>
-                      <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">{a.time} · sample</p>
-                    </div>
-                  </div>
-                ))}
+              : !isLoading && (
+                  <p className="text-sm text-muted-foreground">
+                    No recent team activity to show yet.
+                  </p>
+                )}
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader><CardTitle>Quick links</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle>Quick links</CardTitle>
+          </CardHeader>
           <CardContent className="space-y-2">
             {quickLinks.map((l) => (
               <Button key={l.label} asChild variant="outline" className="w-full justify-start">
-                <Link to={l.href}><l.icon className="mr-2 h-4 w-4" /> {l.label}</Link>
+                <Link to={l.href}>
+                  <l.icon className="mr-2 h-4 w-4" /> {l.label}
+                </Link>
               </Button>
             ))}
           </CardContent>

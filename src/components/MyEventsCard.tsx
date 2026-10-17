@@ -12,7 +12,13 @@ import { listMyTeamEvents, setMyRsvp } from "@/lib/team-events.functions";
 import { AddToCalendar } from "@/components/AddToCalendar";
 
 /** Compact RSVP control shared by the journey card and the full events page. */
-export function RsvpButtons({ event, size = "sm" }: { event: MyTeamEvent; size?: "sm" | "default" }) {
+export function RsvpButtons({
+  event,
+  size = "sm",
+}: {
+  event: MyTeamEvent;
+  size?: "sm" | "default";
+}) {
   const qc = useQueryClient();
   const rsvpFn = useServerFn(setMyRsvp);
   const mutate = useMutation({
@@ -51,7 +57,9 @@ export function RsvpButtons({ event, size = "sm" }: { event: MyTeamEvent; size?:
 /** Next few team events assigned to the signed-in colleague, with RSVP. */
 export function MyEventsCard() {
   const events = useQuery({ queryKey: ["my-team-events"], queryFn: () => listMyTeamEvents() });
-  const upcoming = (events.data ?? []).filter((e) => isUpcoming(e.eventDate) && e.status === "published");
+  const upcoming = (events.data ?? []).filter(
+    (e) => isUpcoming(e.eventDate) && e.status === "published",
+  );
 
   if (events.isLoading) return null;
 
@@ -73,7 +81,9 @@ export function MyEventsCard() {
                   <p className="font-semibold">{e.title}</p>
                   <p className="text-xs text-muted-foreground">
                     {formatEventDate(e.eventDate)}
-                    {formatTimeRange(e.startTime, e.endTime) ? ` · ${formatTimeRange(e.startTime, e.endTime)}` : ""}
+                    {formatTimeRange(e.startTime, e.endTime)
+                      ? ` · ${formatTimeRange(e.startTime, e.endTime)}`
+                      : ""}
                   </p>
                   {e.location && (
                     <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">

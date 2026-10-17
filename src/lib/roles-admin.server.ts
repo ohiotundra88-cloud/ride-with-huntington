@@ -1,3 +1,6 @@
+import { exactEmail } from "@/lib/email-match";
+import type { AuthContext } from "@/integrations/supabase/auth-middleware";
+
 export interface RoleMemberRow {
   user_id: string;
   email: string;
@@ -6,7 +9,7 @@ export interface RoleMemberRow {
   is_self: boolean;
 }
 
-type Ctx = { supabase: any; userId: string };
+type Ctx = Pick<AuthContext, "supabase" | "userId">;
 
 export async function assertAdmin(context: Ctx) {
   const { data, error } = await context.supabase.rpc("has_role", {
@@ -64,7 +67,7 @@ export async function grantRole(context: Ctx, email: string, role: string) {
   const { data: profile, error } = await supabaseAdmin
     .from("profiles")
     .select("id, email, full_name")
-    .ilike("email", normalized)
+    .ilike("email", exactEmail(normalized))
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!profile) {

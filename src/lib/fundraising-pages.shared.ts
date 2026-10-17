@@ -5,8 +5,20 @@ import { z } from "zod";
  * Client-safe: no server-only imports here.
  */
 
-export const FUNDRAISER_KINDS = ["donation", "raffle", "tickets", "sponsorship", "auction"] as const;
+export const FUNDRAISER_KINDS = [
+  "donation",
+  "raffle",
+  "tickets",
+  "sponsorship",
+  "auction",
+] as const;
 export type FundraiserKind = (typeof FUNDRAISER_KINDS)[number];
+
+/** Narrows a kind read from the database (a CHECK-constrained text column). */
+export function asFundraiserKind(value: string): FundraiserKind {
+  if ((FUNDRAISER_KINDS as readonly string[]).includes(value)) return value as FundraiserKind;
+  throw new Error(`Unknown fundraiser kind: ${value}`);
+}
 
 export const KIND_LABELS: Record<FundraiserKind, string> = {
   donation: "Donations",
@@ -42,6 +54,12 @@ export const FUNDRAISER_STATUSES = [
 ] as const;
 export type FundraiserStatus = (typeof FUNDRAISER_STATUSES)[number];
 
+/** Narrows a status read from the database (a CHECK-constrained text column). */
+export function asFundraiserStatus(value: string): FundraiserStatus {
+  if ((FUNDRAISER_STATUSES as readonly string[]).includes(value)) return value as FundraiserStatus;
+  throw new Error(`Unknown fundraiser status: ${value}`);
+}
+
 export const STATUS_LABELS: Record<FundraiserStatus, string> = {
   draft: "Draft",
   pending_approval: "In approval",
@@ -67,7 +85,11 @@ export function round2(n: number) {
 }
 
 export function money(n: number | null | undefined) {
-  return (Number(n) || 0).toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+  return (Number(n) || 0).toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  });
 }
 
 export function moneyExact(n: number | null | undefined) {
@@ -270,7 +292,15 @@ export interface FundraiserAccess {
 // ------------------------------------------------------------------ math
 
 export function totalsFromOrders(
-  orders: Array<Pick<FundraiserOrderRow, "amount" | "fee_amount" | "net_amount" | "status" | "quantity" | "supporter_email">>,
+  // `status` is a plain string here so database rows can be passed directly.
+  orders: Array<
+    Pick<
+      FundraiserOrderRow,
+      "amount" | "fee_amount" | "net_amount" | "quantity" | "supporter_email"
+    > & {
+      status: string;
+    }
+  >,
   goal: number,
 ): FundraiserTotals {
   let gross = 0;
@@ -303,7 +333,10 @@ export function totalsFromOrders(
   };
 }
 
-export function isOpenForOrders(f: Pick<FundraiserRecord, "status" | "opens_at" | "closes_at">, now = new Date()) {
+export function isOpenForOrders(
+  f: Pick<FundraiserRecord, "opens_at" | "closes_at"> & { status: string },
+  now = new Date(),
+) {
   if (f.status !== "live") return false;
   if (f.opens_at && new Date(f.opens_at) > now) return false;
   if (f.closes_at && new Date(f.closes_at) < now) return false;

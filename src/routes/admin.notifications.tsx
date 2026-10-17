@@ -8,7 +8,10 @@ export const Route = createFileRoute("/admin/notifications")({
   head: () => ({
     meta: [
       { title: "Notifications — Super User" },
-      { name: "description", content: "Team messaging has moved to the targeted Team Messages composer." },
+      {
+        name: "description",
+        content: "Team messaging has moved to the targeted Team Messages composer.",
+      },
     ],
   }),
   component: NotificationsAdmin,
@@ -23,8 +26,9 @@ function NotificationsAdmin() {
           <div>
             <h2 className="text-lg font-semibold">Notifications moved to Team Messages</h2>
             <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-              Announcements are now sent from the Team Messages composer, where you can target riders by role,
-              Pelotonia tag, sub-peloton, route or readiness gap, schedule the send, and track who has read it.
+              Announcements are now sent from the Team Messages composer, where you can target
+              riders by role, Pelotonia tag, sub-peloton, route or readiness gap, schedule the send,
+              and track who has read it.
             </p>
           </div>
           <Button asChild>

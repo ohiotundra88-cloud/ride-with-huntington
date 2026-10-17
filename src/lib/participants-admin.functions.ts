@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { exactEmail } from "@/lib/email-match";
 
 export type JsonLike = Record<string, string | number | boolean | null>;
 
@@ -30,7 +31,10 @@ const jsonRecord = z.record(z.string(), z.union([z.string(), z.number(), z.boole
 const saveSchema = z.object({
   user_id: z.string().uuid(),
   full_name: z.string().trim().min(2).max(120).optional(),
-  participation: z.enum(["rider", "volunteer", "both", "unsure"]).nullable().optional(),
+  participation: z
+    .enum(["rider", "volunteer", "challenger", "both", "unsure"])
+    .nullable()
+    .optional(),
   reg_id: z.string().trim().max(60).nullable().optional(),
   pelotonia: jsonRecord.optional(),
   travel: jsonRecord.optional(),
@@ -55,13 +59,28 @@ export const listColleagues = createServerFn({ method: "GET" })
     const { data: profiles } = await supabaseAdmin
       .from("profiles")
       .select("id, email, full_name, region")
-      .in("id", rows.map((r: { user_id: string }) => r.user_id));
-    const map = new Map((profiles ?? []).map((p: { id: string; email: string | null; full_name: string | null; region?: string | null }) => [p.id, p] as const));
+      .in(
+        "id",
+        rows.map((r: { user_id: string }) => r.user_id),
+      );
+    const map = new Map(
+      (profiles ?? []).map(
+        (p: {
+          id: string;
+          email: string | null;
+          full_name: string | null;
+          region?: string | null;
+        }) => [p.id, p] as const,
+      ),
+    );
 
     // Last sign-in comes from the auth directory (not mirrored into profiles).
     const signIns = new Map<string, string | null>();
     for (let page = 1; page <= 5; page++) {
-      const { data: list, error: authErr } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 1000 });
+      const { data: list, error: authErr } = await supabaseAdmin.auth.admin.listUsers({
+        page,
+        perPage: 1000,
+      });
       if (authErr) break;
       const users = list?.users ?? [];
       for (const u of users) signIns.set(u.id, u.last_sign_in_at ?? null);
@@ -91,14 +110,18 @@ export const listColleagues = createServerFn({ method: "GET" })
 
 export const saveColleague = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => saveSchema.parse(d))
+  .validator((d) => saveSchema.parse(d))
   .handler(async ({ data, context }) => {
-    const { supabaseAdmin, assertManager, appendAudit } = await import("@/lib/participants-admin.server");
+    const { supabaseAdmin, assertManager, appendAudit } =
+      await import("@/lib/participants-admin.server");
     const actor = await assertManager(context);
     const { user_id, full_name, ...fields } = data;
 
     if (full_name) {
-      const { error } = await supabaseAdmin.from("profiles").update({ full_name }).eq("id", user_id);
+      const { error } = await supabaseAdmin
+        .from("profiles")
+        .update({ full_name })
+        .eq("id", user_id);
       if (error) throw new Error(error.message);
     }
 
@@ -108,28 +131,28 @@ export const saveColleague = createServerFn({ method: "POST" })
       .eq("user_id", user_id)
       .maybeSingle();
 
-    const { error } = await supabaseAdmin
-      .from("participants")
-      .upsert(
-        {
-          user_id,
-          ...fields,
-          audit: appendAudit(existing?.audit, `Edited by ${actor} (admin)`),
-        } as never,
-        { onConflict: "user_id" },
-      );
+    const { error } = await supabaseAdmin.from("participants").upsert(
+      {
+        user_id,
+        ...fields,
+        audit: appendAudit(existing?.audit, `Edited by ${actor} (admin)`),
+      } as never,
+      { onConflict: "user_id" },
+    );
     if (error) throw new Error(error.message);
     return { ok: true };
   });
 
 export const createColleague = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
+  .validator((d) =>
     z
       .object({
         email: z.string().trim().toLowerCase().email(),
         full_name: z.string().trim().min(2).max(120),
-        participation: z.enum(["rider", "volunteer", "both", "unsure"]).default("rider"),
+        participation: z
+          .enum(["rider", "volunteer", "challenger", "both", "unsure"])
+          .default("rider"),
         season_locked: z.boolean().default(false),
       })
       .parse(d),
@@ -142,7 +165,7 @@ export const createColleague = createServerFn({ method: "POST" })
     const { data: existing } = await supabaseAdmin
       .from("profiles")
       .select("id")
-      .ilike("email", data.email)
+      .ilike("email", exactEmail(data.email))
       .maybeSingle();
     if (existing) {
       userId = existing.id;
@@ -178,8 +201,13 @@ export const createColleague = createServerFn({ method: "POST" })
 
 export const deleteColleague = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
-    z.object({ user_id: z.string().uuid(), mode: z.enum(["registration", "account"]).default("registration") }).parse(d),
+  .validator((d) =>
+    z
+      .object({
+        user_id: z.string().uuid(),
+        mode: z.enum(["registration", "account"]).default("registration"),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin, assertManager } = await import("@/lib/participants-admin.server");

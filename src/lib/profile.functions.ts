@@ -4,11 +4,11 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 /**
  * Personal fields a colleague may set on their own profile.
- * Privileged columns (has_vendor_dashboard_access, activated_at,
- * password_set_at) are deliberately absent and can never be written here.
+ * Privileged columns (email, has_vendor_dashboard_access, activated_at)
+ * are deliberately absent and can never be written here.
+ * The profile email always mirrors the sign-in account (database trigger).
  */
 const profileFieldsSchema = z.object({
-  email: z.string().email().max(320).optional(),
   full_name: z.string().max(200).optional(),
   mobile: z.string().max(40).optional(),
   segment: z.string().max(120).optional(),
@@ -27,7 +27,7 @@ export type ProfileFields = z.infer<typeof profileFieldsSchema>;
  */
 export const ensureMyProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data) =>
+  .validator((data) =>
     profileFieldsSchema.parse((data as { fields?: unknown })?.fields ?? data ?? {}),
   )
   .handler(async ({ data, context }) => {

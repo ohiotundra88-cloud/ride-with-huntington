@@ -1,4 +1,9 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import { useId, useMemo, useState, type ReactNode } from "react";
+import {
+  RegisterContentCtx,
+  useRegisterContent,
+  type EditCtx,
+} from "@/lib/register-content-context";
 import { ArrowDown, ArrowUp, Eye, EyeOff, Plus, Settings2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,14 +17,6 @@ import {
   type RegisterOption,
 } from "@/lib/register-content.shared";
 
-interface EditCtx {
-  content: RegisterContent;
-  editing: boolean;
-  setContent: (next: RegisterContent) => void;
-}
-
-const Ctx = createContext<EditCtx | null>(null);
-
 export function RegisterContentProvider({
   content,
   editing,
@@ -27,31 +24,7 @@ export function RegisterContentProvider({
   children,
 }: EditCtx & { children: ReactNode }) {
   const value = useMemo(() => ({ content, editing, setContent }), [content, editing, setContent]);
-  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
-}
-
-export function useRegisterContent() {
-  const c = useContext(Ctx);
-  if (!c) throw new Error("useRegisterContent must be used inside RegisterContentProvider");
-  const { content, editing, setContent } = c;
-
-  const t = (key: string) => content.text[key] ?? DEFAULT_REGISTER_CONTENT.text[key] ?? "";
-  const field = (key: string) =>
-    content.fields[key] ?? DEFAULT_REGISTER_CONTENT.fields[key] ?? { label: key, visible: true, required: false };
-  const list = (key: string) => content.lists[key] ?? DEFAULT_REGISTER_CONTENT.lists[key] ?? [];
-  const link = (key: string) =>
-    content.links[key] ?? DEFAULT_REGISTER_CONTENT.links[key] ?? { label: key, url: "about:blank" };
-
-  const setText = (key: string, next: string) =>
-    setContent({ ...content, text: { ...content.text, [key]: next } });
-  const setField = (key: string, patch: Partial<RegisterContent["fields"][string]>) =>
-    setContent({ ...content, fields: { ...content.fields, [key]: { ...field(key), ...patch } } });
-  const setList = (key: string, next: RegisterOption[]) =>
-    setContent({ ...content, lists: { ...content.lists, [key]: next } });
-  const setLink = (key: string, patch: Partial<RegisterContent["links"][string]>) =>
-    setContent({ ...content, links: { ...content.links, [key]: { ...link(key), ...patch } } });
-
-  return { content, editing, setContent, t, field, list, link, setText, setField, setList, setLink };
+  return <RegisterContentCtx.Provider value={value}>{children}</RegisterContentCtx.Provider>;
 }
 
 /** Editable piece of copy. Renders plain text for everyone else. */
@@ -96,7 +69,12 @@ export function FieldLabel({
   return (
     <span className={`inline-flex items-center gap-1.5 ${className ?? ""}`}>
       {editing ? (
-        <InlineEditText value={f.label} editing onCommit={(next) => setField(name, { label: next })} />
+        <InlineEditText
+          value={f.label}
+          editing
+          label="Field label"
+          onCommit={(next) => setField(name, { label: next })}
+        />
       ) : (
         <span>{f.label}</span>
       )}
@@ -110,6 +88,8 @@ function FieldSettings({ name, listKey }: { name: string; listKey?: string }) {
   const { field, setField, list, setList } = useRegisterContent();
   const f = field(name);
   const options = listKey ? list(listKey) : [];
+  const visibleId = useId();
+  const requiredId = useId();
 
   const move = (i: number, dir: -1 | 1) => {
     const next = [...options];
@@ -124,7 +104,10 @@ function FieldSettings({ name, listKey }: { name: string; listKey?: string }) {
   };
   const remove = (i: number) => {
     if (options.length <= 1) return;
-    setList(listKey!, options.filter((_, idx) => idx !== i));
+    setList(
+      listKey!,
+      options.filter((_, idx) => idx !== i),
+    );
   };
   const add = () => {
     const value = `option-${Date.now().toString(36)}`;
@@ -134,35 +117,69 @@ function FieldSettings({ name, listKey }: { name: string; listKey?: string }) {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-6 w-6 text-[var(--brand-dark)]" title="Field settings">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-6 w-6 text-[var(--brand-dark)]"
+          title="Field settings"
+          aria-label={`Field settings for ${f.label}`}
+        >
           <Settings2 className="h-3.5 w-3.5" />
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-80 space-y-3">
         <div className="flex items-center justify-between">
-          <Label className="flex items-center gap-2 text-xs">
-            {f.visible ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />} Visible
+          <Label htmlFor={visibleId} className="flex items-center gap-2 text-xs">
+            {f.visible ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}{" "}
+            Visible
           </Label>
-          <Switch checked={f.visible} onCheckedChange={(v) => setField(name, { visible: v })} />
+          <Switch
+            id={visibleId}
+            checked={f.visible}
+            onCheckedChange={(v) => setField(name, { visible: v })}
+          />
         </div>
         <div className="flex items-center justify-between">
-          <Label className="text-xs">Required</Label>
-          <Switch checked={f.required} onCheckedChange={(v) => setField(name, { required: v })} />
+          <Label htmlFor={requiredId} className="text-xs">
+            Required
+          </Label>
+          <Switch
+            id={requiredId}
+            checked={f.required}
+            onCheckedChange={(v) => setField(name, { required: v })}
+          />
         </div>
         {listKey && (
           <div className="space-y-2 border-t pt-2">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Choices</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Choices
+            </p>
             {options.map((o, i) => (
               <div key={o.value} className="flex items-center gap-1">
                 <Input
+                  aria-label={`Choice ${i + 1} name`}
                   value={o.label}
                   onChange={(e) => rename(i, e.target.value)}
                   className="h-8 text-xs"
                 />
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => move(i, -1)} title="Move up">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={() => move(i, -1)}
+                  title="Move up"
+                  aria-label={`Move ${o.label} up`}
+                >
                   <ArrowUp className="h-3.5 w-3.5" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => move(i, 1)} title="Move down">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={() => move(i, 1)}
+                  title="Move down"
+                  aria-label={`Move ${o.label} down`}
+                >
                   <ArrowDown className="h-3.5 w-3.5" />
                 </Button>
                 <Button
@@ -171,6 +188,7 @@ function FieldSettings({ name, listKey }: { name: string; listKey?: string }) {
                   className="h-7 w-7 text-red-500"
                   onClick={() => remove(i)}
                   title="Remove"
+                  aria-label={`Remove ${o.label}`}
                   disabled={options.length <= 1}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
@@ -188,12 +206,23 @@ function FieldSettings({ name, listKey }: { name: string; listKey?: string }) {
 }
 
 /** Standalone editor for a choice list that isn't tied to a single labelled field. */
-export function ListSettings({ listKey, title, withDesc = false }: { listKey: string; title: string; withDesc?: boolean }) {
+export function ListSettings({
+  listKey,
+  title,
+  withDesc = false,
+}: {
+  listKey: string;
+  title: string;
+  withDesc?: boolean;
+}) {
   const { editing, list, setList } = useRegisterContent();
   if (!editing) return null;
   const options = list(listKey);
   const patch = (i: number, p: Partial<RegisterOption>) =>
-    setList(listKey, options.map((o, idx) => (idx === i ? { ...o, ...p } : o)));
+    setList(
+      listKey,
+      options.map((o, idx) => (idx === i ? { ...o, ...p } : o)),
+    );
   const move = (i: number, dir: -1 | 1) => {
     const next = [...options];
     const j = i + dir;
@@ -210,30 +239,59 @@ export function ListSettings({ listKey, title, withDesc = false }: { listKey: st
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-96 space-y-2">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{title}</p>
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          {title}
+        </p>
         {options.map((o, i) => (
           <div key={o.value} className="flex items-center gap-1">
-            <Input value={o.label} onChange={(e) => patch(i, { label: e.target.value })} className="h-8 text-xs" />
+            <Input
+              aria-label={`Choice ${i + 1} name`}
+              value={o.label}
+              onChange={(e) => patch(i, { label: e.target.value })}
+              className="h-8 text-xs"
+            />
             {withDesc && (
               <Input
+                aria-label={`Choice ${i + 1} description`}
                 value={o.desc ?? ""}
                 onChange={(e) => patch(i, { desc: e.target.value })}
                 className="h-8 text-xs"
                 placeholder="Description"
               />
             )}
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => move(i, -1)} title="Move up">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={() => move(i, -1)}
+              title="Move up"
+              aria-label={`Move ${o.label} up`}
+            >
               <ArrowUp className="h-3.5 w-3.5" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => move(i, 1)} title="Move down">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={() => move(i, 1)}
+              title="Move down"
+              aria-label={`Move ${o.label} down`}
+            >
               <ArrowDown className="h-3.5 w-3.5" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
               className="h-7 w-7 text-red-500"
-              onClick={() => options.length > 1 && setList(listKey, options.filter((_, idx) => idx !== i))}
+              onClick={() =>
+                options.length > 1 &&
+                setList(
+                  listKey,
+                  options.filter((_, idx) => idx !== i),
+                )
+              }
               title="Remove"
+              aria-label={`Remove ${o.label}`}
               disabled={options.length <= 1}
             >
               <Trash2 className="h-3.5 w-3.5" />
@@ -244,7 +302,12 @@ export function ListSettings({ listKey, title, withDesc = false }: { listKey: st
           variant="outline"
           size="sm"
           className="w-full"
-          onClick={() => setList(listKey, [...options, { value: `option-${Date.now().toString(36)}`, label: "New option" }])}
+          onClick={() =>
+            setList(listKey, [
+              ...options,
+              { value: `option-${Date.now().toString(36)}`, label: "New option" },
+            ])
+          }
         >
           <Plus className="mr-1 h-3.5 w-3.5" /> Add choice
         </Button>
@@ -257,6 +320,8 @@ export function ListSettings({ listKey, title, withDesc = false }: { listKey: st
 export function LinkSettings({ linkKey }: { linkKey: string }) {
   const { editing, link, setLink } = useRegisterContent();
   const [draft, setDraft] = useState<string | null>(null);
+  const labelId = useId();
+  const urlId = useId();
   if (!editing) return null;
   const l = link(linkKey);
   return (
@@ -267,10 +332,20 @@ export function LinkSettings({ linkKey }: { linkKey: string }) {
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-80 space-y-2">
-        <Label className="text-xs">Button label</Label>
-        <Input value={l.label} onChange={(e) => setLink(linkKey, { label: e.target.value })} className="h-8 text-xs" />
-        <Label className="text-xs">Web address</Label>
+        <Label htmlFor={labelId} className="text-xs">
+          Button label
+        </Label>
         <Input
+          id={labelId}
+          value={l.label}
+          onChange={(e) => setLink(linkKey, { label: e.target.value })}
+          className="h-8 text-xs"
+        />
+        <Label htmlFor={urlId} className="text-xs">
+          Web address
+        </Label>
+        <Input
+          id={urlId}
           value={draft ?? l.url}
           onChange={(e) => setDraft(e.target.value)}
           onBlur={() => draft !== null && setLink(linkKey, { url: draft.trim() })}

@@ -12,7 +12,7 @@ export const recordSiteVisit = createServerFn({ method: "GET" }).handler(
     try {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-      const { data, error } = await supabaseAdmin.rpc("increment_site_visits" as any);
+      const { data, error } = await supabaseAdmin.rpc("increment_site_visits");
       if (!error && typeof data === "number") return data;
       if (error) console.error("[site-visits] increment failed:", error.message);
 

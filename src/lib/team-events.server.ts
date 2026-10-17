@@ -1,9 +1,11 @@
 /** Server-only helpers for team events: invitee resolution and notifications. */
-import { describeAudience, type AudienceRules } from "@/lib/messages.shared";
+import { describeAudience, normalizeAudience, type AudienceRules } from "@/lib/messages.shared";
 import { formatEventDate, formatTimeRange } from "@/lib/events.shared";
 import type { TeamEventSummary } from "@/lib/team-events.shared";
+import type { Db } from "@/server/backend.server";
+import type { Tables } from "@/integrations/supabase/types";
 
-type AnySupabase = { from: (table: string) => any };
+type AnySupabase = Db;
 
 export interface InviteePerson {
   userId: string;
@@ -156,10 +158,10 @@ export function eventWhenWhere(row: {
 }
 
 export function mapTeamEventRow(
-  row: Record<string, any>,
+  row: Tables<"team_events">,
   tally: { yes: number; no: number; total: number } = { yes: 0, no: 0, total: 0 },
 ): TeamEventSummary {
-  const audience = row["audience"] as AudienceRules;
+  const audience = normalizeAudience(row.audience);
   const invited = Number(row["invited_count"] ?? 0) || tally.total;
   return {
     id: String(row["id"]),

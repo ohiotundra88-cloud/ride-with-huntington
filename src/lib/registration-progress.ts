@@ -10,8 +10,35 @@ import type { Registration, StepStatus } from "@/lib/store";
 
 const filled = (v?: string | null) => typeof v === "string" && v.trim() !== "";
 
+/*
+ * Participation choices: Rider, Volunteer, Challenger, Not sure. "both"
+ * (rider + volunteer) was an earlier choice; registrations that still carry
+ * it count as a rider and a volunteer.
+ */
+
+/** Rides a Pelotonia route, so the bike step applies. */
 export function isRiderParticipation(p: Registration["participation"]): boolean {
   return p === "rider" || p === "both";
+}
+
+/** Works a volunteer shift. */
+export function isVolunteerParticipation(p: Registration["participation"]): boolean {
+  return p === "volunteer" || p === "both";
+}
+
+/** Takes on their own Pelotonia challenge: fundraises; no route, bike, hotel or apparel. */
+export function isChallengerParticipation(p: Registration["participation"]): boolean {
+  return p === "challenger";
+}
+
+/** Riders and challengers carry a fundraising commitment. */
+export function isFundraisingParticipation(p: Registration["participation"]): boolean {
+  return isRiderParticipation(p) || isChallengerParticipation(p);
+}
+
+/** Travel/hotel and apparel steps apply to everyone except challengers (Chris Kemper, 2026-09-28). */
+export function needsTravelAndApparel(p: Registration["participation"]): boolean {
+  return !isChallengerParticipation(p);
 }
 
 export function pelotoniaHasData(reg: Registration): boolean {
@@ -30,15 +57,23 @@ export function pelotoniaStatus(reg: Registration): StepStatus {
 export function travelHasData(reg: Registration): boolean {
   const t = reg.travel;
   return (
-    filled(t.needs) || filled(t.arrivalDate) || filled(t.departureDate) || filled(t.hotelName) ||
-    filled(t.hotelCheckIn) || filled(t.hotelCheckOut) || filled(t.departureCity) || t.bookLater
+    filled(t.needs) ||
+    filled(t.arrivalDate) ||
+    filled(t.departureDate) ||
+    filled(t.hotelName) ||
+    filled(t.hotelCheckIn) ||
+    filled(t.hotelCheckOut) ||
+    filled(t.departureCity) ||
+    t.bookLater
   );
 }
 
 export function travelStatus(reg: Registration): StepStatus {
   const t = reg.travel;
+  if (!needsTravelAndApparel(reg.participation)) return "complete";
   if (t.needs === "none") return "complete";
-  const complete = t.bookLater || filled(t.arrivalDate) || filled(t.hotelName) || filled(t.hotelCheckIn);
+  const complete =
+    t.bookLater || filled(t.arrivalDate) || filled(t.hotelName) || filled(t.hotelCheckIn);
   if (t.status === "complete" && complete) return "complete";
   if (travelHasData(reg)) return "pending";
   return "not_started";
@@ -59,13 +94,18 @@ export function bikeStatus(reg: Registration): StepStatus {
 export function apparelHasData(reg: Registration): boolean {
   const a = reg.apparel;
   return (
-    filled(a.jerseySize) || filled(a.jerseyStyle) || filled(a.shirtSize) ||
-    filled(a.cut) || filled(a.volunteerShirtSize) || filled(a.volunteerCut)
+    filled(a.jerseySize) ||
+    filled(a.jerseyStyle) ||
+    filled(a.shirtSize) ||
+    filled(a.cut) ||
+    filled(a.volunteerShirtSize) ||
+    filled(a.volunteerCut)
   );
 }
 
 export function apparelStatus(reg: Registration): StepStatus {
   const a = reg.apparel;
+  if (!needsTravelAndApparel(reg.participation)) return "complete";
   const isRider = isRiderParticipation(reg.participation);
   const complete = isRider
     ? filled(a.jerseySize) || filled(a.shirtSize)
@@ -82,4 +122,22 @@ export function effectiveStatuses(reg: Registration) {
     bike: bikeStatus(reg),
     apparel: apparelStatus(reg),
   };
+}
+
+/**
+ * Percent of the steps that actually apply to this person. Choosing how you
+ * take part is itself a step, and steps that do not apply (a volunteer's bike
+ * step) are excluded from the denominator rather than counted as done.
+ */
+export function registrationCompletion(reg: Registration): number {
+  const effective = effectiveStatuses(reg);
+  const steps: StepStatus[] = [
+    reg.participation ? "complete" : "not_started",
+    effective.pelotonia,
+    effective.travel,
+    effective.apparel,
+  ];
+  if (isRiderParticipation(reg.participation)) steps.push(effective.bike);
+  const done = steps.filter((x) => x === "complete").length;
+  return Math.round((done / steps.length) * 100);
 }

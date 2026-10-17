@@ -19,9 +19,9 @@ export function DemoPaymentBanner({ className = "" }: { className?: string }) {
     >
       <FlaskConical className="mt-0.5 h-4 w-4 shrink-0" />
       <p>
-        <span className="font-semibold">Demo mode.</span> Checkout is simulated — no card is charged and no money moves.
-        Totals, raffle entries, and payout reporting all work so the team can test the full flow before a live payment
-        account is connected.
+        <span className="font-semibold">Demo mode.</span> Checkout is simulated — no card is charged
+        and no money moves. Totals, raffle entries, and payout reporting all work so the team can
+        test the full flow before a live payment account is connected.
       </p>
     </div>
   );

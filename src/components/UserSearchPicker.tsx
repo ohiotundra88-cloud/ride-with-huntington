@@ -62,7 +62,9 @@ export function UserSearchPicker({
           }}
           onFocus={() => setOpen(true)}
         />
-        {isFetching && <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />}
+        {isFetching && (
+          <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+        )}
         {open && debounced.length >= 2 && !isFetching && (
           <div className="absolute z-30 mt-1 w-full overflow-hidden rounded-md border bg-popover shadow-md">
             {results.length === 0 ? (
@@ -84,8 +86,12 @@ export function UserSearchPicker({
                       }}
                     >
                       <span className="min-w-0">
-                        <span className="block truncate text-sm font-medium">{u.full_name || u.email}</span>
-                        <span className="block truncate text-xs text-muted-foreground">{u.email}</span>
+                        <span className="block truncate text-sm font-medium">
+                          {u.full_name || u.email}
+                        </span>
+                        <span className="block truncate text-xs text-muted-foreground">
+                          {u.email}
+                        </span>
                       </span>
                     </button>
                   </li>

@@ -5,7 +5,11 @@ import { Briefcase, Search } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { listVendorCaptainAccess, setVendorDashboardAccess, type VendorCaptainRow } from "@/lib/vendors.functions";
+import {
+  listVendorCaptainAccess,
+  setVendorDashboardAccess,
+  type VendorCaptainRow,
+} from "@/lib/vendors.functions";
 
 /**
  * Super-user-only control for the `has_vendor_dashboard_access` flag on
@@ -16,7 +20,11 @@ export function VendorAccessCard() {
   const qc = useQueryClient();
   const [q, setQ] = useState("");
 
-  const { data: rows = [], isPending, error } = useQuery<VendorCaptainRow[]>({
+  const {
+    data: rows = [],
+    isPending,
+    error,
+  } = useQuery<VendorCaptainRow[]>({
     queryKey: ["vendor-captain-access"],
     queryFn: () => listVendorCaptainAccess(),
     retry: false,
@@ -25,7 +33,9 @@ export function VendorAccessCard() {
   const toggle = useMutation({
     mutationFn: (p: { user_id: string; value: boolean }) => setVendorDashboardAccess({ data: p }),
     onSuccess: (_r, p) => {
-      toast.success(p.value ? "Vendor dashboard access granted" : "Vendor dashboard access removed");
+      toast.success(
+        p.value ? "Vendor dashboard access granted" : "Vendor dashboard access removed",
+      );
       qc.invalidateQueries({ queryKey: ["vendor-captain-access"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -50,13 +60,18 @@ export function VendorAccessCard() {
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          Vendor Captains only reach the Vendor CRM when this switch is on. Co-chairs and super users
-          always have access. Only super users can change these switches.
+          Vendor Captains only reach the Vendor CRM when this switch is on. Co-chairs and super
+          users always have access. Only super users can change these switches.
         </p>
 
         <div className="relative">
           <Search className="pointer-events-none absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input className="pl-8" placeholder="Search vendor captains" value={q} onChange={(e) => setQ(e.target.value)} />
+          <Input
+            className="pl-8"
+            placeholder="Search vendor captains"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+          />
         </div>
 
         {isPending ? (

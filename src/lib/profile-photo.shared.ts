@@ -18,6 +18,9 @@ export function avatarUrl(userId: string, version?: string | null) {
 export function initialsFrom(nameOrEmail?: string | null) {
   const src = (nameOrEmail ?? "").trim();
   if (!src) return "TH";
-  const parts = src.replace(/@.*$/, "").split(/[\s._-]+/).filter(Boolean);
+  const parts = src
+    .replace(/@.*$/, "")
+    .split(/[\s._-]+/)
+    .filter(Boolean);
   return (parts[0]?.[0] ?? "T").concat(parts[1]?.[0] ?? "").toUpperCase();
 }

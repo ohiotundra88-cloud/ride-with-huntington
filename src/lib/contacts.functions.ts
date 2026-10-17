@@ -6,6 +6,7 @@ import {
   contactSaveSchema,
   type DirectoryContact,
 } from "@/lib/contacts.shared";
+import type { AuthContext } from "@/integrations/supabase/auth-middleware";
 
 /** RLS lets admins/super users see hidden rows and everyone else see active ones. */
 export const listContacts = createServerFn({ method: "GET" })
@@ -20,24 +21,25 @@ export const listContacts = createServerFn({ method: "GET" })
     return (data ?? []) as unknown as DirectoryContact[];
   });
 
-async function assertContactManager(context: { supabase: any; userId: string }) {
+async function assertContactManager(context: Pick<AuthContext, "supabase" | "userId">) {
   const [{ data: isAdmin }, { data: isSuper }] = await Promise.all([
     context.supabase.rpc("is_admin_text", { _user_id: context.userId }),
     context.supabase.rpc("is_superuser", { _user_id: context.userId }),
   ]);
-  if (!isAdmin && !isSuper) throw new Error("Only admins and super users can change the contact directory.");
+  if (!isAdmin && !isSuper)
+    throw new Error("Only admins and super users can change the contact directory.");
 }
 
 export const saveContact = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => contactSaveSchema.parse(d))
+  .validator((d) => contactSaveSchema.parse(d))
   .handler(async ({ data, context }): Promise<DirectoryContact> => {
-    await assertContactManager(context as any);
+    await assertContactManager(context);
 
     const patch = {
       ...data.values,
       updated_by: context.userId,
-      updated_by_email: (context.claims as any)?.email ?? null,
+      updated_by_email: context.claims.email ?? null,
     };
 
     if (data.id) {
@@ -62,9 +64,9 @@ export const saveContact = createServerFn({ method: "POST" })
 
 export const deleteContact = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => contactDeleteSchema.parse(d))
+  .validator((d) => contactDeleteSchema.parse(d))
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
-    await assertContactManager(context as any);
+    await assertContactManager(context);
     const { error } = await context.supabase.from("contacts").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };

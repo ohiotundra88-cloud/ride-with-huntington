@@ -1,7 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { assertSuper, demoPassword } from "@/lib/season.server";
+import { assertSuper, placeholderPassword } from "@/lib/season.server";
+import { exactEmail } from "@/lib/email-match";
 
 export interface ManualParticipantRow {
   user_id: string;
@@ -28,7 +29,10 @@ export const listManualParticipants = createServerFn({ method: "GET" })
     const { data: profiles } = await supabaseAdmin
       .from("profiles")
       .select("id, email, full_name")
-      .in("id", rows.map((r) => r.user_id));
+      .in(
+        "id",
+        rows.map((r) => r.user_id),
+      );
     const map = new Map((profiles ?? []).map((p) => [p.id, p]));
     return rows.map((r) => ({
       user_id: r.user_id,
@@ -42,13 +46,19 @@ export const listManualParticipants = createServerFn({ method: "GET" })
 
 export const createManualParticipant = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
+  .validator((d) =>
     z
       .object({
         email: z.string().trim().toLowerCase().email(),
         full_name: z.string().trim().min(2).max(120),
-        participation: z.enum(["rider", "volunteer", "both", "unsure"]).default("rider"),
-        roles: z.array(z.enum(["captain", "legal", "risk", "compliance", "marketing", "cochair", "admin"])).default([]),
+        participation: z
+          .enum(["rider", "volunteer", "challenger", "both", "unsure"])
+          .default("rider"),
+        roles: z
+          .array(
+            z.enum(["captain", "legal", "risk", "compliance", "marketing", "cochair", "admin"]),
+          )
+          .default([]),
       })
       .parse(d),
   )
@@ -60,14 +70,14 @@ export const createManualParticipant = createServerFn({ method: "POST" })
     const { data: existing } = await supabaseAdmin
       .from("profiles")
       .select("id")
-      .ilike("email", data.email)
+      .ilike("email", exactEmail(data.email))
       .maybeSingle();
     if (existing) {
       userId = existing.id;
     } else {
       const { data: created, error: cErr } = await supabaseAdmin.auth.admin.createUser({
         email: data.email,
-        password: demoPassword(data.email),
+        password: placeholderPassword(),
         email_confirm: true,
         user_metadata: { full_name: data.full_name },
       });
@@ -93,12 +103,10 @@ export const createManualParticipant = createServerFn({ method: "POST" })
     if (partErr) throw new Error(partErr.message);
 
     if (data.roles.length > 0) {
-      const { error: rErr } = await supabaseAdmin
-        .from("user_roles")
-        .upsert(
-          data.roles.map((role) => ({ user_id: userId!, role: role as never })),
-          { onConflict: "user_id,role" },
-        );
+      const { error: rErr } = await supabaseAdmin.from("user_roles").upsert(
+        data.roles.map((role) => ({ user_id: userId!, role: role as never })),
+        { onConflict: "user_id,role" },
+      );
       if (rErr) throw new Error(rErr.message);
     }
 
@@ -107,7 +115,7 @@ export const createManualParticipant = createServerFn({ method: "POST" })
 
 export const removeManualParticipant = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ user_id: z.string().uuid() }).parse(d))
+  .validator((d) => z.object({ user_id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertSuper(context);
     if (data.user_id === context.userId) throw new Error("You can't remove your own record.");
@@ -120,7 +128,7 @@ export const removeManualParticipant = createServerFn({ method: "POST" })
 /** End-of-season cleanup: clears season registrations, keeps roles + manual records. */
 export const resetSeason = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ confirm: z.literal("RESET SEASON") }).parse(d))
+  .validator((d) => z.object({ confirm: z.literal("RESET SEASON") }).parse(d))
   .handler(async ({ context }) => {
     await assertSuper(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

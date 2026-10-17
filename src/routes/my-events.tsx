@@ -20,7 +20,8 @@ export const Route = createFileRoute("/my-events")({
       { property: "og:title", content: "My Team Events — Team Huntington" },
       {
         property: "og:description",
-        content: "See the company events assigned to you and let your captain know if you can make it.",
+        content:
+          "See the company events assigned to you and let your captain know if you can make it.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -86,7 +87,7 @@ function MyEventsPage() {
   const past = all.filter((e) => !isUpcoming(e.eventDate)).reverse();
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-8">
+    <div className="mx-auto max-w-3xl px-4 py-8">
       <header className="mb-6">
         <h1 className="flex items-center gap-2 text-2xl font-black tracking-tight sm:text-3xl">
           <CalendarDays className="h-6 w-6" /> My team events
@@ -133,6 +134,6 @@ function MyEventsPage() {
           )}
         </div>
       )}
-    </main>
+    </div>
   );
 }

@@ -13,6 +13,7 @@ export function InlineEditText({
   editing,
   multiline = false,
   placeholder = "Add text",
+  label,
   className,
   as: As = "span",
 }: {
@@ -21,6 +22,8 @@ export function InlineEditText({
   editing: boolean;
   multiline?: boolean;
   placeholder?: string;
+  /** Accessible name for the text box while editing. Defaults to the placeholder. */
+  label?: string;
   className?: string;
   as?: "span" | "p" | "div";
 }) {
@@ -47,7 +50,8 @@ export function InlineEditText({
   if (active) {
     const shared = {
       value: draft,
-      onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setDraft(e.target.value),
+      onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+        setDraft(e.target.value),
       onBlur: commit,
       placeholder,
       className: "text-sm",
@@ -56,19 +60,30 @@ export function InlineEditText({
     return multiline ? (
       <Textarea
         {...shared}
+        aria-label={label ?? placeholder}
         rows={3}
         ref={ref as React.Ref<HTMLTextAreaElement>}
         onKeyDown={(e) => {
-          if (e.key === "Escape") { setDraft(value); setActive(false); }
+          if (e.key === "Escape") {
+            setDraft(value);
+            setActive(false);
+          }
         }}
       />
     ) : (
       <Input
         {...shared}
+        aria-label={label ?? placeholder}
         ref={ref as React.Ref<HTMLInputElement>}
         onKeyDown={(e) => {
-          if (e.key === "Enter") { e.preventDefault(); commit(); }
-          if (e.key === "Escape") { setDraft(value); setActive(false); }
+          if (e.key === "Enter") {
+            e.preventDefault();
+            commit();
+          }
+          if (e.key === "Escape") {
+            setDraft(value);
+            setActive(false);
+          }
         }}
       />
     );
@@ -79,8 +94,17 @@ export function InlineEditText({
       className={`${className ?? ""} cursor-text rounded border border-dashed border-[var(--brand)]/60 bg-[var(--brand)]/5 px-1 -mx-1 inline-flex items-baseline gap-1 hover:bg-[var(--brand)]/15`}
       role="button"
       tabIndex={0}
-      onClick={(e: React.MouseEvent) => { e.preventDefault(); e.stopPropagation(); setActive(true); }}
-      onKeyDown={(e: React.KeyboardEvent) => { if (e.key === "Enter") { e.preventDefault(); setActive(true); } }}
+      onClick={(e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setActive(true);
+      }}
+      onKeyDown={(e: React.KeyboardEvent) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          setActive(true);
+        }
+      }}
       title="Click to edit"
     >
       {value || <span className="italic text-muted-foreground">{placeholder}</span>}

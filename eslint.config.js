@@ -36,5 +36,34 @@ export default tseslint.config(
       "@typescript-eslint/no-unused-vars": "off",
     },
   },
+  {
+    // Vendored shadcn/ui primitives export their variant helpers and hooks next
+    // to the components (the upstream layout, kept so `shadcn add` updates stay
+    // drop-in). Allow exactly those names; any other non-component export is
+    // still reported.
+    files: ["src/components/ui/**/*.tsx"],
+    rules: {
+      "react-refresh/only-export-components": [
+        "warn",
+        {
+          allowConstantExport: true,
+          allowExportNames: [
+            "badgeVariants",
+            "buttonVariants",
+            "toggleVariants",
+            "navigationMenuTriggerStyle",
+            "useFormField",
+            "useSidebar",
+          ],
+        },
+      ],
+    },
+  },
+  {
+    // Email templates are rendered to HTML on the server and never hot-reloaded
+    // in the browser, so Fast Refresh boundaries don't apply to them.
+    files: ["src/lib/email-templates/**/*.tsx"],
+    rules: { "react-refresh/only-export-components": "off" },
+  },
   eslintPluginPrettier,
 );

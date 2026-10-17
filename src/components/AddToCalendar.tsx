@@ -11,7 +11,13 @@ import { downloadIcs, outlookWebUrl } from "@/lib/calendar-links";
 import type { MyTeamEvent } from "@/lib/team-events.shared";
 
 /** Menu letting an invitee add a team event to Apple Calendar or Outlook. */
-export function AddToCalendar({ event, size = "sm" }: { event: MyTeamEvent; size?: "sm" | "default" }) {
+export function AddToCalendar({
+  event,
+  size = "sm",
+}: {
+  event: MyTeamEvent;
+  size?: "sm" | "default";
+}) {
   if (event.status === "cancelled") return null;
   return (
     <DropdownMenu>

@@ -18,7 +18,11 @@ function icsStamp(d: Date): string {
 }
 
 function icsEscape(s: string): string {
-  return s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+  return s
+    .replace(/\\/g, "\\\\")
+    .replace(/;/g, "\\;")
+    .replace(/,/g, "\\,")
+    .replace(/\r?\n/g, "\\n");
 }
 
 export interface EventTimes {
@@ -27,7 +31,9 @@ export interface EventTimes {
   allDay: boolean;
 }
 
-export function eventTimes(event: Pick<MyTeamEvent, "eventDate" | "startTime" | "endTime">): EventTimes {
+export function eventTimes(
+  event: Pick<MyTeamEvent, "eventDate" | "startTime" | "endTime">,
+): EventTimes {
   const hasStart = !!event.startTime;
   const start = toDateTime(event.eventDate, event.startTime, "09:00");
   const end = event.endTime
@@ -65,11 +71,13 @@ export function buildIcs(event: MyTeamEvent): string {
 }
 
 function slugify(s: string): string {
-  return s
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 40) || "event";
+  return (
+    s
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 40) || "event"
+  );
 }
 
 /** Download the event as an .ics file — opens in Apple Calendar or Outlook desktop. */

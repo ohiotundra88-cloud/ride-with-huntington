@@ -6,7 +6,11 @@ import { AdminShell } from "@/components/AdminShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Mail, Send, SendHorizonal, Loader2 } from "lucide-react";
-import { TEST_EMAIL_TEMPLATES, sendTestEmail, sendAllTestEmails } from "@/lib/test-emails.functions";
+import {
+  TEST_EMAIL_TEMPLATES,
+  sendTestEmail,
+  sendAllTestEmails,
+} from "@/lib/test-emails.functions";
 
 export const Route = createFileRoute("/admin/test-emails")({
   head: () => ({
@@ -68,8 +72,8 @@ function TestEmailsAdmin() {
         <CardContent className="space-y-4">
           <p className="max-w-2xl text-sm text-muted-foreground">
             Each button sends that email, filled with sample content, to your own email address.
-            Subjects are prefixed with [TEST] so you can tell them apart from the real thing.
-            Only Super Users can use this page, and emails only ever go to you.
+            Subjects are prefixed with [TEST] so you can tell them apart from the real thing. Only
+            Super Users can use this page, and emails only ever go to you.
           </p>
           <div className="grid gap-3 sm:grid-cols-2">
             {TEST_EMAIL_TEMPLATES.map((t) => (

@@ -20,6 +20,8 @@ export type FAQArticle = {
   body: string;
   hidden?: boolean;
   is_builtin?: boolean;
+  /** Stable id of a built-in article, used by older /resources/<id> links. */
+  source_id?: string | null;
 };
 export { faqCategories };
 export type { FAQCategory };
@@ -33,6 +35,7 @@ function toArticle(row: FaqRow): FAQArticle {
     body: row.body,
     hidden: row.hidden,
     is_builtin: row.is_builtin,
+    source_id: row.source_id,
   };
 }
 
@@ -55,7 +58,8 @@ export function useAdminFaqs() {
   const query = useQuery({
     queryKey: ["faqs", "admin"],
     queryFn: () => fn(),
-    select: (rows) => rows.map((r) => ({ ...toArticle(r), hidden: r.hidden, is_builtin: r.is_builtin })),
+    select: (rows) =>
+      rows.map((r) => ({ ...toArticle(r), hidden: r.hidden, is_builtin: r.is_builtin })),
   });
 
   const invalidate = () => {
@@ -63,7 +67,14 @@ export function useAdminFaqs() {
   };
 
   const upsert = useMutation({
-    mutationFn: (a: Partial<FAQArticle> & { title: string; category: string; body: string; keywords: string[] }) =>
+    mutationFn: (
+      a: Partial<FAQArticle> & {
+        title: string;
+        category: string;
+        body: string;
+        keywords: string[];
+      },
+    ) =>
       upsertFn({
         data: {
           id: a.id && a.id.length === 36 ? a.id : undefined,

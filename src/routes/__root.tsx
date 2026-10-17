@@ -6,13 +6,13 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
-import { StoreProvider } from "@/lib/store";
-import { AdminStoreProvider } from "@/lib/admin-store";
+import { StoreProvider } from "@/components/StoreProvider";
+import { AdminStoreProvider } from "@/components/AdminStoreProvider";
 import { AppNav } from "@/components/AppNav";
 import { SuperUserBar } from "@/components/AdminShell";
 import { Toaster } from "@/components/ui/sonner";
@@ -42,12 +42,9 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -86,10 +83,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Team Huntington Hub — Your Pelotonia Journey" },
-      { name: "description", content: "One guided digital front door for Huntington colleagues participating in Pelotonia — registration, travel, bike, apparel, and support." },
+      {
+        name: "description",
+        content:
+          "One guided digital front door for Huntington colleagues participating in Pelotonia — registration, travel, bike, apparel, and support.",
+      },
       { name: "author", content: "Team Huntington" },
       { property: "og:title", content: "Team Huntington Hub" },
-      { property: "og:description", content: "Your Team Huntington Pelotonia journey starts here." },
+      {
+        property: "og:description",
+        content: "Your Team Huntington Pelotonia journey starts here.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -129,20 +133,31 @@ function RootComponent() {
       <StoreProvider>
         <AdminStoreProvider>
           <div className="min-h-screen flex flex-col">
+            <a
+              href="#main-content"
+              className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-background focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-foreground focus:shadow-lg focus:ring-2 focus:ring-ring"
+            >
+              Skip to main content
+            </a>
             <AppNav />
             <NetworkNotice />
             <SuperUserBar />
 
-            <main className="flex-1 relative">
+            <main id="main-content" tabIndex={-1} className="flex-1 relative focus:outline-none">
               <AuthGate>
                 <Outlet />
               </AuthGate>
             </main>
             <footer className="border-t bg-[var(--brand-dark)] text-white/70 py-6 text-xs">
               <div className="mx-auto max-w-7xl px-4 flex flex-wrap gap-4 justify-between">
-                <span>© {new Date().getFullYear()} Team Huntington Hub · Internal colleague resource</span>
+                <span>
+                  © {new Date().getFullYear()} Team Huntington Hub · Internal colleague resource
+                </span>
                 <span className="flex gap-4">
-                  <Link to="/health" className="hover:text-white underline-offset-2 hover:underline">
+                  <Link
+                    to="/health"
+                    className="hover:text-white underline-offset-2 hover:underline"
+                  >
                     Network check
                   </Link>
                   <span>Not affiliated with copyrighted Pelotonia branding.</span>
